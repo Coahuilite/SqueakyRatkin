@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ModMetaData>
+  <packageId>coahuilite.squeakyratkin</packageId>
+  <name>鼠辈啁啾 (Squeaky Ratkin)</name>
+  <author>Coahuilite</author>
+  <supportedVersions>
+    <li>1.6</li>
+  </supportedVersions>
+  <description>让鼠族(Ratkin)在吃饭、睡觉、受击、选中、移动、社交、娱乐、精神崩溃时,按心情状态(好/中/坏/崩溃)发出吱吱叫。摄像机缩放联动"凑近听",屏幕外静音以省性能。
+
+仅作用于 Ratkin 种族,需配合 NewRatkin(鼠族)使用。</description>
+  <modDependencies>
+    <li>
+      <packageId>brrainz.harmony</packageId>
+      <displayName>Harmony</displayName>
+      <steamWorkshopUrl>steam://url/CommunityFilePage/2009463077</steamWorkshopUrl>
+    </li>
+    <li>
+      <packageId>erdelf.HumanoidAlienRaces</packageId>
+      <displayName>Humanoid Alien Races</displayName>
+      <steamWorkshopUrl>steam://url/CommunityFilePage/839005762</steamWorkshopUrl>
+    </li>
+    <li>
+      <packageId>Solaris.RatkinRaceMod</packageId>
+      <displayName>Ratkin (鼠族)</displayName>
+    </li>
+  </modDependencies>
+  <loadAfter>
+    <li>brrainz.harmony</li>
+    <li>erdelf.HumanoidAlienRaces</li>
+    <li>Solaris.RatkinRaceMod</li>
+  </loadAfter>
+</ModMetaData>

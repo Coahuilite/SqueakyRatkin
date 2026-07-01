@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+  <ThingDef>
+    <defName>SR_Mote_TextBg</defName>
+    <thingClass>SqueakyRatkin.MoteTextWithBackground</thingClass>
+    <category>Mote</category>
+    <tickerType>Normal</tickerType>
+    <altitudeLayer>MoteOverhead</altitudeLayer>
+    <drawerType>RealtimeOnly</drawerType>
+    <useHitPoints>false</useHitPoints>
+    <selectable>false</selectable>
+    <neverMultiSelect>true</neverMultiSelect>
+    <rotatable>false</rotatable>
+    <isSaveable>false</isSaveable>
+    <mote>
+      <solidTime>0.5</solidTime>
+      <fadeInTime>0.2</fadeInTime>
+      <fadeOutTime>1.5</fadeOutTime>
+    </mote>
+  </ThingDef>
+</Defs>

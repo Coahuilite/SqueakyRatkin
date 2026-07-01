@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <AssemblyName>SqueakyRatkin</AssemblyName>
+    <RootNamespace>SqueakyRatkin</RootNamespace>
+    <Version>0.1.0</Version>
+    <AssemblyVersion>0.1.0.0</AssemblyVersion>
+    <FileVersion>0.1.0.0</FileVersion>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <OutputPath>..\..\1.6\Assemblies</OutputPath>
+    <SqueakyBuildFlavor Condition="'$(SqueakyBuildFlavor)' == ''">Dev</SqueakyBuildFlavor>
+    <DefineConstants>$(DefineConstants);SQUEAKY_$(SqueakyBuildFlavor.ToUpper())</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.*" />
+    <PackageReference Include="Lib.Harmony" Version="2.4.*" ExcludeAssets="runtime" />
+  </ItemGroup>
+
+  <Target Name="ValidateModJunction" BeforeTargets="BeforeBuild">
+    <Exec Command='pwsh -NoProfile -ExecutionPolicy Bypass -File "$(MSBuildProjectDirectory)\..\..\scripts\validate-junction.ps1" -wsRoot "$(MSBuildProjectDirectory)\..\.."' ContinueOnError="WarnAndContinue" />
+  </Target>
+
+</Project>

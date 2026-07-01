@@ -1,0 +1,32 @@
+name: Release
+
+# 推 v* 格式的 tag(如 v1.0.0)触发:构建 GitHub flavor → 打 zip → 发 Release。
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write   # 创建 GitHub Release 需写权限
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Pack GitHub release
+        run: pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/pack-github.ps1 -Version "${{ github.ref_name }}"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/github/*.zip
+          generate_release_notes: true   # 自动从 commits 生成 Release notes
+          draft: false
+          prerelease: false

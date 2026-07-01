@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+  <SR.SettingsCategory>Squeaky Ratkin</SR.SettingsCategory>
+
+  <SR.UseCustomOnly.Label>Full override (custom audio only, no vanilla default)</SR.UseCustomOnly.Label>
+  <SR.UseCustomOnly.Desc>ON: only custom audio (SR_*_Pure). OFF: custom + vanilla guinea-pig default mixed.</SR.UseCustomOnly.Desc>
+
+  <SR.Workbench.Header>Mood modulation workbench</SR.Workbench.Header>
+  <SR.Workbench.Header.Desc>Pick a mood to edit its override; pick an action to preview. Enable override to replace the XML default. Drag sliders or type exact values, then Preview to hear.</SR.Workbench.Header.Desc>
+  <SR.Workbench.Mood>Mood</SR.Workbench.Mood>
+  <SR.Workbench.Action>Preview action</SR.Workbench.Action>
+  <SR.Workbench.EnableOverride>Enable override (replaces default)</SR.Workbench.EnableOverride>
+  <SR.Workbench.PitchFactor>pitchFactor</SR.Workbench.PitchFactor>
+  <SR.Workbench.VolumeFactor>volumeFactor</SR.Workbench.VolumeFactor>
+  <SR.Workbench.PitchJitter>pitchJitter</SR.Workbench.PitchJitter>
+  <SR.Workbench.JitterMin>min</SR.Workbench.JitterMin>
+  <SR.Workbench.JitterMax>max</SR.Workbench.JitterMax>
+  <SR.Workbench.Preview>Preview</SR.Workbench.Preview>
+  <SR.Workbench.Preset>Mood preset</SR.Workbench.Preset>
+  <SR.Preset.Sharp>Sharp</SR.Preset.Sharp>
+  <SR.Preset.Neutral>Neutral</SR.Preset.Neutral>
+  <SR.Preset.Low>Low</SR.Preset.Low>
+  <SR.Preset.Chaos>Chaos</SR.Preset.Chaos>
+
+  <SR.Action.Call>Call</SR.Action.Call>
+  <SR.Action.Eat>Eat</SR.Action.Eat>
+  <SR.Action.Sleep>Sleep</SR.Action.Sleep>
+  <SR.Action.Wounded>Wounded</SR.Action.Wounded>
+  <SR.Action.Select>Select</SR.Action.Select>
+  <SR.Action.Move>Move</SR.Action.Move>
+  <SR.Action.Social>Social</SR.Action.Social>
+  <SR.Action.Joy>Joy</SR.Action.Joy>
+
+  <SR.Mood.Good>Good</SR.Mood.Good>
+  <SR.Mood.Neutral>Neutral</SR.Mood.Neutral>
+  <SR.Mood.Bad>Bad</SR.Mood.Bad>
+  <SR.Mood.Break>Break</SR.Mood.Break>
+
+  <SR.Debug.OverlayOn>Overlay: ON</SR.Debug.OverlayOn>
+  <SR.Debug.OverlayOff>Overlay: OFF</SR.Debug.OverlayOff>
+  <SR.Debug.Browser>Sound Browser...</SR.Debug.Browser>
+  <SR.Debug.BrowserTitle>Squeaky Ratkin - Sound Browser</SR.Debug.BrowserTitle>
+</LanguageData>
