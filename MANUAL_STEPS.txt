@@ -1,0 +1,23 @@
+鼠辈啁啾 · 发布前手动步骤
+==========================
+
+正式发布前请逐项确认。Please verify each item before release.
+
+[已完成 · Done]
+× 作者与 packageId 已统一：Coahuilite / coahuilite.squeakyratkin
+  （注：packageId 发布后不可更改，否则会导致旧存档无法识别本模组。）
+  (Note: packageId must not change after release — breaks save recognition.)
+× LICENSE 版权署名：Coahuilite
+
+[待办 · TODO]
+1. 自定义音频（内测阶段可选）：详见 1.6/Sounds/Squeak/AUDIO_GUIDE.txt。
+   操作步骤：放入音频文件 → 取消 SoundDef 中对应 grain 的注释。
+   Custom audio (optional for beta): see AUDIO_GUIDE.txt. Add files, uncomment grains.
+
+2. 首次上传 Steam 创意工坊后，会生成 About/PublishedFileId.txt。
+   该文件已被 gitignore，请勿提交。
+   First Steam Workshop upload generates About/PublishedFileId.txt. Gitignored — do not commit.
+
+3. 发布版本：执行 `git tag v0.1.0 && git push origin v0.1.0`，
+   CI 将自动打包并发布 GitHub Release。
+   To release: `git tag v0.1.0 && git push origin v0.1.0`. CI builds & publishes the Release.
