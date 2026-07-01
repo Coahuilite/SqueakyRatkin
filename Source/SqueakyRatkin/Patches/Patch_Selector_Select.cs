@@ -10,14 +10,17 @@ public static class Patch_Selector_Select
 {
     private static MethodBase? TargetMethod()
     {
-        return AccessTools.Method(typeof(Selector), "Select", new[] { typeof(Thing), typeof(bool), typeof(bool) })
-            ?? AccessTools.Method(typeof(Selector), "Select", new[] { typeof(Thing), typeof(bool) })
-            ?? AccessTools.Method(typeof(Selector), "Select", new[] { typeof(Thing) });
+        // Selector.Select 实际签名: Select(object obj, bool playSound, bool forceDesignatorDeselect)
+        // 第一参数是 object(不是 Thing),按重载链 fallback。
+        return AccessTools.Method(typeof(Selector), "Select", new[] { typeof(object), typeof(bool), typeof(bool) })
+            ?? AccessTools.Method(typeof(Selector), "Select", new[] { typeof(object), typeof(bool) })
+            ?? AccessTools.Method(typeof(Selector), "Select", new[] { typeof(object) });
     }
 
-    private static void Postfix(Thing t)
+    // 用位置注入 __0 取第一参数,避免与原方法参数名耦合(原方法参数名为 obj,不是 t)。
+    private static void Postfix(object __0)
     {
-        if (t is not Pawn pawn || !CompSqueaker.IsRatkin(pawn))
+        if (__0 is not Pawn pawn || !CompSqueaker.IsRatkin(pawn))
         {
             return;
         }
