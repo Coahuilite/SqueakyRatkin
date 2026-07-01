@@ -1,0 +1,20 @@
+# <类型>: <简短描述,祈使句,不超过 50 字>
+#
+# 类型 ∈ feat / fix / docs / refactor / chore / style / test
+#   feat     新功能
+#   fix      修 bug
+#   docs     文档
+#   refactor 重构(不改行为)
+#   chore    构建 / 工具 / 杂项
+#   style    格式(不改逻辑)
+#   test     测试
+#
+# 原子提交原则:一个 commit 只做一件事。
+# 提交进 dev 分支;PR 合 main 时用 squash merge。
+#
+# 示例:
+#   feat: 新增 Sleep 动作的吱叫触发
+#   fix: Wounded 加最短间隔,防高攻速武器刷屏
+#   docs: AUDIO_GUIDE 音频格式改为 ogg 以对齐原版
+#   refactor: 心情调制改为运行时 pitchFactor,SoundDef 64→16
+#   chore: 完善 .gitignore,补 .vscode/.opencode

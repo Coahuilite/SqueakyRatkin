@@ -42,6 +42,9 @@ if (Test-Path -LiteralPath $publishedFileId) {
 
 Get-ChildItem -LiteralPath $stageDir -Recurse -File -Filter *.pdb | Remove-Item -Force
 
+# 排除占位文件(玩家包不需要 .gitkeep;音频指引 txt 保留,供翻文件的玩家查看)
+Get-ChildItem -LiteralPath $stageDir -Recurse -File -Filter *.gitkeep | Remove-Item -Force
+
 $resolvedVersion = $Version
 if (-not $PSBoundParameters.ContainsKey('Version') -and (Test-Path -LiteralPath $dllPath -PathType Leaf)) {
     $assemblyVersion = [System.Reflection.AssemblyName]::GetAssemblyName($dllPath).Version
