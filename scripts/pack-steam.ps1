@@ -39,12 +39,8 @@ if (Test-Path -LiteralPath $publishedFileId) {
 
 Get-ChildItem -LiteralPath $stageDir -Recurse -File -Filter *.pdb | Remove-Item -Force
 
-# 排除开发/占位文件(玩家包不需要:贡献者指引 txt + gitkeep 占位)
+# 排除占位文件(玩家包不需要 .gitkeep;音频指引 txt 保留,供翻文件的玩家查看)
 Get-ChildItem -LiteralPath $stageDir -Recurse -File -Filter *.gitkeep | Remove-Item -Force
-$soundsDir = Join-Path $stageDir "1.6\Sounds"
-if (Test-Path -LiteralPath $soundsDir) {
-    Get-ChildItem -LiteralPath $soundsDir -Recurse -File -Filter *.txt | Remove-Item -Force
-}
 
 $fileCount = (Get-ChildItem -LiteralPath $stageDir -Recurse -File | Measure-Object).Count
 Write-Host "[pack-steam] Staged $fileCount files to $stageDir"
