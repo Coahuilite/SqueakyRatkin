@@ -32,9 +32,20 @@ public class SqueakyRatkinMod : Mod
         LongEventHandler.ExecuteWhenFinished(() =>
         {
             Settings.ApplyToRuntime();
-            int n = DefDatabase<SoundDef>.AllDefs.Count(d => d.defName.StartsWith("SR_"));
+            var srDefs = DefDatabase<SoundDef>.AllDefs.Where(d => d.defName.StartsWith("SR_")).ToList();
+            int baseCount = srDefs.Count(d => !d.defName.EndsWith("_Pure") && !d.defName.EndsWith("_Preview"));
+            int pureCount = srDefs.Count(d => d.defName.EndsWith("_Pure"));
+            int previewCount = srDefs.Count(d => d.defName.EndsWith("_Preview"));
             string version = typeof(SqueakyRatkinMod).Assembly.GetName().Version?.ToString() ?? "unknown";
-            Log.Message($"[SqueakyRatkin] Loaded [{BuildFlavor}] v{version}. {n} squeak SoundDefs. useCustomOnly={Settings.useCustomOnly}, moodOverrides={Settings.moodOverrides.Count}");
+            string moodDetail = Settings.moodOverrides.Count == 0
+                ? ""
+                : "\n" + string.Join("\n", Settings.moodOverrides.Select(kv =>
+                    $"    {kv.Key}: pitch={kv.Value.pitchFactor:0.##} vol={kv.Value.volumeFactor:0.##} jitter={kv.Value.pitchJitter}"));
+            Log.Message($"[SqueakyRatkin] === Squeaky Ratkin v{version} [{BuildFlavor}] loaded ===\n" +
+                        $"  SoundDefs: {srDefs.Count} (base={baseCount}, pure={pureCount}, preview={previewCount})\n" +
+                        $"  Harmony: PatchAll OK ({Harmony.GetPatchedMethods().Count()} methods)\n" +
+                        $"  useCustomOnly: {Settings.useCustomOnly} ({(Settings.useCustomOnly ? "pure custom" : "mixed vanilla+custom")})\n" +
+                        $"  moodOverrides: {Settings.moodOverrides.Count}{moodDetail}");
         });
     }
 

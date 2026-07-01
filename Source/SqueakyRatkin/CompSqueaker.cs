@@ -7,7 +7,7 @@ using Verse.Sound;
 namespace SqueakyRatkin;
 
 public enum SqueakMood { Good, Neutral, Bad, Break }
-public enum SqueakAction { Call, Eat, Sleep, Wounded, Select, Move, Social, Joy }
+public enum SqueakAction { Call, Eat, Sleep, Wounded, Select, Move, Social, Joy, Death }
 
 /// <summary>触发模式,由 XML 配置驱动,C# 通用适配。</summary>
 public enum SqueakTriggerMode
@@ -138,11 +138,6 @@ public class CompSqueaker : ThingComp
             return;
         }
 
-        if (Find.CameraDriver.CurrentZoom > CameraZoomRange.Close)
-        {
-            return;
-        }
-
         SqueakAction? action = CurrentAction;
         if (action == null || !configMap.TryGetValue(action.Value, out SqueakActionConfig? cfg))
         {
@@ -169,6 +164,7 @@ public class CompSqueaker : ThingComp
 
     public void Notify_Wounded() => NotifyExternal(SqueakAction.Wounded);
     public void Notify_Select() => NotifyExternal(SqueakAction.Select);
+    public void Notify_Death() => NotifyExternal(SqueakAction.Death);
 
     private void NotifyExternal(SqueakAction action)
     {
@@ -178,11 +174,6 @@ public class CompSqueaker : ThingComp
         }
 
         if (!Find.CameraDriver.CurrentViewRect.ExpandedBy(10).Contains(Pawn.Position))
-        {
-            return;
-        }
-
-        if (Find.CameraDriver.CurrentZoom > CameraZoomRange.Close)
         {
             return;
         }

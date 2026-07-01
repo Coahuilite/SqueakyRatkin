@@ -6,6 +6,23 @@
 ## Overview
 Ratkin squeak QOL mod. RimWorld 1.6, C# (Harmony patch + ThingComp) + XML. namespace `SqueakyRatkin`, packageId `coahuilite.squeakyratkin`.
 
+## Memory Protocol
+
+This repo uses three root memory files. Maintain them as part of every non-trivial session.
+
+| File | Role | Read Rule | Write Rule |
+| --- | --- | --- | --- |
+| `MEMORY.md` | Current durable project knowledge: repo state, confirmed constraints, architecture decisions | Read at session start before claiming project context | Add only facts/decisions that should guide future work; keep compact |
+| `TODO.md` | Current task surface: goal, in-progress, pending, blocked, done | Read at session start before continuing work | Update whenever tasks start/finish/block/drop/change |
+| `OBLIVIONIS.md` | Cold archive for downgraded memory | Do **not** read at session start; read only for historical conflict or explicit request | Move inactive-but-useful summaries here from `MEMORY.md` with date/reason/status |
+
+Maintenance rules:
+- Keep `MEMORY.md` stable and short: facts, signed-off decisions, constraints, evidence pointers only.
+- Keep `TODO.md` operational: current goal, next actions, blockers, recent results.
+- Downgrade stale `MEMORY.md` items into `OBLIVIONIS.md` with date/reason/status when they no longer guide current work.
+- If an `OBLIVIONIS.md` item becomes relevant again, re-summarize into `MEMORY.md` with `source: OBLIVIONIS.md`.
+- Editing README / CONTRIBUTING / AUDIO_GUIDE does NOT by itself require changing memory files; update them only when durable project facts, tasks, blockers, or archival state change.
+
 ## Hard Constraints (violation fails the task)
 - **Never scan paths outside the project root.** `grep/glob/read` touching `C:\Program Files`, Steam install dirs, or sibling mod folders triggers a privilege prompt and fails. Required RimWorld APIs must be supplied by the caller in the prompt — do not search for them yourself.
 - **`SR_` prefix on all Defs** (global Def-database collision avoidance); C# classes carry no prefix (namespace isolation).
@@ -53,7 +70,7 @@ Source/SqueakyRatkin/
   Defs/SoundDefs/          16 SoundDefs (8 actions × 2 sets, guinea-pig default)
   Defs/MoteDefs/           white-bg overlay mote
   Patches/Ratkin_AddSqueakComp.xml  actions + moodMods (data-driven core)
-  Sounds/Squeak/<Action>/  custom audio placeholders (friend collects here)
+  Sounds/Squeak/<Action>/  custom audio placeholders (players place custom audio here)
   Languages/{EN,SC}/Keyed/ localization
 scripts/                   validate-junction / pack-steam / pack-github
 ```

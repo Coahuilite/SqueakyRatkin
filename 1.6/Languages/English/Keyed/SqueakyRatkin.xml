@@ -16,6 +16,9 @@
   <SR.Workbench.JitterMin>min</SR.Workbench.JitterMin>
   <SR.Workbench.JitterMax>max</SR.Workbench.JitterMax>
   <SR.Workbench.Preview>Preview</SR.Workbench.Preview>
+  <SR.Workbench.Apply>Apply</SR.Workbench.Apply>
+  <SR.Workbench.Revert>Revert</SR.Workbench.Revert>
+  <SR.Workbench.RestoreDefaults>Defaults</SR.Workbench.RestoreDefaults>
   <SR.Workbench.Preset>Mood preset</SR.Workbench.Preset>
   <SR.Preset.Sharp>Sharp</SR.Preset.Sharp>
   <SR.Preset.Neutral>Neutral</SR.Preset.Neutral>
@@ -30,6 +33,7 @@
   <SR.Action.Move>Move</SR.Action.Move>
   <SR.Action.Social>Social</SR.Action.Social>
   <SR.Action.Joy>Joy</SR.Action.Joy>
+  <SR.Action.Death>Death</SR.Action.Death>
 
   <SR.Mood.Good>Good</SR.Mood.Good>
   <SR.Mood.Neutral>Neutral</SR.Mood.Neutral>
@@ -38,6 +42,4 @@
 
   <SR.Debug.OverlayOn>Overlay: ON</SR.Debug.OverlayOn>
   <SR.Debug.OverlayOff>Overlay: OFF</SR.Debug.OverlayOff>
-  <SR.Debug.Browser>Sound Browser...</SR.Debug.Browser>
-  <SR.Debug.BrowserTitle>Squeaky Ratkin - Sound Browser</SR.Debug.BrowserTitle>
 </LanguageData>

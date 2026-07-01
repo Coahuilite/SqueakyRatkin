@@ -16,6 +16,9 @@
   <SR.Workbench.JitterMin>最小</SR.Workbench.JitterMin>
   <SR.Workbench.JitterMax>最大</SR.Workbench.JitterMax>
   <SR.Workbench.Preview>预览</SR.Workbench.Preview>
+  <SR.Workbench.Apply>写入</SR.Workbench.Apply>
+  <SR.Workbench.Revert>还原</SR.Workbench.Revert>
+  <SR.Workbench.RestoreDefaults>默认值</SR.Workbench.RestoreDefaults>
   <SR.Workbench.Preset>心情预设</SR.Workbench.Preset>
   <SR.Preset.Sharp>尖锐</SR.Preset.Sharp>
   <SR.Preset.Neutral>中性</SR.Preset.Neutral>
@@ -30,6 +33,7 @@
   <SR.Action.Move>移动</SR.Action.Move>
   <SR.Action.Social>社交</SR.Action.Social>
   <SR.Action.Joy>娱乐</SR.Action.Joy>
+  <SR.Action.Death>死亡</SR.Action.Death>
 
   <SR.Mood.Good>好心情</SR.Mood.Good>
   <SR.Mood.Neutral>中性</SR.Mood.Neutral>
@@ -38,6 +42,4 @@
 
   <SR.Debug.OverlayOn>悬浮字: 开启</SR.Debug.OverlayOn>
   <SR.Debug.OverlayOff>悬浮字: 关闭</SR.Debug.OverlayOff>
-  <SR.Debug.Browser>音频浏览器...</SR.Debug.Browser>
-  <SR.Debug.BrowserTitle>鼠辈啁啾 - 音频浏览器</SR.Debug.BrowserTitle>
 </LanguageData>
