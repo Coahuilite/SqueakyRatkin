@@ -1,0 +1,87 @@
+鼠辈啁啾 · 自定义音频指引
+==========================
+
+本模组默认使用原版豚鼠（GuineaPig）的叫声作为音源。若需替换为自定义鼠叫，请遵循以下规范。
+The default audio source is the vanilla guinea-pig. To replace it with custom squeaks, follow this guide.
+
+
+1. 命名规范 · Naming
+--------------------
+文件名格式：SR_<动作>_<序号>.ogg
+File name: SR_<Action>_<n>.ogg
+
+动作类别共 8 种 / 8 actions:
+  Call（空闲）   Eat（进食）    Sleep（睡眠）   Wounded（受击）
+  Select（选中） Move（移动）   Social（社交）  Joy（娱乐）
+
+序号为变体编号，从 1 起递增。
+示例 / examples:
+  SR_Call_1.ogg
+  SR_Call_2.ogg
+  SR_Wounded_1.ogg
+  SR_Eat_1.ogg
+
+动作名称必须与游戏内 SoundDef（SR_<动作>）及文件夹路径（Squeak/<动作>）一致，否则无法接入。
+The <Action> segment must match the SoundDef (SR_<Action>) and the folder path (Squeak/<Action>).
+
+
+2. 技术规格 · Format
+--------------------
+- 声道：单声道（mono），必需。游戏通过单声道实现距离衰减，立体声会破坏此效果。
+  Channels: mono, mandatory. Distance fading relies on mono; stereo breaks it.
+- 格式：ogg（推荐，与原版及多数音效模组一致，兼容性最佳）；wav 亦可。请勿使用 mp3。
+  Format: ogg (recommended; vanilla and most mods use it); wav acceptable. Avoid mp3.
+- 采样率：22050 Hz 或 44100 Hz。
+  Sample rate: 22050 Hz or 44100 Hz.
+- 音量：峰值归一化至约 -3dBFS，避免削波失真。
+  Loudness: normalize peak to ~-3dBFS, no clipping.
+- 首尾静音：裁剪干净，避免触发延迟。
+  Trim leading/trailing silence to avoid trigger delay.
+- 时长：0.3–1.5 秒。睡眠与移动为偶发性一次性音效，非循环长音。
+  Duration: 0.3–1.5s. Sleep and Move are occasional one-shots, not loops.
+
+
+3. 文件位置 · Placement
+-----------------------
+1.6/Sounds/Squeak/<动作>/SR_<动作>_<序号>.ogg
+1.6/Sounds/Squeak/<Action>/SR_<Action>_<n>.ogg
+
+示例 / e.g.:
+  1.6/Sounds/Squeak/Call/SR_Call_1.ogg
+  1.6/Sounds/Squeak/Wounded/SR_Wounded_1.ogg
+
+
+4. 心情处理 · Mood
+------------------
+游戏中的四种心情（好/中/坏/崩溃）由运行时通过音高与音量调制实现（见模组设置「调制工作台」）。
+因此每个动作只需录制中性基准版本，2–3 个变体即可，无需分别录制不同情绪。
+Mood (good/neutral/bad/breakdown) is produced at runtime via pitch/volume modulation
+(mod settings → Modulation Workbench). Record only the neutral base, 2–3 variants per action.
+
+
+5. 启用方式 · Enable
+--------------------
+编辑 1.6/Defs/SoundDefs/SqueakyRatkin_SoundDefs.xml。
+找到对应的 SR_<动作> 与 SR_<动作>_Pure，取消下列行的注释：
+Edit SqueakyRatkin_SoundDefs.xml. For each SR_<Action> and SR_<Action>_Pure, uncomment:
+  <li Class="AudioGrain_Folder"><clipFolderPath>Squeak/<动作></clipFolderPath></li>
+
+grain 结构参考 / grain template:
+  <grains>
+    <!-- 原版豚鼠（兜底）· vanilla guinea-pig fallback -->
+    <li Class="AudioGrain_Folder"><clipFolderPath>Pawn/Animal/GuineaPig/Call</clipFolderPath></li>
+    <!-- 自定义音频（放入文件后启用）· custom (enable after adding files) -->
+    <li Class="AudioGrain_Folder"><clipFolderPath>Squeak/Call</clipFolderPath></li>
+  </grains>
+
+同一 SoundDef 内多个 grain 会被游戏随机选用（原版机制）。
+Multiple grains within one SoundDef are selected randomly (vanilla behavior).
+
+
+6. 音源开关 · Source switch
+---------------------------
+模组设置中的「完全 override」/ mod settings → "Full override":
+- 关闭（默认）：自定义音频与原版豚鼠混合随机播放。
+  OFF (default): custom + vanilla guinea-pig, mixed randomly.
+- 开启：仅使用自定义音频，不播放豚鼠（走 SR_<动作>_Pure）。
+  ON: custom only, no guinea-pig (uses SR_<Action>_Pure).
