@@ -32,7 +32,7 @@ Maintenance rules:
 - **Data-driven**: `actions` (trigger mode EachTime/RandomOneShot/External + interval + probability) and `moodMods` (mood modulation) live in `1.6/Patches/Ratkin_AddSqueakComp.xml`; CompSqueaker adapts generically. Changing behavior = editing XML, no recompile.
 - **Runtime modulation**: mood is applied via `SoundInfo.pitchFactor/volumeFactor` at runtime (one SoundDef per action + one neutral audio set). **Do not regress to a mood×action SoundDef matrix** (previously corrected as over-engineering).
 - **Three-layer config** (bottom → top): `CompProperties` (XML default) ← `ModSettings.moodOverrides` (player override) ← `useCustomOnly` (source switch).
-- Camera reuses the vanilla `Pawn_CallTracker` idiom: `CurrentViewRect.ExpandedBy(10).Contains()` view culling + `CurrentZoom <= Close` zoom gating + `TickRateMultiplier` time-speed volume.
+- Camera reuses the vanilla `Pawn_CallTracker` idiom: `CurrentViewRect.ExpandedBy(10).Contains()` view culling (perf) + **distRange distance attenuation** (`SoundInfo.InMap(TargetInfo(Pawn))`, 15~70 cells linear fade, >70 silent; 2026-07 removed `CurrentZoom<=Close` zoom gating which blocked distRange) + `TickRateMultiplier` time-speed volume.
 
 ## Junction Dev Mechanism (local dev core)
 Make `RimWorld/Mods/SqueakyRatkin` a junction to this workspace root so builds load instantly.
@@ -65,15 +65,24 @@ Source/SqueakyRatkin/
   SqueakLabels.cs          localization helper
   Mod.cs                   entry + flavor + load log
   Patches/                 Wounded + Select Harmony patches
-  Debug/                   dev debug (overlay / browser / menu)
+  Debug/                   dev debug (overlay / mote maker)
 1.6/
-  Defs/SoundDefs/          16 SoundDefs (8 actions × 2 sets, guinea-pig default)
+  Defs/SoundDefs/          27 SoundDefs (9 actions × 3 sets: base/Pure/Preview, guinea-pig default)
   Defs/MoteDefs/           white-bg overlay mote
   Patches/Ratkin_AddSqueakComp.xml  actions + moodMods (data-driven core)
   Sounds/Squeak/<Action>/  custom audio placeholders (players place custom audio here)
-  Languages/{EN,SC}/Keyed/ localization
+  Languages/{English,ChineseSimplified}/Keyed/ localization
 scripts/                   validate-junction / pack-steam / pack-github
 ```
 
 ## Debug Entry (development mode)
-Developer menu → "Squeaky Ratkin" category: overlay toggle ×2, sound browser. DevMode plays auto-log.
+Developer menu → "Squeaky Ratkin" category: overlay toggle ×2. DevMode plays auto-log. Sound preview moved to ModSettings workbench (no DevMode needed).
+
+## Release Flow (dev → main → tag → CI)
+1. dev: atomic commits, all development here.
+2. PR dev→main: `gh pr create --base main --head dev --title "<type>: <desc>"`.
+3. Squash merge: `gh pr merge --squash --subject "<type>: <desc>"` (main protected: require PR + enforce_admins, no direct push).
+4. Tag **main** (not dev): `git tag v<x.y.z>` stable, `v<x.y.z>-rc<N>` pre-release. Tag must point at main's squash commit.
+5. Push tag: `git push origin v<x.y.z>-rc<N>` → triggers `release.yml` → pack-github + GitHub Release.
+6. Pre-release detection: `release.yml` marks `prerelease: true` if tag contains `-` (e.g. v0.1.0-rc1); stable (v0.1.0) is not.
+7. **Never tag dev for release.** dev is development; main is the release surface.
