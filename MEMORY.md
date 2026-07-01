@@ -6,7 +6,7 @@
 - junction:`I:\SteamLibrary\steamapps\common\RimWorld\Mods\SqueakyRatkin` → 工作区根,编译即加载。
 - 构建:`dotnet build Source/SqueakyRatkin/SqueakyRatkin.csproj` → `1.6/Assemblies/SqueakyRatkin.dll`,要求 0 错误。
 - BuildFlavor:`-p:SqueakyBuildFlavor=Dev|Steam|GitHub` → `SQUEAKY_*` 常量,仅影响启动日志 banner,运行时功能三态相同。
-- 版本:0.1.0(SemVer,内测期 0.x.y,正式 1.0.0)。源头 csproj `<Version>`/`<AssemblyVersion>`。
+- 版本:**0.1.0-rc1**(2026-07 发版,tag `v0.1.0-rc1`,CI release 上线)。SemVer 内测期,正式 1.0.0。源头 csproj `<Version>`/`<AssemblyVersion>`。
 - CI:`.github/workflows/ci.yml`(push/PR main+dev 构建验证;push 额外产出 `dev-<sha>` artifact 供内测)+ `release.yml`(tag `v*` 发 GitHub Release)。
 - git identity:`19252128+Coahuilite@users.noreply.github.com`(GitHub noreply 带数字 ID,`--local` 不碰全局)。
 - 许可:代码 MPL-2.0,音频 All Rights Reserved,原版资产只引用不分发。
@@ -23,6 +23,7 @@
 - **分支保护**:main `require PR` + `enforce_admins` + 禁 force push;dev 原子提交链(9 阶段:骨架→核心→patches→工作台→调试→本地化→分发→文档→音频)。
 - **红字修复**(2026-07):`SR_Mote_TextBg` 缺 `ParentName="MoteBase"` + graphicData + drawGUIOverlay + mote.realTime → Def ConfigErrors 红字;仿原版 `Mote_Text` 修复(commit `80a5ab5`)。
 - **启动崩溃修复**(2026-07,commit `982331f`,实测通过):(1) `Patch_Selector_Select` postfix 声明 `Thing t`,但 `Selector.Select` 实参为 `(object obj,bool,bool)`,Harmony 按参数名注入找不到 `t` → Mod 类构造崩;改位置注入 `object __0`。(2) XML FloatRange 写 `(a,b)`,但 vanilla `FloatRange.FromString` 用 `~` 分隔(`Split('~')`)→ 16 SoundDef + moodMod 全部 FormatException;全项目 `(a,b)`→`a~b`。
+- **v0.1.0-rc1 发版**(2026-07,tag `v0.1.0-rc1`,commit `91f0c9d`):rebase 整理 dev 为 1 干净 commit,tag 触发 CI release 发 GitHub Release。内测候选,反馈后正式 0.1.0(merge main + tag v0.1.0)。rc1 含:Death 音效、工作台 editBuffer 三按钮(写入/还原/默认值)+ mood/action 数据驱动、试听集中工作台(删 DevMode 浏览器,SR_*_Preview onCamera 无衰减)、SC 本地化修复(ChineseSimplified 文件夹)、启动日志增强、调参(Good 1.2/Bad 0.8/0.7/Break 1.1+0.6~1.5/Call 0.015/Death 0.8~0.9)。
 - **功能调优**(2026-07,本地待推送):声音浏览器 `SoundInfo.OnCamera()`→`InMap(镜头中心)`(onCamera 需 subSound.onCamera=true 未配);删镜头 zoom gating;Select 节流 60→15;mote 位置可配置(`modExtensions/SqueakMoteOffset`,offsetY 默认 1.2);Death 死亡音效(`Pawn.Kill` prefix + `SR_Death`,GuineaPig/Pain grain,pitch 0.85~0.95)。
 
 ## Active Constraints

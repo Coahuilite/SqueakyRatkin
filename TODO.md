@@ -1,23 +1,17 @@
 # TODO
 
 ## Current Goal
-游戏内验证本轮调优/新增(mote 位置、声音浏览器、镜头距离衰减、死亡音效)+ 文案去私人化,确认后统一推送 dev。
+v0.1.0-rc1 已发(tag `v0.1.0-rc1`,CI release)。收集内测反馈,精调后发正式 0.1.0。
 
 ## In Progress
-- [ ] 等用户重启 RimWorld 一次性验证(本地 5 个 commit 未推送):
-  - mote 文字位置(offsetY=1.2 是否到头顶,截图微调)
-  - 声音浏览器 Play 能响(InMap 修复)
-  - 镜头:中近距有声 → 远距线性衰减 → 超 70 格无声(删 zoom gating 后 distRange 生效)
-  - 死亡音效:被击杀 + 流血而亡都响(Pawn.Kill prefix)
-  - Select 连点 ~4/秒(minIntervalTicks=15)
+- [ ] CI release.yml 完成 → GitHub Release v0.1.0-rc1 zip 上线
+- [ ] rc1 内测反馈收集(玩家听感、触发频率、心情调制、bug)
 
 ## Pending
-- [ ] 验证通过后 `git push origin dev`(本地待推:3ffb72b/3d5e97c/22a5365/37181eb/4090b4e)
-- [ ] PR #1(dev→main squash)merge(用户在 GitHub 网页操作)
-- [ ] 收集自定义音频(ogg/22050Hz/16-bit/mono,放 `1.6/Sounds/Squeak/<Action>/SR_<Action>_<n>.ogg`,取消 `SqueakyRatkin_SoundDefs.xml` 对应 grain 注释)
-- [ ] Steam Workshop 上传(手动:`pwsh scripts/pack-steam.ps1` → RimWorld 开发者模式"上传模组")
-- [ ] 首个 release:`git tag v0.1.0 && git push origin v0.1.0`(CI 自动打包发 GitHub Release)
-- [ ] 游戏内调参:间隔/概率/心情阈值(改 `Ratkin_AddSqueakComp.xml`,不重编译)
+- [ ] 正式 0.1.0:rc1 反馈精调后,PR dev→main squash merge + tag `v0.1.0` + push(CI release)
+- [ ] 收集自定义音频(ogg/22050Hz/16-bit/mono,放 `1.6/Sounds/Squeak/<Action>/SR_<Action>_<n>.ogg`,取消 grain 注释)
+- [ ] Steam Workshop 上传(pack-steam.ps1 → RimWorld 开发者模式上传)
+- [ ] rc1 反馈驱动调参(改 Ratkin_AddSqueakComp.xml,不重编译)
 
 ## Completed
 - [x] 立项评估(原版机制核实:类人无发声钩子)
