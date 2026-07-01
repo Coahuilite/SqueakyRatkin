@@ -18,10 +18,4 @@ public static class SqueakDebugActions
         SqueakDebug.ShowOverlay = false;
         Log.Message("[SqueakyRatkin] Overlay OFF");
     }
-
-    [DebugAction("Squeaky Ratkin", "Sound Browser...", actionType = DebugActionType.Action, allowedGameStates = AllowedGameStates.PlayingOnMap)]
-    public static void OpenBrowser()
-    {
-        Find.WindowStack.Add(new SqueakSoundBrowserWindow());
-    }
 }

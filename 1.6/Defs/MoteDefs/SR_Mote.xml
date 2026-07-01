@@ -14,5 +14,11 @@
       <fadeInTime>0.2</fadeInTime>
       <fadeOutTime>1.5</fadeOutTime>
     </mote>
+    <modExtensions>
+      <li Class="SqueakyRatkin.SqueakMoteOffset">
+        <offsetX>0</offsetX>
+        <offsetY>1.3</offsetY>
+      </li>
+    </modExtensions>
   </ThingDef>
 </Defs>

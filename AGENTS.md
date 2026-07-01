@@ -70,7 +70,7 @@ Source/SqueakyRatkin/
   Defs/SoundDefs/          16 SoundDefs (8 actions × 2 sets, guinea-pig default)
   Defs/MoteDefs/           white-bg overlay mote
   Patches/Ratkin_AddSqueakComp.xml  actions + moodMods (data-driven core)
-  Sounds/Squeak/<Action>/  custom audio placeholders (friend collects here)
+  Sounds/Squeak/<Action>/  custom audio placeholders (players place custom audio here)
   Languages/{EN,SC}/Keyed/ localization
 scripts/                   validate-junction / pack-steam / pack-github
 ```

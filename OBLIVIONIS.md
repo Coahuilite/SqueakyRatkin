@@ -33,7 +33,7 @@ Cold archive for downgraded memory. Do NOT read at session start. Read only for 
 - **Status**: resolved。**教训**:重构分支应基于 main(`git rebase --root --onto main` 或重建时 parent=main),或事后 merge 建立祖先。
 
 ## 2026-07: SR_Mote 缺 ParentName/graphicData → 红字 → 已修复
-- **What**:`SR_Mote_TextBg` 早期 Def 缺 `ParentName="MoteBase"` + `<graphicData>` + `drawGUIOverlay` + `mote.realTime`,触发 Def ConfigErrors 红字(好友启动报错)。
+- **What**:`SR_Mote_TextBg` 早期 Def 缺 `ParentName="MoteBase"` + `<graphicData>` + `drawGUIOverlay` + `mote.realTime`,触发 Def ConfigErrors 红字(首次启动报错)。
 - **Reason**:fixer 生成 SR_Mote.xml 时未仿原版 `Mote_Text` 结构。
 - **Replaced by**:仿原版 Mote_Text(ParentName MoteBase + graphicData `Things/Mote/Transparent` + drawGUIOverlay + altitudeLayer MetaOverlays + mote.realTime),commit `80a5ab5`。
 - **Status**: fixed。
