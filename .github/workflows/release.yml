@@ -29,4 +29,4 @@ jobs:
           files: dist/github/*.zip
           generate_release_notes: true   # 自动从 commits 生成 Release notes
           draft: false
-          prerelease: false
+          prerelease: ${{ contains(github.ref_name, '-') }}   # v0.1.0-rc1 等 pre-release tag 自动标记;v0.1.0 正式不含 -
