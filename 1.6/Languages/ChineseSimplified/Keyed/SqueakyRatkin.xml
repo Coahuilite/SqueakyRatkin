@@ -4,6 +4,8 @@
 
   <SR.UseCustomOnly.Label>完全 override(只用自定义音频,不混原版豚鼠 default)</SR.UseCustomOnly.Label>
   <SR.UseCustomOnly.Desc>开启:只用自定义音频(SR_*_Pure)。关闭:自定义与原版豚鼠 default 混合。</SR.UseCustomOnly.Desc>
+  <SR.ScaleCooldownWithTimeSpeed.Label>按游戏倍速放大触发冷却(推荐)</SR.ScaleCooldownWithTimeSpeed.Label>
+  <SR.GlobalCooldownMultiplier.Label>全局触发间隔：{0}x</SR.GlobalCooldownMultiplier.Label>
 
   <SR.Workbench.Header>心情调制工作台</SR.Workbench.Header>
   <SR.Workbench.Header.Desc>选一个心情编辑其 override;选一个动作用于预览。启用 override 即覆盖 XML 默认。拖动滑块或输入精确值,然后点预览试听。</SR.Workbench.Header.Desc>

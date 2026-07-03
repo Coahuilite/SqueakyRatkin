@@ -2,7 +2,7 @@
 
 **English** | [中文](./README.zh-CN.md)
 
-A QOL mod that makes Ratkin pawns squeak on eat / sleep / wounded / select / move / social / joy / mental-break, with mood-tinted pitch (good / neutral / bad / breakdown). Camera-zoom gated for a "lean-in to listen" feel; off-screen pawns are culled to save performance.
+A QOL mod that makes Ratkin pawns squeak on idle call / eat / sleep / wounded / select / move / social / joy / death, with mood-tinted pitch (good / neutral / bad / breakdown). Off-screen pawns are culled for performance, and in-view sounds fade naturally with distRange distance attenuation.
 
 > The Chinese name 「鼠辈啁啾」is a playful pun; the mod itself is a lightweight, optional ambience enhancement.
 
@@ -30,8 +30,10 @@ Three layers (bottom → top):
 2. **Player override**: mod settings "Modulation Workbench" — toggle a mood's override, slider + input + presets (Sharp/Neutral/Low/Chaos) + preview
 3. **Source switch**: `Full override` (custom-only vs mixed with vanilla default)
 
+Also includes a global trigger interval slider and a `Scale trigger cooldown with time speed` checkbox (default ON) to keep accelerated play quieter in real-time.
+
 ## Dev Menu (development mode)
-Developer menu → "Squeaky Ratkin": overlay text on/off ×2, sound browser.
+Developer menu → "Squeaky Ratkin": overlay text on/off ×2. Sound preview lives in the mod settings workbench.
 
 ## License
 - **Code (C# / XML defs / patches)**: [Mozilla Public License 2.0](./LICENSE) — file-level copyleft, project-level combinable with proprietary code.

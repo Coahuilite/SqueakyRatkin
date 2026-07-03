@@ -25,6 +25,7 @@ public class SqueakActionConfig
     public SqueakTriggerMode mode = SqueakTriggerMode.RandomOneShot;
     public int minIntervalTicks = 300;
     public float probabilityPerCheck = 0.02f;
+    public bool ignoreGlobalCooldown = false;
 }
 
 /// <summary>
@@ -38,6 +39,8 @@ public class CompSqueaker : ThingComp
 
     /// <summary>完全 override:ON=纯自定义(SR_*_Pure),OFF=混合(SR_*)。由 ModSettings 同步。</summary>
     public static bool UseCustomOnly = false;
+    public static bool ScaleCooldownWithTimeSpeed = true;
+    public static float GlobalCooldownMultiplier = 1f;
 
     private static readonly Dictionary<SqueakAction, SoundDef?> SoundCacheMixed = new();
     private static readonly Dictionary<SqueakAction, SoundDef?> SoundCachePure = new();
@@ -46,6 +49,7 @@ public class CompSqueaker : ThingComp
     private readonly Dictionary<SqueakAction, SqueakActionConfig> configMap = new();
     private readonly Dictionary<SqueakAction, int> lastTriggerTick = new();
     private readonly Dictionary<SqueakMood, SqueakMoodMod> moodModMap = new();
+    private int lastAnyTriggerTick = int.MinValue / 2;
 
     private Pawn Pawn => (Pawn)parent;
     private CompProperties_Squeaker Props => (CompProperties_Squeaker)props;
@@ -53,6 +57,7 @@ public class CompSqueaker : ThingComp
     public override void Initialize(CompProperties props)
     {
         base.Initialize(props);
+        lastAnyTriggerTick = int.MinValue / 2;
         foreach (SqueakActionConfig cfg in Props.actions)
         {
             configMap[cfg.action] = cfg;
@@ -189,13 +194,21 @@ public class CompSqueaker : ThingComp
     private void TryTrigger(SqueakAction action, SqueakActionConfig cfg)
     {
         int now = Find.TickManager.TicksGame;
-        if (now - lastTriggerTick[action] < cfg.minIntervalTicks)
+        int actionCooldown = GetEffectiveCooldownTicks(cfg.minIntervalTicks);
+        if (now - lastTriggerTick[action] < actionCooldown)
+        {
+            return;
+        }
+
+        int globalCooldown = GetEffectiveCooldownTicks((int)Math.Ceiling(Props.globalMinIntervalTicks * Math.Max(0f, GlobalCooldownMultiplier)));
+        if (!cfg.ignoreGlobalCooldown && now - lastAnyTriggerTick < globalCooldown)
         {
             return;
         }
 
         PlayOneShot(action, CurrentMood);
         lastTriggerTick[action] = now;
+        lastAnyTriggerTick = now;
     }
 
     /// <summary>三层合并取心情调制:ModSettings.override > CompProperties.default > 内置默认。</summary>
@@ -233,6 +246,18 @@ public class CompSqueaker : ThingComp
     }
 
     private static float TimeSpeedVolumeFactor() => 1f / Math.Max(1f, Find.TickManager.TickRateMultiplier);
+
+    private static int GetEffectiveCooldownTicks(int baseCooldownTicks)
+    {
+        int cooldown = Math.Max(0, baseCooldownTicks);
+        if (!ScaleCooldownWithTimeSpeed || cooldown == 0)
+        {
+            return cooldown;
+        }
+
+        float multiplier = Math.Max(1f, Find.TickManager.TickRateMultiplier);
+        return multiplier <= 1f ? cooldown : (int)Math.Ceiling(cooldown * multiplier);
+    }
 
     private static void EnsureSoundCache()
     {
@@ -281,6 +306,7 @@ public class CompSqueaker : ThingComp
 
 public class CompProperties_Squeaker : CompProperties
 {
+    public int globalMinIntervalTicks = 120;
     public List<SqueakActionConfig> actions = new();
     public List<SqueakMoodMod> moodMods = new();
 

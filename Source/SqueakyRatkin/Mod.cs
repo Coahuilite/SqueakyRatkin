@@ -6,7 +6,7 @@ using Verse;
 namespace SqueakyRatkin;
 
 /// <summary>
-/// 模组入口。启动时加载 Harmony patch,提供 ModSettings(音源开关 + 心情调制 override)。
+/// 模组入口。启动时加载 Harmony patch,提供 ModSettings(音源开关 + 倍速冷却补偿 + 心情调制 override)。
 /// 配置分层:CompProperties(XML 全局默认) ← SqueakyRatkinSettings(玩家 override)。
 /// </summary>
 public class SqueakyRatkinMod : Mod
@@ -45,6 +45,8 @@ public class SqueakyRatkinMod : Mod
                         $"  SoundDefs: {srDefs.Count} (base={baseCount}, pure={pureCount}, preview={previewCount})\n" +
                         $"  Harmony: PatchAll OK ({Harmony.GetPatchedMethods().Count()} methods)\n" +
                         $"  useCustomOnly: {Settings.useCustomOnly} ({(Settings.useCustomOnly ? "pure custom" : "mixed vanilla+custom")})\n" +
+                        $"  scaleCooldownWithTimeSpeed: {Settings.scaleCooldownWithTimeSpeed}\n" +
+                        $"  globalCooldownMultiplier: {Settings.globalCooldownMultiplier:0.##}x\n" +
                         $"  moodOverrides: {Settings.moodOverrides.Count}{moodDetail}");
         });
     }

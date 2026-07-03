@@ -10,9 +10,10 @@ The default audio source is the vanilla guinea-pig. To replace it with custom sq
 文件名格式：SR_<动作>_<序号>.ogg
 File name: SR_<Action>_<n>.ogg
 
-动作类别共 8 种 / 8 actions:
+动作类别共 9 种 / 9 actions:
   Call（空闲）   Eat（进食）    Sleep（睡眠）   Wounded（受击）
   Select（选中） Move（移动）   Social（社交）  Joy（娱乐）
+  Death（死亡）
 
 序号为变体编号，从 1 起递增。
 示例 / examples:

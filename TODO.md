@@ -1,19 +1,28 @@
 # TODO
 
 ## Current Goal
-v0.1.0-rc1 已发(tag `v0.1.0-rc1`,CI release)。收集内测反馈,精调后发正式 0.1.0。
+正式 0.1.0 发布前收口:完成 rc1 反馈精调、频率控制与发布卫生,准备 PR dev→main + tag `v0.1.0`。
 
 ## In Progress
-- [ ] CI release.yml 完成 → GitHub Release v0.1.0-rc1 zip 上线
-- [ ] rc1 内测反馈收集(玩家听感、触发频率、心情调制、bug)
+- [ ] rc1 反馈收口与最终调参(玩家听感、触发频率、心情调制、bug)
+- [ ] 正式 0.1.0 发版准备:PR dev→main squash merge + tag `v0.1.0` + push(CI release)
 
 ## Pending
-- [ ] 正式 0.1.0:rc1 反馈精调后,PR dev→main squash merge + tag `v0.1.0` + push(CI release)
 - [ ] 收集自定义音频(ogg/22050Hz/16-bit/mono,放 `1.6/Sounds/Squeak/<Action>/SR_<Action>_<n>.ogg`,取消 grain 注释)
-- [ ] Steam Workshop 上传(pack-steam.ps1 → RimWorld 开发者模式上传)
 - [ ] rc1 反馈驱动调参(改 Ratkin_AddSqueakComp.xml,不重编译)
+- [ ] Steam Workshop 上传(pack-steam.ps1 → RimWorld 开发者模式上传)
+- [ ] 下一阶段架构设计:组件资格判定
+- [ ] 下一阶段架构设计:xenotype/gene 目标配置
+- [ ] 下一阶段架构设计:动作元数据拆分
+- [ ] 下一阶段架构设计:长音频/配音策略
 
 ## Completed
+- [x] 正式 0.1.0 发布前:per-pawn 全局冷却(`globalMinIntervalTicks`)已落地,玩家可用 `globalCooldownMultiplier` 调整全局触发间隔,Death 绕过全局冷却避免被吞。
+- [x] 正式 0.1.0 发布前:新增倍速冷却补偿选项(`scaleCooldownWithTimeSpeed`,默认开启),按 `TickRateMultiplier` 放大全局/动作有效冷却。
+- [x] 正式 0.1.0 发布前:发布卫生修正(README/README.zh-CN/About/AUDIO_GUIDE 对齐 distRange/工作台预览/Death,补 Death README)。
+- [x] 生成 `docs/` 规划与工程审阅文档(仓库状态、架构规划、独立 oracle 工程审阅)
+- [x] 生成根目录文案人工审核表 `TEXT_REVIEW.md`(含 About、Keyed、README、CONTRIBUTING、AUDIO_GUIDE、XML 注释、开发者菜单硬编码字符串)
+- [x] rc1 反馈排查:Ratkin 派系/pawn 无法生成已解决；原因是玩家未更新模组、仍使用旧版已知 bug 代码，更新后恢复。
 - [x] 立项评估(原版机制核实:类人无发声钩子)
 - [x] 核心实现(数据驱动 Comp + 运行时调制 + 三层配置)
 - [x] ModSettings 调制工作台(slider+输入+预设+预览)
@@ -34,7 +43,7 @@ v0.1.0-rc1 已发(tag `v0.1.0-rc1`,CI release)。收集内测反馈,精调后发
 - [x] 文案去私人化,面向所有玩家(commit 4090b4e,清 20 处)
 
 ## Blocked
-- 无(等用户重启验证本轮改动)
+- 无
 
 ## Known (not blocking)
 - CI Node 20 deprecation 警告:来自 GitHub 官方 actions,功能不受影响,无需操作。

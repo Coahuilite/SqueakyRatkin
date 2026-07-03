@@ -15,9 +15,9 @@
 ## Completed (立项→上云全流程)
 - **立项评估**:核实原版机制——类人种族**无原版发声钩子**(`Pawn_CallTracker` 只为 `intelligence<=1` 动物创建,`PawnComponentsUtility.cs:183`;`Toils_Ingest` 显式跳过 Humanlike 的 `race.soundEating`)。故"纯 XML 补 race 声音字段"对鼠族无效,必须自驱动 C#。
 - **核心 CompSqueaker**:数据驱动(`actions` + `moodMods` 在 `1.6/Patches/Ratkin_AddSqueakComp.xml`,C# 通用适配);**运行时调制**(`SoundInfo.pitchFactor/volumeFactor`,非 SoundDef 矩阵);三层配置(CompProperties 默认 ← ModSettings.moodOverrides ← useCustomOnly);复用 `Pawn_CallTracker` 摄像机视野剔除(`CurrentViewRect.ExpandedBy(10).Contains()`,性能优化)+ **distRange 距离衰减**(`SoundInfo.InMap(TargetInfo(Pawn))` 让引擎按相机-pawn 距离线性衰减,15~70 格,超 70 无声;2026-07 删除原 `CurrentZoom<=Close` zoom gating,因它挡掉 distRange 自然衰减,只有最大缩放才响)+ `TickRateMultiplier` 时间倍速音量;default 原版豚鼠(GuineaPig)。
-- **触发模式**:Eat=EachTime;Call/Move/Sleep/Social/Joy=RandomOneShot(概率+间隔);Wounded/Select/Death=External(patch `Pawn.PostApplyDamage` / `Selector.Select`(postfix,位置注入 `__0`)/ `Pawn.Kill`(prefix,被击杀+流血而亡统一入口),带最短间隔节流防高攻速刷屏)。Select 节流 15 ticks(0.25 秒,2026-07 从 60 调低)。
-- **ModSettings 调制工作台**:下拉选心情/动作 + slider+TextFieldFloat 联动 + 4 预设(尖锐/中性/低沉/混乱)+ 预览试听(`SoundDef.PlayOneShot(SoundInfo.OnCamera())`)。
-- **Dev 调试**:`[DebugAction]` 菜单(悬浮字开关 + 音频浏览器)+ 描边悬浮字(`MoteTextWithBackground`)+ DevMode 日志。
+- **触发模式**:Eat=EachTime;Call/Move/Sleep/Social/Joy=RandomOneShot(概率+间隔);Wounded/Select/Death=External(patch `Pawn.PostApplyDamage` / `Selector.Select`(postfix,位置注入 `__0`)/ `Pawn.Kill`(prefix,被击杀+流血而亡统一入口),带最短间隔节流防高攻速刷屏)。Select 节流 15 ticks(0.25 秒,2026-07 从 60 调低);**0.1.0 发布前新增 per-pawn `globalMinIntervalTicks` 全局冷却**,`Death.ignoreGlobalCooldown=true` 不被全局冷却吞掉。
+- **ModSettings 调制工作台**:下拉选心情/动作 + slider+TextFieldFloat 联动 + 4 预设(尖锐/中性/低沉/混乱)+ 预览试听(`SoundDef.PlayOneShot(SoundInfo.OnCamera())`);**`globalCooldownMultiplier` 玩家可调全局触发间隔**,**`scaleCooldownWithTimeSpeed` 默认开启**,在 `TickRateMultiplier>1` 时按倍速放大全局/动作有效冷却,稳定现实时间触发密度。
+- **Dev 调试**:`[DebugAction]` 菜单(悬浮字开关 ×2)+ 描边悬浮字(`MoteTextWithBackground`)+ DevMode 日志；声音预览已集中到 ModSettings 工作台。
 - **分发**:LICENSE(MPL-2.0)+ 双语 `README.md`/`README.zh-CN.md` + AGENTS.md + CONTRIBUTING.md(含术语通俗解释)+ `1.6/Sounds/Squeak/AUDIO_GUIDE.txt`(ogg/22050/16bit/mono);`scripts/`(validate-junction + pack-steam/pack-github);CI/CD。
 - **上云准备**:脱敏(README 本地路径占位、AGENTS 兄弟项目名泛化)+ `.gitignore` 完善 + packageId 定死 + author 统一 Coahuilite + commit 规范(`.gitmessage`)。
 - **分支保护**:main `require PR` + `enforce_admins` + 禁 force push;dev 原子提交链(9 阶段:骨架→核心→patches→工作台→调试→本地化→分发→文档→音频)。
@@ -50,6 +50,8 @@
 ## Evidence Pointers
 - 仓库规则 + 记忆协议:`AGENTS.md`
 - 当前任务:`TODO.md`
+- rc1 玩家 Ratkin 派系/pawn 生成问题已解决:玩家未更新模组,仍在使用旧版已知 bug 代码；更新后恢复。无 SqueakyRatkin 新代码问题。
+- 2026-07-03 规划文档: `docs/architecture-planning-notes.md` 记录 xenotype 扩展、动作配置、全局间隔、长音频策略；`docs/engineering-review-2026-07-03.md` 记录独立工程审阅。
 - 冷归档(失效决策):`OBLIVIONIS.md`
 - 用户/贡献者文档:`README.md`(EN)/ `README.zh-CN.md`(中)/ `CONTRIBUTING.md`
 - 音频指引:`1.6/Sounds/Squeak/AUDIO_GUIDE.txt`

@@ -35,6 +35,8 @@ public class SqueakMoodMod : IExposable
 public class SqueakyRatkinSettings : ModSettings
 {
     public bool useCustomOnly = false;
+    public bool scaleCooldownWithTimeSpeed = true;
+    public float globalCooldownMultiplier = 1f;
     public Dictionary<SqueakMood, SqueakMoodMod> moodOverrides = new();
 
     // 数据驱动:mood/action 列表从所有挂 CompProperties_Squeaker 的 ThingDef 读(XML actions/moodMods)。
@@ -55,16 +57,25 @@ public class SqueakyRatkinSettings : ModSettings
     {
         base.ExposeData();
         Scribe_Values.Look(ref useCustomOnly, "useCustomOnly", false);
+        Scribe_Values.Look(ref scaleCooldownWithTimeSpeed, "scaleCooldownWithTimeSpeed", true);
+        Scribe_Values.Look(ref globalCooldownMultiplier, "globalCooldownMultiplier", 1f);
         Scribe_Collections.Look(ref moodOverrides, "moodOverrides", LookMode.Value, LookMode.Deep);
         if (Scribe.mode == LoadSaveMode.LoadingVars && moodOverrides == null)
         {
             moodOverrides = new Dictionary<SqueakMood, SqueakMoodMod>();
+        }
+
+        if (Scribe.mode == LoadSaveMode.PostLoadInit)
+        {
+            globalCooldownMultiplier = Mathf.Clamp(globalCooldownMultiplier, 0f, 3f);
         }
     }
 
     public void ApplyToRuntime()
     {
         CompSqueaker.UseCustomOnly = useCustomOnly;
+        CompSqueaker.ScaleCooldownWithTimeSpeed = scaleCooldownWithTimeSpeed;
+        CompSqueaker.GlobalCooldownMultiplier = Mathf.Clamp(globalCooldownMultiplier, 0f, 3f);
     }
 
     private static List<SqueakMood> ConfiguredMoods
@@ -157,12 +168,15 @@ public class SqueakyRatkinSettings : ModSettings
 
     public void DrawSettings(Rect rect)
     {
-        const float topHeight = 58f;
+        const float topHeight = 130f;
         float workbenchHeight = Mathf.Max(0f, rect.height - topHeight);
 
         Listing_Standard topList = new();
         topList.Begin(new Rect(rect.x, rect.y, rect.width, topHeight));
         topList.CheckboxLabeled("SR.UseCustomOnly.Label".Translate(), ref useCustomOnly);
+        topList.CheckboxLabeled("SR.ScaleCooldownWithTimeSpeed.Label".Translate(), ref scaleCooldownWithTimeSpeed);
+        topList.Label("SR.GlobalCooldownMultiplier.Label".Translate(globalCooldownMultiplier.ToString("0.##")));
+        globalCooldownMultiplier = topList.Slider(globalCooldownMultiplier, 0f, 3f);
         topList.GapLine();
         topList.End();
 
