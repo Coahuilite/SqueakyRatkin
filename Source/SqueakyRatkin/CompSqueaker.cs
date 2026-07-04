@@ -45,10 +45,12 @@ public class SqueakDistancePresetConfig
 public class CompSqueaker : ThingComp
 {
     private const string RatkinDefName = "Ratkin";
+    private const float VocalSilenceEpsilon = 0.001f;
 
     /// <summary>完全 override:ON=纯自定义(SR_*_Pure),OFF=混合(SR_*)。由 ModSettings 同步。</summary>
     public static bool UseCustomOnly = false;
     public static bool ScaleCooldownWithTimeSpeed = true;
+    public static bool ScaleFrequencyWithTalking = true;
     public static float GlobalCooldownMultiplier = 1f;
 
     private static readonly Dictionary<SqueakAction, SoundDef?> SoundCacheMixed = new();
@@ -221,6 +223,14 @@ public class CompSqueaker : ThingComp
             return;
         }
 
+        if (!PassesTalkingGate(action))
+        {
+            lastTriggerTick[action] = now;
+            lastTriggerRealTime[action] = Time.realtimeSinceStartup;
+            lastAnyTriggerTick = now;
+            return;
+        }
+
         PlayOneShot(action, CurrentMood);
         lastTriggerTick[action] = now;
         lastTriggerRealTime[action] = Time.realtimeSinceStartup;
@@ -268,6 +278,62 @@ public class CompSqueaker : ThingComp
         info.volumeFactor = mod.volumeFactor;
         def.PlayOneShot(info);
         SqueakDebug.NotifySqueak(Pawn, action, mood, def);
+    }
+
+    private bool PassesTalkingGate(SqueakAction action)
+    {
+        if (GetVocalOrganCapacity() <= VocalSilenceEpsilon)
+        {
+            return false;
+        }
+
+        if (!ScaleFrequencyWithTalking || action == SqueakAction.Death)
+        {
+            return true;
+        }
+
+        float talking = Pawn.health?.capacities?.GetLevel(PawnCapacityDefOf.Talking) ?? 1f;
+        float gate = Mathf.Clamp01(talking);
+        return gate >= 0.999f || Rand.Value < gate;
+    }
+
+    private float GetVocalOrganCapacity()
+    {
+        if (Pawn.health?.hediffSet == null)
+        {
+            return 1f;
+        }
+
+        float source = PawnCapacityUtility.CalculateTagEfficiency(Pawn.health.hediffSet, BodyPartTagDefOf.TalkingSource);
+        float pathway = PawnCapacityUtility.CalculateTagEfficiency(Pawn.health.hediffSet, BodyPartTagDefOf.TalkingPathway, 1f);
+        float tongue = GetTagEfficiencyOrOneIfMissing(BodyPartTagDefOf.Tongue, 1f);
+        return source * pathway * tongue;
+    }
+
+    private float GetTagEfficiencyOrOneIfMissing(BodyPartTagDef tag, float maxEfficiency)
+    {
+        return BodyHasPartTag(tag)
+            ? PawnCapacityUtility.CalculateTagEfficiency(Pawn.health!.hediffSet, tag, maxEfficiency)
+            : 1f;
+    }
+
+    private bool BodyHasPartTag(BodyPartTagDef tag)
+    {
+        List<BodyPartRecord>? parts = Pawn.RaceProps.body?.AllParts;
+        if (parts == null)
+        {
+            return false;
+        }
+
+        foreach (BodyPartRecord part in parts)
+        {
+            if (part.def.tags != null && part.def.tags.Contains(tag))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static int GetEffectiveCooldownTicks(int baseCooldownTicks)
@@ -361,6 +427,7 @@ public class CompSqueaker : ThingComp
 public class CompProperties_Squeaker : CompProperties
 {
     public int globalMinIntervalTicks = 120;
+    public bool scaleFrequencyWithTalking = true;
     public List<SqueakActionConfig> actions = new();
     public List<SqueakMoodMod> moodMods = new();
     public List<SqueakDistancePresetConfig> distancePresets = new();

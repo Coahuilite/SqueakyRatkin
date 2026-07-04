@@ -22,6 +22,7 @@
     <value>
       <li Class="SqueakyRatkin.CompProperties_Squeaker">
         <globalMinIntervalTicks>180</globalMinIntervalTicks>
+        <scaleFrequencyWithTalking>true</scaleFrequencyWithTalking>
         <actions>
           <li><action>Eat</action>     <mode>EachTime</mode>        <minIntervalTicks>120</minIntervalTicks></li>
           <li><action>Call</action>    <mode>RandomOneShot</mode>   <minIntervalTicks>720</minIntervalTicks> <probabilityPerCheck>0.012</probabilityPerCheck></li>

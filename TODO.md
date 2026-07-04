@@ -17,6 +17,9 @@
 - [ ] 下一阶段架构设计:长音频/配音策略
 
 ## Completed
+- [x] 调试动作本地化:参考 `Dev In Your Language` 的 `DebugAction_*` Keyed 风格,新增 DebugAction 节点本地化 patch;由全版本 ModSettings 开关控制,默认关闭;切换时清 DebugAction 静态缓存,无需重启,重开调试动作菜单后生效;鼠族汉化包检查为普通 Def/Keyed 汉化,未见 DebugAction 支持。
+- [x] 增强:新增 Talking/语言能力频率缩放全局开关(默认取 XML true)。普通发声按最终 Talking 百分比做概率门控且失败消耗冷却;器官性无声才全局静音包括 Death;昏迷/麻醉导致 `Talking=0` 时 Death 仍播放。
+- [x] 决策记录:拒绝额外 screen-center 平面距离衰减,避免与 `SoundInfo.InMap` 现有 3D spatial/distRange 双重衰减。
 - [x] 最终 blockers:摄像机指示器改读真实 runtime `Find.Camera.transform.position.y` / `Find.Camera.orthographicSize`;ModSettings 改为单一滚动体,距离衰减与心情调制工作台可折叠并持久化;Release Dev 构建通过。
 - [x] 打包脚本职责缩减:build 由调用方/workflow 负责,`pack-*` 只 staging/zip,减少 GitHub Actions 重复构建耗时;branch CI dev artifact 改用 Dev flavor。
 - [x] ModSettings QoL:新增距离衰减动态图表(衰减开始前全音量→区间内线性衰减→衰减结束后静音)并用 GapLine/短标题分隔音源与触发节奏、距离衰减、心情调制工作台;`dotnet build Source/SqueakyRatkin/SqueakyRatkin.csproj` 通过。

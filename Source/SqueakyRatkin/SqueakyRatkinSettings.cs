@@ -40,6 +40,8 @@ public class SqueakyRatkinSettings : ModSettings
 
     public bool useCustomOnly = false;
     public bool scaleCooldownWithTimeSpeed = true;
+    public bool scaleFrequencyWithTalking = true;
+    public bool localizeDebugActions = false;
     public float globalCooldownMultiplier = 1f;
     public SqueakDistancePreset distancePreset = SqueakDistancePreset.Balanced;
     public FloatRange distanceRange = new(15f, 50f);
@@ -57,6 +59,7 @@ public class SqueakyRatkinSettings : ModSettings
     private Vector2 scrollPos;
     private readonly Dictionary<string, string> numericBuffers = new();
     private bool distanceRangeWasLoaded;
+    private bool scaleFrequencyWithTalkingWasLoaded;
 
     // 编辑缓冲:slider/preset/预览作用于 editBuffer,「写入」才同步到 moodOverrides。
     private SqueakMoodMod? editBuffer;
@@ -66,8 +69,11 @@ public class SqueakyRatkinSettings : ModSettings
     {
         base.ExposeData();
         distanceRangeWasLoaded = false;
+        scaleFrequencyWithTalkingWasLoaded = false;
         Scribe_Values.Look(ref useCustomOnly, "useCustomOnly", false);
         Scribe_Values.Look(ref scaleCooldownWithTimeSpeed, "scaleCooldownWithTimeSpeed", true);
+        Scribe_Values.Look(ref scaleFrequencyWithTalking, "scaleFrequencyWithTalking", GetDefaultScaleFrequencyWithTalking());
+        Scribe_Values.Look(ref localizeDebugActions, "localizeDebugActions", false);
         Scribe_Values.Look(ref globalCooldownMultiplier, "globalCooldownMultiplier", 1f);
         Scribe_Values.Look(ref distancePreset, "distancePreset", SqueakDistancePreset.Balanced);
         Scribe_Values.Look(ref distanceRange, "distanceRange", GetDistancePresetRange(SqueakDistancePreset.Balanced));
@@ -75,6 +81,7 @@ public class SqueakyRatkinSettings : ModSettings
         Scribe_Values.Look(ref workbenchSectionOpen, "workbenchSectionOpen", false);
         if (Scribe.mode == LoadSaveMode.LoadingVars)
         {
+            scaleFrequencyWithTalkingWasLoaded = Scribe.loader?.curXmlParent?["scaleFrequencyWithTalking"] != null;
             distanceRangeWasLoaded = Scribe.loader?.curXmlParent?["distanceRange"] != null;
         }
         Scribe_Collections.Look(ref moodOverrides, "moodOverrides", LookMode.Value, LookMode.Deep);
@@ -86,6 +93,10 @@ public class SqueakyRatkinSettings : ModSettings
         if (Scribe.mode == LoadSaveMode.PostLoadInit)
         {
             globalCooldownMultiplier = Mathf.Clamp(globalCooldownMultiplier, 0f, 3f);
+            if (!scaleFrequencyWithTalkingWasLoaded)
+            {
+                scaleFrequencyWithTalking = GetDefaultScaleFrequencyWithTalking();
+            }
             if (!distanceRangeWasLoaded)
             {
                 distanceRange = GetDistancePresetRange(SqueakDistancePreset.Balanced);
@@ -98,8 +109,10 @@ public class SqueakyRatkinSettings : ModSettings
     {
         CompSqueaker.UseCustomOnly = useCustomOnly;
         CompSqueaker.ScaleCooldownWithTimeSpeed = scaleCooldownWithTimeSpeed;
+        CompSqueaker.ScaleFrequencyWithTalking = scaleFrequencyWithTalking;
         CompSqueaker.GlobalCooldownMultiplier = Mathf.Clamp(globalCooldownMultiplier, 0f, 3f);
         CompSqueaker.ApplyDistanceRange(ClampDistanceRange(distanceRange));
+        Patch_DebugTabMenu_Actions.SetEnabled(localizeDebugActions);
     }
 
     private static List<SqueakMood> ConfiguredMoods
@@ -197,6 +210,16 @@ public class SqueakyRatkinSettings : ModSettings
         };
     }
 
+    private static bool GetDefaultScaleFrequencyWithTalking()
+    {
+        foreach (CompProperties_Squeaker sq in ConfiguredSqueakers())
+        {
+            return sq.scaleFrequencyWithTalking;
+        }
+
+        return true;
+    }
+
     /// <summary>选 mood 变化或启用状态变时,从 moodOverrides 重建 editBuffer,清 numericBuffers 强制刷新输入框显示。</summary>
     private void SyncBufferFromSaved()
     {
@@ -235,9 +258,16 @@ public class SqueakyRatkinSettings : ModSettings
     {
         Listing_Standard list = new();
         list.Begin(rect);
-        list.Label("SR.Global.Header".Translate());
+        DrawSectionHeader(list, "SR.Global.Header".Translate());
         list.CheckboxLabeled("SR.UseCustomOnly.Label".Translate(), ref useCustomOnly);
         list.CheckboxLabeled("SR.ScaleCooldownWithTimeSpeed.Label".Translate(), ref scaleCooldownWithTimeSpeed);
+        list.CheckboxLabeled("SR.ScaleFrequencyWithTalking.Label".Translate(), ref scaleFrequencyWithTalking);
+        bool debugActionLocalizationWasOn = localizeDebugActions;
+        list.CheckboxLabeled("SR.LocalizeDebugActions.Label".Translate(), ref localizeDebugActions);
+        if (localizeDebugActions != debugActionLocalizationWasOn)
+        {
+            Patch_DebugTabMenu_Actions.SetEnabled(localizeDebugActions);
+        }
         list.Label("SR.GlobalCooldownMultiplier.Label".Translate(globalCooldownMultiplier.ToString("0.##")));
         globalCooldownMultiplier = list.Slider(globalCooldownMultiplier, 0f, 3f);
         list.Gap(8f);
@@ -262,10 +292,22 @@ public class SqueakyRatkinSettings : ModSettings
 
     private float GetSettingsHeight()
     {
-        float height = 182f;
-        height += distanceSectionOpen ? 218f : 32f;
-        height += workbenchSectionOpen ? GetWorkbenchHeight() + 32f : 32f;
+        float height = 254f;
+        height += distanceSectionOpen ? 226f : 40f;
+        height += workbenchSectionOpen ? GetWorkbenchHeight() + 40f : 40f;
         return height;
+    }
+
+    private static void DrawSectionHeader(Listing_Standard list, string label)
+    {
+        Rect rect = list.GetRect(34f);
+        TextAnchor oldAnchor = Text.Anchor;
+        GameFont oldFont = Text.Font;
+        Text.Anchor = TextAnchor.MiddleLeft;
+        Text.Font = GameFont.Medium;
+        Widgets.Label(rect, label);
+        Text.Font = oldFont;
+        Text.Anchor = oldAnchor;
     }
 
     private float GetWorkbenchHeight()
@@ -387,8 +429,8 @@ public class SqueakyRatkinSettings : ModSettings
 
     private static void DrawCollapsibleHeader(Listing_Standard list, string label, ref bool open)
     {
-        Rect rect = list.GetRect(28f);
-        Rect iconRect = new(rect.x, rect.y + 4f, 18f, 18f);
+        Rect rect = list.GetRect(34f);
+        Rect iconRect = new(rect.x, rect.y + 7f, 18f, 18f);
         Rect labelRect = new(iconRect.xMax + 6f, rect.y, rect.width - 24f, rect.height);
         Widgets.DrawHighlightIfMouseover(rect);
         if (Widgets.ButtonImage(iconRect, open ? TexButton.Collapse : TexButton.Reveal) || Widgets.ButtonInvisible(labelRect))
@@ -397,8 +439,11 @@ public class SqueakyRatkinSettings : ModSettings
         }
 
         TextAnchor oldAnchor = Text.Anchor;
+        GameFont oldFont = Text.Font;
         Text.Anchor = TextAnchor.MiddleLeft;
+        Text.Font = GameFont.Medium;
         Widgets.Label(labelRect, label);
+        Text.Font = oldFont;
         Text.Anchor = oldAnchor;
     }
 
