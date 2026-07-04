@@ -20,18 +20,18 @@ public static class SqueakDebugActions
         Log.Message("[SqueakyRatkin] Overlay OFF");
     }
 
-    [DebugAction("Squeaky Ratkin", "Camera HUD: ON", actionType = DebugActionType.Action, allowedGameStates = AllowedGameStates.PlayingOnMap)]
-    public static void CameraHudOn()
+    [DebugAction("Squeaky Ratkin", "Camera Indicator: ON", actionType = DebugActionType.Action, allowedGameStates = AllowedGameStates.PlayingOnMap)]
+    public static void CameraIndicatorOn()
     {
-        SqueakDebug.ShowCameraHeight = true;
-        Log.Message("[SqueakyRatkin] Camera HUD ON");
+        SqueakDebug.ShowCameraIndicator = true;
+        Log.Message("[SqueakyRatkin] Camera Indicator ON");
     }
 
-    [DebugAction("Squeaky Ratkin", "Camera HUD: OFF", actionType = DebugActionType.Action, allowedGameStates = AllowedGameStates.PlayingOnMap)]
-    public static void CameraHudOff()
+    [DebugAction("Squeaky Ratkin", "Camera Indicator: OFF", actionType = DebugActionType.Action, allowedGameStates = AllowedGameStates.PlayingOnMap)]
+    public static void CameraIndicatorOff()
     {
-        SqueakDebug.ShowCameraHeight = false;
-        Log.Message("[SqueakyRatkin] Camera HUD OFF");
+        SqueakDebug.ShowCameraIndicator = false;
+        Log.Message("[SqueakyRatkin] Camera Indicator OFF");
     }
 }
 #endif

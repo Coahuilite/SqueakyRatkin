@@ -176,17 +176,20 @@ public class SqueakyRatkinSettings : ModSettings
 
     public void DrawSettings(Rect rect)
     {
-        const float topHeight = 248f;
+        const float topHeight = 340f;
         float workbenchHeight = Mathf.Max(0f, rect.height - topHeight);
 
         Listing_Standard topList = new();
         topList.Begin(new Rect(rect.x, rect.y, rect.width, topHeight));
+        topList.Label("SR.Global.Header".Translate());
         topList.CheckboxLabeled("SR.UseCustomOnly.Label".Translate(), ref useCustomOnly);
         topList.CheckboxLabeled("SR.ScaleCooldownWithTimeSpeed.Label".Translate(), ref scaleCooldownWithTimeSpeed);
         topList.Label("SR.GlobalCooldownMultiplier.Label".Translate(globalCooldownMultiplier.ToString("0.##")));
         globalCooldownMultiplier = topList.Slider(globalCooldownMultiplier, 0f, 3f);
-        topList.Gap(6f);
+        topList.Gap(8f);
+        topList.GapLine();
         DrawDistanceSettings(topList);
+        topList.Gap(8f);
         topList.GapLine();
         topList.End();
 
@@ -245,7 +248,54 @@ public class SqueakyRatkinSettings : ModSettings
             ApplyToRuntime();
         }
 
+        DrawDistancePreviewChart(list.GetRect(78f), distanceRange);
         list.Label("SR.Distance.Desc".Translate(distanceRange.min.ToString("0.#"), distanceRange.max.ToString("0.#")));
+    }
+
+    private static void DrawDistancePreviewChart(Rect rect, FloatRange range)
+    {
+        Rect plotRect = rect.ContractedBy(6f);
+        plotRect.xMin += 34f;
+        plotRect.yMin += 4f;
+        plotRect.yMax -= 18f;
+
+        Widgets.DrawBoxSolid(rect, new Color(0.08f, 0.08f, 0.08f, 0.20f));
+        Widgets.DrawBox(rect);
+        Widgets.DrawBoxSolid(plotRect, new Color(0f, 0f, 0f, 0.18f));
+
+        float x0 = plotRect.x;
+        float xFull = Mathf.Lerp(plotRect.xMin, plotRect.xMax, Mathf.InverseLerp(0f, 70f, range.min));
+        float xSilent = Mathf.Lerp(plotRect.xMin, plotRect.xMax, Mathf.InverseLerp(0f, 70f, range.max));
+        float xEnd = plotRect.xMax;
+        float yTop = plotRect.yMin;
+        float yZero = plotRect.yMax;
+        Color lineColor = new(0.76f, 0.92f, 1f, 0.95f);
+        Color markerColor = new(1f, 0.78f, 0.36f, 0.75f);
+        Color mutedColor = new(1f, 1f, 1f, 0.22f);
+
+        Widgets.DrawLine(new Vector2(x0, yZero), new Vector2(xEnd, yZero), mutedColor, 1f);
+        Widgets.DrawLine(new Vector2(x0, yTop), new Vector2(xEnd, yTop), mutedColor, 1f);
+        Widgets.DrawLine(new Vector2(xFull, yTop), new Vector2(xFull, yZero), markerColor, 1f);
+        Widgets.DrawLine(new Vector2(xSilent, yTop), new Vector2(xSilent, yZero), markerColor, 1f);
+        Widgets.DrawLine(new Vector2(x0, yTop), new Vector2(xFull, yTop), lineColor, 3f);
+        Widgets.DrawLine(new Vector2(xFull, yTop), new Vector2(xSilent, yZero), lineColor, 3f);
+        Widgets.DrawLine(new Vector2(xSilent, yZero), new Vector2(xEnd, yZero), lineColor, 3f);
+
+        TextAnchor oldAnchor = Text.Anchor;
+        GameFont oldFont = Text.Font;
+        Text.Font = GameFont.Tiny;
+        Color oldColor = GUI.color;
+        GUI.color = new Color(1f, 1f, 1f, 0.78f);
+        Text.Anchor = TextAnchor.UpperLeft;
+        Widgets.Label(new Rect(rect.x + 6f, rect.y + 4f, 44f, 20f), "SR.Distance.Chart.Volume".Translate());
+        Widgets.Label(new Rect(plotRect.xMin, plotRect.yMax + 1f, plotRect.width * 0.5f, 18f), "SR.Distance.Chart.Full".Translate(range.min.ToString("0.#")));
+        Text.Anchor = TextAnchor.UpperRight;
+        Widgets.Label(new Rect(plotRect.xMin + (plotRect.width * 0.5f), plotRect.yMax + 1f, plotRect.width * 0.5f, 18f), "SR.Distance.Chart.Silent".Translate(range.max.ToString("0.#")));
+        Text.Anchor = TextAnchor.UpperRight;
+        Widgets.Label(new Rect(plotRect.xMax - 100f, rect.y + 4f, 100f, 20f), "SR.Distance.Chart.Distance".Translate());
+        GUI.color = oldColor;
+        Text.Anchor = oldAnchor;
+        Text.Font = oldFont;
     }
 
     private static string DistancePresetLabel(SqueakDistancePreset preset) => ("SR.Distance.Preset." + preset).Translate();

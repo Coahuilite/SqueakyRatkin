@@ -4,6 +4,7 @@
 
   <SR.UseCustomOnly.Label>Full override (custom audio only, no vanilla default)</SR.UseCustomOnly.Label>
   <SR.UseCustomOnly.Desc>ON: only custom audio (SR_*_Pure). OFF: custom + vanilla guinea-pig default mixed.</SR.UseCustomOnly.Desc>
+  <SR.Global.Header>Audio source and timing</SR.Global.Header>
   <SR.ScaleCooldownWithTimeSpeed.Label>Scale trigger cooldown with time speed (recommended)</SR.ScaleCooldownWithTimeSpeed.Label>
   <SR.GlobalCooldownMultiplier.Label>Global trigger interval: {0}x</SR.GlobalCooldownMultiplier.Label>
   <SR.Distance.Header>Distance attenuation</SR.Distance.Header>
@@ -14,6 +15,10 @@
   <SR.Distance.Preset.Custom>Custom</SR.Distance.Preset.Custom>
   <SR.Distance.FullVolume>Full-volume distance</SR.Distance.FullVolume>
   <SR.Distance.Silent>Silent distance</SR.Distance.Silent>
+  <SR.Distance.Chart.Volume>Volume</SR.Distance.Chart.Volume>
+  <SR.Distance.Chart.Distance>Distance</SR.Distance.Chart.Distance>
+  <SR.Distance.Chart.Full>{0} full</SR.Distance.Chart.Full>
+  <SR.Distance.Chart.Silent>{0} silent</SR.Distance.Chart.Silent>
   <SR.Distance.Desc>Map squeaks are full near {0} cells and fade out by {1} cells. Workbench preview is not distance-attenuated.</SR.Distance.Desc>
 
   <SR.Workbench.Header>Mood modulation workbench</SR.Workbench.Header>
@@ -53,4 +58,5 @@
 
   <SR.Debug.OverlayOn>Overlay: ON</SR.Debug.OverlayOn>
   <SR.Debug.OverlayOff>Overlay: OFF</SR.Debug.OverlayOff>
+  <SR.Debug.CameraIndicator>Camera: height {0}, view size {1}</SR.Debug.CameraIndicator>
 </LanguageData>
