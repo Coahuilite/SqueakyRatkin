@@ -30,7 +30,7 @@ Three layers (bottom → top):
 2. **Player override**: mod settings "Modulation Workbench" — toggle a mood's override, slider + input + presets (Sharp/Neutral/Low/Chaos) + preview
 3. **Source switch**: `Full override` (custom-only vs mixed with vanilla default)
 
-Also includes a global trigger interval slider and a `Scale trigger cooldown with time speed` checkbox (default ON) to keep accelerated play quieter in real-time.
+Also includes a global trigger interval slider and a `Scale trigger cooldown with time speed` checkbox (default ON). Accelerated play is quieted by reducing real-time trigger density rather than lowering each sound's volume. Select feedback uses a real-time cooldown, so it remains responsive while the game is paused.
 
 ## Dev Menu (development mode)
 Developer menu → "Squeaky Ratkin": overlay text on/off ×2. Sound preview lives in the mod settings workbench.
@@ -62,7 +62,7 @@ dotnet build Source/SqueakyRatkin/SqueakyRatkin.csproj
 Must be 0 errors. A missing-junction WARNING is normal (non-blocking).
 
 ### Build Flavor (for distribution)
-`-p:SqueakyBuildFlavor=Dev|Steam|GitHub` toggles the startup-log banner (`[dev|steam|github]`). Runtime behavior is identical across flavors.
+`-p:SqueakyBuildFlavor=Dev|Steam|GitHub` toggles the startup-log banner (`[dev|steam|github]`). Runtime behavior is identical across flavors. Startup logs include a strong build identifier: dev commit, GitHub tag, or Steam package version.
 
 ### Pack
 - `pwsh scripts/pack-steam.ps1` → `dist/steam/SqueakyRatkin/` (Workshop upload)

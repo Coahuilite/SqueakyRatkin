@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using RimWorld;
+using UnityEngine;
 using Verse;
 using Verse.Sound;
 
@@ -8,6 +9,7 @@ namespace SqueakyRatkin;
 
 public enum SqueakMood { Good, Neutral, Bad, Break }
 public enum SqueakAction { Call, Eat, Sleep, Wounded, Select, Move, Social, Joy, Death }
+public enum SqueakCooldownClock { GameTicks, Realtime }
 
 /// <summary>触发模式,由 XML 配置驱动,C# 通用适配。</summary>
 public enum SqueakTriggerMode
@@ -26,6 +28,7 @@ public class SqueakActionConfig
     public int minIntervalTicks = 300;
     public float probabilityPerCheck = 0.02f;
     public bool ignoreGlobalCooldown = false;
+    public SqueakCooldownClock cooldownClock = SqueakCooldownClock.GameTicks;
 }
 
 /// <summary>
@@ -48,6 +51,7 @@ public class CompSqueaker : ThingComp
 
     private readonly Dictionary<SqueakAction, SqueakActionConfig> configMap = new();
     private readonly Dictionary<SqueakAction, int> lastTriggerTick = new();
+    private readonly Dictionary<SqueakAction, float> lastTriggerRealTime = new();
     private readonly Dictionary<SqueakMood, SqueakMoodMod> moodModMap = new();
     private int lastAnyTriggerTick = int.MinValue / 2;
 
@@ -64,6 +68,11 @@ public class CompSqueaker : ThingComp
             if (!lastTriggerTick.ContainsKey(cfg.action))
             {
                 lastTriggerTick[cfg.action] = int.MinValue / 2;
+            }
+
+            if (!lastTriggerRealTime.ContainsKey(cfg.action))
+            {
+                lastTriggerRealTime[cfg.action] = -1_000_000f;
             }
         }
 
@@ -194,8 +203,7 @@ public class CompSqueaker : ThingComp
     private void TryTrigger(SqueakAction action, SqueakActionConfig cfg)
     {
         int now = Find.TickManager.TicksGame;
-        int actionCooldown = GetEffectiveCooldownTicks(cfg.minIntervalTicks);
-        if (now - lastTriggerTick[action] < actionCooldown)
+        if (!ActionCooldownElapsed(action, cfg, now))
         {
             return;
         }
@@ -208,7 +216,17 @@ public class CompSqueaker : ThingComp
 
         PlayOneShot(action, CurrentMood);
         lastTriggerTick[action] = now;
+        lastTriggerRealTime[action] = Time.realtimeSinceStartup;
         lastAnyTriggerTick = now;
+    }
+
+    private bool ActionCooldownElapsed(SqueakAction action, SqueakActionConfig cfg, int now)
+    {
+        return cfg.cooldownClock switch
+        {
+            SqueakCooldownClock.Realtime => Time.realtimeSinceStartup - lastTriggerRealTime[action] >= Math.Max(0, cfg.minIntervalTicks) / 60f,
+            _ => now - lastTriggerTick[action] >= GetEffectiveCooldownTicks(cfg.minIntervalTicks),
+        };
     }
 
     /// <summary>三层合并取心情调制:ModSettings.override > CompProperties.default > 内置默认。</summary>
@@ -240,12 +258,10 @@ public class CompSqueaker : ThingComp
         SqueakMoodMod mod = ResolveMoodMod(mood);
         SoundInfo info = SoundInfo.InMap(new TargetInfo(Pawn));
         info.pitchFactor = mod.pitchFactor * mod.pitchJitter.RandomInRange;
-        info.volumeFactor = mod.volumeFactor * TimeSpeedVolumeFactor();
+        info.volumeFactor = mod.volumeFactor;
         def.PlayOneShot(info);
         SqueakDebug.NotifySqueak(Pawn, action, mood, def);
     }
-
-    private static float TimeSpeedVolumeFactor() => 1f / Math.Max(1f, Find.TickManager.TickRateMultiplier);
 
     private static int GetEffectiveCooldownTicks(int baseCooldownTicks)
     {

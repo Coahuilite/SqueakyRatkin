@@ -19,6 +19,9 @@
 ## Completed
 - [x] 正式 0.1.0 发布前:per-pawn 全局冷却(`globalMinIntervalTicks`)已落地,玩家可用 `globalCooldownMultiplier` 调整全局触发间隔,Death 绕过全局冷却避免被吞。
 - [x] 正式 0.1.0 发布前:新增倍速冷却补偿选项(`scaleCooldownWithTimeSpeed`,默认开启),按 `TickRateMultiplier` 放大全局/动作有效冷却。
+- [x] 正式 0.1.0 发布前:修复高倍速声音显著变小:移除按 `TickRateMultiplier` 压低单次 `volumeFactor`,高倍速降噪改由冷却补偿承担。
+- [x] 正式 0.1.0 发布前:新增字段驱动冷却时钟(`cooldownClock`),Select 配置 Realtime + ignoreGlobalCooldown,暂停时仍保留玩家反馈。
+- [x] 正式 0.1.0 发布前:启动日志加入强区分 build 标识(dev 提交号/GitHub tag/Steam 包版本),减少旧版反馈误判。
 - [x] 正式 0.1.0 发布前:发布卫生修正(README/README.zh-CN/About/AUDIO_GUIDE 对齐 distRange/工作台预览/Death,补 Death README)。
 - [x] 生成 `docs/` 规划与工程审阅文档(仓库状态、架构规划、独立 oracle 工程审阅)
 - [x] 生成根目录文案人工审核表 `TEXT_REVIEW.md`(含 About、Keyed、README、CONTRIBUTING、AUDIO_GUIDE、XML 注释、开发者菜单硬编码字符串)

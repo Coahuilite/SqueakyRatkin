@@ -1,5 +1,6 @@
 param(
-    [string]$ProjectRoot = (Split-Path -Parent $PSScriptRoot)
+    [string]$ProjectRoot = (Split-Path -Parent $PSScriptRoot),
+    [string]$SteamVersion = ""
 )
 
 Set-StrictMode -Version Latest
@@ -18,7 +19,19 @@ $aboutSource = Join-Path $root "About"
 $loadFoldersSource = Join-Path $root "LoadFolders.xml"
 $versionedSource = Join-Path $root "1.6"
 
-& dotnet build $projectFile -c Release -p:SqueakyBuildFlavor=Steam
+if ([string]::IsNullOrWhiteSpace($SteamVersion)) {
+    [xml]$projectXml = Get-Content -LiteralPath $projectFile -Raw
+    $semver = ($projectXml.Project.PropertyGroup.Version | Select-Object -First 1)
+    $shortSha = "nogit"
+    $gitSha = (& git -C $root rev-parse --short=12 HEAD 2>$null)
+    if ($LASTEXITCODE -eq 0 -and -not [string]::IsNullOrWhiteSpace($gitSha)) {
+        $shortSha = $gitSha.Trim()
+    }
+
+    $SteamVersion = "steam-$semver-$(Get-Date -Format 'yyyyMMdd-HHmm')-$shortSha"
+}
+
+& dotnet build $projectFile -c Release -p:SqueakyBuildFlavor=Steam -p:SqueakyInformationalVersion=$SteamVersion
 if ($LASTEXITCODE -ne 0) {
     exit $LASTEXITCODE
 }
@@ -44,3 +57,4 @@ Get-ChildItem -LiteralPath $stageDir -Recurse -File -Filter *.gitkeep | Remove-I
 
 $fileCount = (Get-ChildItem -LiteralPath $stageDir -Recurse -File | Measure-Object).Count
 Write-Host "[pack-steam] Staged $fileCount files to $stageDir"
+Write-Host "[pack-steam] Build identity: $SteamVersion"

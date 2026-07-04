@@ -30,7 +30,7 @@
 2. **玩家 override**:模组设置「调制工作台」,勾选心情 override,滑块+输入框+预设(尖锐/中性/低沉/混乱)+预览
 3. **音源开关**:`完全 override`(纯自定义 vs 混合原版 default)
 
-另含全局触发间隔滑块,以及「按游戏倍速放大触发冷却」checkbox(默认开),用于在高倍速下保持更稳定的现实时间触发密度。
+另含全局触发间隔滑块,以及「按游戏倍速放大触发冷却」checkbox(默认开)。高倍速降噪通过降低现实时间触发密度实现,不再压低单次声音音量。选中反馈使用现实时间冷却,暂停时仍保持响应。
 
 ## 开发者菜单(开发者模式)
 开发者菜单 → "Squeaky Ratkin":悬浮字开关 ×2。声音预览在模组设置工作台中进行。
@@ -62,7 +62,7 @@ dotnet build Source/SqueakyRatkin/SqueakyRatkin.csproj
 必须 0 errors。junction 缺失的 WARNING 正常(非阻断)。
 
 ### Build Flavor(分发用)
-`-p:SqueakyBuildFlavor=Dev|Steam|GitHub`,影响启动日志 banner(`[dev|steam|github]`)。运行时功能三态相同。
+`-p:SqueakyBuildFlavor=Dev|Steam|GitHub`,影响启动日志 banner(`[dev|steam|github]`)。运行时功能三态相同。启动日志会写入强区分 build 标识:dev 提交号、GitHub tag 或 Steam 包版本。
 
 ### 打包
 - `pwsh scripts/pack-steam.ps1` → `dist/steam/SqueakyRatkin/`(Steam 工坊上传)

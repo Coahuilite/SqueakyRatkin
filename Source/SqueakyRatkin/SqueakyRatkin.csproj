@@ -14,6 +14,7 @@
     <OutputPath>..\..\1.6\Assemblies</OutputPath>
     <SqueakyBuildFlavor Condition="'$(SqueakyBuildFlavor)' == ''">Dev</SqueakyBuildFlavor>
     <DefineConstants>$(DefineConstants);SQUEAKY_$(SqueakyBuildFlavor.ToUpper())</DefineConstants>
+    <InformationalVersion Condition="'$(SqueakyInformationalVersion)' != ''">$(SqueakyInformationalVersion)</InformationalVersion>
   </PropertyGroup>
 
   <ItemGroup>

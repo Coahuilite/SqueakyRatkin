@@ -21,7 +21,7 @@ $loadFoldersSource = Join-Path $root "LoadFolders.xml"
 $versionedSource = Join-Path $root "1.6"
 $dllPath = Join-Path $root "1.6\Assemblies\SqueakyRatkin.dll"
 
-& dotnet build $projectFile -c Release -p:SqueakyBuildFlavor=GitHub
+& dotnet build $projectFile -c Release -p:SqueakyBuildFlavor=GitHub -p:SqueakyInformationalVersion=$Version
 if ($LASTEXITCODE -ne 0) {
     exit $LASTEXITCODE
 }

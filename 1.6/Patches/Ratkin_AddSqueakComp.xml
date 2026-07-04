@@ -30,7 +30,7 @@
           <li><action>Social</action>  <mode>RandomOneShot</mode>   <minIntervalTicks>300</minIntervalTicks> <probabilityPerCheck>0.02</probabilityPerCheck></li>
           <li><action>Joy</action>     <mode>RandomOneShot</mode>   <minIntervalTicks>300</minIntervalTicks> <probabilityPerCheck>0.02</probabilityPerCheck></li>
           <li><action>Wounded</action> <mode>External</mode>        <minIntervalTicks>120</minIntervalTicks></li>
-          <li><action>Select</action>  <mode>External</mode>        <minIntervalTicks>15</minIntervalTicks></li>
+          <li><action>Select</action>  <mode>External</mode>        <minIntervalTicks>15</minIntervalTicks>   <ignoreGlobalCooldown>true</ignoreGlobalCooldown> <cooldownClock>Realtime</cooldownClock></li>
           <li><action>Death</action>   <mode>External</mode>        <minIntervalTicks>0</minIntervalTicks>   <ignoreGlobalCooldown>true</ignoreGlobalCooldown></li>
         </actions>
         <moodMods>
