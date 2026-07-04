@@ -62,7 +62,7 @@ dotnet build Source/SqueakyRatkin/SqueakyRatkin.csproj
 必须 0 errors。junction 缺失的 WARNING 正常(非阻断)。
 
 ### Build Flavor(分发用)
-`-p:SqueakyBuildFlavor=Dev|Steam|GitHub`,影响启动日志 banner(`[dev|steam|github]`)。运行时功能三态相同。启动日志会写入强区分 build 标识:dev 提交号、GitHub tag 或 Steam 包版本。
+`-p:SqueakyBuildFlavor=Dev|Steam|GitHub`,影响启动日志 banner(`[dev|steam|github]`)。运行时功能三态相同。启动日志中 dev 版按提交号区分,GitHub 版按 tag+提交区分,Steam 版只显示包版本号。
 
 ### 打包
 - `pwsh scripts/pack-steam.ps1` → `dist/steam/SqueakyRatkin/`(Steam 工坊上传)

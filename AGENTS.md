@@ -34,7 +34,7 @@ Maintenance rules:
 - **Runtime modulation**: mood is applied via `SoundInfo.pitchFactor/volumeFactor` at runtime (one SoundDef per action + one neutral audio set). **Do not regress to a mood×action SoundDef matrix** (previously corrected as over-engineering).
 - **Three-layer config** (bottom → top): `CompProperties` (XML default) ← `ModSettings.moodOverrides` (player override) ← `useCustomOnly` (source switch).
 - Camera reuses the vanilla `Pawn_CallTracker` idiom: `CurrentViewRect.ExpandedBy(10).Contains()` view culling (perf) + **distRange distance attenuation** (`SoundInfo.InMap(TargetInfo(Pawn))`, 15~70 cells linear fade, >70 silent; 2026-07 removed `CurrentZoom<=Close` zoom gating which blocked distRange). High-speed noise control is done by cooldown scaling, not by lowering per-sound `volumeFactor`.
-- **Build identity in logs**: startup logs must show a strong build identifier. Dev builds identify by commit (`AssemblyInformationalVersion` source revision); GitHub builds identify by tag; Steam builds identify by a Steam package version string that includes semantic version + timestamp + commit. This prevents old-version bug reports being mistaken for current builds.
+- **Build identity in logs**: startup logs must show the intended channel identity. Dev builds need the strongest distinction and identify by commit (`AssemblyInformationalVersion` source revision); GitHub builds identify by tag plus the tag commit; Steam builds identify only by the Steam package version. This prevents old-version bug reports being mistaken for current builds while keeping Steam logs concise.
 
 ## Junction Dev Mechanism (local dev core)
 Make `RimWorld/Mods/SqueakyRatkin` a junction to this workspace root so builds load instantly.
@@ -47,7 +47,7 @@ Make `RimWorld/Mods/SqueakyRatkin` a junction to this workspace root so builds l
 
 ## Build Flavor
 `-p:SqueakyBuildFlavor=Dev|Steam|GitHub` → constants `SQUEAKY_DEV/STEAM/GITHUB`, only affects the `Mod.cs` startup-log banner (`[dev|steam|github]`). Default Dev. Runtime behavior is identical across flavors.
-- Pack scripts pass flavor-specific `InformationalVersion` values into the DLL so the startup log can distinguish dev snapshots, GitHub releases, and Steam test/upload builds.
+- Pack scripts pass flavor-specific `InformationalVersion` values into the DLL: dev uses the SDK source revision, GitHub uses `<tag>+<commit>`, Steam uses only the package version.
 
 ## Build Verification (mandatory)
 ```

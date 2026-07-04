@@ -21,7 +21,14 @@ $loadFoldersSource = Join-Path $root "LoadFolders.xml"
 $versionedSource = Join-Path $root "1.6"
 $dllPath = Join-Path $root "1.6\Assemblies\SqueakyRatkin.dll"
 
-& dotnet build $projectFile -c Release -p:SqueakyBuildFlavor=GitHub -p:SqueakyInformationalVersion=$Version
+$shortSha = "nogit"
+$gitSha = (& git -C $root rev-parse --short=12 HEAD 2>$null)
+if ($LASTEXITCODE -eq 0 -and -not [string]::IsNullOrWhiteSpace($gitSha)) {
+    $shortSha = $gitSha.Trim()
+}
+$buildIdentity = "$Version+$shortSha"
+
+& dotnet build $projectFile -c Release -p:SqueakyBuildFlavor=GitHub -p:SqueakyInformationalVersion=$buildIdentity -p:IncludeSourceRevisionInInformationalVersion=false
 if ($LASTEXITCODE -ne 0) {
     exit $LASTEXITCODE
 }
@@ -63,3 +70,4 @@ Compress-Archive -Path $stageDir -DestinationPath $zipPath -Force
 $fileCount = (Get-ChildItem -LiteralPath $stageDir -Recurse -File | Measure-Object).Count
 Write-Host "[pack-github] Staged $fileCount files to $stageDir"
 Write-Host "[pack-github] Created $zipPath"
+Write-Host "[pack-github] Build identity: $buildIdentity"

@@ -62,7 +62,7 @@ dotnet build Source/SqueakyRatkin/SqueakyRatkin.csproj
 Must be 0 errors. A missing-junction WARNING is normal (non-blocking).
 
 ### Build Flavor (for distribution)
-`-p:SqueakyBuildFlavor=Dev|Steam|GitHub` toggles the startup-log banner (`[dev|steam|github]`). Runtime behavior is identical across flavors. Startup logs include a strong build identifier: dev commit, GitHub tag, or Steam package version.
+`-p:SqueakyBuildFlavor=Dev|Steam|GitHub` toggles the startup-log banner (`[dev|steam|github]`). Runtime behavior is identical across flavors. Startup logs identify dev builds by commit, GitHub releases by tag plus commit, and Steam builds by package version.
 
 ### Pack
 - `pwsh scripts/pack-steam.ps1` → `dist/steam/SqueakyRatkin/` (Workshop upload)
