@@ -3,6 +3,7 @@ using Verse;
 
 namespace SqueakyRatkin;
 
+#if SQUEAKY_DEV
 public static class SqueakDebugActions
 {
     [DebugAction("Squeaky Ratkin", "Overlay: ON", actionType = DebugActionType.Action, allowedGameStates = AllowedGameStates.PlayingOnMap)]
@@ -18,4 +19,19 @@ public static class SqueakDebugActions
         SqueakDebug.ShowOverlay = false;
         Log.Message("[SqueakyRatkin] Overlay OFF");
     }
+
+    [DebugAction("Squeaky Ratkin", "Camera Indicator: ON", actionType = DebugActionType.Action, allowedGameStates = AllowedGameStates.PlayingOnMap)]
+    public static void CameraIndicatorOn()
+    {
+        SqueakDebug.ShowCameraIndicator = true;
+        Log.Message("[SqueakyRatkin] Camera Indicator ON");
+    }
+
+    [DebugAction("Squeaky Ratkin", "Camera Indicator: OFF", actionType = DebugActionType.Action, allowedGameStates = AllowedGameStates.PlayingOnMap)]
+    public static void CameraIndicatorOff()
+    {
+        SqueakDebug.ShowCameraIndicator = false;
+        Log.Message("[SqueakyRatkin] Camera Indicator OFF");
+    }
 }
+#endif

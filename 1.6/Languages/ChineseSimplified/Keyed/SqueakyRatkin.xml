@@ -2,11 +2,29 @@
 <LanguageData>
   <SR.SettingsCategory>鼠辈啁啾</SR.SettingsCategory>
 
-  <SR.UseCustomOnly.Label>完全 override(只用自定义音频,不混原版豚鼠 default)</SR.UseCustomOnly.Label>
+  <SR.UseCustomOnly.Label>自定义音频全覆盖</SR.UseCustomOnly.Label>
   <SR.UseCustomOnly.Desc>开启:只用自定义音频(SR_*_Pure)。关闭:自定义与原版豚鼠 default 混合。</SR.UseCustomOnly.Desc>
+  <SR.Global.Header>调整选项</SR.Global.Header>
+  <SR.ScaleCooldownWithTimeSpeed.Label>按游戏倍速放大触发冷却(推荐)</SR.ScaleCooldownWithTimeSpeed.Label>
+  <SR.ScaleFrequencyWithTalking.Label>按语言能力缩放触发频率</SR.ScaleFrequencyWithTalking.Label>
+  <SR.LocalizeDebugActions.Label>使用本模组自带翻译本地化调试动作(重开调试动作菜单后生效)</SR.LocalizeDebugActions.Label>
+  <SR.GlobalCooldownMultiplier.Label>全局触发间隔：{0}x</SR.GlobalCooldownMultiplier.Label>
+  <SR.Distance.Header>按摄像机高度衰减</SR.Distance.Header>
+  <SR.Distance.Preset>衰减预设</SR.Distance.Preset>
+  <SR.Distance.Preset.Conservative>保守</SR.Distance.Preset.Conservative>
+  <SR.Distance.Preset.Balanced>适中</SR.Distance.Preset.Balanced>
+  <SR.Distance.Preset.Strong>激进</SR.Distance.Preset.Strong>
+  <SR.Distance.Preset.Custom>自定义</SR.Distance.Preset.Custom>
+  <SR.Distance.FullVolume>衰减开始</SR.Distance.FullVolume>
+  <SR.Distance.Silent>衰减结束</SR.Distance.Silent>
+  <SR.Distance.Chart.Volume>音量</SR.Distance.Chart.Volume>
+  <SR.Distance.Chart.Distance>高度</SR.Distance.Chart.Distance>
+  <SR.Distance.Chart.Full>开始 {0}</SR.Distance.Chart.Full>
+  <SR.Distance.Chart.Silent>结束 {0}</SR.Distance.Chart.Silent>
+  <SR.Distance.Desc>衰减区间以原版摄像机高度范围(15-65)作为调参参照。地图内声音低于 {0} 保持全音量；{0} 到 {1} 之间逐步衰减；高于 {1} 静音。工作台预览不受距离衰减影响。</SR.Distance.Desc>
 
   <SR.Workbench.Header>心情调制工作台</SR.Workbench.Header>
-  <SR.Workbench.Header.Desc>选一个心情编辑其 override;选一个动作用于预览。启用 override 即覆盖 XML 默认。拖动滑块或输入精确值,然后点预览试听。</SR.Workbench.Header.Desc>
+  <SR.Workbench.Header.Desc>编辑按心情生效的音高与音量覆盖值,并用任意已配置动作预览。未启用覆盖时使用 XML 默认值。</SR.Workbench.Header.Desc>
   <SR.Workbench.Mood>心情</SR.Workbench.Mood>
   <SR.Workbench.Action>预览动作</SR.Workbench.Action>
   <SR.Workbench.EnableOverride>启用 override(覆盖默认)</SR.Workbench.EnableOverride>
@@ -42,4 +60,10 @@
 
   <SR.Debug.OverlayOn>悬浮字: 开启</SR.Debug.OverlayOn>
   <SR.Debug.OverlayOff>悬浮字: 关闭</SR.Debug.OverlayOff>
+  <SR.Debug.CameraIndicator>摄像机：高度 {0}，视野 {1}</SR.Debug.CameraIndicator>
+  <DebugActionCategory_SqueakyRatkin>鼠辈啁啾</DebugActionCategory_SqueakyRatkin>
+  <DebugAction_OverlayOn>悬浮字：开启</DebugAction_OverlayOn>
+  <DebugAction_OverlayOff>悬浮字：关闭</DebugAction_OverlayOff>
+  <DebugAction_CameraIndicatorOn>摄像机指示器：开启</DebugAction_CameraIndicatorOn>
+  <DebugAction_CameraIndicatorOff>摄像机指示器：关闭</DebugAction_CameraIndicatorOff>
 </LanguageData>

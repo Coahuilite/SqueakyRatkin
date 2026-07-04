@@ -2,9 +2,9 @@
 
 **English** | [中文](./README.zh-CN.md)
 
-A QOL mod that makes Ratkin pawns squeak on eat / sleep / wounded / select / move / social / joy / mental-break, with mood-tinted pitch (good / neutral / bad / breakdown). Camera-zoom gated for a "lean-in to listen" feel; off-screen pawns are culled to save performance.
+Squeaky Ratkin is a lightweight sound effect mod that adds a whimsical medley of chirps and squeaks to Ratkin pawns. Idle calls, eating, sleeping, wounds, selection, movement, social time, joy, and death can all carry a little sound, tinted by mood and softened by camera-distance attenuation.
 
-> The Chinese name 「鼠辈啁啾」is a playful pun; the mod itself is a lightweight, optional ambience enhancement.
+> Lightweight, optional ambience for Ratkin colonies.
 
 ## Requirements
 - RimWorld 1.6
@@ -17,21 +17,27 @@ A QOL mod that makes Ratkin pawns squeak on eat / sleep / wounded / select / mov
 - **GitHub Release**: download the release zip and extract into `RimWorld/Mods/SqueakyRatkin/`.
 
 ## Audio
-Default source is the vanilla guinea-pig (rodent). To use custom squeaks:
-- Place files in `1.6/Sounds/Squeak/<Action>/`, named `SR_<Action>_<n>.wav`
-- Spec: **mono**, wav (16-bit) or ogg, 22050 or 44100 Hz, normalized to ~-3dBFS
-- Uncomment the matching grain in `1.6/Defs/SoundDefs/SqueakyRatkin_SoundDefs.xml` to enable
-- Mood differences are produced via runtime pitch/volume modulation — record only neutral-base variants (2–3 per action)
-- Compensate per-audio traits in the mod settings "Modulation Workbench"
+Default source is the vanilla guinea-pig sound set. To use custom squeaks:
+- Place mono files in `1.6/Sounds/Squeak/<Action>/`, named `SR_<Action>_<n>.ogg`.
+- Ogg is recommended; wav (16-bit) is acceptable. Use 22050 or 44100 Hz and normalize peaks around -3dBFS.
+- Uncomment the matching grain in `1.6/Defs/SoundDefs/SqueakyRatkin_SoundDefs.xml`.
+- Record neutral-base variants only; mood differences are produced at runtime through pitch and volume modulation.
+- Use the mod settings workbench to compensate for different custom audio traits.
 
 ## Configuration
-Three layers (bottom → top):
-1. **Default** (author): `actions` / `moodMods` in `1.6/Patches/Ratkin_AddSqueakComp.xml`
-2. **Player override**: mod settings "Modulation Workbench" — toggle a mood's override, slider + input + presets (Sharp/Neutral/Low/Chaos) + preview
-3. **Source switch**: `Full override` (custom-only vs mixed with vanilla default)
+Core behavior is data-driven from `1.6/Patches/Ratkin_AddSqueakComp.xml`: actions define trigger modes, cooldowns, probabilities, and distance presets; mood mods define runtime pitch and volume changes.
+
+Mod settings provide:
+- Custom audio full override, switching between mixed vanilla fallback and custom-only sounds.
+- Time-speed cooldown scaling, enabled by default, to reduce high-speed trigger density without lowering each sound's volume.
+- Talking capacity frequency scaling, enabled by default, so impaired speech reduces ordinary squeak frequency while death feedback remains protected unless the pawn is organ-mute.
+- Global trigger interval multiplier.
+- Camera-height attenuation presets or custom attenuation bands.
+- Mood modulation workbench with per-mood overrides, exact inputs, presets, and preview.
+- Optional built-in DebugAction localization, disabled by default; reopen the debug actions menu after toggling.
 
 ## Dev Menu (development mode)
-Developer menu → "Squeaky Ratkin": overlay text on/off ×2, sound browser.
+Developer menu → "Squeaky Ratkin": overlay text toggles and camera indicator toggles. Sound preview lives in the mod settings workbench.
 
 ## License
 - **Code (C# / XML defs / patches)**: [Mozilla Public License 2.0](./LICENSE) — file-level copyleft, project-level combinable with proprietary code.
@@ -60,11 +66,13 @@ dotnet build Source/SqueakyRatkin/SqueakyRatkin.csproj
 Must be 0 errors. A missing-junction WARNING is normal (non-blocking).
 
 ### Build Flavor (for distribution)
-`-p:SqueakyBuildFlavor=Dev|Steam|GitHub` toggles the startup-log banner (`[dev|steam|github]`). Runtime behavior is identical across flavors.
+`-p:SqueakyBuildFlavor=Dev|Steam|GitHub` toggles the startup-log banner (`[dev|steam|github]`). Runtime behavior is identical across flavors. Startup logs identify dev builds by commit, GitHub releases by tag plus commit, and Steam builds by package version.
 
 ### Pack
-- `pwsh scripts/pack-steam.ps1` → `dist/steam/SqueakyRatkin/` (Workshop upload)
-- `pwsh scripts/pack-github.ps1` → `dist/github/SqueakyRatkin-v<ver>.zip` (GitHub Release)
+- Build the intended flavor first; pack scripts only stage/zip existing build output.
+- Dev local test: build Dev flavor, then `pwsh scripts/pack-dev.ps1` → `dist/dev/SqueakyRatkin/`.
+- Steam Workshop: build Steam flavor, then `pwsh scripts/pack-steam.ps1` → `dist/steam/SqueakyRatkin/`.
+- GitHub Release: CI/tag flow builds GitHub flavor, then `pwsh scripts/pack-github.ps1` → `dist/github/SqueakyRatkin-v<ver>.zip`.
 - Content includes only `About/`, `LoadFolders.xml`, `1.6/` (excludes source / pdb / docs).
 
 ## Branches & Contributing

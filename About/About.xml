@@ -6,9 +6,14 @@
   <supportedVersions>
     <li>1.6</li>
   </supportedVersions>
-  <description>让鼠族(Ratkin)在吃饭、睡觉、受击、选中、移动、社交、娱乐、精神崩溃时,按心情状态(好/中/坏/崩溃)发出吱吱叫。摄像机缩放联动"凑近听",屏幕外静音以省性能。
+  <description>Squeaky Ratkin is a lightweight sound effect mod that injects a little stir into the Ratkin experience. It brings a whimsical medley of chirps and squeaks to these once-silent little critters, ensuring every action comes with... a little sound things. No longer shall the colonies and the world beyond echo solely with the lamentations of blood and fire - the whispered squeaks of the ratkin will remind you that though they may be small, they are never content to remain silent.
 
-仅作用于 Ratkin 种族,需配合 NewRatkin(鼠族)使用。</description>
+*Not eligible for registration in The Book of Squeakudges*
+
+鼠辈啁啾(Squeaky Ratkin) 是一款轻量级音效模组，为 鼠族(Ratkin) 的游玩体验注入一些*小动静*。它为这些曾经沉默的小家伙们带来随心所欲的百变啁啾，让每一次行动都附带着……那么一点动静。从此，殖民地与远方世界不再只回荡着血与火的哀鸣，鼠鼠们窸窣的吱语会提醒你：它们虽小，却从不甘于沉寂。
+
+*禁止登记在仇恨吱书上*</description>
+  <url>https://github.com/Coahuilite/SqueakyRatkin</url>
   <modDependencies>
     <li>
       <packageId>brrainz.harmony</packageId>
@@ -23,6 +28,7 @@
     <li>
       <packageId>Solaris.RatkinRaceMod</packageId>
       <displayName>Ratkin (鼠族)</displayName>
+      <steamWorkshopUrl>steam://url/CommunityFilePage/1578693166</steamWorkshopUrl>
     </li>
   </modDependencies>
   <loadAfter>

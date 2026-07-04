@@ -21,18 +21,20 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Build (Dev flavor)
-        run: dotnet build Source/SqueakyRatkin/SqueakyRatkin.csproj -c Release
+        run: dotnet build Source/SqueakyRatkin/SqueakyRatkin.csproj -c Release -p:SqueakyBuildFlavor=Dev
 
       - name: Pack (commit-hash named dev snapshot)
         if: github.event_name == 'push'
-        run: pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/pack-github.ps1 -Version "dev-${{ github.sha }}"
+        run: |
+          pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/pack-dev.ps1
+          Compress-Archive -Path dist/dev/SqueakyRatkin -DestinationPath dist/dev/SqueakyRatkin-dev-${{ github.sha }}.zip -Force
 
       - name: Upload dev artifact
         if: github.event_name == 'push'
         uses: actions/upload-artifact@v4
         with:
           name: SqueakyRatkin-dev-${{ github.sha }}
-          path: dist/github/*.zip
+          path: dist/dev/*.zip
           retention-days: 14
 
       # CI 仅做编译验证;junction 缺失的 WARNING 是正常的(非阻塞)。

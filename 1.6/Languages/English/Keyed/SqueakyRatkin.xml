@@ -2,11 +2,29 @@
 <LanguageData>
   <SR.SettingsCategory>Squeaky Ratkin</SR.SettingsCategory>
 
-  <SR.UseCustomOnly.Label>Full override (custom audio only, no vanilla default)</SR.UseCustomOnly.Label>
-  <SR.UseCustomOnly.Desc>ON: only custom audio (SR_*_Pure). OFF: custom + vanilla guinea-pig default mixed.</SR.UseCustomOnly.Desc>
+  <SR.UseCustomOnly.Label>Custom audio full override</SR.UseCustomOnly.Label>
+  <SR.UseCustomOnly.Desc>ON: only custom audio (SR_*_Pure). OFF: custom + vanilla default (guinea-pig) mixed.</SR.UseCustomOnly.Desc>
+  <SR.Global.Header>Tuning options</SR.Global.Header>
+  <SR.ScaleCooldownWithTimeSpeed.Label>Scale trigger cooldown with time speed (recommended)</SR.ScaleCooldownWithTimeSpeed.Label>
+  <SR.ScaleFrequencyWithTalking.Label>Scale squeak frequency with Talking capacity</SR.ScaleFrequencyWithTalking.Label>
+  <SR.LocalizeDebugActions.Label>Localize debug actions with this mod's translations (reopen the debug actions menu)</SR.LocalizeDebugActions.Label>
+  <SR.GlobalCooldownMultiplier.Label>Global trigger interval: {0}x</SR.GlobalCooldownMultiplier.Label>
+  <SR.Distance.Header>Camera-height attenuation</SR.Distance.Header>
+  <SR.Distance.Preset>Attenuation preset</SR.Distance.Preset>
+  <SR.Distance.Preset.Conservative>Conservative</SR.Distance.Preset.Conservative>
+  <SR.Distance.Preset.Balanced>Balanced</SR.Distance.Preset.Balanced>
+  <SR.Distance.Preset.Strong>Radical</SR.Distance.Preset.Strong>
+  <SR.Distance.Preset.Custom>Custom</SR.Distance.Preset.Custom>
+  <SR.Distance.FullVolume>Attenuation starts</SR.Distance.FullVolume>
+  <SR.Distance.Silent>Attenuation ends</SR.Distance.Silent>
+  <SR.Distance.Chart.Volume>Volume</SR.Distance.Chart.Volume>
+  <SR.Distance.Chart.Distance>Height</SR.Distance.Chart.Distance>
+  <SR.Distance.Chart.Full>start {0}</SR.Distance.Chart.Full>
+  <SR.Distance.Chart.Silent>end {0}</SR.Distance.Chart.Silent>
+  <SR.Distance.Desc>The attenuation band uses the vanilla camera-height scale (15-65) as its tuning reference. In-map sounds stay full below {0}, fade between {0} and {1}, and are silent above {1}. Workbench preview is not distance-attenuated.</SR.Distance.Desc>
 
   <SR.Workbench.Header>Mood modulation workbench</SR.Workbench.Header>
-  <SR.Workbench.Header.Desc>Pick a mood to edit its override; pick an action to preview. Enable override to replace the XML default. Drag sliders or type exact values, then Preview to hear.</SR.Workbench.Header.Desc>
+  <SR.Workbench.Header.Desc>Edit mood-based pitch and volume overrides, then preview them with any configured action. Disabled overrides use the XML defaults.</SR.Workbench.Header.Desc>
   <SR.Workbench.Mood>Mood</SR.Workbench.Mood>
   <SR.Workbench.Action>Preview action</SR.Workbench.Action>
   <SR.Workbench.EnableOverride>Enable override (replaces default)</SR.Workbench.EnableOverride>
@@ -42,4 +60,10 @@
 
   <SR.Debug.OverlayOn>Overlay: ON</SR.Debug.OverlayOn>
   <SR.Debug.OverlayOff>Overlay: OFF</SR.Debug.OverlayOff>
+  <SR.Debug.CameraIndicator>Camera: height {0}, view size {1}</SR.Debug.CameraIndicator>
+  <DebugActionCategory_SqueakyRatkin>Squeaky Ratkin</DebugActionCategory_SqueakyRatkin>
+  <DebugAction_OverlayOn>Overlay: ON</DebugAction_OverlayOn>
+  <DebugAction_OverlayOff>Overlay: OFF</DebugAction_OverlayOff>
+  <DebugAction_CameraIndicatorOn>Camera Indicator: ON</DebugAction_CameraIndicatorOn>
+  <DebugAction_CameraIndicatorOff>Camera Indicator: OFF</DebugAction_CameraIndicatorOff>
 </LanguageData>

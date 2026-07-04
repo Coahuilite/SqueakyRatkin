@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using RimWorld;
+using UnityEngine;
 using Verse;
 using Verse.Sound;
 
@@ -8,6 +9,7 @@ namespace SqueakyRatkin;
 
 public enum SqueakMood { Good, Neutral, Bad, Break }
 public enum SqueakAction { Call, Eat, Sleep, Wounded, Select, Move, Social, Joy, Death }
+public enum SqueakCooldownClock { GameTicks, Realtime }
 
 /// <summary>触发模式,由 XML 配置驱动,C# 通用适配。</summary>
 public enum SqueakTriggerMode
@@ -25,6 +27,14 @@ public class SqueakActionConfig
     public SqueakTriggerMode mode = SqueakTriggerMode.RandomOneShot;
     public int minIntervalTicks = 300;
     public float probabilityPerCheck = 0.02f;
+    public bool ignoreGlobalCooldown = false;
+    public SqueakCooldownClock cooldownClock = SqueakCooldownClock.GameTicks;
+}
+
+public class SqueakDistancePresetConfig
+{
+    public SqueakDistancePreset preset = SqueakDistancePreset.Balanced;
+    public FloatRange range = new(15f, 50f);
 }
 
 /// <summary>
@@ -35,17 +45,24 @@ public class SqueakActionConfig
 public class CompSqueaker : ThingComp
 {
     private const string RatkinDefName = "Ratkin";
+    private const float VocalSilenceEpsilon = 0.001f;
 
     /// <summary>完全 override:ON=纯自定义(SR_*_Pure),OFF=混合(SR_*)。由 ModSettings 同步。</summary>
     public static bool UseCustomOnly = false;
+    public static bool ScaleCooldownWithTimeSpeed = true;
+    public static bool ScaleFrequencyWithTalking = true;
+    public static float GlobalCooldownMultiplier = 1f;
 
     private static readonly Dictionary<SqueakAction, SoundDef?> SoundCacheMixed = new();
     private static readonly Dictionary<SqueakAction, SoundDef?> SoundCachePure = new();
     private static bool soundCacheInitialized;
+    private static FloatRange activeDistanceRange = new(15f, 50f);
 
     private readonly Dictionary<SqueakAction, SqueakActionConfig> configMap = new();
     private readonly Dictionary<SqueakAction, int> lastTriggerTick = new();
+    private readonly Dictionary<SqueakAction, float> lastTriggerRealTime = new();
     private readonly Dictionary<SqueakMood, SqueakMoodMod> moodModMap = new();
+    private int lastAnyTriggerTick = int.MinValue / 2;
 
     private Pawn Pawn => (Pawn)parent;
     private CompProperties_Squeaker Props => (CompProperties_Squeaker)props;
@@ -53,12 +70,18 @@ public class CompSqueaker : ThingComp
     public override void Initialize(CompProperties props)
     {
         base.Initialize(props);
+        lastAnyTriggerTick = int.MinValue / 2;
         foreach (SqueakActionConfig cfg in Props.actions)
         {
             configMap[cfg.action] = cfg;
             if (!lastTriggerTick.ContainsKey(cfg.action))
             {
                 lastTriggerTick[cfg.action] = int.MinValue / 2;
+            }
+
+            if (!lastTriggerRealTime.ContainsKey(cfg.action))
+            {
+                lastTriggerRealTime[cfg.action] = -1_000_000f;
             }
         }
 
@@ -189,13 +212,38 @@ public class CompSqueaker : ThingComp
     private void TryTrigger(SqueakAction action, SqueakActionConfig cfg)
     {
         int now = Find.TickManager.TicksGame;
-        if (now - lastTriggerTick[action] < cfg.minIntervalTicks)
+        if (!ActionCooldownElapsed(action, cfg, now))
         {
+            return;
+        }
+
+        int globalCooldown = GetEffectiveCooldownTicks((int)Math.Ceiling(Props.globalMinIntervalTicks * Math.Max(0f, GlobalCooldownMultiplier)));
+        if (!cfg.ignoreGlobalCooldown && now - lastAnyTriggerTick < globalCooldown)
+        {
+            return;
+        }
+
+        if (!PassesTalkingGate(action))
+        {
+            lastTriggerTick[action] = now;
+            lastTriggerRealTime[action] = Time.realtimeSinceStartup;
+            lastAnyTriggerTick = now;
             return;
         }
 
         PlayOneShot(action, CurrentMood);
         lastTriggerTick[action] = now;
+        lastTriggerRealTime[action] = Time.realtimeSinceStartup;
+        lastAnyTriggerTick = now;
+    }
+
+    private bool ActionCooldownElapsed(SqueakAction action, SqueakActionConfig cfg, int now)
+    {
+        return cfg.cooldownClock switch
+        {
+            SqueakCooldownClock.Realtime => Time.realtimeSinceStartup - lastTriggerRealTime[action] >= Math.Max(0, cfg.minIntervalTicks) / 60f,
+            _ => now - lastTriggerTick[action] >= GetEffectiveCooldownTicks(cfg.minIntervalTicks),
+        };
     }
 
     /// <summary>三层合并取心情调制:ModSettings.override > CompProperties.default > 内置默认。</summary>
@@ -227,12 +275,78 @@ public class CompSqueaker : ThingComp
         SqueakMoodMod mod = ResolveMoodMod(mood);
         SoundInfo info = SoundInfo.InMap(new TargetInfo(Pawn));
         info.pitchFactor = mod.pitchFactor * mod.pitchJitter.RandomInRange;
-        info.volumeFactor = mod.volumeFactor * TimeSpeedVolumeFactor();
+        info.volumeFactor = mod.volumeFactor;
         def.PlayOneShot(info);
         SqueakDebug.NotifySqueak(Pawn, action, mood, def);
     }
 
-    private static float TimeSpeedVolumeFactor() => 1f / Math.Max(1f, Find.TickManager.TickRateMultiplier);
+    private bool PassesTalkingGate(SqueakAction action)
+    {
+        if (GetVocalOrganCapacity() <= VocalSilenceEpsilon)
+        {
+            return false;
+        }
+
+        if (!ScaleFrequencyWithTalking || action == SqueakAction.Death)
+        {
+            return true;
+        }
+
+        float talking = Pawn.health?.capacities?.GetLevel(PawnCapacityDefOf.Talking) ?? 1f;
+        float gate = Mathf.Clamp01(talking);
+        return gate >= 0.999f || Rand.Value < gate;
+    }
+
+    private float GetVocalOrganCapacity()
+    {
+        if (Pawn.health?.hediffSet == null)
+        {
+            return 1f;
+        }
+
+        float source = PawnCapacityUtility.CalculateTagEfficiency(Pawn.health.hediffSet, BodyPartTagDefOf.TalkingSource);
+        float pathway = PawnCapacityUtility.CalculateTagEfficiency(Pawn.health.hediffSet, BodyPartTagDefOf.TalkingPathway, 1f);
+        float tongue = GetTagEfficiencyOrOneIfMissing(BodyPartTagDefOf.Tongue, 1f);
+        return source * pathway * tongue;
+    }
+
+    private float GetTagEfficiencyOrOneIfMissing(BodyPartTagDef tag, float maxEfficiency)
+    {
+        return BodyHasPartTag(tag)
+            ? PawnCapacityUtility.CalculateTagEfficiency(Pawn.health!.hediffSet, tag, maxEfficiency)
+            : 1f;
+    }
+
+    private bool BodyHasPartTag(BodyPartTagDef tag)
+    {
+        List<BodyPartRecord>? parts = Pawn.RaceProps.body?.AllParts;
+        if (parts == null)
+        {
+            return false;
+        }
+
+        foreach (BodyPartRecord part in parts)
+        {
+            if (part.def.tags != null && part.def.tags.Contains(tag))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static int GetEffectiveCooldownTicks(int baseCooldownTicks)
+    {
+        int cooldown = Math.Max(0, baseCooldownTicks);
+        if (!ScaleCooldownWithTimeSpeed || cooldown == 0)
+        {
+            return cooldown;
+        }
+
+        float multiplier = Math.Max(1f, Find.TickManager.TickRateMultiplier);
+        return multiplier <= 1f ? cooldown : (int)Math.Ceiling(cooldown * multiplier);
+    }
 
     private static void EnsureSoundCache()
     {
@@ -254,6 +368,37 @@ public class CompSqueaker : ThingComp
     {
         EnsureSoundCache();
         return UseCustomOnly ? SoundCachePure[a] : SoundCacheMixed[a];
+    }
+
+    public static void ApplyDistanceRange(FloatRange range)
+    {
+        activeDistanceRange = range;
+        EnsureSoundCache();
+        foreach (SoundDef? def in SoundCacheMixed.Values)
+        {
+            ApplyDistanceRange(def, activeDistanceRange);
+        }
+
+        foreach (SoundDef? def in SoundCachePure.Values)
+        {
+            ApplyDistanceRange(def, activeDistanceRange);
+        }
+    }
+
+    private static void ApplyDistanceRange(SoundDef? def, FloatRange range)
+    {
+        if (def?.subSounds == null)
+        {
+            return;
+        }
+
+        foreach (SubSoundDef subSound in def.subSounds)
+        {
+            if (!subSound.onCamera)
+            {
+                subSound.distRange = range;
+            }
+        }
     }
 
     private bool IsEating() => Pawn.CurJob?.def == JobDefOf.Ingest;
@@ -281,8 +426,11 @@ public class CompSqueaker : ThingComp
 
 public class CompProperties_Squeaker : CompProperties
 {
+    public int globalMinIntervalTicks = 120;
+    public bool scaleFrequencyWithTalking = true;
     public List<SqueakActionConfig> actions = new();
     public List<SqueakMoodMod> moodMods = new();
+    public List<SqueakDistancePresetConfig> distancePresets = new();
 
     public CompProperties_Squeaker()
     {
