@@ -27,4 +27,4 @@ packages/
 *.bak
 *.orig
 *.log
-debug/
+/debug/

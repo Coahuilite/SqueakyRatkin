@@ -46,7 +46,7 @@ Make `RimWorld/Mods/SqueakyRatkin` a junction to this workspace root so builds l
 - **To create the junction for a developer**: run `validate-junction.ps1`, then execute the `New-Item -ItemType Junction -Path '<Mods>/SqueakyRatkin' -Target '<root>'` it prints. **Never hardcode paths; never assume where RimWorld is installed.**
 
 ## Build Flavor
-`-p:SqueakyBuildFlavor=Dev|Steam|GitHub` → constants `SQUEAKY_DEV/STEAM/GITHUB`, only affects the `Mod.cs` startup-log banner (`[dev|steam|github]`). Default Dev. Runtime behavior is identical across flavors.
+`-p:SqueakyBuildFlavor=Dev|Steam|GitHub` → constants `SQUEAKY_DEV/STEAM/GITHUB`, default Dev. Startup-log banner differs by flavor; dev-only debug UI (DebugAction entries + camera HUD) must compile under `SQUEAKY_DEV` only and stay out of Steam/GitHub builds.
 - Pack scripts pass flavor-specific `InformationalVersion` values into the DLL: dev uses the SDK source revision, GitHub uses `<tag>+<commit>`, Steam uses only the package version.
 
 ## Build Verification (mandatory)
@@ -82,7 +82,7 @@ scripts/pack-dev.ps1       local Dev-flavor directory package for manual testing
 ```
 
 ## Debug Entry (development mode)
-Developer menu → "Squeaky Ratkin" category: overlay toggle ×2. DevMode plays auto-log. Sound preview moved to ModSettings workbench (no DevMode needed).
+Developer menu → "Squeaky Ratkin" category: overlay toggle ×2 + camera HUD toggle ×2. DevMode plays auto-log. A dev-only `GlobalControlsOnGUI` postfix may draw camera height in the vanilla right-side status stack. Sound preview moved to ModSettings workbench (no DevMode needed).
 
 ## Release Flow (dev → main → tag → CI)
 1. dev: atomic commits, all development here.

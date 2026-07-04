@@ -17,6 +17,8 @@
 - [ ] 下一阶段架构设计:长音频/配音策略
 
 ## Completed
+- [x] rc1 反馈收口:默认 1x 发声节奏保守放慢,仅改 `Ratkin_AddSqueakComp.xml` 数据默认值(无 C# 硬编码)。
+- [x] Dev 调试:新增仅 `SQUEAKY_DEV` 编译的右侧相机高度 HUD(DebugAction 开关 + `GlobalControlsOnGUI` postfix)。
 - [x] 正式 0.1.0 发布前:per-pawn 全局冷却(`globalMinIntervalTicks`)已落地,玩家可用 `globalCooldownMultiplier` 调整全局触发间隔,Death 绕过全局冷却避免被吞。
 - [x] 正式 0.1.0 发布前:新增倍速冷却补偿选项(`scaleCooldownWithTimeSpeed`,默认开启),按 `TickRateMultiplier` 放大全局/动作有效冷却。
 - [x] 正式 0.1.0 发布前:修复高倍速声音显著变小:移除按 `TickRateMultiplier` 压低单次 `volumeFactor`,高倍速降噪改由冷却补偿承担。

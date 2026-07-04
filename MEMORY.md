@@ -19,6 +19,7 @@
 - **触发模式**:Eat=EachTime;Call/Move/Sleep/Social/Joy=RandomOneShot(概率+间隔);Wounded/Select/Death=External(patch `Pawn.PostApplyDamage` / `Selector.Select`(postfix,位置注入 `__0`)/ `Pawn.Kill`(prefix,被击杀+流血而亡统一入口),带最短间隔节流防高攻速刷屏)。Select 节流 15 ticks(0.25 秒,2026-07 从 60 调低);**0.1.0 发布前新增 per-pawn `globalMinIntervalTicks` 全局冷却**,`Death.ignoreGlobalCooldown=true` 不被全局冷却吞掉;`Select.ignoreGlobalCooldown=true` + `cooldownClock=Realtime` 保持暂停时玩家反馈。
 - **ModSettings 调制工作台**:下拉选心情/动作 + slider+TextFieldFloat 联动 + 4 预设(尖锐/中性/低沉/混乱)+ 预览试听(`SoundDef.PlayOneShot(SoundInfo.OnCamera())`);**`globalCooldownMultiplier` 玩家可调全局触发间隔**,**距离衰减预设/自定义**(保守 12~45,适中/默认 12~40,强力 10~36;预设写入实际 range,手动改数值自动 Custom,运行时覆盖 SR_* / SR_*_Pure 非 onCamera subSound `distRange`);**`scaleCooldownWithTimeSpeed` 默认开启**,在 `TickRateMultiplier>1` 时按倍速放大全局/动作有效冷却,稳定现实时间触发密度；高倍速不再按倍速压低单次 `volumeFactor`。
 - **Dev 调试**:`[DebugAction]` 菜单(悬浮字开关 ×2)+ 描边悬浮字(`MoteTextWithBackground`)+ DevMode 日志；声音预览已集中到 ModSettings 工作台。
+- **Dev HUD**(2026-07):新增仅 `SQUEAKY_DEV` 编译的右侧状态栏相机高度指示(`GlobalControlsOnGUI` postfix),由 DebugAction 菜单切换,Steam/GitHub 构建不含该可见调试 UI。
 - **分发**:LICENSE(MPL-2.0)+ 双语 `README.md`/`README.zh-CN.md` + AGENTS.md + CONTRIBUTING.md(含术语通俗解释)+ `1.6/Sounds/Squeak/AUDIO_GUIDE.txt`(ogg/22050/16bit/mono);`scripts/`(validate-junction + pack-steam/pack-github);CI/CD。
 - **上云准备**:脱敏(README 本地路径占位、AGENTS 兄弟项目名泛化)+ `.gitignore` 完善 + packageId 定死 + author 统一 Coahuilite + commit 规范(`.gitmessage`)。
 - **分支保护**:main `require PR` + `enforce_admins` + 禁 force push;dev 原子提交链(9 阶段:骨架→核心→patches→工作台→调试→本地化→分发→文档→音频)。
@@ -28,6 +29,7 @@
 - **rc1 声音反馈结论**(2026-07-04):测试对象为已分发 `v0.1.0-rc1`,非当前本地修改版。高倍速声音显著变小已实际复现,首要原因是 rc1 代码 `info.volumeFactor = mod.volumeFactor * TimeSpeedVolumeFactor()`,在 3x/4x 分别约为 1/3、1/4 音量；声音重叠/覆盖不是首要解释。暂停+缩放后第一声音量疑似不一致:代码层依据为 `SoundInfo.InMap(TargetInfo(Pawn))` + Unity 3D AudioSource 距离衰减,`CameraDriver.Update()->ApplyPositionToGameObject()` 以 `RootSize` 改相机高度且暂停中仍可更新；若暂停中缩放后立刻触发声音,可能遇到相机 transform/AudioListener 与播放触发同帧时序未刷新,需运行时复现确认,暂不改代码。
 - **构建识别**(2026-07-04):启动日志按渠道显示身份。Dev 需要最强区分,显示提交号(`dev-<sha>`);GitHub flavor 注入 `<tag>+<tag commit>` 且只由 CI/tag release 产出;Steam flavor 只注入包版本号且只用于 Workshop 上传。`IncludeSourceRevisionInInformationalVersion=false` 用于 GitHub/Steam 脚本防止 SDK 额外追加 commit。
 - **功能调优**(2026-07,本地待推送):声音浏览器 `SoundInfo.OnCamera()`→`InMap(镜头中心)`(onCamera 需 subSound.onCamera=true 未配);删镜头 zoom gating;Select 节流 60→15;mote 位置可配置(`modExtensions/SqueakMoteOffset`,offsetY 默认 1.2);Death 死亡音效(`Pawn.Kill` prefix + `SR_Death`,GuineaPig/Pain grain,pitch 0.85~0.95)。
+- **默认频率下调**(2026-07,本地待推送):仅改 `1.6/Patches/Ratkin_AddSqueakComp.xml` 数据默认值,把 1x 默认节奏保守放慢(`globalMinIntervalTicks` 120→180;Eat 90→120;Call 600/0.015→720/0.012;Move 300/0.015→420/0.012;Sleep 600/0.01→900/0.008;Social/Joy 300/0.02→420/0.016;Wounded 120→180),不改 C# 逻辑。
 
 ## Active Constraints
 - **Def 前缀 `SR_`**(Def 数据库全局防撞);C# 类不加前缀(namespace 隔离)。

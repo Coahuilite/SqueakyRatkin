@@ -6,6 +6,7 @@ namespace SqueakyRatkin;
 public static class SqueakDebug
 {
     public static bool ShowOverlay = false;
+    public static bool ShowCameraHeight = false;
 
     public static void NotifySqueak(Pawn pawn, SqueakAction action, SqueakMood mood, SoundDef def)
     {
