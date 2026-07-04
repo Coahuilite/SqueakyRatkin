@@ -65,9 +65,10 @@ Must be 0 errors. A missing-junction WARNING is normal (non-blocking).
 `-p:SqueakyBuildFlavor=Dev|Steam|GitHub` toggles the startup-log banner (`[dev|steam|github]`). Runtime behavior is identical across flavors. Startup logs identify dev builds by commit, GitHub releases by tag plus commit, and Steam builds by package version.
 
 ### Pack
-- `pwsh scripts/pack-dev.ps1` → `dist/dev/SqueakyRatkin/` (local manual testing)
-- `pwsh scripts/pack-steam.ps1` → `dist/steam/SqueakyRatkin/` (Workshop upload only)
-- `pwsh scripts/pack-github.ps1` → `dist/github/SqueakyRatkin-v<ver>.zip` (GitHub Release; CI/tag flow only)
+- Build the intended flavor first; pack scripts only stage/zip existing build output.
+- Dev local test: build Dev flavor, then `pwsh scripts/pack-dev.ps1` → `dist/dev/SqueakyRatkin/`.
+- Steam Workshop: build Steam flavor, then `pwsh scripts/pack-steam.ps1` → `dist/steam/SqueakyRatkin/`.
+- GitHub Release: CI/tag flow builds GitHub flavor, then `pwsh scripts/pack-github.ps1` → `dist/github/SqueakyRatkin-v<ver>.zip`.
 - Content includes only `About/`, `LoadFolders.xml`, `1.6/` (excludes source / pdb / docs).
 
 ## Branches & Contributing

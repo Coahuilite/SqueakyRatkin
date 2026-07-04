@@ -65,9 +65,10 @@ dotnet build Source/SqueakyRatkin/SqueakyRatkin.csproj
 `-p:SqueakyBuildFlavor=Dev|Steam|GitHub`,影响启动日志 banner(`[dev|steam|github]`)。运行时功能三态相同。启动日志中 dev 版按提交号区分,GitHub 版按 tag+提交区分,Steam 版只显示包版本号。
 
 ### 打包
-- `pwsh scripts/pack-dev.ps1` → `dist/dev/SqueakyRatkin/`(本地手动测试)
-- `pwsh scripts/pack-steam.ps1` → `dist/steam/SqueakyRatkin/`(仅 Steam 工坊上传)
-- `pwsh scripts/pack-github.ps1` → `dist/github/SqueakyRatkin-v<ver>.zip`(GitHub Release;仅 CI/tag 流程)
+- 先构建目标 flavor;打包脚本只整理/压缩已有构建产物。
+- 本地测试:先构建 Dev flavor,再 `pwsh scripts/pack-dev.ps1` → `dist/dev/SqueakyRatkin/`。
+- Steam 工坊:先构建 Steam flavor,再 `pwsh scripts/pack-steam.ps1` → `dist/steam/SqueakyRatkin/`。
+- GitHub Release:仅 CI/tag 流程构建 GitHub flavor,再 `pwsh scripts/pack-github.ps1` → `dist/github/SqueakyRatkin-v<ver>.zip`。
 - 内容只含 `About/`、`LoadFolders.xml`、`1.6/`(排除源码/pdb/文档)
 
 ## 分支与贡献

@@ -20,6 +20,13 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
+      - name: Build GitHub release flavor
+        shell: pwsh
+        run: |
+          $shortSha = (git rev-parse --short=12 HEAD).Trim()
+          $identity = "${{ github.ref_name }}+$shortSha"
+          dotnet build Source/SqueakyRatkin/SqueakyRatkin.csproj -c Release -p:SqueakyBuildFlavor=GitHub -p:SqueakyInformationalVersion=$identity -p:IncludeSourceRevisionInInformationalVersion=false
+
       - name: Pack GitHub release
         run: pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/pack-github.ps1 -Version "${{ github.ref_name }}"
 

@@ -48,7 +48,7 @@ Make `RimWorld/Mods/SqueakyRatkin` a junction to this workspace root so builds l
 
 ## Build Flavor
 `-p:SqueakyBuildFlavor=Dev|Steam|GitHub` → constants `SQUEAKY_DEV/STEAM/GITHUB`, default Dev. Startup-log banner differs by flavor; dev-only debug UI (DebugAction entries + camera indicator) must compile under `SQUEAKY_DEV` only and stay out of Steam/GitHub builds.
-- Pack scripts pass flavor-specific `InformationalVersion` values into the DLL: dev uses the SDK source revision, GitHub uses `<tag>+<commit>`, Steam uses only the package version.
+- Build commands/workflows pass flavor-specific `InformationalVersion` values into the DLL: dev uses the SDK source revision, GitHub uses `<tag>+<commit>`, Steam uses only the package version.
 
 ## Build Verification (mandatory)
 ```
@@ -57,9 +57,10 @@ dotnet build Source/SqueakyRatkin/SqueakyRatkin.csproj
 workdir = project root. Must be 0 errors. A missing-junction WARNING is normal (non-blocking).
 
 ## Pack (distribution)
-- `scripts/pack-dev.ps1` → `dist/dev/SqueakyRatkin/` (**local testing only**, Dev flavor; use this when copying a local test build into RimWorld/Mods).
-- `scripts/pack-steam.ps1` → `dist/steam/SqueakyRatkin/` (Steam flavor)
-- `scripts/pack-github.ps1` → `dist/github/SqueakyRatkin-v<ver>.zip` (GitHub flavor)
+- Pack scripts are packaging-only: build the intended flavor first, then stage/zip. They must not compile; this keeps CI from building twice.
+- `dotnet build Source/SqueakyRatkin/SqueakyRatkin.csproj -c Release -p:SqueakyBuildFlavor=Dev` then `scripts/pack-dev.ps1` → `dist/dev/SqueakyRatkin/` (**local testing only**, Dev flavor; use this when copying a local test build into RimWorld/Mods).
+- Build Steam flavor with `-p:SqueakyBuildFlavor=Steam -p:SqueakyInformationalVersion=<version> -p:IncludeSourceRevisionInInformationalVersion=false`, then `scripts/pack-steam.ps1` → `dist/steam/SqueakyRatkin/` (Steam flavor)
+- CI release builds GitHub flavor once with `<tag>+<commit>`, then `scripts/pack-github.ps1` → `dist/github/SqueakyRatkin-v<ver>.zip` (GitHub flavor)
 - Content filter: only `About/`, `LoadFolders.xml`, `1.6/`. Excludes `Source/`, `*.pdb`, `About/PublishedFileId.txt`, `dist/`, `*.md`, `LICENSE`, `scripts/`.
 - **Flavor discipline**: local dev/test directory packages must use Dev flavor (`pack-dev.ps1`). GitHub flavor packages must be produced by CI release/tag flow only. Steam flavor is reserved for Steam Workshop packaging/upload, not local dev testing.
 
@@ -78,7 +79,7 @@ Source/SqueakyRatkin/
   Patches/Ratkin_AddSqueakComp.xml  actions + moodMods (data-driven core)
   Sounds/Squeak/<Action>/  custom audio placeholders (players place custom audio here)
   Languages/{English,ChineseSimplified}/Keyed/ localization
-scripts/                   validate-junction / pack-steam / pack-github
+scripts/                   validate-junction / stage-package / pack-dev / pack-steam / pack-github
 scripts/pack-dev.ps1       local Dev-flavor directory package for manual testing
 ```
 
