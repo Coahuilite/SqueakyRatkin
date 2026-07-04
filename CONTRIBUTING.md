@@ -68,8 +68,8 @@ Local dev setup (junction) — see README "Development".
   `SR_` prefix on Defs; no prefix on C# classes (namespace isolation).
 - 所有面向用户的字符串须通过 Keyed 本地化，中英文同时提供。
   Localize user-facing strings via Keyed, both EN and SC.
-- 请勿扫描项目根目录之外的路径（详见 AGENTS.md）。
-  Do not scan paths outside the project root (see AGENTS.md).
+- 默认不要扫描项目根目录之外的路径；确需外部参考时，必须先取得用户对具体路径的明确授权（详见 AGENTS.md）。
+  Stay inside the project root by default; external reference paths require explicit user authorization for exact paths first (see AGENTS.md).
 - 代码采用 MPL-2.0 协议，贡献代码同样适用。
   Code is MPL-2.0; contributions are licensed likewise.
 

@@ -24,7 +24,7 @@ Maintenance rules:
 - Editing README / CONTRIBUTING / AUDIO_GUIDE does NOT by itself require changing memory files; update them only when durable project facts, tasks, blockers, or archival state change.
 
 ## Hard Constraints (violation fails the task)
-- **Never scan paths outside the project root.** `grep/glob/read` touching `C:\Program Files`, Steam install dirs, or sibling mod folders triggers a privilege prompt and fails. Required RimWorld APIs must be supplied by the caller in the prompt — do not search for them yourself.
+- **Project-root scope by default.** Do not scan or read paths outside the project root unless the user explicitly authorizes the exact external path(s) for the current task. When authorized, keep access read-only, limited to the named path(s), and do not broaden to parent directories, sibling mod folders, Steam-wide scans, or global search roots. If more external context is needed, ask for a new explicit authorization first.
 - **`SR_` prefix on all Defs** (global Def-database collision avoidance); C# classes carry no prefix (namespace isolation).
 - Code license MPL-2.0; audio All Rights Reserved; **vanilla assets are referenced by defName/clipFolderPath only, never redistributed** (Ludeon policy).
 
