@@ -43,6 +43,8 @@ public class SqueakyRatkinSettings : ModSettings
     public float globalCooldownMultiplier = 1f;
     public SqueakDistancePreset distancePreset = SqueakDistancePreset.Balanced;
     public FloatRange distanceRange = new(15f, 50f);
+    public bool distanceSectionOpen = true;
+    public bool workbenchSectionOpen = false;
     public Dictionary<SqueakMood, SqueakMoodMod> moodOverrides = new();
 
     // 数据驱动:mood/action 列表从所有挂 CompProperties_Squeaker 的 ThingDef 读(XML actions/moodMods)。
@@ -69,6 +71,8 @@ public class SqueakyRatkinSettings : ModSettings
         Scribe_Values.Look(ref globalCooldownMultiplier, "globalCooldownMultiplier", 1f);
         Scribe_Values.Look(ref distancePreset, "distancePreset", SqueakDistancePreset.Balanced);
         Scribe_Values.Look(ref distanceRange, "distanceRange", GetDistancePresetRange(SqueakDistancePreset.Balanced));
+        Scribe_Values.Look(ref distanceSectionOpen, "distanceSectionOpen", true);
+        Scribe_Values.Look(ref workbenchSectionOpen, "workbenchSectionOpen", false);
         if (Scribe.mode == LoadSaveMode.LoadingVars)
         {
             distanceRangeWasLoaded = Scribe.loader?.curXmlParent?["distanceRange"] != null;
@@ -214,42 +218,60 @@ public class SqueakyRatkinSettings : ModSettings
 
     public void DrawSettings(Rect rect)
     {
-        const float topHeight = 340f;
-        float workbenchHeight = Mathf.Max(0f, rect.height - topHeight);
-
-        Listing_Standard topList = new();
-        topList.Begin(new Rect(rect.x, rect.y, rect.width, topHeight));
-        topList.Label("SR.Global.Header".Translate());
-        topList.CheckboxLabeled("SR.UseCustomOnly.Label".Translate(), ref useCustomOnly);
-        topList.CheckboxLabeled("SR.ScaleCooldownWithTimeSpeed.Label".Translate(), ref scaleCooldownWithTimeSpeed);
-        topList.Label("SR.GlobalCooldownMultiplier.Label".Translate(globalCooldownMultiplier.ToString("0.##")));
-        globalCooldownMultiplier = topList.Slider(globalCooldownMultiplier, 0f, 3f);
-        topList.Gap(8f);
-        topList.GapLine();
-        DrawDistanceSettings(topList);
-        topList.Gap(8f);
-        topList.GapLine();
-        topList.End();
-
-        Rect workbenchRect = new(rect.x, rect.y + topHeight, rect.width, workbenchHeight);
-        float contentHeight = GetWorkbenchHeight();
-
-        if (contentHeight > workbenchRect.height)
+        float contentHeight = GetSettingsHeight();
+        Rect viewRect = new(0f, 0f, rect.width - 16f, contentHeight);
+        if (contentHeight > rect.height)
         {
-            Rect viewRect = new(0f, 0f, workbenchRect.width - 16f, contentHeight);
-            Widgets.BeginScrollView(workbenchRect, ref scrollPos, viewRect);
-            DrawWorkbenchContents(viewRect);
+            Widgets.BeginScrollView(rect, ref scrollPos, viewRect);
+            DrawSettingsContents(viewRect);
             Widgets.EndScrollView();
             return;
         }
 
-        DrawWorkbenchContents(workbenchRect);
+        DrawSettingsContents(rect);
+    }
+
+    private void DrawSettingsContents(Rect rect)
+    {
+        Listing_Standard list = new();
+        list.Begin(rect);
+        list.Label("SR.Global.Header".Translate());
+        list.CheckboxLabeled("SR.UseCustomOnly.Label".Translate(), ref useCustomOnly);
+        list.CheckboxLabeled("SR.ScaleCooldownWithTimeSpeed.Label".Translate(), ref scaleCooldownWithTimeSpeed);
+        list.Label("SR.GlobalCooldownMultiplier.Label".Translate(globalCooldownMultiplier.ToString("0.##")));
+        globalCooldownMultiplier = list.Slider(globalCooldownMultiplier, 0f, 3f);
+        list.Gap(8f);
+        list.GapLine();
+
+        DrawCollapsibleHeader(list, "SR.Distance.Header".Translate(), ref distanceSectionOpen);
+        if (distanceSectionOpen)
+        {
+            DrawDistanceSettings(list);
+        }
+
+        list.Gap(8f);
+        list.GapLine();
+        DrawCollapsibleHeader(list, "SR.Workbench.Header".Translate(), ref workbenchSectionOpen);
+        if (workbenchSectionOpen)
+        {
+            DrawWorkbenchContents(list);
+        }
+
+        list.End();
+    }
+
+    private float GetSettingsHeight()
+    {
+        float height = 182f;
+        height += distanceSectionOpen ? 218f : 32f;
+        height += workbenchSectionOpen ? GetWorkbenchHeight() + 32f : 32f;
+        return height;
     }
 
     private float GetWorkbenchHeight()
     {
-        // 标题区 + mood/action/enable 三行 + 预览按钮
-        float height = 260f;
+        // 描述区 + mood/action/enable 三行 + 预览按钮
+        float height = 230f;
         if (moodOverrides.ContainsKey(selectedMood))
         {
             // preset + 4 slider + 写入/还原按钮行
@@ -261,7 +283,6 @@ public class SqueakyRatkinSettings : ModSettings
 
     private void DrawDistanceSettings(Listing_Standard list)
     {
-        list.Label("SR.Distance.Header".Translate());
         Rect presetRect = list.GetRect(32f);
         if (Widgets.ButtonText(presetRect, "SR.Distance.Preset".Translate() + ": " + DistancePresetLabel(distancePreset)))
         {
@@ -364,14 +385,26 @@ public class SqueakyRatkinSettings : ModSettings
         return new FloatRange(min, max);
     }
 
-    private void DrawWorkbenchContents(Rect rect)
+    private static void DrawCollapsibleHeader(Listing_Standard list, string label, ref bool open)
+    {
+        Rect rect = list.GetRect(28f);
+        Rect iconRect = new(rect.x, rect.y + 4f, 18f, 18f);
+        Rect labelRect = new(iconRect.xMax + 6f, rect.y, rect.width - 24f, rect.height);
+        Widgets.DrawHighlightIfMouseover(rect);
+        if (Widgets.ButtonImage(iconRect, open ? TexButton.Collapse : TexButton.Reveal) || Widgets.ButtonInvisible(labelRect))
+        {
+            open = !open;
+        }
+
+        TextAnchor oldAnchor = Text.Anchor;
+        Text.Anchor = TextAnchor.MiddleLeft;
+        Widgets.Label(labelRect, label);
+        Text.Anchor = oldAnchor;
+    }
+
+    private void DrawWorkbenchContents(Listing_Standard list)
     {
         EnsureBuffer();
-
-        Listing_Standard list = new();
-        list.Begin(rect);
-
-        list.Label("SR.Workbench.Header".Translate());
         list.Label("SR.Workbench.Header.Desc".Translate());
         list.Gap(8f);
 
@@ -475,8 +508,6 @@ public class SqueakyRatkinSettings : ModSettings
                 def.PlayOneShot(info);
             }
         }
-
-        list.End();
     }
 
     private void DrawPresetButtons(Rect rect, SqueakMoodMod mod)

@@ -84,7 +84,7 @@ scripts/pack-dev.ps1       local Dev-flavor directory package for manual testing
 ```
 
 ## Debug Entry (development mode)
-Developer menu → "Squeaky Ratkin" category: overlay toggle ×2 + camera indicator toggle ×2. DevMode plays auto-log. A dev-only `GlobalControlsUtility.DoDate` postfix may draw localized camera height/view size (SC: 高度/视野) in the vanilla right-side status stack. Sound preview moved to ModSettings workbench (no DevMode needed).
+Developer menu → "Squeaky Ratkin" category: overlay toggle ×2 + camera indicator toggle ×2. DevMode plays auto-log. A dev-only `GlobalControlsUtility.DoDate` postfix may draw localized camera height/view size (SC: 高度/视野) in the vanilla right-side status stack, reading actual runtime `Find.Camera.transform.position.y` / `Find.Camera.orthographicSize` rather than re-deriving vanilla height from `RootSize`. Sound preview moved to ModSettings workbench (no DevMode needed).
 
 ## Release Flow (dev → main → tag → CI)
 1. dev: atomic commits, all development here.

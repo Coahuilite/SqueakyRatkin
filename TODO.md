@@ -17,6 +17,7 @@
 - [ ] 下一阶段架构设计:长音频/配音策略
 
 ## Completed
+- [x] 最终 blockers:摄像机指示器改读真实 runtime `Find.Camera.transform.position.y` / `Find.Camera.orthographicSize`;ModSettings 改为单一滚动体,距离衰减与心情调制工作台可折叠并持久化;Release Dev 构建通过。
 - [x] 打包脚本职责缩减:build 由调用方/workflow 负责,`pack-*` 只 staging/zip,减少 GitHub Actions 重复构建耗时;branch CI dev artifact 改用 Dev flavor。
 - [x] ModSettings QoL:新增距离衰减动态图表(衰减开始前全音量→区间内线性衰减→衰减结束后静音)并用 GapLine/短标题分隔音源与触发节奏、距离衰减、心情调制工作台;`dotnet build Source/SqueakyRatkin/SqueakyRatkin.csproj` 通过。
 - [x] rc1 反馈收口:默认 1x 发声节奏保守放慢,仅改 `Ratkin_AddSqueakComp.xml` 数据默认值(无 C# 硬编码)。

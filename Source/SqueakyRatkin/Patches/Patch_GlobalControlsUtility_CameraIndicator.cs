@@ -18,17 +18,20 @@ public static class Patch_GlobalControlsUtility_CameraIndicator
             return;
         }
 
-        CameraDriver camera = Find.CameraDriver;
-        FloatRange sizeRange = camera.config.sizeRange;
-        float rootSize = camera.RootSize;
-        float t = Mathf.InverseLerp(sizeRange.min, sizeRange.max, rootSize);
-        float height = 15f + (t * 50f);
+        Camera camera = Find.Camera;
+        if (camera == null)
+        {
+            return;
+        }
+
+        float height = camera.transform.position.y;
+        float viewSize = camera.orthographicSize;
 
         curBaseY -= LineHeight;
         Rect rect = new(leftX, curBaseY, width, LineHeight);
         TextAnchor previousAnchor = Text.Anchor;
         Text.Anchor = TextAnchor.UpperRight;
-        Widgets.Label(rect, "SR.Debug.CameraIndicator".Translate(height.ToString("0.0"), rootSize.ToString("0.0")));
+        Widgets.Label(rect, "SR.Debug.CameraIndicator".Translate(height.ToString("0.0"), viewSize.ToString("0.0")));
         Text.Anchor = previousAnchor;
     }
 }
