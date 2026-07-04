@@ -7,19 +7,19 @@
   <SR.Global.Header>Audio source and timing</SR.Global.Header>
   <SR.ScaleCooldownWithTimeSpeed.Label>Scale trigger cooldown with time speed (recommended)</SR.ScaleCooldownWithTimeSpeed.Label>
   <SR.GlobalCooldownMultiplier.Label>Global trigger interval: {0}x</SR.GlobalCooldownMultiplier.Label>
-  <SR.Distance.Header>Distance attenuation</SR.Distance.Header>
+  <SR.Distance.Header>Camera-height attenuation</SR.Distance.Header>
   <SR.Distance.Preset>Attenuation preset</SR.Distance.Preset>
   <SR.Distance.Preset.Conservative>Conservative</SR.Distance.Preset.Conservative>
   <SR.Distance.Preset.Balanced>Balanced</SR.Distance.Preset.Balanced>
   <SR.Distance.Preset.Strong>Strong</SR.Distance.Preset.Strong>
   <SR.Distance.Preset.Custom>Custom</SR.Distance.Preset.Custom>
-  <SR.Distance.FullVolume>Full-volume distance</SR.Distance.FullVolume>
-  <SR.Distance.Silent>Silent distance</SR.Distance.Silent>
+  <SR.Distance.FullVolume>Attenuation starts</SR.Distance.FullVolume>
+  <SR.Distance.Silent>Attenuation ends</SR.Distance.Silent>
   <SR.Distance.Chart.Volume>Volume</SR.Distance.Chart.Volume>
-  <SR.Distance.Chart.Distance>Distance</SR.Distance.Chart.Distance>
-  <SR.Distance.Chart.Full>{0} full</SR.Distance.Chart.Full>
-  <SR.Distance.Chart.Silent>{0} silent</SR.Distance.Chart.Silent>
-  <SR.Distance.Desc>Map squeaks are full near {0} cells and fade out by {1} cells. Workbench preview is not distance-attenuated.</SR.Distance.Desc>
+  <SR.Distance.Chart.Distance>Height</SR.Distance.Chart.Distance>
+  <SR.Distance.Chart.Full>start {0}</SR.Distance.Chart.Full>
+  <SR.Distance.Chart.Silent>end {0}</SR.Distance.Chart.Silent>
+  <SR.Distance.Desc>The attenuation band matches camera/listener distance in play. Sounds below {0} stay full; between {0} and {1} they fade; above {1} they are silent. Workbench preview is not distance-attenuated.</SR.Distance.Desc>
 
   <SR.Workbench.Header>Mood modulation workbench</SR.Workbench.Header>
   <SR.Workbench.Header.Desc>Pick a mood to edit its override; pick an action to preview. Enable override to replace the XML default. Drag sliders or type exact values, then Preview to hear.</SR.Workbench.Header.Desc>

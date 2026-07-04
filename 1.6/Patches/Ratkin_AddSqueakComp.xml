@@ -39,6 +39,11 @@
           <li><mood>Bad</mood>     <pitchFactor>0.8</pitchFactor>   <pitchJitter>0.97~1.03</pitchJitter> <volumeFactor>0.7</volumeFactor></li>
           <li><mood>Break</mood>   <pitchFactor>1.1</pitchFactor>   <pitchJitter>0.6~1.5</pitchJitter>    <volumeFactor>1.5</volumeFactor></li>
         </moodMods>
+        <distancePresets>
+          <li><preset>Conservative</preset> <range>15~65</range></li>
+          <li><preset>Balanced</preset>     <range>15~50</range></li>
+          <li><preset>Strong</preset>       <range>15~40</range></li>
+        </distancePresets>
       </li>
     </value>
   </Operation>

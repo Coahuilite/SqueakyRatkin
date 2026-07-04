@@ -31,6 +31,12 @@ public class SqueakActionConfig
     public SqueakCooldownClock cooldownClock = SqueakCooldownClock.GameTicks;
 }
 
+public class SqueakDistancePresetConfig
+{
+    public SqueakDistancePreset preset = SqueakDistancePreset.Balanced;
+    public FloatRange range = new(15f, 50f);
+}
+
 /// <summary>
 /// 挂在 Ratkin pawn 上的自驱动发声组件。
 /// 配置三层:CompProperties(XML默认) ← ModSettings(玩家override) ← 运行时。
@@ -48,7 +54,7 @@ public class CompSqueaker : ThingComp
     private static readonly Dictionary<SqueakAction, SoundDef?> SoundCacheMixed = new();
     private static readonly Dictionary<SqueakAction, SoundDef?> SoundCachePure = new();
     private static bool soundCacheInitialized;
-    private static FloatRange activeDistanceRange = new(12f, 40f);
+    private static FloatRange activeDistanceRange = new(15f, 50f);
 
     private readonly Dictionary<SqueakAction, SqueakActionConfig> configMap = new();
     private readonly Dictionary<SqueakAction, int> lastTriggerTick = new();
@@ -357,6 +363,7 @@ public class CompProperties_Squeaker : CompProperties
     public int globalMinIntervalTicks = 120;
     public List<SqueakActionConfig> actions = new();
     public List<SqueakMoodMod> moodMods = new();
+    public List<SqueakDistancePresetConfig> distancePresets = new();
 
     public CompProperties_Squeaker()
     {

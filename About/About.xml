@@ -9,6 +9,7 @@
   <description>让鼠族(Ratkin)在空闲叫、吃饭、睡觉、受击、选中、移动、社交、娱乐、死亡时,按心情状态(好/中/坏/崩溃)发出吱吱叫。屏幕外视野剔除以省性能,镜头内通过距离衰减自然变轻。
 
 仅作用于 Ratkin 种族,需配合 NewRatkin(鼠族)使用。</description>
+  <url>https://github.com/Coahuilite/SqueakyRatkin</url>
   <modDependencies>
     <li>
       <packageId>brrainz.harmony</packageId>

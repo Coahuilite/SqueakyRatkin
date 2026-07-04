@@ -36,11 +36,13 @@ public enum SqueakDistancePreset { Conservative, Balanced, Strong, Custom }
 /// </summary>
 public class SqueakyRatkinSettings : ModSettings
 {
+    private static readonly FloatRange FallbackBalancedDistanceRange = new(15f, 50f);
+
     public bool useCustomOnly = false;
     public bool scaleCooldownWithTimeSpeed = true;
     public float globalCooldownMultiplier = 1f;
     public SqueakDistancePreset distancePreset = SqueakDistancePreset.Balanced;
-    public FloatRange distanceRange = new(12f, 40f);
+    public FloatRange distanceRange = new(15f, 50f);
     public Dictionary<SqueakMood, SqueakMoodMod> moodOverrides = new();
 
     // 数据驱动:mood/action 列表从所有挂 CompProperties_Squeaker 的 ThingDef 读(XML actions/moodMods)。
@@ -52,6 +54,7 @@ public class SqueakyRatkinSettings : ModSettings
     private SqueakAction selectedAction = SqueakAction.Call;
     private Vector2 scrollPos;
     private readonly Dictionary<string, string> numericBuffers = new();
+    private bool distanceRangeWasLoaded;
 
     // 编辑缓冲:slider/preset/预览作用于 editBuffer,「写入」才同步到 moodOverrides。
     private SqueakMoodMod? editBuffer;
@@ -60,11 +63,16 @@ public class SqueakyRatkinSettings : ModSettings
     public override void ExposeData()
     {
         base.ExposeData();
+        distanceRangeWasLoaded = false;
         Scribe_Values.Look(ref useCustomOnly, "useCustomOnly", false);
         Scribe_Values.Look(ref scaleCooldownWithTimeSpeed, "scaleCooldownWithTimeSpeed", true);
         Scribe_Values.Look(ref globalCooldownMultiplier, "globalCooldownMultiplier", 1f);
         Scribe_Values.Look(ref distancePreset, "distancePreset", SqueakDistancePreset.Balanced);
-        Scribe_Values.Look(ref distanceRange, "distanceRange", new FloatRange(12f, 40f));
+        Scribe_Values.Look(ref distanceRange, "distanceRange", GetDistancePresetRange(SqueakDistancePreset.Balanced));
+        if (Scribe.mode == LoadSaveMode.LoadingVars)
+        {
+            distanceRangeWasLoaded = Scribe.loader?.curXmlParent?["distanceRange"] != null;
+        }
         Scribe_Collections.Look(ref moodOverrides, "moodOverrides", LookMode.Value, LookMode.Deep);
         if (Scribe.mode == LoadSaveMode.LoadingVars && moodOverrides == null)
         {
@@ -74,6 +82,10 @@ public class SqueakyRatkinSettings : ModSettings
         if (Scribe.mode == LoadSaveMode.PostLoadInit)
         {
             globalCooldownMultiplier = Mathf.Clamp(globalCooldownMultiplier, 0f, 3f);
+            if (!distanceRangeWasLoaded)
+            {
+                distanceRange = GetDistancePresetRange(SqueakDistancePreset.Balanced);
+            }
             distanceRange = ClampDistanceRange(distanceRange);
         }
     }
@@ -106,27 +118,39 @@ public class SqueakyRatkinSettings : ModSettings
         }
     }
 
+    private static IEnumerable<CompProperties_Squeaker> ConfiguredSqueakers()
+    {
+        foreach (ThingDef def in DefDatabase<ThingDef>.AllDefs)
+        {
+            if (def.comps == null)
+            {
+                continue;
+            }
+
+            foreach (CompProperties cp in def.comps)
+            {
+                if (cp is CompProperties_Squeaker sq)
+                {
+                    yield return sq;
+                }
+            }
+        }
+    }
+
     private static void RefreshConfigured()
     {
         var moods = new List<SqueakMood>();
         var actions = new List<SqueakAction>();
-        foreach (ThingDef def in DefDatabase<ThingDef>.AllDefs)
+        foreach (CompProperties_Squeaker sq in ConfiguredSqueakers())
         {
-            if (def.comps == null) { continue; }
-
-            foreach (CompProperties cp in def.comps)
+            foreach (SqueakActionConfig cfg in sq.actions)
             {
-                if (cp is not CompProperties_Squeaker sq) { continue; }
+                if (!actions.Contains(cfg.action)) { actions.Add(cfg.action); }
+            }
 
-                foreach (SqueakActionConfig cfg in sq.actions)
-                {
-                    if (!actions.Contains(cfg.action)) { actions.Add(cfg.action); }
-                }
-
-                foreach (SqueakMoodMod mod in sq.moodMods)
-                {
-                    if (!moods.Contains(mod.mood)) { moods.Add(mod.mood); }
-                }
+            foreach (SqueakMoodMod mod in sq.moodMods)
+            {
+                if (!moods.Contains(mod.mood)) { moods.Add(mod.mood); }
             }
         }
 
@@ -137,22 +161,36 @@ public class SqueakyRatkinSettings : ModSettings
     /// <summary>从 CompProperties_Squeaker(XML 分发默认)取指定 mood 的默认 moodMod,供「还原默认」按钮用。</summary>
     private static SqueakMoodMod? GetDefaultMoodMod(SqueakMood mood)
     {
-        foreach (ThingDef def in DefDatabase<ThingDef>.AllDefs)
+        foreach (CompProperties_Squeaker sq in ConfiguredSqueakers())
         {
-            if (def.comps == null) { continue; }
-
-            foreach (CompProperties cp in def.comps)
+            foreach (SqueakMoodMod m in sq.moodMods)
             {
-                if (cp is not CompProperties_Squeaker sq) { continue; }
-
-                foreach (SqueakMoodMod m in sq.moodMods)
-                {
-                    if (m.mood == mood) { return m; }
-                }
+                if (m.mood == mood) { return m; }
             }
         }
 
         return null;
+    }
+
+    private static FloatRange GetDistancePresetRange(SqueakDistancePreset preset)
+    {
+        foreach (CompProperties_Squeaker sq in ConfiguredSqueakers())
+        {
+            foreach (SqueakDistancePresetConfig cfg in sq.distancePresets)
+            {
+                if (cfg.preset == preset)
+                {
+                    return cfg.range;
+                }
+            }
+        }
+
+        return preset switch
+        {
+            SqueakDistancePreset.Conservative => new FloatRange(15f, 65f),
+            SqueakDistancePreset.Strong => new FloatRange(15f, 40f),
+            _ => FallbackBalancedDistanceRange,
+        };
     }
 
     /// <summary>选 mood 变化或启用状态变时,从 moodOverrides 重建 editBuffer,清 numericBuffers 强制刷新输入框显示。</summary>
@@ -238,8 +276,8 @@ public class SqueakyRatkinSettings : ModSettings
         }
 
         FloatRange before = distanceRange;
-        distanceRange.min = DrawSliderWithField(list.GetRect(32f), "Distance.Min", "SR.Distance.FullVolume".Translate(), distanceRange.min, 5f, 25f);
-        distanceRange.max = DrawSliderWithField(list.GetRect(32f), "Distance.Max", "SR.Distance.Silent".Translate(), distanceRange.max, 25f, 70f);
+        distanceRange.min = DrawSliderWithField(list.GetRect(32f), "Distance.Min", "SR.Distance.FullVolume".Translate(), distanceRange.min, 15f, 60f);
+        distanceRange.max = DrawSliderWithField(list.GetRect(32f), "Distance.Max", "SR.Distance.Silent".Translate(), distanceRange.max, 20f, 65f);
         distanceRange = ClampDistanceRange(distanceRange);
 
         if (Math.Abs(before.min - distanceRange.min) > 0.0001f || Math.Abs(before.max - distanceRange.max) > 0.0001f)
@@ -264,8 +302,8 @@ public class SqueakyRatkinSettings : ModSettings
         Widgets.DrawBoxSolid(plotRect, new Color(0f, 0f, 0f, 0.18f));
 
         float x0 = plotRect.x;
-        float xFull = Mathf.Lerp(plotRect.xMin, plotRect.xMax, Mathf.InverseLerp(0f, 70f, range.min));
-        float xSilent = Mathf.Lerp(plotRect.xMin, plotRect.xMax, Mathf.InverseLerp(0f, 70f, range.max));
+        float xFull = Mathf.Lerp(plotRect.xMin, plotRect.xMax, Mathf.InverseLerp(15f, 65f, range.min));
+        float xSilent = Mathf.Lerp(plotRect.xMin, plotRect.xMax, Mathf.InverseLerp(15f, 65f, range.max));
         float xEnd = plotRect.xMax;
         float yTop = plotRect.yMin;
         float yZero = plotRect.yMax;
@@ -305,10 +343,10 @@ public class SqueakyRatkinSettings : ModSettings
         distancePreset = preset;
         distanceRange = preset switch
         {
-            SqueakDistancePreset.Conservative => new FloatRange(12f, 45f),
-            SqueakDistancePreset.Strong => new FloatRange(10f, 36f),
+            SqueakDistancePreset.Conservative => GetDistancePresetRange(SqueakDistancePreset.Conservative),
+            SqueakDistancePreset.Strong => GetDistancePresetRange(SqueakDistancePreset.Strong),
             SqueakDistancePreset.Custom => ClampDistanceRange(distanceRange),
-            _ => new FloatRange(12f, 40f),
+            _ => GetDistancePresetRange(SqueakDistancePreset.Balanced),
         };
         numericBuffers.Remove("Distance.Min");
         numericBuffers.Remove("Distance.Max");
@@ -317,11 +355,11 @@ public class SqueakyRatkinSettings : ModSettings
 
     private static FloatRange ClampDistanceRange(FloatRange range)
     {
-        float min = Mathf.Clamp(range.min, 5f, 25f);
-        float max = Mathf.Clamp(range.max, 25f, 70f);
+        float min = Mathf.Clamp(range.min, 15f, 60f);
+        float max = Mathf.Clamp(range.max, 20f, 65f);
         if (max < min + 5f)
         {
-            max = Mathf.Min(70f, min + 5f);
+            max = Mathf.Min(65f, min + 5f);
         }
         return new FloatRange(min, max);
     }
