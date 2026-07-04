@@ -8,6 +8,7 @@
 - BuildFlavor:`-p:SqueakyBuildFlavor=Dev|Steam|GitHub` → `SQUEAKY_*` 常量,仅影响启动日志 banner,运行时功能三态相同。启动日志标识:dev 强区分提交号,GitHub 显示 tag+tag commit,Steam 只显示包版本号。
 - 版本:**0.1.0-rc1**(2026-07 发版,tag `v0.1.0-rc1`,CI release 上线)。SemVer 内测期,正式 1.0.0。源头 csproj `<Version>`/`<AssemblyVersion>`。
 - CI:`.github/workflows/ci.yml`(push/PR main+dev 构建验证;push 额外产出 `dev-<sha>` artifact 供内测)+ `release.yml`(tag `v*` 发 GitHub Release)。
+- 本地手测目录包必须用 Dev flavor:`scripts/pack-dev.ps1` → `dist/dev/SqueakyRatkin/` 后复制到 RimWorld Mods；GitHub flavor 只走 CI/tag release；Steam flavor 只用于 Workshop 上传。
 - git identity:`19252128+Coahuilite@users.noreply.github.com`(GitHub noreply 带数字 ID,`--local` 不碰全局)。
 - 许可:代码 MPL-2.0,音频 All Rights Reserved,原版资产只引用不分发。
 - 本地化:全 Keyed(EN + SC),`SqueakLabels` helper 封装动作/心情名翻译。
@@ -16,7 +17,7 @@
 - **立项评估**:核实原版机制——类人种族**无原版发声钩子**(`Pawn_CallTracker` 只为 `intelligence<=1` 动物创建,`PawnComponentsUtility.cs:183`;`Toils_Ingest` 显式跳过 Humanlike 的 `race.soundEating`)。故"纯 XML 补 race 声音字段"对鼠族无效,必须自驱动 C#。
 - **核心 CompSqueaker**:数据驱动(`actions` + `moodMods` 在 `1.6/Patches/Ratkin_AddSqueakComp.xml`,C# 通用适配);**运行时调制**(`SoundInfo.pitchFactor/volumeFactor`,非 SoundDef 矩阵);三层配置(CompProperties 默认 ← ModSettings.moodOverrides ← useCustomOnly);复用 `Pawn_CallTracker` 摄像机视野剔除(`CurrentViewRect.ExpandedBy(10).Contains()`,性能优化)+ **distRange 距离衰减**(`SoundInfo.InMap(TargetInfo(Pawn))` 让引擎按相机-pawn 距离线性衰减,15~70 格,超 70 无声;2026-07 删除原 `CurrentZoom<=Close` zoom gating,因它挡掉 distRange 自然衰减,只有最大缩放才响);default 原版豚鼠(GuineaPig)。
 - **触发模式**:Eat=EachTime;Call/Move/Sleep/Social/Joy=RandomOneShot(概率+间隔);Wounded/Select/Death=External(patch `Pawn.PostApplyDamage` / `Selector.Select`(postfix,位置注入 `__0`)/ `Pawn.Kill`(prefix,被击杀+流血而亡统一入口),带最短间隔节流防高攻速刷屏)。Select 节流 15 ticks(0.25 秒,2026-07 从 60 调低);**0.1.0 发布前新增 per-pawn `globalMinIntervalTicks` 全局冷却**,`Death.ignoreGlobalCooldown=true` 不被全局冷却吞掉;`Select.ignoreGlobalCooldown=true` + `cooldownClock=Realtime` 保持暂停时玩家反馈。
-- **ModSettings 调制工作台**:下拉选心情/动作 + slider+TextFieldFloat 联动 + 4 预设(尖锐/中性/低沉/混乱)+ 预览试听(`SoundDef.PlayOneShot(SoundInfo.OnCamera())`);**`globalCooldownMultiplier` 玩家可调全局触发间隔**,**`scaleCooldownWithTimeSpeed` 默认开启**,在 `TickRateMultiplier>1` 时按倍速放大全局/动作有效冷却,稳定现实时间触发密度；高倍速不再按倍速压低单次 `volumeFactor`。
+- **ModSettings 调制工作台**:下拉选心情/动作 + slider+TextFieldFloat 联动 + 4 预设(尖锐/中性/低沉/混乱)+ 预览试听(`SoundDef.PlayOneShot(SoundInfo.OnCamera())`);**`globalCooldownMultiplier` 玩家可调全局触发间隔**,**距离衰减预设/自定义**(保守 12~45,适中/默认 12~40,强力 10~36;预设写入实际 range,手动改数值自动 Custom,运行时覆盖 SR_* / SR_*_Pure 非 onCamera subSound `distRange`);**`scaleCooldownWithTimeSpeed` 默认开启**,在 `TickRateMultiplier>1` 时按倍速放大全局/动作有效冷却,稳定现实时间触发密度；高倍速不再按倍速压低单次 `volumeFactor`。
 - **Dev 调试**:`[DebugAction]` 菜单(悬浮字开关 ×2)+ 描边悬浮字(`MoteTextWithBackground`)+ DevMode 日志；声音预览已集中到 ModSettings 工作台。
 - **分发**:LICENSE(MPL-2.0)+ 双语 `README.md`/`README.zh-CN.md` + AGENTS.md + CONTRIBUTING.md(含术语通俗解释)+ `1.6/Sounds/Squeak/AUDIO_GUIDE.txt`(ogg/22050/16bit/mono);`scripts/`(validate-junction + pack-steam/pack-github);CI/CD。
 - **上云准备**:脱敏(README 本地路径占位、AGENTS 兄弟项目名泛化)+ `.gitignore` 完善 + packageId 定死 + author 统一 Coahuilite + commit 规范(`.gitmessage`)。
@@ -25,7 +26,7 @@
 - **启动崩溃修复**(2026-07,commit `982331f`,实测通过):(1) `Patch_Selector_Select` postfix 声明 `Thing t`,但 `Selector.Select` 实参为 `(object obj,bool,bool)`,Harmony 按参数名注入找不到 `t` → Mod 类构造崩;改位置注入 `object __0`。(2) XML FloatRange 写 `(a,b)`,但 vanilla `FloatRange.FromString` 用 `~` 分隔(`Split('~')`)→ 16 SoundDef + moodMod 全部 FormatException;全项目 `(a,b)`→`a~b`。
 - **v0.1.0-rc1 发版**(2026-07,tag `v0.1.0-rc1`,commit `91f0c9d`):rebase 整理 dev 为 1 干净 commit,tag 触发 CI release 发 GitHub Release。内测候选,反馈后正式 0.1.0(merge main + tag v0.1.0)。rc1 含:Death 音效、工作台 editBuffer 三按钮(写入/还原/默认值)+ mood/action 数据驱动、试听集中工作台(删 DevMode 浏览器,SR_*_Preview onCamera 无衰减)、SC 本地化修复(ChineseSimplified 文件夹)、启动日志增强、调参(Good 1.2/Bad 0.8/0.7/Break 1.1+0.6~1.5/Call 0.015/Death 0.8~0.9)。
 - **rc1 声音反馈结论**(2026-07-04):测试对象为已分发 `v0.1.0-rc1`,非当前本地修改版。高倍速声音显著变小已实际复现,首要原因是 rc1 代码 `info.volumeFactor = mod.volumeFactor * TimeSpeedVolumeFactor()`,在 3x/4x 分别约为 1/3、1/4 音量；声音重叠/覆盖不是首要解释。暂停+缩放后第一声音量疑似不一致:代码层依据为 `SoundInfo.InMap(TargetInfo(Pawn))` + Unity 3D AudioSource 距离衰减,`CameraDriver.Update()->ApplyPositionToGameObject()` 以 `RootSize` 改相机高度且暂停中仍可更新；若暂停中缩放后立刻触发声音,可能遇到相机 transform/AudioListener 与播放触发同帧时序未刷新,需运行时复现确认,暂不改代码。
-- **构建识别**(2026-07-04):启动日志按渠道显示身份。Dev 需要最强区分,显示提交号(`dev-<sha>`);GitHub flavor 注入 `<tag>+<tag commit>`;Steam flavor 只注入包版本号。`IncludeSourceRevisionInInformationalVersion=false` 用于 GitHub/Steam 脚本防止 SDK 额外追加 commit。
+- **构建识别**(2026-07-04):启动日志按渠道显示身份。Dev 需要最强区分,显示提交号(`dev-<sha>`);GitHub flavor 注入 `<tag>+<tag commit>` 且只由 CI/tag release 产出;Steam flavor 只注入包版本号且只用于 Workshop 上传。`IncludeSourceRevisionInInformationalVersion=false` 用于 GitHub/Steam 脚本防止 SDK 额外追加 commit。
 - **功能调优**(2026-07,本地待推送):声音浏览器 `SoundInfo.OnCamera()`→`InMap(镜头中心)`(onCamera 需 subSound.onCamera=true 未配);删镜头 zoom gating;Select 节流 60→15;mote 位置可配置(`modExtensions/SqueakMoteOffset`,offsetY 默认 1.2);Death 死亡音效(`Pawn.Kill` prefix + `SR_Death`,GuineaPig/Pain grain,pitch 0.85~0.95)。
 
 ## Active Constraints

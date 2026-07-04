@@ -56,9 +56,11 @@ dotnet build Source/SqueakyRatkin/SqueakyRatkin.csproj
 workdir = project root. Must be 0 errors. A missing-junction WARNING is normal (non-blocking).
 
 ## Pack (distribution)
+- `scripts/pack-dev.ps1` → `dist/dev/SqueakyRatkin/` (**local testing only**, Dev flavor; use this when copying a local test build into RimWorld/Mods).
 - `scripts/pack-steam.ps1` → `dist/steam/SqueakyRatkin/` (Steam flavor)
 - `scripts/pack-github.ps1` → `dist/github/SqueakyRatkin-v<ver>.zip` (GitHub flavor)
 - Content filter: only `About/`, `LoadFolders.xml`, `1.6/`. Excludes `Source/`, `*.pdb`, `About/PublishedFileId.txt`, `dist/`, `*.md`, `LICENSE`, `scripts/`.
+- **Flavor discipline**: local dev/test directory packages must use Dev flavor (`pack-dev.ps1`). GitHub flavor packages must be produced by CI release/tag flow only. Steam flavor is reserved for Steam Workshop packaging/upload, not local dev testing.
 
 ## Key File Map
 ```
@@ -76,6 +78,7 @@ Source/SqueakyRatkin/
   Sounds/Squeak/<Action>/  custom audio placeholders (players place custom audio here)
   Languages/{English,ChineseSimplified}/Keyed/ localization
 scripts/                   validate-junction / pack-steam / pack-github
+scripts/pack-dev.ps1       local Dev-flavor directory package for manual testing
 ```
 
 ## Debug Entry (development mode)

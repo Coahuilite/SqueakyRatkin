@@ -6,6 +6,15 @@
   <SR.UseCustomOnly.Desc>开启:只用自定义音频(SR_*_Pure)。关闭:自定义与原版豚鼠 default 混合。</SR.UseCustomOnly.Desc>
   <SR.ScaleCooldownWithTimeSpeed.Label>按游戏倍速放大触发冷却(推荐)</SR.ScaleCooldownWithTimeSpeed.Label>
   <SR.GlobalCooldownMultiplier.Label>全局触发间隔：{0}x</SR.GlobalCooldownMultiplier.Label>
+  <SR.Distance.Header>距离衰减</SR.Distance.Header>
+  <SR.Distance.Preset>衰减预设</SR.Distance.Preset>
+  <SR.Distance.Preset.Conservative>保守</SR.Distance.Preset.Conservative>
+  <SR.Distance.Preset.Balanced>适中</SR.Distance.Preset.Balanced>
+  <SR.Distance.Preset.Strong>强力</SR.Distance.Preset.Strong>
+  <SR.Distance.Preset.Custom>自定义</SR.Distance.Preset.Custom>
+  <SR.Distance.FullVolume>满音量距离</SR.Distance.FullVolume>
+  <SR.Distance.Silent>静音距离</SR.Distance.Silent>
+  <SR.Distance.Desc>地图内鼠叫在 {0} 格附近保持完整音量,到 {1} 格时衰减至静音。工作台预览不受距离衰减影响。</SR.Distance.Desc>
 
   <SR.Workbench.Header>心情调制工作台</SR.Workbench.Header>
   <SR.Workbench.Header.Desc>选一个心情编辑其 override;选一个动作用于预览。启用 override 即覆盖 XML 默认。拖动滑块或输入精确值,然后点预览试听。</SR.Workbench.Header.Desc>

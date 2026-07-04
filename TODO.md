@@ -22,6 +22,8 @@
 - [x] 正式 0.1.0 发布前:修复高倍速声音显著变小:移除按 `TickRateMultiplier` 压低单次 `volumeFactor`,高倍速降噪改由冷却补偿承担。
 - [x] 正式 0.1.0 发布前:新增字段驱动冷却时钟(`cooldownClock`),Select 配置 Realtime + ignoreGlobalCooldown,暂停时仍保留玩家反馈。
 - [x] 正式 0.1.0 发布前:启动日志加入强区分 build 标识(dev 提交号/GitHub tag/Steam 包版本),减少旧版反馈误判。
+- [x] 正式 0.1.0 发布前:新增 `pack-dev.ps1`,明确本地测试只能用 Dev flavor；GitHub flavor 仅 CI/tag release；Steam flavor 仅 Workshop 上传。
+- [x] 正式 0.1.0 发布前:新增距离衰减预设/自定义设置(保守 12~45,适中 12~40,强力 10~36;手动改值自动 Custom,运行时覆盖游戏内 SR_* distRange)。
 - [x] 正式 0.1.0 发布前:发布卫生修正(README/README.zh-CN/About/AUDIO_GUIDE 对齐 distRange/工作台预览/Death,补 Death README)。
 - [x] 生成 `docs/` 规划与工程审阅文档(仓库状态、架构规划、独立 oracle 工程审阅)
 - [x] 生成根目录文案人工审核表 `TEXT_REVIEW.md`(含 About、Keyed、README、CONTRIBUTING、AUDIO_GUIDE、XML 注释、开发者菜单硬编码字符串)

@@ -48,6 +48,7 @@ public class CompSqueaker : ThingComp
     private static readonly Dictionary<SqueakAction, SoundDef?> SoundCacheMixed = new();
     private static readonly Dictionary<SqueakAction, SoundDef?> SoundCachePure = new();
     private static bool soundCacheInitialized;
+    private static FloatRange activeDistanceRange = new(12f, 40f);
 
     private readonly Dictionary<SqueakAction, SqueakActionConfig> configMap = new();
     private readonly Dictionary<SqueakAction, int> lastTriggerTick = new();
@@ -295,6 +296,37 @@ public class CompSqueaker : ThingComp
     {
         EnsureSoundCache();
         return UseCustomOnly ? SoundCachePure[a] : SoundCacheMixed[a];
+    }
+
+    public static void ApplyDistanceRange(FloatRange range)
+    {
+        activeDistanceRange = range;
+        EnsureSoundCache();
+        foreach (SoundDef? def in SoundCacheMixed.Values)
+        {
+            ApplyDistanceRange(def, activeDistanceRange);
+        }
+
+        foreach (SoundDef? def in SoundCachePure.Values)
+        {
+            ApplyDistanceRange(def, activeDistanceRange);
+        }
+    }
+
+    private static void ApplyDistanceRange(SoundDef? def, FloatRange range)
+    {
+        if (def?.subSounds == null)
+        {
+            return;
+        }
+
+        foreach (SubSoundDef subSound in def.subSounds)
+        {
+            if (!subSound.onCamera)
+            {
+                subSound.distRange = range;
+            }
+        }
     }
 
     private bool IsEating() => Pawn.CurJob?.def == JobDefOf.Ingest;

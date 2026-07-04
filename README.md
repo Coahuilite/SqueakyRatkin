@@ -30,7 +30,7 @@ Three layers (bottom → top):
 2. **Player override**: mod settings "Modulation Workbench" — toggle a mood's override, slider + input + presets (Sharp/Neutral/Low/Chaos) + preview
 3. **Source switch**: `Full override` (custom-only vs mixed with vanilla default)
 
-Also includes a global trigger interval slider and a `Scale trigger cooldown with time speed` checkbox (default ON). Accelerated play is quieted by reducing real-time trigger density rather than lowering each sound's volume. Select feedback uses a real-time cooldown, so it remains responsive while the game is paused.
+Also includes a global trigger interval slider, a distance attenuation preset/custom control, and a `Scale trigger cooldown with time speed` checkbox (default ON). Accelerated play is quieted by reducing real-time trigger density rather than lowering each sound's volume. Select feedback uses a real-time cooldown, so it remains responsive while the game is paused.
 
 ## Dev Menu (development mode)
 Developer menu → "Squeaky Ratkin": overlay text on/off ×2. Sound preview lives in the mod settings workbench.
@@ -65,8 +65,9 @@ Must be 0 errors. A missing-junction WARNING is normal (non-blocking).
 `-p:SqueakyBuildFlavor=Dev|Steam|GitHub` toggles the startup-log banner (`[dev|steam|github]`). Runtime behavior is identical across flavors. Startup logs identify dev builds by commit, GitHub releases by tag plus commit, and Steam builds by package version.
 
 ### Pack
-- `pwsh scripts/pack-steam.ps1` → `dist/steam/SqueakyRatkin/` (Workshop upload)
-- `pwsh scripts/pack-github.ps1` → `dist/github/SqueakyRatkin-v<ver>.zip` (GitHub Release)
+- `pwsh scripts/pack-dev.ps1` → `dist/dev/SqueakyRatkin/` (local manual testing)
+- `pwsh scripts/pack-steam.ps1` → `dist/steam/SqueakyRatkin/` (Workshop upload only)
+- `pwsh scripts/pack-github.ps1` → `dist/github/SqueakyRatkin-v<ver>.zip` (GitHub Release; CI/tag flow only)
 - Content includes only `About/`, `LoadFolders.xml`, `1.6/` (excludes source / pdb / docs).
 
 ## Branches & Contributing

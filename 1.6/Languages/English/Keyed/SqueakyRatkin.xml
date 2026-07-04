@@ -6,6 +6,15 @@
   <SR.UseCustomOnly.Desc>ON: only custom audio (SR_*_Pure). OFF: custom + vanilla guinea-pig default mixed.</SR.UseCustomOnly.Desc>
   <SR.ScaleCooldownWithTimeSpeed.Label>Scale trigger cooldown with time speed (recommended)</SR.ScaleCooldownWithTimeSpeed.Label>
   <SR.GlobalCooldownMultiplier.Label>Global trigger interval: {0}x</SR.GlobalCooldownMultiplier.Label>
+  <SR.Distance.Header>Distance attenuation</SR.Distance.Header>
+  <SR.Distance.Preset>Attenuation preset</SR.Distance.Preset>
+  <SR.Distance.Preset.Conservative>Conservative</SR.Distance.Preset.Conservative>
+  <SR.Distance.Preset.Balanced>Balanced</SR.Distance.Preset.Balanced>
+  <SR.Distance.Preset.Strong>Strong</SR.Distance.Preset.Strong>
+  <SR.Distance.Preset.Custom>Custom</SR.Distance.Preset.Custom>
+  <SR.Distance.FullVolume>Full-volume distance</SR.Distance.FullVolume>
+  <SR.Distance.Silent>Silent distance</SR.Distance.Silent>
+  <SR.Distance.Desc>Map squeaks are full near {0} cells and fade out by {1} cells. Workbench preview is not distance-attenuated.</SR.Distance.Desc>
 
   <SR.Workbench.Header>Mood modulation workbench</SR.Workbench.Header>
   <SR.Workbench.Header.Desc>Pick a mood to edit its override; pick an action to preview. Enable override to replace the XML default. Drag sliders or type exact values, then Preview to hear.</SR.Workbench.Header.Desc>

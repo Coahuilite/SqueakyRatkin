@@ -26,6 +26,8 @@ public class SqueakMoodMod : IExposable
     public SqueakMoodMod Clone() => new() { mood = mood, pitchFactor = pitchFactor, volumeFactor = volumeFactor, pitchJitter = pitchJitter };
 }
 
+public enum SqueakDistancePreset { Conservative, Balanced, Strong, Custom }
+
 /// <summary>
 /// 玩家配置。承载:
 ///  - useCustomOnly:音源开关(纯自定义 override / 混合原版 default)
@@ -37,6 +39,8 @@ public class SqueakyRatkinSettings : ModSettings
     public bool useCustomOnly = false;
     public bool scaleCooldownWithTimeSpeed = true;
     public float globalCooldownMultiplier = 1f;
+    public SqueakDistancePreset distancePreset = SqueakDistancePreset.Balanced;
+    public FloatRange distanceRange = new(12f, 40f);
     public Dictionary<SqueakMood, SqueakMoodMod> moodOverrides = new();
 
     // 数据驱动:mood/action 列表从所有挂 CompProperties_Squeaker 的 ThingDef 读(XML actions/moodMods)。
@@ -59,6 +63,8 @@ public class SqueakyRatkinSettings : ModSettings
         Scribe_Values.Look(ref useCustomOnly, "useCustomOnly", false);
         Scribe_Values.Look(ref scaleCooldownWithTimeSpeed, "scaleCooldownWithTimeSpeed", true);
         Scribe_Values.Look(ref globalCooldownMultiplier, "globalCooldownMultiplier", 1f);
+        Scribe_Values.Look(ref distancePreset, "distancePreset", SqueakDistancePreset.Balanced);
+        Scribe_Values.Look(ref distanceRange, "distanceRange", new FloatRange(12f, 40f));
         Scribe_Collections.Look(ref moodOverrides, "moodOverrides", LookMode.Value, LookMode.Deep);
         if (Scribe.mode == LoadSaveMode.LoadingVars && moodOverrides == null)
         {
@@ -68,6 +74,7 @@ public class SqueakyRatkinSettings : ModSettings
         if (Scribe.mode == LoadSaveMode.PostLoadInit)
         {
             globalCooldownMultiplier = Mathf.Clamp(globalCooldownMultiplier, 0f, 3f);
+            distanceRange = ClampDistanceRange(distanceRange);
         }
     }
 
@@ -76,6 +83,7 @@ public class SqueakyRatkinSettings : ModSettings
         CompSqueaker.UseCustomOnly = useCustomOnly;
         CompSqueaker.ScaleCooldownWithTimeSpeed = scaleCooldownWithTimeSpeed;
         CompSqueaker.GlobalCooldownMultiplier = Mathf.Clamp(globalCooldownMultiplier, 0f, 3f);
+        CompSqueaker.ApplyDistanceRange(ClampDistanceRange(distanceRange));
     }
 
     private static List<SqueakMood> ConfiguredMoods
@@ -168,7 +176,7 @@ public class SqueakyRatkinSettings : ModSettings
 
     public void DrawSettings(Rect rect)
     {
-        const float topHeight = 130f;
+        const float topHeight = 248f;
         float workbenchHeight = Mathf.Max(0f, rect.height - topHeight);
 
         Listing_Standard topList = new();
@@ -177,6 +185,8 @@ public class SqueakyRatkinSettings : ModSettings
         topList.CheckboxLabeled("SR.ScaleCooldownWithTimeSpeed.Label".Translate(), ref scaleCooldownWithTimeSpeed);
         topList.Label("SR.GlobalCooldownMultiplier.Label".Translate(globalCooldownMultiplier.ToString("0.##")));
         globalCooldownMultiplier = topList.Slider(globalCooldownMultiplier, 0f, 3f);
+        topList.Gap(6f);
+        DrawDistanceSettings(topList);
         topList.GapLine();
         topList.End();
 
@@ -206,6 +216,64 @@ public class SqueakyRatkinSettings : ModSettings
         }
 
         return height;
+    }
+
+    private void DrawDistanceSettings(Listing_Standard list)
+    {
+        list.Label("SR.Distance.Header".Translate());
+        Rect presetRect = list.GetRect(32f);
+        if (Widgets.ButtonText(presetRect, "SR.Distance.Preset".Translate() + ": " + DistancePresetLabel(distancePreset)))
+        {
+            List<FloatMenuOption> options = new();
+            foreach (SqueakDistancePreset preset in Enum.GetValues(typeof(SqueakDistancePreset)))
+            {
+                SqueakDistancePreset localPreset = preset;
+                options.Add(new FloatMenuOption(DistancePresetLabel(localPreset), () => ApplyDistancePreset(localPreset)));
+            }
+
+            Find.WindowStack.Add(new FloatMenu(options));
+        }
+
+        FloatRange before = distanceRange;
+        distanceRange.min = DrawSliderWithField(list.GetRect(32f), "Distance.Min", "SR.Distance.FullVolume".Translate(), distanceRange.min, 5f, 25f);
+        distanceRange.max = DrawSliderWithField(list.GetRect(32f), "Distance.Max", "SR.Distance.Silent".Translate(), distanceRange.max, 25f, 70f);
+        distanceRange = ClampDistanceRange(distanceRange);
+
+        if (Math.Abs(before.min - distanceRange.min) > 0.0001f || Math.Abs(before.max - distanceRange.max) > 0.0001f)
+        {
+            distancePreset = SqueakDistancePreset.Custom;
+            ApplyToRuntime();
+        }
+
+        list.Label("SR.Distance.Desc".Translate(distanceRange.min.ToString("0.#"), distanceRange.max.ToString("0.#")));
+    }
+
+    private static string DistancePresetLabel(SqueakDistancePreset preset) => ("SR.Distance.Preset." + preset).Translate();
+
+    private void ApplyDistancePreset(SqueakDistancePreset preset)
+    {
+        distancePreset = preset;
+        distanceRange = preset switch
+        {
+            SqueakDistancePreset.Conservative => new FloatRange(12f, 45f),
+            SqueakDistancePreset.Strong => new FloatRange(10f, 36f),
+            SqueakDistancePreset.Custom => ClampDistanceRange(distanceRange),
+            _ => new FloatRange(12f, 40f),
+        };
+        numericBuffers.Remove("Distance.Min");
+        numericBuffers.Remove("Distance.Max");
+        ApplyToRuntime();
+    }
+
+    private static FloatRange ClampDistanceRange(FloatRange range)
+    {
+        float min = Mathf.Clamp(range.min, 5f, 25f);
+        float max = Mathf.Clamp(range.max, 25f, 70f);
+        if (max < min + 5f)
+        {
+            max = Mathf.Min(70f, min + 5f);
+        }
+        return new FloatRange(min, max);
     }
 
     private void DrawWorkbenchContents(Rect rect)
