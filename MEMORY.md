@@ -6,7 +6,7 @@
 - junction:`I:\SteamLibrary\steamapps\common\RimWorld\Mods\SqueakyRatkin` → 工作区根,编译即加载。
 - 构建:`dotnet build Source/SqueakyRatkin/SqueakyRatkin.csproj` → `1.6/Assemblies/SqueakyRatkin.dll`,要求 0 错误。
 - BuildFlavor:`-p:SqueakyBuildFlavor=Dev|Steam|GitHub` → `SQUEAKY_*` 常量,仅影响启动日志 banner,运行时功能三态相同。启动日志标识:dev 强区分提交号,GitHub 显示 tag+tag commit,Steam 只显示包版本号。
-- 版本:**0.1.1**(2026-07 修复发布准备中)。源头 csproj `<Version>`/`<AssemblyVersion>`。
+- 版本:**0.1.1**(2026-07 修复发布完成,tag `v0.1.1` 指向 main `1b1fe9e`)。源头 csproj `<Version>`/`<AssemblyVersion>`。
 - CI:`.github/workflows/ci.yml`(push/PR main+dev 构建验证;push 额外产出 `dev-<sha>` artifact 供内测)+ `release.yml`(tag `v*` 发 GitHub Release)。
 - 本地手测目录包必须先 build Dev flavor,再 `scripts/pack-dev.ps1` → `dist/dev/SqueakyRatkin/` 后复制到 RimWorld Mods；打包脚本只 staging/zip,不再构建以避免 CI 重复构建；GitHub flavor 只走 CI/tag release；Steam flavor 只用于 Workshop 上传。
 - git identity:`19252128+Coahuilite@users.noreply.github.com`(GitHub noreply 带数字 ID,`--local` 不碰全局)。

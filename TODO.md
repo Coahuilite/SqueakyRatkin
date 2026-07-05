@@ -1,15 +1,15 @@
 # TODO
 
 ## Current Goal
-0.1.1 修复发布:恢复玩家排障 DebugAction、补模组元数据本地化、刷新发布包并走 dev→main→tag release。
+0.1.1 修复发布已完成;剩余 Steam Workshop 手动上传。
 
 ## In Progress
-- [ ] 0.1.1 发版准备:PR dev→main squash merge + tag `v0.1.1` + push(CI release)
+- [ ] Steam Workshop 上传:复制 `dist/steam/SqueakyRatkin/` 到 RimWorld Mods 后用 RimWorld 开发者模式上传,并手动配置 Workshop Required Items/版本标签。
 
 ## Pending
 - [ ] 收集自定义音频(ogg/22050Hz/16-bit/mono,放 `1.6/Sounds/Squeak/<Action>/SR_<Action>_<n>.ogg`,取消 grain 注释)
 - [ ] rc1 反馈驱动调参(改 Ratkin_AddSqueakComp.xml,不重编译)
-- [ ] Steam Workshop 上传:待 GitHub `v0.1.1` release 成功后重新生成 Steam flavor 包;下一步复制 `dist/steam/SqueakyRatkin/` 到 RimWorld Mods 后用 RimWorld 开发者模式上传,并手动配置 Workshop Required Items/版本标签。
+- [ ] Steam Workshop 上传后记录 Workshop item ID/URL,并决定是否更新 About/README 链接。
 - [ ] 下一阶段架构设计:组件资格判定
 - [ ] 下一阶段架构设计:xenotype/gene 目标配置
 - [ ] 下一阶段架构设计:动作元数据拆分
@@ -17,6 +17,7 @@
 
 ## Completed
 - [x] 0.1.1 修复发布准备:解除玩家排障 DebugAction/Camera Indicator 的错误 Dev-only 编译门;新增 `ModMetaData.Name/Description` Keyed 本地化 patch(语言未初始化时静默回退 About.xml 英文);Release 构建禁调试符号;README 增加 3A AI 制作声明并把自定义音频许可交由音频提供者声明;距离设置标题改为 `Distance volume fade`/`距离音量衰减`;版本推进到 0.1.1。
+- [x] 0.1.1 GitHub 发布完成(2026-07-05):首次错误 `v0.1.1` asset 下载数为 0,已删除 release/tag 并重新发布;最终 `v0.1.1` 指向 main `1b1fe9e`,GitHub Release 成功,Steam flavor 包已重新生成并审计通过。
 - [x] Steam 手动发布包准备(2026-07-05):Release Steam flavor build 通过,`scripts/pack-steam.ps1 -SteamVersion 0.1.0` 生成 `dist/steam/SqueakyRatkin/`(20 files,约 708 KB);审计确认无源码/脚本/PDB/项目文件/PublishedFileId/本机路径/账号/token/secret/SteamCMD 信息。为避免 DLL 嵌入本机源码路径,Release 构建禁用 DebugType/DebugSymbols。
 - [x] DebugAction 发布包缺失修复(2026-07-05):确认根因为 `SqueakDebugActions` 与 camera indicator patch 被 `SQUEAKY_DEV` 编译门排除,导致 GitHub/Steam flavor 中英文均无入口;已改为全 flavor 编译,运行时仍由 RimWorld Dev Mode + active map 限制。Steam/GitHub/Dev flavor 构建通过,Steam 包 DLL 已确认包含 Overlay/CameraIndicator DebugAction。
 - [x] 调试动作本地化:参考 `Dev In Your Language` 的 `DebugAction_*` Keyed 风格,新增 DebugAction 节点本地化 patch;由全版本 ModSettings 开关控制,默认关闭;切换时清 DebugAction 静态缓存,无需重启,重开调试动作菜单后生效;鼠族汉化包检查为普通 Def/Keyed 汉化,未见 DebugAction 支持。
