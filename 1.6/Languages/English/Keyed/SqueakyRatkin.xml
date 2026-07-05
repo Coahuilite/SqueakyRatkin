@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LanguageData>
   <SR.SettingsCategory>Squeaky Ratkin</SR.SettingsCategory>
+  <SR.About.Name>Squeaky Ratkin</SR.About.Name>
+  <SR.About.Description>Squeaky Ratkin is a lightweight sound effect mod that injects a little stir into the Ratkin experience. It brings a whimsical medley of chirps and squeaks to these once-silent little critters, ensuring every action comes with... a little sound things. No longer shall the colonies and the world beyond echo solely with the lamentations of blood and fire - the whispered squeaks of the ratkin will remind you that though they may be small, they are never content to remain silent.
+
+*Not eligible for registration in The Book of Squeakudges*</SR.About.Description>
 
   <SR.UseCustomOnly.Label>Custom audio full override</SR.UseCustomOnly.Label>
   <SR.UseCustomOnly.Desc>ON: only custom audio (SR_*_Pure). OFF: custom + vanilla default (guinea-pig) mixed.</SR.UseCustomOnly.Desc>
@@ -9,7 +13,7 @@
   <SR.ScaleFrequencyWithTalking.Label>Scale squeak frequency with Talking capacity</SR.ScaleFrequencyWithTalking.Label>
   <SR.LocalizeDebugActions.Label>Localize debug actions with this mod's translations (reopen the debug actions menu)</SR.LocalizeDebugActions.Label>
   <SR.GlobalCooldownMultiplier.Label>Global trigger interval: {0}x</SR.GlobalCooldownMultiplier.Label>
-  <SR.Distance.Header>Camera-height attenuation</SR.Distance.Header>
+  <SR.Distance.Header>Distance volume fade</SR.Distance.Header>
   <SR.Distance.Preset>Attenuation preset</SR.Distance.Preset>
   <SR.Distance.Preset.Conservative>Conservative</SR.Distance.Preset.Conservative>
   <SR.Distance.Preset.Balanced>Balanced</SR.Distance.Preset.Balanced>

@@ -6,7 +6,7 @@
 - junction:`I:\SteamLibrary\steamapps\common\RimWorld\Mods\SqueakyRatkin` → 工作区根,编译即加载。
 - 构建:`dotnet build Source/SqueakyRatkin/SqueakyRatkin.csproj` → `1.6/Assemblies/SqueakyRatkin.dll`,要求 0 错误。
 - BuildFlavor:`-p:SqueakyBuildFlavor=Dev|Steam|GitHub` → `SQUEAKY_*` 常量,仅影响启动日志 banner,运行时功能三态相同。启动日志标识:dev 强区分提交号,GitHub 显示 tag+tag commit,Steam 只显示包版本号。
-- 版本:**0.1.0-rc1**(2026-07 发版,tag `v0.1.0-rc1`,CI release 上线)。SemVer 内测期,正式 1.0.0。源头 csproj `<Version>`/`<AssemblyVersion>`。
+- 版本:**0.1.1**(2026-07 修复发布准备中)。源头 csproj `<Version>`/`<AssemblyVersion>`。
 - CI:`.github/workflows/ci.yml`(push/PR main+dev 构建验证;push 额外产出 `dev-<sha>` artifact 供内测)+ `release.yml`(tag `v*` 发 GitHub Release)。
 - 本地手测目录包必须先 build Dev flavor,再 `scripts/pack-dev.ps1` → `dist/dev/SqueakyRatkin/` 后复制到 RimWorld Mods；打包脚本只 staging/zip,不再构建以避免 CI 重复构建；GitHub flavor 只走 CI/tag release；Steam flavor 只用于 Workshop 上传。
 - git identity:`19252128+Coahuilite@users.noreply.github.com`(GitHub noreply 带数字 ID,`--local` 不碰全局)。
@@ -18,9 +18,9 @@
 - **核心 CompSqueaker**:数据驱动(`actions` + `moodMods` 在 `1.6/Patches/Ratkin_AddSqueakComp.xml`,C# 通用适配);**运行时调制**(`SoundInfo.pitchFactor/volumeFactor`,非 SoundDef 矩阵);三层配置(CompProperties 默认 ← ModSettings.moodOverrides ← useCustomOnly);复用 `Pawn_CallTracker` 摄像机视野剔除(`CurrentViewRect.ExpandedBy(10).Contains()`,性能优化)+ **distRange 距离衰减**(`SoundInfo.InMap(TargetInfo(Pawn))` 让引擎按相机-pawn 距离线性衰减,15~70 格,超 70 无声;2026-07 删除原 `CurrentZoom<=Close` zoom gating,因它挡掉 distRange 自然衰减,只有最大缩放才响);default 原版豚鼠(GuineaPig)。
 - **触发模式**:Eat=EachTime;Call/Move/Sleep/Social/Joy=RandomOneShot(概率+间隔);Wounded/Select/Death=External(patch `Pawn.PostApplyDamage` / `Selector.Select`(postfix,位置注入 `__0`)/ `Pawn.Kill`(prefix,被击杀+流血而亡统一入口),带最短间隔节流防高攻速刷屏)。Select 节流 15 ticks(0.25 秒,2026-07 从 60 调低);**0.1.0 发布前新增 per-pawn `globalMinIntervalTicks` 全局冷却**,`Death.ignoreGlobalCooldown=true` 不被全局冷却吞掉;`Select.ignoreGlobalCooldown=true` + `cooldownClock=Realtime` 保持暂停时玩家反馈。
 - **ModSettings 调制工作台**:下拉选心情/动作 + slider+TextFieldFloat 联动 + 4 预设(尖锐/中性/低沉/混乱)+ 预览试听(`SoundDef.PlayOneShot(SoundInfo.OnCamera())`);**`globalCooldownMultiplier` 玩家可调全局触发间隔**,**距离衰减预设/自定义**改为 player-visible 衰减区间(保守 15~65,适中/默认 15~50,强力 15~40,值来自 XML `distancePresets`;玩家调“衰减开始/结束”,低于开始全音量,高于结束静音;预设写入实际 range,手动改数值自动 Custom,运行时覆盖 SR_* / SR_*_Pure 非 onCamera subSound `distRange`);**`scaleCooldownWithTimeSpeed` 默认开启**,在 `TickRateMultiplier>1` 时按倍速放大全局/动作有效冷却,稳定现实时间触发密度；高倍速不再按倍速压低单次 `volumeFactor`。
-- **ModSettings QoL**(2026-07-04):设置页为单一滚动体,全局音源/触发节奏常显;Distance attenuation 和 Mood modulation workbench 用原生 `TexButton.Collapse/Reveal` 折叠头,开合状态通过 ModSettings 持久化(距离默认展开,工作台默认折叠);距离衰减区有原生 Widgets 动态图表,直接显示“衰减开始→衰减结束”区间:开始前全音量、区间内线性衰减、结束后静音,随滑块/输入框立即更新。
-- **Dev 调试**:`[DebugAction]` 菜单(悬浮字开关 ×2)+ 描边悬浮字(`MoteTextWithBackground`)+ DevMode 日志；声音预览已集中到 ModSettings 工作台。
-- **摄像机指示器 / Camera Indicator**(2026-07):新增仅 `SQUEAKY_DEV` 编译的右侧状态栏相机 height/view size 指示(SC: 高度/视野);为避免 camera/zoom mod 下配置换算不准,直接读取真实运行时 `Find.Camera.transform.position.y` 与 `Find.Camera.orthographicSize`,挂 `GlobalControlsUtility.DoDate` postfix,由 DebugAction 菜单切换。`Patch_DebugTabMenu_Actions` 支持 `DebugAction_<MethodName>`/`DebugActionCategory_<CategoryNoSpaces>` Keyed 本地化,由全版本 ModSettings 开关 `localizeDebugActions` 控制且默认关闭;切换时清 RimWorld DebugAction 静态缓存,无需重启,重开调试动作菜单后生效。
+- **ModSettings QoL**(2026-07-04):设置页为单一滚动体,全局音源/触发节奏常显;`Distance volume fade`/`距离音量衰减` 和 Mood modulation workbench 用原生 `TexButton.Collapse/Reveal` 折叠头,开合状态通过 ModSettings 持久化(距离默认展开,工作台默认折叠);距离衰减区有原生 Widgets 动态图表,直接显示“衰减开始→衰减结束”区间:开始前全音量、区间内线性衰减、结束后静音,随滑块/输入框立即更新。
+- **DevMode 排障工具**:`[DebugAction]` 菜单(悬浮字开关 ×2 + 摄像机指示器开关 ×2)是玩家排障入口,必须随 GitHub/Steam 包发布,运行时由 RimWorld Dev Mode + active map 限制;描边悬浮字(`MoteTextWithBackground`)和 DevMode 日志用于报告问题。声音预览已集中到 ModSettings 工作台。
+- **摄像机指示器 / Camera Indicator**(2026-07):右侧状态栏相机 height/view size 指示(SC: 高度/视野)用于玩家调距离衰减;为避免 camera/zoom mod 下配置换算不准,直接读取真实运行时 `Find.Camera.transform.position.y` 与 `Find.Camera.orthographicSize`,挂 `GlobalControlsUtility.DoDate` postfix,由 DebugAction 菜单切换。`Patch_DebugTabMenu_Actions` 支持 `DebugAction_<MethodName>`/`DebugActionCategory_<CategoryNoSpaces>` Keyed 本地化,由全版本 ModSettings 开关 `localizeDebugActions` 控制且默认关闭;切换时清 RimWorld DebugAction 静态缓存,无需重启,重开调试动作菜单后生效。
 - **Talking 频率缩放**(2026-07):新增全局 ModSettings 开关(默认取 XML `scaleFrequencyWithTalking=true`,玩家可关)。普通发声在播放前按最终 `PawnCapacityDefOf.Talking`(Clamp 0..1)做概率门控,未通过也计为一次尝试并消耗动作/全局冷却以实现真实降频;Death 不因 Consciousness/麻醉导致的 `Talking=0` 而被压掉。但若发声源/通路/舌头器官效率乘积≈0,则所有动作包括 Death 全静音。
 - **Rejected idea**(2026-07):不再额外加“屏幕中心平面距离衰减”。`SoundInfo.InMap` 已提供 3D spatial audio(`spatialBlend=1` + linear rolloff + `distRange`);再叠一层 screen-center 衰减会双重衰减并让设置行为不可见。
 - **分发**:LICENSE(MPL-2.0)+ 双语 `README.md`/`README.zh-CN.md` + AGENTS.md + CONTRIBUTING.md(含术语通俗解释)+ `1.6/Sounds/Squeak/AUDIO_GUIDE.txt`(ogg/22050/16bit/mono);`scripts/`(validate-junction + stage-package + pack-dev/steam/github,pack 只 staging/zip);CI/CD。
@@ -44,6 +44,8 @@
 - **commit 规范**:Conventional Commits(`<type>: <desc>`,feat/fix/docs/chore/refactor),原子提交进 dev,模板见 `.gitmessage`。
 - **日志**:`Log.Message`/`Warning`/`Error` 硬编码英文,`[SqueakyRatkin]` 前缀(开发者面向,便于全局搜索)。
 - **文案面向所有玩家**:发布包内文本(Sounds/README.txt、Keyed、SoundDefs 注释、README/AUDIO_GUIDE)用中性措辞,禁私人化(朋友/好友/friend);commit message 同样不指名特定人。2026-07 已清 20 处。
+- **玩家排障 DebugAction 不得 Dev-only 编译**:Overlay/Camera Indicator 动作和 camera-height HUD 必须进入 GitHub/Steam flavor;内部开发专用 instrumentation 才能 `SQUEAKY_DEV` gate。
+- **About.xml fallback 为英文**:About `name/description` 保持英文默认;游戏内模组列表名称/简介由 `SR.About.Name`/`SR.About.Description` Keyed patch 本地化。patch 必须在 `LanguageDatabase.activeLanguage != null` 后才调用 `TryTranslate`,否则启动早期会红字。
 
 ## Architecture Decisions
 - **数据驱动**:触发模式/间隔/概率/心情调制在 patch XML(`actions`/`moodMods`),改行为不重编译。

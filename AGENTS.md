@@ -47,7 +47,7 @@ Make `RimWorld/Mods/SqueakyRatkin` a junction to this workspace root so builds l
 - **To create the junction for a developer**: run `validate-junction.ps1`, then execute the `New-Item -ItemType Junction -Path '<Mods>/SqueakyRatkin' -Target '<root>'` it prints. **Never hardcode paths; never assume where RimWorld is installed.**
 
 ## Build Flavor
-`-p:SqueakyBuildFlavor=Dev|Steam|GitHub` → constants `SQUEAKY_DEV/STEAM/GITHUB`, default Dev. Startup-log banner differs by flavor; dev-only debug UI (DebugAction entries + camera indicator) must compile under `SQUEAKY_DEV` only and stay out of Steam/GitHub builds.
+`-p:SqueakyBuildFlavor=Dev|Steam|GitHub` → constants `SQUEAKY_DEV/STEAM/GITHUB`, default Dev. Startup-log banner differs by flavor. Player-facing troubleshooting DebugAction entries and the camera-height indicator must compile in all flavors; they are gated at runtime by RimWorld Dev Mode and map state, because players need them to tune distance attenuation and report issues. Internal-only instrumentation may still be `SQUEAKY_DEV`-gated.
 - Build commands/workflows pass flavor-specific `InformationalVersion` values into the DLL: dev uses the SDK source revision, GitHub uses `<tag>+<commit>`, Steam uses only the package version.
 
 ## Build Verification (mandatory)
@@ -71,8 +71,8 @@ Source/SqueakyRatkin/
   SqueakyRatkinSettings.cs ModSettings modulation workbench UI
   SqueakLabels.cs          localization helper
   Mod.cs                   entry + flavor + load log
-  Patches/                 Wounded + Select Harmony patches
-  Debug/                   dev debug (overlay / mote maker)
+  Patches/                 Wounded + Select Harmony patches + player troubleshooting HUD
+  Debug/                   DevMode troubleshooting actions / overlay / mote maker
 1.6/
   Defs/SoundDefs/          27 SoundDefs (9 actions × 3 sets: base/Pure/Preview, guinea-pig default)
   Defs/MoteDefs/           white-bg overlay mote
@@ -84,7 +84,7 @@ scripts/pack-dev.ps1       local Dev-flavor directory package for manual testing
 ```
 
 ## Debug Entry (development mode)
-Developer menu → "Squeaky Ratkin" category: overlay toggle ×2 + camera indicator toggle ×2. DevMode plays auto-log. A dev-only `GlobalControlsUtility.DoDate` postfix may draw localized camera height/view size (SC: 高度/视野) in the vanilla right-side status stack, reading actual runtime `Find.Camera.transform.position.y` / `Find.Camera.orthographicSize` rather than re-deriving vanilla height from `RootSize`. Sound preview moved to ModSettings workbench (no DevMode needed).
+Developer menu → "Squeaky Ratkin" category: overlay toggle ×2 + camera indicator toggle ×2. These entries must ship in GitHub/Steam builds as player troubleshooting tools, while still requiring RimWorld Dev Mode and an active map. The `GlobalControlsUtility.DoDate` postfix can draw localized camera height/view size (SC: 高度/视野) in the vanilla right-side status stack, reading actual runtime `Find.Camera.transform.position.y` / `Find.Camera.orthographicSize` rather than re-deriving vanilla height from `RootSize`. Sound preview moved to ModSettings workbench (no DevMode needed).
 
 ## Release Flow (dev → main → tag → CI)
 1. dev: atomic commits, all development here.

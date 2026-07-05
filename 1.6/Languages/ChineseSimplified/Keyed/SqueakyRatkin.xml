@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LanguageData>
   <SR.SettingsCategory>鼠辈啁啾</SR.SettingsCategory>
+  <SR.About.Name>鼠辈啁啾</SR.About.Name>
+  <SR.About.Description>鼠辈啁啾(Squeaky Ratkin) 是一款轻量级音效模组，为 鼠族(Ratkin) 的游玩体验注入一些*小动静*。它为这些曾经沉默的小家伙们带来随心所欲的百变啁啾，让每一次行动都附带着……那么一点动静。从此，殖民地与远方世界不再只回荡着血与火的哀鸣，鼠鼠们窸窣的吱语会提醒你：它们虽小，却从不甘于沉寂。
+
+*禁止登记在仇恨吱书上*</SR.About.Description>
 
   <SR.UseCustomOnly.Label>自定义音频全覆盖</SR.UseCustomOnly.Label>
   <SR.UseCustomOnly.Desc>开启:只用自定义音频(SR_*_Pure)。关闭:自定义与原版豚鼠 default 混合。</SR.UseCustomOnly.Desc>
@@ -9,7 +13,7 @@
   <SR.ScaleFrequencyWithTalking.Label>按语言能力缩放触发频率</SR.ScaleFrequencyWithTalking.Label>
   <SR.LocalizeDebugActions.Label>使用本模组自带翻译本地化调试动作(重开调试动作菜单后生效)</SR.LocalizeDebugActions.Label>
   <SR.GlobalCooldownMultiplier.Label>全局触发间隔：{0}x</SR.GlobalCooldownMultiplier.Label>
-  <SR.Distance.Header>按摄像机高度衰减</SR.Distance.Header>
+  <SR.Distance.Header>距离音量衰减</SR.Distance.Header>
   <SR.Distance.Preset>衰减预设</SR.Distance.Preset>
   <SR.Distance.Preset.Conservative>保守</SR.Distance.Preset.Conservative>
   <SR.Distance.Preset.Balanced>适中</SR.Distance.Preset.Balanced>
