@@ -1,7 +1,7 @@
 # TODO
 
 ## Current Goal
-0.1.1 修复发布已完成;剩余 Steam Workshop 手动上传。
+0.1.1 GitHub 发布与 Steam flavor 打包已完成;剩余 Steam Workshop 手动上传。
 
 ## In Progress
 - [ ] Steam Workshop 上传:复制 `dist/steam/SqueakyRatkin/` 到 RimWorld Mods 后用 RimWorld 开发者模式上传,并手动配置 Workshop Required Items/版本标签。
@@ -16,6 +16,7 @@
 - [ ] 下一阶段架构设计:长音频/配音策略
 
 ## Completed
+- [x] Steam 0.1.1 最终包(2026-07-05):GitHub `v0.1.1` 重新发布成功后,用 Steam flavor `0.1.1` 重新生成 `dist/steam/SqueakyRatkin/`;确认 DLL 含 DebugAction 与 metadata patch,包内无源码/PDB/脚本/PublishedFileId/本机路径/账号/token/secret/SteamCMD 信息。
 - [x] 0.1.1 修复发布准备:解除玩家排障 DebugAction/Camera Indicator 的错误 Dev-only 编译门;新增 `ModMetaData.Name/Description` Keyed 本地化 patch(语言未初始化时静默回退 About.xml 英文);Release 构建禁调试符号;README 增加 3A AI 制作声明并把自定义音频许可交由音频提供者声明;距离设置标题改为 `Distance volume fade`/`距离音量衰减`;版本推进到 0.1.1。
 - [x] 0.1.1 GitHub 发布完成(2026-07-05):首次错误 `v0.1.1` asset 下载数为 0,已删除 release/tag 并重新发布;最终 `v0.1.1` 指向 main `1b1fe9e`,GitHub Release 成功,Steam flavor 包已重新生成并审计通过。
 - [x] Steam 手动发布包准备(2026-07-05):Release Steam flavor build 通过,`scripts/pack-steam.ps1 -SteamVersion 0.1.0` 生成 `dist/steam/SqueakyRatkin/`(20 files,约 708 KB);审计确认无源码/脚本/PDB/项目文件/PublishedFileId/本机路径/账号/token/secret/SteamCMD 信息。为避免 DLL 嵌入本机源码路径,Release 构建禁用 DebugType/DebugSymbols。

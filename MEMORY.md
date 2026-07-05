@@ -10,8 +10,8 @@
 - CI:`.github/workflows/ci.yml`(push/PR main+dev 构建验证;push 额外产出 `dev-<sha>` artifact 供内测)+ `release.yml`(tag `v*` 发 GitHub Release)。
 - 本地手测目录包必须先 build Dev flavor,再 `scripts/pack-dev.ps1` → `dist/dev/SqueakyRatkin/` 后复制到 RimWorld Mods；打包脚本只 staging/zip,不再构建以避免 CI 重复构建；GitHub flavor 只走 CI/tag release；Steam flavor 只用于 Workshop 上传。
 - git identity:`19252128+Coahuilite@users.noreply.github.com`(GitHub noreply 带数字 ID,`--local` 不碰全局)。
-- 许可:代码 MPL-2.0,音频 All Rights Reserved,原版资产只引用不分发。
-- 本地化:全 Keyed(EN + SC),`SqueakLabels` helper 封装动作/心情名翻译。
+- 许可:代码 MPL-2.0;自定义音频由音频提供者自行声明许可与权利;原版资产只引用不分发。
+- 本地化:全 Keyed(EN + SC),`SqueakLabels` helper 封装动作/心情名翻译;About.xml `name/description` 保持英文 fallback,游戏内模组列表由 `SR.About.Name`/`SR.About.Description` Keyed patch 本地化。
 
 ## Completed (立项→上云全流程)
 - **立项评估**:核实原版机制——类人种族**无原版发声钩子**(`Pawn_CallTracker` 只为 `intelligence<=1` 动物创建,`PawnComponentsUtility.cs:183`;`Toils_Ingest` 显式跳过 Humanlike 的 `race.soundEating`)。故"纯 XML 补 race 声音字段"对鼠族无效,必须自驱动 C#。
@@ -28,11 +28,9 @@
 - **分支保护**:main `require PR` + `enforce_admins` + 禁 force push;dev 原子提交链(9 阶段:骨架→核心→patches→工作台→调试→本地化→分发→文档→音频)。
 - **红字修复**(2026-07):`SR_Mote_TextBg` 缺 `ParentName="MoteBase"` + graphicData + drawGUIOverlay + mote.realTime → Def ConfigErrors 红字;仿原版 `Mote_Text` 修复(commit `80a5ab5`)。
 - **启动崩溃修复**(2026-07,commit `982331f`,实测通过):(1) `Patch_Selector_Select` postfix 声明 `Thing t`,但 `Selector.Select` 实参为 `(object obj,bool,bool)`,Harmony 按参数名注入找不到 `t` → Mod 类构造崩;改位置注入 `object __0`。(2) XML FloatRange 写 `(a,b)`,但 vanilla `FloatRange.FromString` 用 `~` 分隔(`Split('~')`)→ 16 SoundDef + moodMod 全部 FormatException;全项目 `(a,b)`→`a~b`。
-- **v0.1.0-rc1 发版**(2026-07,tag `v0.1.0-rc1`,commit `91f0c9d`):rebase 整理 dev 为 1 干净 commit,tag 触发 CI release 发 GitHub Release。内测候选,反馈后正式 0.1.0(merge main + tag v0.1.0)。rc1 含:Death 音效、工作台 editBuffer 三按钮(写入/还原/默认值)+ mood/action 数据驱动、试听集中工作台(删 DevMode 浏览器,SR_*_Preview onCamera 无衰减)、SC 本地化修复(ChineseSimplified 文件夹)、启动日志增强、调参(Good 1.2/Bad 0.8/0.7/Break 1.1+0.6~1.5/Call 0.015/Death 0.8~0.9)。
-- **rc1 声音反馈结论**(2026-07-04):测试对象为已分发 `v0.1.0-rc1`,非当前本地修改版。高倍速声音显著变小已实际复现,首要原因是 rc1 代码 `info.volumeFactor = mod.volumeFactor * TimeSpeedVolumeFactor()`,在 3x/4x 分别约为 1/3、1/4 音量；声音重叠/覆盖不是首要解释。暂停+缩放后第一声音量疑似不一致:代码层依据为 `SoundInfo.InMap(TargetInfo(Pawn))` + Unity 3D AudioSource 距离衰减,`CameraDriver.Update()->ApplyPositionToGameObject()` 以 `RootSize` 改相机高度且暂停中仍可更新；若暂停中缩放后立刻触发声音,可能遇到相机 transform/AudioListener 与播放触发同帧时序未刷新,需运行时复现确认,暂不改代码。
+- **0.1.1 修复发布**(2026-07-05,tag `v0.1.1`,main `1b1fe9e`):解除玩家排障 DebugAction/Camera Indicator 的错误 Dev-only 编译门;新增 `ModMetaData.Name/Description` Keyed 本地化 patch(语言未初始化时回退 About.xml 英文);Release 构建禁调试符号;README 增加 3A AI 制作声明并把自定义音频许可交由音频提供者声明;距离设置标题改为 `Distance volume fade`/`距离音量衰减`。首次错误 v0.1.1 asset 下载数为 0,已删除 release/tag 后同版本重发。
 - **构建识别**(2026-07-04):启动日志按渠道显示身份。Dev 需要最强区分,显示提交号(`dev-<sha>`);GitHub flavor 在 CI build 阶段注入 `<tag>+<tag commit>`;Steam flavor 在 build 阶段只注入包版本号且只用于 Workshop 上传。`IncludeSourceRevisionInInformationalVersion=false` 用于 GitHub/Steam build 防止 SDK 额外追加 commit。
-- **功能调优**(2026-07,本地待推送):声音浏览器 `SoundInfo.OnCamera()`→`InMap(镜头中心)`(onCamera 需 subSound.onCamera=true 未配);删镜头 zoom gating;Select 节流 60→15;mote 位置可配置(`modExtensions/SqueakMoteOffset`,offsetY 默认 1.2);Death 死亡音效(`Pawn.Kill` prefix + `SR_Death`,GuineaPig/Pain grain,pitch 0.85~0.95)。
-- **默认频率下调**(2026-07,本地待推送):仅改 `1.6/Patches/Ratkin_AddSqueakComp.xml` 数据默认值,把 1x 默认节奏保守放慢(`globalMinIntervalTicks` 120→180;Eat 90→120;Call 600/0.015→720/0.012;Move 300/0.015→420/0.012;Sleep 600/0.01→900/0.008;Social/Joy 300/0.02→420/0.016;Wounded 120→180),不改 C# 逻辑。
+- **Steam package ready**(2026-07-05):`dist/steam/SqueakyRatkin/` 已用 Steam flavor `0.1.1` 重新生成并审计;20 files,约 712 KB,DLL 含 DebugAction 与 metadata patch,无源码/PDB/脚本/PublishedFileId/本机路径/账号/token/secret/SteamCMD 信息。
 
 ## Active Constraints
 - **Def 前缀 `SR_`**(Def 数据库全局防撞);C# 类不加前缀(namespace 隔离)。

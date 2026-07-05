@@ -43,3 +43,21 @@ Cold archive for downgraded memory. Do NOT read at session start. Read only for 
 - **Reason**:fixer 内部用 grep/glob 搜原版 API 实例,扫到 `C:\Program Files`/Steam 目录,触发系统提权弹窗被用户 reject,任务空跑。
 - **Replaced by**:fixer prompt 明确"禁止扫描项目根外路径"+ 所需 API 由 orchestrator 提前核实写进 prompt。fix-5 起成功。
 - **Status**: resolved。**教训**:派 fixer/agent 时禁扫外部,API 由调用方提供。
+
+## 2026-07: v0.1.0-rc1 发布过程细节 → 0.1.1 后冷归档
+- **What**:`v0.1.0-rc1` 作为内测候选发布,包含 Death 音效、工作台 editBuffer、mood/action 数据驱动、试听迁移、SC 本地化、启动日志增强与一组早期调参。
+- **Reason downgraded**:正式 `v0.1.0` 与修复版 `v0.1.1` 已发布,rc1 过程细节不再指导当前开发;保留在热记忆中会干扰版本判断。
+- **Current replacement**:`MEMORY.md` 只保留当前版本 `0.1.1`、release flow、架构红线与玩家排障 DebugAction 约束。
+- **Status**: archived。
+
+## 2026-07: rc1 高倍速音量反馈细节 → 已由 0.1.0/0.1.1 吸收
+- **What**:rc1 反馈中确认高倍速声音显著变小,主因是旧代码按 `TickRateMultiplier` 降低单次 `volumeFactor`;暂停缩放后第一声音量不一致曾列为待复现。
+- **Reason downgraded**:当前架构已移除高倍速单次音量压低,改由冷却补偿控制触发密度;距离衰减改用 vanilla spatial `distRange` 与玩家可调 `Distance volume fade`。
+- **Current replacement**:`MEMORY.md` 中的 distRange/Distance volume fade、cooldown scaling 与 camera indicator 约束。
+- **Status**: superseded。
+
+## 2026-07: 功能调优/默认频率“本地待推送”状态 → 已发布
+- **What**:曾记录声音浏览器 InMap、删 zoom gating、Select 15 ticks、mote offset、Death 音效、默认频率下调等为“本地待推送”。
+- **Reason downgraded**:这些内容已进入正式发布链,不再是当前 pending 状态。
+- **Current replacement**:`MEMORY.md` 的核心 CompSqueaker/触发模式/ModSettings/Death/Distance volume fade 事实。
+- **Status**: completed and archived。
