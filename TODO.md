@@ -1,22 +1,24 @@
 # TODO
 
 ## Current Goal
-正式 0.1.0 发布前收口:完成 rc1 反馈精调、频率控制与发布卫生,准备 PR dev→main + tag `v0.1.0`。
+0.1.1 修复发布:恢复玩家排障 DebugAction、补模组元数据本地化、刷新发布包并走 dev→main→tag release。
 
 ## In Progress
-- [ ] rc1 反馈收口与最终调参(玩家听感、触发频率、心情调制、bug)
-- [ ] 正式 0.1.0 发版准备:PR dev→main squash merge + tag `v0.1.0` + push(CI release)
+- [ ] 0.1.1 发版准备:PR dev→main squash merge + tag `v0.1.1` + push(CI release)
 
 ## Pending
 - [ ] 收集自定义音频(ogg/22050Hz/16-bit/mono,放 `1.6/Sounds/Squeak/<Action>/SR_<Action>_<n>.ogg`,取消 grain 注释)
 - [ ] rc1 反馈驱动调参(改 Ratkin_AddSqueakComp.xml,不重编译)
-- [ ] Steam Workshop 上传(pack-steam.ps1 → RimWorld 开发者模式上传)
+- [ ] Steam Workshop 上传:待 GitHub `v0.1.1` release 成功后重新生成 Steam flavor 包;下一步复制 `dist/steam/SqueakyRatkin/` 到 RimWorld Mods 后用 RimWorld 开发者模式上传,并手动配置 Workshop Required Items/版本标签。
 - [ ] 下一阶段架构设计:组件资格判定
 - [ ] 下一阶段架构设计:xenotype/gene 目标配置
 - [ ] 下一阶段架构设计:动作元数据拆分
 - [ ] 下一阶段架构设计:长音频/配音策略
 
 ## Completed
+- [x] 0.1.1 修复发布准备:解除玩家排障 DebugAction/Camera Indicator 的错误 Dev-only 编译门;新增 `ModMetaData.Name/Description` Keyed 本地化 patch(语言未初始化时静默回退 About.xml 英文);Release 构建禁调试符号;README 增加 3A AI 制作声明并把自定义音频许可交由音频提供者声明;距离设置标题改为 `Distance volume fade`/`距离音量衰减`;版本推进到 0.1.1。
+- [x] Steam 手动发布包准备(2026-07-05):Release Steam flavor build 通过,`scripts/pack-steam.ps1 -SteamVersion 0.1.0` 生成 `dist/steam/SqueakyRatkin/`(20 files,约 708 KB);审计确认无源码/脚本/PDB/项目文件/PublishedFileId/本机路径/账号/token/secret/SteamCMD 信息。为避免 DLL 嵌入本机源码路径,Release 构建禁用 DebugType/DebugSymbols。
+- [x] DebugAction 发布包缺失修复(2026-07-05):确认根因为 `SqueakDebugActions` 与 camera indicator patch 被 `SQUEAKY_DEV` 编译门排除,导致 GitHub/Steam flavor 中英文均无入口;已改为全 flavor 编译,运行时仍由 RimWorld Dev Mode + active map 限制。Steam/GitHub/Dev flavor 构建通过,Steam 包 DLL 已确认包含 Overlay/CameraIndicator DebugAction。
 - [x] 调试动作本地化:参考 `Dev In Your Language` 的 `DebugAction_*` Keyed 风格,新增 DebugAction 节点本地化 patch;由全版本 ModSettings 开关控制,默认关闭;切换时清 DebugAction 静态缓存,无需重启,重开调试动作菜单后生效;鼠族汉化包检查为普通 Def/Keyed 汉化,未见 DebugAction 支持。
 - [x] 增强:新增 Talking/语言能力频率缩放全局开关(默认取 XML true)。普通发声按最终 Talking 百分比做概率门控且失败消耗冷却;器官性无声才全局静音包括 Death;昏迷/麻醉导致 `Talking=0` 时 Death 仍播放。
 - [x] 决策记录:拒绝额外 screen-center 平面距离衰减,避免与 `SoundInfo.InMap` 现有 3D spatial/distRange 双重衰减。

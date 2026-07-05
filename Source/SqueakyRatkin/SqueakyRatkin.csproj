@@ -7,14 +7,19 @@
     <Nullable>enable</Nullable>
     <AssemblyName>SqueakyRatkin</AssemblyName>
     <RootNamespace>SqueakyRatkin</RootNamespace>
-    <Version>0.1.0</Version>
-    <AssemblyVersion>0.1.0.0</AssemblyVersion>
-    <FileVersion>0.1.0.0</FileVersion>
+    <Version>0.1.1</Version>
+    <AssemblyVersion>0.1.1.0</AssemblyVersion>
+    <FileVersion>0.1.1.0</FileVersion>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <OutputPath>..\..\1.6\Assemblies</OutputPath>
     <SqueakyBuildFlavor Condition="'$(SqueakyBuildFlavor)' == ''">Dev</SqueakyBuildFlavor>
     <DefineConstants>$(DefineConstants);SQUEAKY_$(SqueakyBuildFlavor.ToUpper())</DefineConstants>
     <InformationalVersion Condition="'$(SqueakyInformationalVersion)' != ''">$(SqueakyInformationalVersion)</InformationalVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
 
   <ItemGroup>

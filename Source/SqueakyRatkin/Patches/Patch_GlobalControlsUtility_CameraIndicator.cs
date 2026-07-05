@@ -1,4 +1,3 @@
-#if SQUEAKY_DEV
 using HarmonyLib;
 using RimWorld;
 using UnityEngine;
@@ -35,4 +34,3 @@ public static class Patch_GlobalControlsUtility_CameraIndicator
         Text.Anchor = previousAnchor;
     }
 }
-#endif

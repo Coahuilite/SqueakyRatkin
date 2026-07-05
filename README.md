@@ -4,7 +4,9 @@
 
 Squeaky Ratkin is a lightweight sound effect mod that adds a whimsical medley of chirps and squeaks to Ratkin pawns. Idle calls, eating, sleeping, wounds, selection, movement, social time, joy, and death can all carry a little sound, tinted by mood and softened by camera-distance attenuation.
 
-> Lightweight, optional ambience for Ratkin colonies.
+> Lightweight, optional ambience for Ratkin Races.
+
+> **3A disclosure:** this mod is AI-designed, AI-developed, and AI-illustrated. Human maintainers review, package, and release the work.
 
 ## Requirements
 - RimWorld 1.6
@@ -32,7 +34,7 @@ Mod settings provide:
 - Time-speed cooldown scaling, enabled by default, to reduce high-speed trigger density without lowering each sound's volume.
 - Talking capacity frequency scaling, enabled by default, so impaired speech reduces ordinary squeak frequency while death feedback remains protected unless the pawn is organ-mute.
 - Global trigger interval multiplier.
-- Camera-height attenuation presets or custom attenuation bands.
+- Distance volume fade presets or custom attenuation bands.
 - Mood modulation workbench with per-mood overrides, exact inputs, presets, and preview.
 - Optional built-in DebugAction localization, disabled by default; reopen the debug actions menu after toggling.
 
@@ -41,7 +43,7 @@ Developer menu → "Squeaky Ratkin": overlay text toggles and camera indicator t
 
 ## License
 - **Code (C# / XML defs / patches)**: [Mozilla Public License 2.0](./LICENSE) — file-level copyleft, project-level combinable with proprietary code.
-- **Audio assets** (custom audio under `1.6/Sounds/Squeak/`): All Rights Reserved (default, pending final confirmation). The vanilla guinea-pig audio is owned by Ludeon; this mod only references defName/clipFolderPath per Ludeon's mod policy — no vanilla assets are redistributed.
+- **Audio assets**: custom audio contributors are responsible for declaring the license and rights for their own files. The vanilla guinea-pig audio is owned by Ludeon; this mod only references defName/clipFolderPath per Ludeon's mod policy — no vanilla assets are redistributed.
 - **Third-party deps** (Harmony / HAR / Ratkin): belong to their authors, under their own licenses.
 
 ## Development

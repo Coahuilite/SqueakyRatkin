@@ -1,18 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ModMetaData>
   <packageId>coahuilite.squeakyratkin</packageId>
-  <name>鼠辈啁啾 (Squeaky Ratkin)</name>
+  <name>Squeaky Ratkin</name>
   <author>Coahuilite</author>
   <supportedVersions>
     <li>1.6</li>
   </supportedVersions>
   <description>Squeaky Ratkin is a lightweight sound effect mod that injects a little stir into the Ratkin experience. It brings a whimsical medley of chirps and squeaks to these once-silent little critters, ensuring every action comes with... a little sound things. No longer shall the colonies and the world beyond echo solely with the lamentations of blood and fire - the whispered squeaks of the ratkin will remind you that though they may be small, they are never content to remain silent.
 
-*Not eligible for registration in The Book of Squeakudges*
-
-鼠辈啁啾(Squeaky Ratkin) 是一款轻量级音效模组，为 鼠族(Ratkin) 的游玩体验注入一些*小动静*。它为这些曾经沉默的小家伙们带来随心所欲的百变啁啾，让每一次行动都附带着……那么一点动静。从此，殖民地与远方世界不再只回荡着血与火的哀鸣，鼠鼠们窸窣的吱语会提醒你：它们虽小，却从不甘于沉寂。
-
-*禁止登记在仇恨吱书上*</description>
+*Not eligible for registration in The Book of Squeakudges*</description>
   <url>https://github.com/Coahuilite/SqueakyRatkin</url>
   <modDependencies>
     <li>
