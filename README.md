@@ -34,10 +34,10 @@ dotnet build Source/SqueakyRatkin/SqueakyRatkin.csproj -c Release -p:SqueakyBuil
 pwsh scripts/pack-dev.ps1
 ```
 
-This stages `dist/dev/SqueakyRatkin/`; manually install/copy it for local testing. The four scripts are `stage-package.ps1`, `pack-dev.ps1`, `pack-steam.ps1`, and `pack-github.ps1`; pack scripts package existing flavor builds and do not compile. Dev is for local dist-only tests, Steam for Workshop packaging, and GitHub packaging is the CI tag/release path. Maintainers updating an existing Workshop item must follow the update rule in [`AGENTS.md`](./AGENTS.md): `pack-steam.ps1` only stages, and the item ID belongs only in the local upload copy, never Git or staging. Standard build verification is:
+This stages `dist/dev/SqueakyRatkin/` for manual local testing. Packaging scripts stage existing builds and do not compile: Dev is for local testing, Steam is for Workshop staging, and GitHub release packages are produced by the tag/release CI path. Maintainer release rules are in [`AGENTS.md`](./AGENTS.md). Standard build verification is:
 
 ```text
 dotnet build Source/SqueakyRatkin/SqueakyRatkin.csproj
 ```
 
-Code is MPL-2.0. Vanilla assets are referenced only by Def/path and are never redistributed. Contributions: [`CONTRIBUTING.md`](./CONTRIBUTING.md). Historical documentation is explicitly marked `DEPRECATED`; do not use it as current guidance.
+Code is licensed under [MPL-2.0](./LICENSE). Vanilla assets are referenced only by Def/path and are never redistributed. Contributions: [`CONTRIBUTING.md`](./CONTRIBUTING.md).

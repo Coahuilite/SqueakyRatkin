@@ -34,10 +34,10 @@ dotnet build Source/SqueakyRatkin/SqueakyRatkin.csproj -c Release -p:SqueakyBuil
 pwsh scripts/pack-dev.ps1
 ```
 
-它会生成 `dist/dev/SqueakyRatkin/`，本地测试时由开发者手动复制/安装。四个脚本为 `stage-package.ps1`、`pack-dev.ps1`、`pack-steam.ps1`、`pack-github.ps1`；打包脚本只处理已有 flavor 构建，不会编译。Dev 用于仅 dist 的本地测试，Steam 用于创意工坊打包，GitHub 包只由 CI tag/release 流程生成。维护者更新既有创意工坊条目时，须遵循 [`AGENTS.md`](./AGENTS.md) 的更新规则：`pack-steam.ps1` 只 stage，item ID 只写入本机上传副本，绝不进入 Git 或 stage。标准构建验证：
+它会生成 `dist/dev/SqueakyRatkin/`，供开发者手动安装测试。打包脚本只 stage 已有构建，不会编译：Dev 用于本地测试，Steam 用于创意工坊 staging，GitHub 发布包由 tag/release CI 流程生成。维护者发布规则见 [`AGENTS.md`](./AGENTS.md)。标准构建验证：
 
 ```text
 dotnet build Source/SqueakyRatkin/SqueakyRatkin.csproj
 ```
 
-代码采用 MPL-2.0。原版资产只通过 Def/path 引用，绝不重新分发。贡献说明见 [`CONTRIBUTING.md`](./CONTRIBUTING.md)。标记为 `DEPRECATED` 的历史文档不可作为现行指南。
+代码采用 [MPL-2.0](./LICENSE)。原版资产只通过 Def/path 引用，绝不重新分发。贡献说明见 [`CONTRIBUTING.md`](./CONTRIBUTING.md)。
