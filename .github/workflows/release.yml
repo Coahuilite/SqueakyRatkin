@@ -14,26 +14,73 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
 
+      - name: Verify release tag
+        shell: pwsh
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $tag = $env:RELEASE_TAG
+          if ([string]::IsNullOrWhiteSpace($tag)) {
+            throw 'Release tag environment variable is empty.'
+          }
+          $semVerTagPattern = '^v(?<base>(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*))(?:-(?:(?:0|[1-9]\d*)|[0-9A-Za-z-]*[A-Za-z-][0-9A-Za-z-]*)(?:\.(?:(?:0|[1-9]\d*)|[0-9A-Za-z-]*[A-Za-z-][0-9A-Za-z-]*))*)?$'
+          $tagMatch = [regex]::Match($tag, $semVerTagPattern)
+          if (-not $tagMatch.Success) {
+            throw "Release tag must be a strict SemVer 2.0 tag: vMAJOR.MINOR.PATCH with an optional prerelease suffix: $tag"
+          }
+
+          [xml]$projectXml = Get-Content -LiteralPath 'Source/SqueakyRatkin/SqueakyRatkin.csproj' -Raw
+          $versionNodes = @($projectXml.SelectNodes('/Project/PropertyGroup/Version'))
+          if ($versionNodes.Count -ne 1 -or [string]::IsNullOrWhiteSpace($versionNodes[0].InnerText)) {
+            throw 'Source/SqueakyRatkin/SqueakyRatkin.csproj must contain exactly one non-empty <Version>.'
+          }
+          $projectVersion = $versionNodes[0].InnerText.Trim()
+          $tagBaseVersion = $tagMatch.Groups['base'].Value
+          if ($tagBaseVersion -ne $projectVersion) {
+            throw "Release tag base version '$tagBaseVersion' does not match project <Version> '$projectVersion'."
+          }
+
+          git fetch --no-tags origin '+refs/heads/main:refs/remotes/origin/main'
+          if ($LASTEXITCODE -ne 0) {
+            throw 'Failed to fetch origin/main; cannot verify the release tag commit belongs to main history.'
+          }
+          $tagCommit = (git rev-parse 'HEAD^{commit}').Trim()
+          if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($tagCommit)) {
+            throw 'Failed to resolve the release tag commit.'
+          }
+          git merge-base --is-ancestor $tagCommit origin/main
+          if ($LASTEXITCODE -ne 0) {
+            throw "Release tag commit $tagCommit is not in origin/main history. Tag main's squash commit before releasing."
+          }
+
       - name: Build GitHub release flavor
         shell: pwsh
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
         run: |
           $shortSha = (git rev-parse --short=12 HEAD).Trim()
-          $identity = "${{ github.ref_name }}+$shortSha"
+          $identity = "$env:RELEASE_TAG+$shortSha"
           dotnet build Source/SqueakyRatkin/SqueakyRatkin.csproj -c Release -p:SqueakyBuildFlavor=GitHub -p:SqueakyInformationalVersion=$identity -p:IncludeSourceRevisionInInformationalVersion=false
 
       - name: Pack GitHub release
-        run: pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/pack-github.ps1 -Version "${{ github.ref_name }}"
+        shell: pwsh
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: ./scripts/pack-github.ps1 -Version $env:RELEASE_TAG
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/github/*.zip
+          files: dist/github/SqueakyRatkin-${{ github.ref_name }}.zip
           generate_release_notes: true   # 自动从 commits 生成 Release notes
           draft: false
           prerelease: ${{ contains(github.ref_name, '-') }}   # v0.1.0-rc1 等 pre-release tag 自动标记;v0.1.0 正式不含 -

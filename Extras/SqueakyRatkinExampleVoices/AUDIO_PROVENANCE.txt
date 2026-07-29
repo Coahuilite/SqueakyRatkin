@@ -1,0 +1,41 @@
+Audio provenance record
+=======================
+
+Current formal source update (2026-07-29)
+-----------------------------------------
+
+The user designated the dirty Dev package's built-in tree
+`1.6/Sounds/coahuilite.squeakyratkin/SR_OfficialExample_Race/`
+as the authoritative delivery for this update. Its complete 41-OGG set covers all 15 actions:
+Attack 3, Call 4, Death 2, Draft 3, Eat 2, Equip 2, Joy 3, MentalBreak 1, Move 3, Select 3,
+Sleep 3, Social 3, Undraft 3, Work 3, and Wounded 3.
+
+SHA-256 plus UTC comparison found 16 added/replaced files after the Dev DLL cutoff
+`2026-07-28T18:28:01.8161895Z` and three additional pre-pack differences. The user explicitly
+required the complete 41-file set for release, rather than selecting only post-pack files.
+
+The incoming set fully decoded: 25 files were Vorbis/22050 Hz/mono and 16 were FLAC-in-OGG at
+44100 Hz/stereo. The 25 conforming files were copied byte-for-byte; the other 16 were normalized
+before entering the sole formal Template source. All 41 formal-source files are Ogg Vorbis,
+22050 Hz mono. Rights status is recorded in AUDIO_RIGHTS.txt.
+
+Normalization command:
+ffmpeg -v error -xerror -y -i <input> -map 0:a:0 -ac 1 -ar 22050 -c:a libvorbis -q:a 5 <output.ogg>
+
+Historical migration
+--------------------
+
+One-time historical recovery location (project-local, dist ignored):
+dist/dev/SqueakyRatkinExampleVoices/1.6/Race/Sounds/SqueakyRatkinExampleVoices/Common/
+
+This old dist WAV path was used once to recover 17 validated PCM WAV clips covering 15 actions
+(Eat and Select each have two). It is historical only and is not a reproducible input for future
+builds or staging. The maintained, formal audio source is the Template OGG tree:
+`Extras/SqueakyRatkinExampleVoices/1.6/Race/Sounds/coahuilite.squeakyratkin.examplevoices/SR_ExampleTemplate_Race/`.
+
+That one-time recovery was converted with:
+ffmpeg -v error -xerror -y -i <wav> -map 0:a:0 -c:a libvorbis -q:a 5 <ogg>
+
+The formal Template OGG Vorbis clips are 22050 Hz mono. The staging script validates the
+15-action / 41 OGG Template source and exact per-action counts, then generates and verifies the byte-identical staged built-in
+mirror without requiring FFmpeg in CI.

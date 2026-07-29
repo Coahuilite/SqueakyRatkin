@@ -11,11 +11,6 @@ public static class Patch_Pawn_Kill
     // 被击杀和流血而亡都统一走 Pawn.Kill,一个 hook 覆盖两种死亡。
     private static void Prefix(Pawn __instance)
     {
-        if (!CompSqueaker.IsRatkin(__instance))
-        {
-            return;
-        }
-
         __instance.GetComp<CompSqueaker>()?.Notify_Death();
     }
 }

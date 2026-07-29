@@ -8,11 +8,6 @@ public static class Patch_Pawn_PostApplyDamage
 {
     private static void Postfix(Pawn __instance)
     {
-        if (!CompSqueaker.IsRatkin(__instance))
-        {
-            return;
-        }
-
         __instance.GetComp<CompSqueaker>()?.Notify_Wounded();
     }
 }

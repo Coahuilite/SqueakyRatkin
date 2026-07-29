@@ -1,6 +1,6 @@
 param(
     [string]$ProjectRoot = (Split-Path -Parent $PSScriptRoot),
-    [string]$Version = (Get-Date -Format "yyyyMMdd-HHmmss")
+    [Parameter(Mandatory = $true)][ValidateNotNullOrEmpty()][string]$Version
 )
 
 Set-StrictMode -Version Latest
@@ -15,19 +15,15 @@ function Resolve-NormalizedPath {
 $root = Resolve-NormalizedPath -Path $ProjectRoot
 $stageDir = Join-Path $root "dist\github\SqueakyRatkin"
 $zipDir = Join-Path $root "dist\github"
-$dllPath = Join-Path $root "1.6\Assemblies\SqueakyRatkin.dll"
+
+$semVerTagPattern = '^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-(?:(?:0|[1-9]\d*)|[0-9A-Za-z-]*[A-Za-z-][0-9A-Za-z-]*)(?:\.(?:(?:0|[1-9]\d*)|[0-9A-Za-z-]*[A-Za-z-][0-9A-Za-z-]*))*)?$'
+if ($Version -notmatch $semVerTagPattern) {
+    throw "Version must be a strict SemVer 2.0 tag: vMAJOR.MINOR.PATCH with an optional prerelease suffix: $Version"
+}
 
 & (Join-Path $PSScriptRoot "stage-package.ps1") -ProjectRoot $root -StageDir $stageDir
 
-$resolvedVersion = $Version
-if (-not $PSBoundParameters.ContainsKey('Version') -and (Test-Path -LiteralPath $dllPath -PathType Leaf)) {
-    $assemblyVersion = [System.Reflection.AssemblyName]::GetAssemblyName($dllPath).Version
-    if ($assemblyVersion) {
-        $resolvedVersion = $assemblyVersion.ToString()
-    }
-}
-
-$zipPath = Join-Path $zipDir "SqueakyRatkin-$resolvedVersion.zip"
+$zipPath = Join-Path $zipDir "SqueakyRatkin-$Version.zip"
 if (Test-Path -LiteralPath $zipPath) {
     Remove-Item -LiteralPath $zipPath -Force
 }

@@ -21,11 +21,6 @@
       <displayName>Humanoid Alien Races</displayName>
       <steamWorkshopUrl>steam://url/CommunityFilePage/839005762</steamWorkshopUrl>
     </li>
-    <li>
-      <packageId>Solaris.RatkinRaceMod</packageId>
-      <displayName>Ratkin (鼠族)</displayName>
-      <steamWorkshopUrl>steam://url/CommunityFilePage/1578693166</steamWorkshopUrl>
-    </li>
   </modDependencies>
   <loadAfter>
     <li>brrainz.harmony</li>
