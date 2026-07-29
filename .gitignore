@@ -28,3 +28,4 @@ packages/
 *.orig
 *.log
 /debug/
+.slim/deepwork/

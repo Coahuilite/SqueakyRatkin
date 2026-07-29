@@ -5,14 +5,15 @@
 本文件是 Squeaky Ratkin 的简体中文标准更新日志。
 
 规则：
-- 按时间顺序记录，旧版本在前，新版本在后。
+- 已发布条目按时间顺序记录，旧版本在前，新版本在后；未发布条目置顶。
 - 标题使用本地发布时间：`[YYYY-MM-DD HH:MM UTC+8] 版本 X.Y.Z`。
-- Steam 创意工坊首次上传使用 `创意工坊首次上传`，不写成普通版本号。
+- 顶端未发布条目可使用 `未发布 — X.Y.Z`；发布时替换为实际 UTC+8 时间。
+- `创意工坊首次上传` 仅用于 Steam 创意工坊第一次上传；后续更新使用普通版本条目。
 - 每条改动保持简短清楚，一条 bullet 只写一个改动。
 - 需要时分为新增、变更、修复、打包、说明等小节。
 - Bugfix 简要带过；只有影响玩家行为时才展开说明。
 - 只有同时影响 GitHub 和 Steam 发布面时，才同时提到二者。
-- 不记录未完成计划；待办事项写入 `TODO.md`。
+- 不记录未接受的计划；已接受但尚未发布的版本可使用上述明确“未发布”条目。
 - 英文版需同步维护在 `docs/CHANGELOG.md`。
 
 推荐条目格式：
@@ -34,6 +35,37 @@
 ### 打包
 - ...
 ```
+
+## [2026-07-30 00:32 UTC+8] 版本 0.2.0
+
+发布已接受的 0.2.0 功能范围。
+
+### 新增
+- 新增固定 15 个一次性动作，包括 Draft、Undraft、有边界的 Core 攻击、玩家下令 Equip 与 Mental Break 反馈。
+- 新增玩家主动选择的独立 Race/Xenotype VoicePack、Off/Fallback/Remix 音源模式，以及精确 Xenotype `defName` 目标。
+- 新增普通内置 Race Example 与可单独启用的 Extras Template；Template 仍是 Example 音频的唯一维护源。
+- 新增即时设置表面：三个常规页、七击解锁的“开发与诊断”页、合并保存和关窗 flush。
+
+### 变更
+- 将 No-DLC Core 基线落实为端到端行为：Xenotype 是可选增量，Race 与原版回退持续可用。
+- 将心情音高/音量调制置于运行时 SoundInfo factor，并保持动作、冷却、概率与距离由 XML 驱动。
+- 将第三方音频资源根统一为 `<lowercase packageId>/<PackDef.defName>/<Action>/`。
+
+### 修复
+- 使发声器官拒绝与成功播放都消耗尝试冷却；Death 仍只豁免 Talking 概率门。
+- 将攻击和装备触发限制在受支持的 Core/玩家命令路径。
+- 不再让仅由 HAR 发现的原版 Xenotype 单独混入设置候选，并为不可用目标新增带确认的明确忘记操作。
+- 让成功派发结果悬浮字跟随其记录开关，同时保持 DebugAction 菜单受 RimWorld 开发者模式门控。
+
+### 破坏性变更
+- 移除旧 `1.6/Sounds/Squeak/` 音频树以及 Pure/custom-only 音源模型。
+- 第三方音频现在作为独立 VoicePack 提供，不再安装进主模。
+- 旧 audio-selection 值不会自动迁移；本条目不声称其他设置是否保留。
+
+### 打包
+- 将内置与 Template Example 语音更新为 41 条公共领域素材，并统一规范为 22.05 kHz 单声道 Ogg Vorbis：Attack 3、Call 4、Death 2、Draft 3、Eat 2、Equip 2、Joy 3、MentalBreak 1、Move 3、Select 3、Sleep 3、Social 3、Undraft 3、Work 3、Wounded 3。
+- staging 将 15 动作/41 OGG 的 Template 源镜像到内置 Example，并校验动作键、精确的各动作数量与 SHA-256 一致性。
+- 本地测试仍仅使用 dist；Dev、Steam、GitHub 与共享 staging 脚本不会由构建部署到游戏。
 
 ## [2026-07-04 18:35 UTC+8] 版本 0.1.0
 

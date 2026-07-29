@@ -20,7 +20,7 @@ public static class Patch_Selector_Select
     // 用位置注入 __0 取第一参数,避免与原方法参数名耦合(原方法参数名为 obj,不是 t)。
     private static void Postfix(object __0)
     {
-        if (__0 is not Pawn pawn || !CompSqueaker.IsRatkin(pawn))
+        if (__0 is not Pawn pawn)
         {
             return;
         }

@@ -4,7 +4,8 @@
 > 本文件给协助开发的 AI agent。人类开发者请读 `README.md`。
 
 ## Overview
-Ratkin squeak QOL mod. RimWorld 1.6, C# (Harmony patch + ThingComp) + XML. namespace `SqueakyRatkin`, packageId `coahuilite.squeakyratkin`.
+RimWorld 1.6 Ratkin squeak QOL mod using C# (Harmony + ThingComp) and XML.
+Namespace: `SqueakyRatkin`; packageId: `coahuilite.squeakyratkin`.
 
 ## Memory Protocol
 
@@ -21,76 +22,49 @@ Maintenance rules:
 - Keep `TODO.md` operational: current goal, next actions, blockers, recent results.
 - Downgrade stale `MEMORY.md` items into `OBLIVIONIS.md` with date/reason/status when they no longer guide current work.
 - If an `OBLIVIONIS.md` item becomes relevant again, re-summarize into `MEMORY.md` with `source: OBLIVIONIS.md`.
-- Editing README / CONTRIBUTING / AUDIO_GUIDE does NOT by itself require changing memory files; update them only when durable project facts, tasks, blockers, or archival state change.
+- Editing README / CONTRIBUTING / the voice-pack author guide or Template README does NOT by itself require changing memory files; update them only when durable project facts, tasks, blockers, or archival state change.
 
-## Hard Constraints (violation fails the task)
-- **Project-root scope by default.** Do not scan or read paths outside the project root unless the user explicitly authorizes the exact external path(s) for the current task. When authorized, keep access read-only, limited to the named path(s), and do not broaden to parent directories, sibling mod folders, Steam-wide scans, or global search roots. If more external context is needed, ask for a new explicit authorization first.
-- **`SR_` prefix on all Defs** (global Def-database collision avoidance); C# classes carry no prefix (namespace isolation).
-- Code license MPL-2.0; audio All Rights Reserved; **vanilla assets are referenced by defName/clipFolderPath only, never redistributed** (Ludeon policy).
+## Hard Constraints
+- **Project-root scope by default.** Do not read outside it without explicit authorization of the exact path; authorized access is read-only and may not broaden to parents, siblings, Steam-wide roots, or global search. Ask again for further context.
+- **Troubleshooting exception:** read-only access to `%USERPROFILE%\AppData\LocalLow\Ludeon Studios\RimWorld by Ludeon Studios` (for example `Player.log`) is authorized; prefer it for startup/runtime issues and do not broaden it unless named.
+- The permanent brands are **`鼠辈啁啾`** and **`Squeaky Ratkin`**: never copy-edit, translate, normalize, or replace them. In ordinary Simplified Chinese prose, call the Ratkin race `鼠族`; identifiers, paths, logs, and proper names are exempt.
+- All Defs use `SR_`; C# types do not.
+- Code is MPL-2.0; the Example audio is public-domain material outside that code license (see `Extras/SqueakyRatkinExampleVoices/AUDIO_RIGHTS.txt`); vanilla assets are referenced only by defName/clipFolderPath, never redistributed.
+- **No-DLC is mandatory end-to-end:** Core + Harmony + HAR/NewRatkinPlus + this mod works with all official DLC disabled. HugsLib and all DLC, including Biotech, remain optional in metadata, references, XML, initialization, settings, and runtime.
+- Example audio has one formal authoring source: the 41 Race OGG files under `Extras/SqueakyRatkinExampleVoices/1.6/Race/Sounds/coahuilite.squeakyratkin.examplevoices/SR_ExampleTemplate_Race/`, covering exactly 15 actions: Attack 3, Call 4, Death 2, Draft 3, Eat 2, Equip 2, Joy 3, MentalBreak 1, Move 3, Select 3, Sleep 3, Social 3, Undraft 3, Work 3, and Wounded 3. Never maintain a source mirror under `1.6/Sounds/coahuilite.squeakyratkin/SR_OfficialExample_Race/`.
+- Formal Example audio is OGG only. Third-party VoicePacks should distribute OGG; WAV is compatible but not recommended (see the author guide).
+- If audio changes outside that Template source, changes roots or the 15-action/41-OGG contract and its exact per-action counts, adds a non-OGG format to either formal root, or staging hashes diverge: **stop and report the changed invariant**. Never silently repair/copy back, create a second source, weaken checks, or treat staged/dist audio as authoring source.
 
-## Architecture Red Lines (read before editing; do not regress)
-- **Data-driven**: `actions` (trigger mode EachTime/RandomOneShot/External + interval + probability) and `moodMods` (mood modulation) live in `1.6/Patches/Ratkin_AddSqueakComp.xml`; CompSqueaker adapts generically. Changing behavior = editing XML, no recompile.
-- **Field-driven action behavior**: paper categories such as ambient/feedback/critical are documentation aids only. Runtime behavior must be driven by XML fields such as `ignoreGlobalCooldown` and `cooldownClock`; do **not** hardcode behavior by action name unless no data expression exists.
-- **Runtime modulation**: mood is applied via `SoundInfo.pitchFactor/volumeFactor` at runtime (one SoundDef per action + one neutral audio set). **Do not regress to a mood×action SoundDef matrix** (previously corrected as over-engineering).
-- **Three-layer config** (bottom → top): `CompProperties` (XML default) ← `ModSettings.moodOverrides` (player override) ← `useCustomOnly` (source switch).
-- **Distance presets are XML-driven**: Conservative/Balanced/Strong camera-height attenuation defaults live in `CompProperties_Squeaker.distancePresets` via `1.6/Patches/Ratkin_AddSqueakComp.xml`; settings copy the selected preset's actual `distanceRange`, and manual edits switch to Custom.
-- Camera reuses the vanilla `Pawn_CallTracker` idiom: `CurrentViewRect.ExpandedBy(10).Contains()` view culling (perf) + **distRange distance attenuation** (`SoundInfo.InMap(TargetInfo(Pawn))`, 15~70 cells linear fade, >70 silent; 2026-07 removed `CurrentZoom<=Close` zoom gating which blocked distRange). High-speed noise control is done by cooldown scaling, not by lowering per-sound `volumeFactor`.
-- **Build identity in logs**: startup logs must show the intended channel identity. Dev builds need the strongest distinction and identify by commit (`AssemblyInformationalVersion` source revision); GitHub builds identify by tag plus the tag commit; Steam builds identify only by the Steam package version. This prevents old-version bug reports being mistaken for current builds while keeping Steam logs concise.
+## Current Contract Index
+- Runtime, actions, resolver, VoicePack model, Xenotype eligibility, Example staging, and camera behavior: [`docs/project-architecture-contract.md`](./docs/project-architecture-contract.md).
+- Settings UI, immediate persistence, Xenotype preset presentation, and player diagnostics: [`docs/settings-ui-product-contract-zh.md`](./docs/settings-ui-product-contract-zh.md).
+- Closed logging compatibility protocol: [`docs/logging-protocol.md`](./docs/logging-protocol.md).
+- Third-party VoicePacks and OGG/WAV guidance: [`docs/voice-pack-author-guide-zh.md`](./docs/voice-pack-author-guide-zh.md).
+- Historical `DEPRECATED_*` documents and `OBLIVIONIS.md` are cold evidence only and cannot override these current contracts.
+- Contract conflicts are not silently normalized: identify the mismatch and resolve it in the authoritative layer.
 
-## Junction Dev Mechanism (local dev core)
-Make `RimWorld/Mods/SqueakyRatkin` a junction to this workspace root so builds load instantly.
-- `scripts/validate-junction.ps1` runs at `BeforeBuild`, **non-blocking** (warns and prints the fix command if missing).
-- Developer chooses the RimWorld Mods location (priority high → low):
-  1. Env var `$env:RIMWORLD_DIR` (pointing at the Mods dir)
-  2. Script params `-wsRoot <root> -modName <name>`
-  3. Auto-detect common Steam paths (`I:\SteamLibrary\...`, `C:\Program Files (x86)\Steam\...`)
-- **To create the junction for a developer**: run `validate-junction.ps1`, then execute the `New-Item -ItemType Junction -Path '<Mods>/SqueakyRatkin' -Target '<root>'` it prints. **Never hardcode paths; never assume where RimWorld is installed.**
+## Build, Stage, and Release Safety
+- Mandatory build (project root; **0 errors**): `dotnet build Source/SqueakyRatkin/SqueakyRatkin.csproj`.
+- Local testing is dist-only: build Dev flavor (`dotnet build Source/SqueakyRatkin/SqueakyRatkin.csproj -c Release -p:SqueakyBuildFlavor=Dev`), then `scripts/pack-dev.ps1`.
+- Builds/pack scripts never install to RimWorld Mods; the developer manually installs `dist/dev/SqueakyRatkin/`.
+- Pack scripts stage/zip only: never compile, transcode audio, or install.
+- The only manually maintained product version is `Source/SqueakyRatkin/SqueakyRatkin.csproj` `<Version>`; Assembly/File versions derive from it.
+- Flavor identity: Dev logs the source-revision commit; GitHub logs `<tag>+<commit>`; Steam logs only its package version.
+- Local testing is Dev only; GitHub artifacts are CI tag/release only; Steam flavor is Workshop-only.
+- `pack-steam.ps1` only stages `dist/steam/SqueakyRatkin/`; staging deliberately excludes `PublishedFileId.txt`. After the first upload, copy that stage to the local RimWorld Mods upload copy (never the `workshop/content` subscription cache), write the existing item ID only to that copy's `About/PublishedFileId.txt`, and Update under the same author account. Never put the ID in Git or staging; after upload verify the same item URL/ID, visibility, preview, and change note. Subsequent versions never use `Initial Workshop Upload`.
+- Distribution content is limited to `About/`, `LoadFolders.xml`, `1.6/`, and exactly `Extras/SqueakyRatkinExampleVoices/`.
+- Exclude source, PDBs, `PublishedFileId.txt`, dist, docs, license, and scripts.
+- Commits and every pending push range must be free of personal local state: concrete usernames or home directories, absolute workspace/Steam/tool paths, local installation or subscription details, diagnostic-log excerpts, credentials, API keys, tokens, private keys, and `PublishedFileId.txt`. Use environment variables or abstract placeholders when a path must be documented; never commit their expanded local values.
+- Before pushing, inspect both the final tree and the complete commit range that would enter the remote, not only `HEAD`. If both are clean, use the normal authorized push flow; no history rewrite or special branch workflow is required.
+- If sensitive local state has already entered unpushed commits, stop before pushing and rebuild or sanitize that pending history while preserving the original history only in an explicitly local archive ref with no upstream. Never push or merge that archive, including through `--all`, `--mirror`, or `--tags`. This is incident recovery, not the normal release process.
+- If any real credential or private key has entered a commit, treat it as compromised: stop, revoke or rotate it first, then remove it from all history that could reach a remote. History cleanup is not a substitute for credential rotation.
+- Commit, push, PR creation, squash merge, tag, and release each require explicit authorization.
+- Work on `dev`; `main` is protected—never push directly. Release follows authorized `dev` → PR → squash to `main` → tag that main commit → push tag → CI artifact/release.
+- Never tag `dev`; do not create a release tag before the authorized squash commit is on `main`.
+- Release tags are manually made strict SemVer 2.0 (`v<version>`, optional dot-separated prerelease; no leading zeroes).
+- Their base version equals csproj `<Version>` and the tag commit is in `origin/main` history. CI builds the GitHub artifact once from that tag.
 
-## Build Flavor
-`-p:SqueakyBuildFlavor=Dev|Steam|GitHub` → constants `SQUEAKY_DEV/STEAM/GITHUB`, default Dev. Startup-log banner differs by flavor. Player-facing troubleshooting DebugAction entries and the camera-height indicator must compile in all flavors; they are gated at runtime by RimWorld Dev Mode and map state, because players need them to tune distance attenuation and report issues. Internal-only instrumentation may still be `SQUEAKY_DEV`-gated.
-- Build commands/workflows pass flavor-specific `InformationalVersion` values into the DLL: dev uses the SDK source revision, GitHub uses `<tag>+<commit>`, Steam uses only the package version.
-
-## Build Verification (mandatory)
-```
-dotnet build Source/SqueakyRatkin/SqueakyRatkin.csproj
-```
-workdir = project root. Must be 0 errors. A missing-junction WARNING is normal (non-blocking).
-
-## Pack (distribution)
-- Pack scripts are packaging-only: build the intended flavor first, then stage/zip. They must not compile; this keeps CI from building twice.
-- `dotnet build Source/SqueakyRatkin/SqueakyRatkin.csproj -c Release -p:SqueakyBuildFlavor=Dev` then `scripts/pack-dev.ps1` → `dist/dev/SqueakyRatkin/` (**local testing only**, Dev flavor; use this when copying a local test build into RimWorld/Mods).
-- Build Steam flavor with `-p:SqueakyBuildFlavor=Steam -p:SqueakyInformationalVersion=<version> -p:IncludeSourceRevisionInInformationalVersion=false`, then `scripts/pack-steam.ps1` → `dist/steam/SqueakyRatkin/` (Steam flavor)
-- CI release builds GitHub flavor once with `<tag>+<commit>`, then `scripts/pack-github.ps1` → `dist/github/SqueakyRatkin-v<ver>.zip` (GitHub flavor)
-- Content filter: only `About/`, `LoadFolders.xml`, `1.6/`. Excludes `Source/`, `*.pdb`, `About/PublishedFileId.txt`, `dist/`, `*.md`, `LICENSE`, `scripts/`.
-- **Flavor discipline**: local dev/test directory packages must use Dev flavor (`pack-dev.ps1`). GitHub flavor packages must be produced by CI release/tag flow only. Steam flavor is reserved for Steam Workshop packaging/upload, not local dev testing.
-
-## Key File Map
-```
-Source/SqueakyRatkin/
-  CompSqueaker.cs          data-driven squeak Comp + three-layer mood merge
-  SqueakyRatkinSettings.cs ModSettings modulation workbench UI
-  SqueakLabels.cs          localization helper
-  Mod.cs                   entry + flavor + load log
-  Patches/                 Wounded + Select Harmony patches + player troubleshooting HUD
-  Debug/                   DevMode troubleshooting actions / overlay / mote maker
-1.6/
-  Defs/SoundDefs/          27 SoundDefs (9 actions × 3 sets: base/Pure/Preview, guinea-pig default)
-  Defs/MoteDefs/           white-bg overlay mote
-  Patches/Ratkin_AddSqueakComp.xml  actions + moodMods (data-driven core)
-  Sounds/Squeak/<Action>/  custom audio placeholders (players place custom audio here)
-  Languages/{English,ChineseSimplified}/Keyed/ localization
-scripts/                   validate-junction / stage-package / pack-dev / pack-steam / pack-github
-scripts/pack-dev.ps1       local Dev-flavor directory package for manual testing
-```
-
-## Debug Entry (development mode)
-Developer menu → "Squeaky Ratkin" category: overlay toggle ×2 + camera indicator toggle ×2. These entries must ship in GitHub/Steam builds as player troubleshooting tools, while still requiring RimWorld Dev Mode and an active map. The `GlobalControlsUtility.DoDate` postfix can draw localized camera height/view size (SC: 高度/视野) in the vanilla right-side status stack, reading actual runtime `Find.Camera.transform.position.y` / `Find.Camera.orthographicSize` rather than re-deriving vanilla height from `RootSize`. Sound preview moved to ModSettings workbench (no DevMode needed).
-
-## Release Flow (dev → main → tag → CI)
-1. dev: atomic commits, all development here.
-2. PR dev→main: `gh pr create --base main --head dev --title "<type>: <desc>"`.
-3. Squash merge: `gh pr merge --squash --subject "<type>: <desc>"` (main protected: require PR + enforce_admins, no direct push).
-4. Tag **main** (not dev): `git tag v<x.y.z>` stable, `v<x.y.z>-rc<N>` pre-release. Tag must point at main's squash commit.
-5. Push tag: `git push origin v<x.y.z>-rc<N>` → triggers `release.yml` → pack-github + GitHub Release.
-6. Pre-release detection: `release.yml` marks `prerelease: true` if tag contains `-` (e.g. v0.1.0-rc1); stable (v0.1.0) is not.
-7. **Never tag dev for release.** dev is development; main is the release surface.
+## Mandatory Verification
+- For code or data changes, run the mandatory build above from the project root and require 0 errors.
+- For pure documentation changes, run targeted text/link checks and `git diff --check`.
+- Do not run Markdown LSP or a build unless requested.

@@ -5,14 +5,15 @@
 Use this file as the canonical English changelog for Squeaky Ratkin.
 
 Rules:
-- Keep entries in chronological order, oldest first and newest last.
+- Keep released entries in chronological order, oldest first and newest last; place an Unreleased entry at the top.
 - Use local release time in the heading: `[YYYY-MM-DD HH:MM UTC+8] Version X.Y.Z`.
-- For the first Steam Workshop upload, use `Initial Workshop Upload` instead of a version number.
+- An unreleased top entry may use `Unreleased — X.Y.Z`; replace it with the actual UTC+8 release time when publishing.
+- Use `Initial Workshop Upload` only for the first Steam Workshop upload; subsequent updates use ordinary version entries.
 - Keep items short and visible. Prefer one change per bullet.
 - Separate feature additions, changes, fixes, packaging notes, and release notes when useful.
 - Bug fixes should be concise unless the fix changes player-facing behavior.
 - Mention both GitHub and Steam only when the entry affects both release surfaces.
-- Do not put unreleased plans here. Use `TODO.md` for pending work.
+- Do not put unaccepted plans here. An accepted, not-yet-released version may use the explicit Unreleased entry above.
 - Keep the Simplified Chinese version synchronized in `docs/CHANGELOG.zh-CN.md`.
 
 Recommended entry shape:
@@ -34,6 +35,37 @@ Short release summary.
 ### Packaging
 - ...
 ```
+
+## [2026-07-30 00:32 UTC+8] Version 0.2.0
+
+Release of the accepted 0.2.0 feature set.
+
+### Added
+- Added 15 fixed one-shot actions, including Draft, Undraft, bounded Core attacks, player-ordered Equip, and Mental Break feedback.
+- Added opt-in independent Race and Xenotype VoicePacks, the Off/Fallback/Remix source modes, and exact Xenotype `defName` targeting.
+- Added the ordinary built-in Race Example and the separately enableable Extras Template; the Template remains the single maintained Example-audio source.
+- Added the immediate settings surface with three regular pages, a seven-click Developer & Diagnostics page, coalesced saving, and close flush.
+
+### Changed
+- Made the No-DLC Core baseline end-to-end: Xenotype features are optional deltas while Race and Vanilla fallback remain available.
+- Moved mood pitch/volume modulation to runtime SoundInfo factors and retained XML-driven action, cooldown, probability, and distance behavior.
+- Standardized third-party audio roots as `<lowercase packageId>/<PackDef.defName>/<Action>/`.
+
+### Fixed
+- Made vocal-organ rejection and successful playback consume attempt cooldowns; Death remains exempt only from the Talking chance gate.
+- Bounded attack and equipment triggers to their supported Core/player-command paths.
+- Prevented HAR-only official Xenotypes from appearing as standalone settings candidates, and added an explicit confirmed action to forget unavailable Xenotype settings.
+- Made successful-dispatch result motes follow their recording switch while the DebugAction menu remains gated by RimWorld Dev Mode.
+
+### Breaking
+- Removed the legacy `1.6/Sounds/Squeak/` audio tree and Pure/custom-only source model.
+- Third-party audio is now supplied as an independent VoicePack rather than installed in the main mod.
+- Legacy audio-selection values are not automatically migrated. This entry makes no claim about retention of other settings.
+
+### Packaging
+- Updated the built-in and Template Example voice set to the 41-clip public-domain delivery, normalized as 22.05 kHz mono Ogg Vorbis: Attack 3, Call 4, Death 2, Draft 3, Eat 2, Equip 2, Joy 3, MentalBreak 1, Move 3, Select 3, Sleep 3, Social 3, Undraft 3, Work 3, Wounded 3.
+- Staging mirrors the 15-action/41-OGG Template source into the built-in Example and verifies action keys, exact per-action counts, and SHA-256 identity.
+- Local testing remains dist-only; packaging uses the Dev, Steam, GitHub, and shared staging scripts without deployment by builds.
 
 ## [2026-07-04 18:35 UTC+8] Version 0.1.0
 

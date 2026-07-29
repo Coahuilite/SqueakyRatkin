@@ -1,0 +1,8 @@
+The project's code remains licensed under MPL-2.0. The Example audio clips in this Template are
+not covered by that code license.
+
+These clips are public-domain material. The project and its contributors claim no copyright or
+related rights in them. They may be used, copied, modified, and redistributed.
+
+This statement does not warrant the clips' provenance or legal status in every jurisdiction. Each
+user is responsible for confirming the status applicable to their own use and jurisdiction.

@@ -1,0 +1,11 @@
+This directory is documentation only. LoadFolders.xml intentionally does not load 1.6/Biotech,
+and this Template package ships no Xenotype XML, PackDef, SoundDef, targetDefName, or audio here.
+
+To create a separate Xenotype voice pack, give that package its own packageId, globally unique
+SR_ PackDef/SoundDef names, and its own package-specific audio root. Add a Biotech-gated load
+folder in that separate package, then define exactly one <scope>Xenotype</scope> PackDef with
+one exact, case-sensitive <targetDefName>YOUR_XENOTYPE_DEFNAME</targetDefName>. Do not reuse
+SR_ExampleTemplate_Race, this package's audio paths, or its identity.
+
+The action folders beside this file are empty naming skeletons only. Replace their TXT markers
+with audio you have the right to distribute in your own independently identified package.

@@ -36,5 +36,3 @@ jobs:
           name: SqueakyRatkin-dev-${{ github.sha }}
           path: dist/dev/*.zip
           retention-days: 14
-
-      # CI 仅做编译验证;junction 缺失的 WARNING 是正常的(非阻塞)。

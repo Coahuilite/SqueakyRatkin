@@ -15,6 +15,6 @@
 # 示例:
 #   feat: 新增 Sleep 动作的吱叫触发
 #   fix: Wounded 加最短间隔,防高攻速武器刷屏
-#   docs: AUDIO_GUIDE 音频格式改为 ogg 以对齐原版
+#   docs: 更新 VoicePack 作者指南与 Template 说明
 #   refactor: 心情调制改为运行时 pitchFactor,SoundDef 64→16
 #   chore: 完善 .gitignore,补 .vscode/.opencode

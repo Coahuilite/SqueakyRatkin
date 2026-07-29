@@ -1,0 +1,1 @@
+Non-loadable Xenotype authoring skeleton. Add your own audio only in a separate package.

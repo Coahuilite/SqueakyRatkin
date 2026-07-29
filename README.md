@@ -2,85 +2,42 @@
 
 **English** | [中文](./README.zh-CN.md)
 
-Squeaky Ratkin is a lightweight sound effect mod that adds a whimsical medley of chirps and squeaks to Ratkin pawns. Idle calls, eating, sleeping, wounds, selection, movement, social time, joy, and death can all carry a little sound, tinted by mood and softened by camera-distance attenuation.
+Squeaky Ratkin adds optional one-shot squeaks to NewRatkinPlus Ratkin pawns. The current repository implements the accepted 0.2.0 feature set, and the product version is **0.2.0**; this README is not a release announcement.
 
-> Lightweight, optional ambience for Ratkin Races.
+## Requirements and No-DLC baseline
 
-> **3A disclosure:** this mod is AI-designed, AI-developed, and AI-illustrated. Human maintainers review, package, and release the work.
+- RimWorld 1.6, Harmony, HAR, and NewRatkinPlus (`Solaris.RatkinRaceMod`).
+- Core + those dependencies is the required baseline; all official DLC, including Biotech, are optional. Without Biotech, global settings, applicable actions, mood modulation, Race packs, and Vanilla fallback still work.
 
-## Requirements
-- RimWorld 1.6
-- [Harmony](https://steamcommunity.com/sharedfiles/filedetails/?id=2009463077)
-- [Humanoid Alien Races (HAR)](https://steamcommunity.com/sharedfiles/filedetails/?id=839005762)
-- [Ratkin / 鼠族 (NewRatkin)](https://steamcommunity.com/sharedfiles/filedetails/?id=1578693166)
+Install a published Steam/Release package into `RimWorld/Mods/` and enable its dependencies. See [`docs/project-architecture-contract.md`](./docs/project-architecture-contract.md) for runtime boundaries.
 
-## Install
-- **Steam**: subscribe on the Workshop (once published).
-- **GitHub Release**: download the release zip and extract into `RimWorld/Mods/SqueakyRatkin/`.
+## Audio and VoicePacks
 
-## Audio
-Default source is the vanilla guinea-pig sound set. To use custom squeaks:
-- Place mono files in `1.6/Sounds/Squeak/<Action>/`, named `SR_<Action>_<n>.ogg`.
-- Ogg is recommended; wav (16-bit) is acceptable. Use 22050 or 44100 Hz and normalize peaks around -3dBFS.
-- Uncomment the matching grain in `1.6/Defs/SoundDefs/SqueakyRatkin_SoundDefs.xml`.
-- Record neutral-base variants only; mood differences are produced at runtime through pitch and volume modulation.
-- Use the mod settings workbench to compensate for different custom audio traits.
+The fixed 15 actions are `Call`, `Eat`, `Sleep`, `Wounded`, `Select`, `Move`, `Social`, `Joy`, `Death`, `Draft`, `Undraft`, `Attack`, `Work`, `Equip`, and `MentalBreak`.
 
-## Configuration
-Core behavior is data-driven from `1.6/Patches/Ratkin_AddSqueakComp.xml`: actions define trigger modes, cooldowns, probabilities, and distance presets; mood mods define runtime pitch and volume changes.
+Audio uses opt-in independent VoicePacks: **Off** plays Vanilla only; **Fallback** resolves Xenotype → Race → Vanilla; **Remix** weights currently playable Xenotype, Race, and Vanilla tiers equally. A Xenotype target is the exact, case-sensitive `XenotypeDef.defName` and is optional.
 
-Mod settings provide:
-- Custom audio full override, switching between mixed vanilla fallback and custom-only sounds.
-- Time-speed cooldown scaling, enabled by default, to reduce high-speed trigger density without lowering each sound's volume.
-- Talking capacity frequency scaling, enabled by default, so impaired speech reduces ordinary squeak frequency while death feedback remains protected unless the pawn is organ-mute.
-- Global trigger interval multiplier.
-- Distance volume fade presets or custom attenuation bands.
-- Mood modulation workbench with per-mood overrides, exact inputs, presets, and preview.
-- Optional built-in DebugAction localization, disabled by default; reopen the debug actions menu after toggling.
+The main package includes the ordinary Race-only `SR_OfficialExample_Race`; it has 15 SoundDefs and 41 OGG clips: Attack 3, Call 4, Death 2, Draft 3, Eat 2, Equip 2, Joy 3, MentalBreak 1, Move 3, Select 3, Sleep 3, Social 3, Undraft 3, Work 3, and Wounded 3. It is No-DLC and has no automatic selection or special weight. `Extras/SqueakyRatkinExampleVoices/` is a separate directly enableable Race-only Template with its own package ID, PackDef, catalog identity, and resource root. The Template is the only maintained Example audio source; staging mirrors it into the built-in Example.
 
-## Dev Menu (development mode)
-Developer menu → "Squeaky Ratkin": overlay text toggles and camera indicator toggles. Sound preview lives in the mod settings workbench.
+The Example clips are public-domain material outside the MPL-2.0 code license. The project and contributors claim no copyright or related rights in them; they may be used, copied, modified, and redistributed. See [`AUDIO_RIGHTS.txt`](./Extras/SqueakyRatkinExampleVoices/AUDIO_RIGHTS.txt) for the limited provenance/status disclaimer. Start with [`docs/voice-pack-author-guide-zh.md`](./docs/voice-pack-author-guide-zh.md) and [`Extras/SqueakyRatkinExampleVoices/README.md`](./Extras/SqueakyRatkinExampleVoices/README.md); custom audio is an independent VoicePack, never an installation into the main mod.
 
-## License
-- **Code (C# / XML defs / patches)**: [Mozilla Public License 2.0](./LICENSE) — file-level copyleft, project-level combinable with proprietary code.
-- **Audio assets**: custom audio contributors are responsible for declaring the license and rights for their own files. The vanilla guinea-pig audio is owned by Ludeon; this mod only references defName/clipFolderPath per Ludeon's mod policy — no vanilla assets are redistributed.
-- **Third-party deps** (Harmony / HAR / Ratkin): belong to their authors, under their own licenses.
+## Settings and diagnostics
 
-## Development
+Settings are immediate with a coalesced save and close flush. There are three regular pages plus a seven-click-unlocked Developer & Diagnostics page. The UI and capability contract is [`docs/settings-ui-product-contract-zh.md`](./docs/settings-ui-product-contract-zh.md). Detailed diagnostic logging is independent of RimWorld Dev Mode; its stable machine/human protocol is [`docs/logging-protocol.md`](./docs/logging-protocol.md).
 
-### Junction (recommended for local dev)
-Make `RimWorld/Mods/SqueakyRatkin` a junction pointing at this workspace root so builds load instantly. `scripts/validate-junction.ps1` auto-checks before each build (warn-only, non-blocking).
+## Development, packaging, and versioning
 
-**Choose your RimWorld Mods location** (priority high → low):
-1. Env var (recommended, persistent): `$env:RIMWORLD_DIR = "<your RimWorld Mods path>"`
-2. Script params: `pwsh scripts/validate-junction.ps1 -wsRoot <root> -modName SqueakyRatkin`
-3. Auto-detect common Steam paths
+The only manually maintained product version is `<Version>` in `Source/SqueakyRatkin/SqueakyRatkin.csproj` (currently 0.2.0). Builds do not install into RimWorld.
 
-**Create the junction manually** (the script prints this when missing):
 ```powershell
-New-Item -ItemType Junction -Path '<your RimWorld>\Mods\SqueakyRatkin' -Target '<this repo root>'
+dotnet build Source/SqueakyRatkin/SqueakyRatkin.csproj -c Release -p:SqueakyBuildFlavor=Dev
+pwsh scripts/pack-dev.ps1
 ```
 
-### Build
-```
+This stages `dist/dev/SqueakyRatkin/`; manually install/copy it for local testing. The four scripts are `stage-package.ps1`, `pack-dev.ps1`, `pack-steam.ps1`, and `pack-github.ps1`; pack scripts package existing flavor builds and do not compile. Dev is for local dist-only tests, Steam for Workshop packaging, and GitHub packaging is the CI tag/release path. Maintainers updating an existing Workshop item must follow the update rule in [`AGENTS.md`](./AGENTS.md): `pack-steam.ps1` only stages, and the item ID belongs only in the local upload copy, never Git or staging. Standard build verification is:
+
+```text
 dotnet build Source/SqueakyRatkin/SqueakyRatkin.csproj
 ```
-Must be 0 errors. A missing-junction WARNING is normal (non-blocking).
 
-### Build Flavor (for distribution)
-`-p:SqueakyBuildFlavor=Dev|Steam|GitHub` toggles the startup-log banner (`[dev|steam|github]`). Runtime behavior is identical across flavors. Startup logs identify dev builds by commit, GitHub releases by tag plus commit, and Steam builds by package version.
-
-### Pack
-- Build the intended flavor first; pack scripts only stage/zip existing build output.
-- Dev local test: build Dev flavor, then `pwsh scripts/pack-dev.ps1` → `dist/dev/SqueakyRatkin/`.
-- Steam Workshop: build Steam flavor, then `pwsh scripts/pack-steam.ps1` → `dist/steam/SqueakyRatkin/`.
-- GitHub Release: CI/tag flow builds GitHub flavor, then `pwsh scripts/pack-github.ps1` → `dist/github/SqueakyRatkin-v<ver>.zip`.
-- Content includes only `About/`, `LoadFolders.xml`, `1.6/` (excludes source / pdb / docs).
-
-## Branches & Contributing
-- `main`: release branch (stable; tags `v*` trigger the release workflow).
-- `dev`: development branch — PRs go here.
-
-See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for audio and code contribution guides.
-
-> AI-agent development guide: [`AGENTS.md`](./AGENTS.md).
+Code is MPL-2.0. Vanilla assets are referenced only by Def/path and are never redistributed. Contributions: [`CONTRIBUTING.md`](./CONTRIBUTING.md). Historical documentation is explicitly marked `DEPRECATED`; do not use it as current guidance.

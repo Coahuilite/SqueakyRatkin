@@ -2,85 +2,42 @@
 
 [English](./README.md) | **中文**
 
-鼠辈啁啾(Squeaky Ratkin) 是一款轻量级音效模组，为鼠族(Ratkin)增加随心情变化的啁啾与吱声。空闲叫、吃饭、睡觉、受击、选中、移动、社交、娱乐、死亡都可以带上一点动静，并随摄像机距离自然变轻。
+鼠辈啁啾为 NewRatkinPlus 鼠族 pawn 加入可选的一次性啁啾声。仓库已实现获接受的 0.2.0 功能范围，产品版本现为 **0.2.0**；本文不是发布声明。
 
-> 面向 Ratkin 种族的轻量、可选氛围增强。
+## 依赖与 No-DLC 基线
 
-> **3A 声明:**本模组由 AI 设计、AI 开发、AI 绘制。人类维护者负责审阅、打包与发布。
+- RimWorld 1.6、Harmony、HAR、NewRatkinPlus（`Solaris.RatkinRaceMod`）。
+- Core 加上述依赖是强制基线；所有官方 DLC（含 Biotech）均为可选。无 Biotech 时，全局设置、适用动作、心情调制、Race 包与原版回退仍可用。
 
-## 依赖
-- RimWorld 1.6
-- [Harmony](https://steamcommunity.com/sharedfiles/filedetails/?id=2009463077)
-- [Humanoid Alien Races (HAR)](https://steamcommunity.com/sharedfiles/filedetails/?id=839005762)
-- [Ratkin / 鼠族 (NewRatkin)](https://steamcommunity.com/sharedfiles/filedetails/?id=1578693166)
+将已发布的 Steam/Release 包安装到 `RimWorld/Mods/` 并启用依赖。运行时边界见 [`docs/project-architecture-contract.md`](./docs/project-architecture-contract.md)。
 
-## 安装
-- **Steam**:订阅创意工坊(发布后)。
-- **GitHub Release**:下载 release zip,解压到 `RimWorld/Mods/SqueakyRatkin/`。
+## 音频与 VoicePack
 
-## 音频素材
-默认音源为原版豚鼠声音组。要使用自定义鼠叫:
-- 将单声道文件放入 `1.6/Sounds/Squeak/<Action>/`,文件名 `SR_<Action>_<n>.ogg`。
-- 推荐 ogg;wav(16-bit)也可。采样率使用 22050 或 44100 Hz,峰值归一化到约 -3dBFS。
-- 取消 `1.6/Defs/SoundDefs/SqueakyRatkin_SoundDefs.xml` 里对应 grain 的注释。
-- 只需录制中性基准变体;心情差异由运行时音高与音量调制产生。
-- 可在模组设置工作台中按自定义音频特性做补偿。
+固定 15 个动作是 `Call`、`Eat`、`Sleep`、`Wounded`、`Select`、`Move`、`Social`、`Joy`、`Death`、`Draft`、`Undraft`、`Attack`、`Work`、`Equip`、`MentalBreak`。
 
-## 配置
-核心行为由 `1.6/Patches/Ratkin_AddSqueakComp.xml` 数据驱动:actions 定义触发模式、冷却、概率与距离预设;moodMods 定义运行时音高与音量调制。
+音频使用玩家主动选择的独立 VoicePack：**Off** 仅原版；**Fallback** 按 Xenotype → Race → 原版回退；**Remix** 让当前可播放的 Xenotype、Race、原版 tier 等权。Xenotype 目标只能是精确且区分大小写的 `XenotypeDef.defName`，并且是可选增量。
 
-模组设置提供:
-- 自定义音频全覆盖,可在混合原版兜底与纯自定义音频之间切换。
-- 按游戏倍速放大触发冷却,默认开启,通过降低高倍速触发密度降噪,不压低单次音量。
-- 按语言能力缩放触发频率,默认开启,语言能力受损会降低普通发声频率;死亡反馈只在器官性无声时静音。
-- 全局触发间隔倍率。
-- 距离音量衰减预设或自定义衰减区间。
-- 心情调制工作台,可按心情覆盖音高、音量、精确输入、套用预设并预览。
-- 可选的内置调试动作本地化,默认关闭;切换后重开调试动作菜单生效。
+主包内置普通 Race-only `SR_OfficialExample_Race`：15 个 SoundDef、41 个 OGG，分布为 Attack 3、Call 4、Death 2、Draft 3、Eat 2、Equip 2、Joy 3、MentalBreak 1、Move 3、Select 3、Sleep 3、Social 3、Undraft 3、Work 3、Wounded 3。它 No-DLC 可用，不自动选择，也没有特殊权重。`Extras/SqueakyRatkinExampleVoices/` 是可直接启用的独立 Race-only Template，拥有自己的 package ID、PackDef、Catalog 身份和资源根。Template 是 Example 音频的唯一维护源，staging 将其镜像到内置 Example。
 
-## 开发者菜单(开发者模式)
-开发者菜单 → "Squeaky Ratkin":悬浮字开关与摄像机指示器开关。声音预览在模组设置工作台中进行。
+Example 音频是 MPL-2.0 代码许可证之外的公共领域素材。项目与贡献者不对其主张版权或相关权利；可使用、复制、修改和再分发。权利状态及有限的来源/法域免责声明见 [`AUDIO_RIGHTS.txt`](./Extras/SqueakyRatkinExampleVoices/AUDIO_RIGHTS.txt)。请从 [`docs/voice-pack-author-guide-zh.md`](./docs/voice-pack-author-guide-zh.md) 和 [`Extras/SqueakyRatkinExampleVoices/README.md`](./Extras/SqueakyRatkinExampleVoices/README.md) 开始；自定义音频必须是独立 VoicePack，绝不安装进主模目录。
 
-## 许可
-- **代码(C#/XML Defs/Patches)**:[Mozilla Public License 2.0](./LICENSE) —— 文件级 copyleft(修改须开源),项目级可与闭源代码组合。
-- **音频素材**:自定义音频贡献者需自行声明其文件的许可与权利归属。原版豚鼠音频归 Ludeon 所有,本模组仅按 Ludeon 模组政策引用 defName/clipFolderPath,不分发原版资产。
-- **第三方依赖**(Harmony/HAR/Ratkin):归各自作者,遵循各自许可。
+## 设置与诊断
 
-## 开发
+设置即时生效，使用合并保存并在关窗时 flush。普通状态有三页；连续点击版本七次后解锁“开发与诊断”第四页。UI/capability 合同见 [`docs/settings-ui-product-contract-zh.md`](./docs/settings-ui-product-contract-zh.md)。详细诊断日志独立于 RimWorld 开发者模式；稳定的人类/机器日志协议见 [`docs/logging-protocol.md`](./docs/logging-protocol.md)。
 
-### Junction(本地开发推荐)
-让 `RimWorld/Mods/SqueakyRatkin` 指向本工作区根,编译即加载,免手动复制。`scripts/validate-junction.ps1` 每次构建前自动校验(缺失只警告,不阻断)。
+## 开发、打包与版本
 
-**指定 RimWorld Mods 位置**(三选一,优先级递减):
-1. 环境变量(推荐,持久):`$env:RIMWORLD_DIR = "<你的 RimWorld Mods 路径>"`
-2. 脚本参数:`pwsh scripts/validate-junction.ps1 -wsRoot <项目根> -modName SqueakyRatkin`
-3. 自动检测常见 Steam 路径
+唯一人工维护的产品版本是 `Source/SqueakyRatkin/SqueakyRatkin.csproj` 的 `<Version>`（当前 0.2.0）。构建不会安装到 RimWorld。
 
-**手动建 junction**(脚本缺失时会打印这条命令,复制运行即可):
 ```powershell
-New-Item -ItemType Junction -Path '<你的 RimWorld>\Mods\SqueakyRatkin' -Target '<本项目根>'
+dotnet build Source/SqueakyRatkin/SqueakyRatkin.csproj -c Release -p:SqueakyBuildFlavor=Dev
+pwsh scripts/pack-dev.ps1
 ```
 
-### 构建
-```
+它会生成 `dist/dev/SqueakyRatkin/`，本地测试时由开发者手动复制/安装。四个脚本为 `stage-package.ps1`、`pack-dev.ps1`、`pack-steam.ps1`、`pack-github.ps1`；打包脚本只处理已有 flavor 构建，不会编译。Dev 用于仅 dist 的本地测试，Steam 用于创意工坊打包，GitHub 包只由 CI tag/release 流程生成。维护者更新既有创意工坊条目时，须遵循 [`AGENTS.md`](./AGENTS.md) 的更新规则：`pack-steam.ps1` 只 stage，item ID 只写入本机上传副本，绝不进入 Git 或 stage。标准构建验证：
+
+```text
 dotnet build Source/SqueakyRatkin/SqueakyRatkin.csproj
 ```
-必须 0 errors。junction 缺失的 WARNING 正常(非阻断)。
 
-### Build Flavor(分发用)
-`-p:SqueakyBuildFlavor=Dev|Steam|GitHub`,影响启动日志 banner(`[dev|steam|github]`)。运行时功能三态相同。启动日志中 dev 版按提交号区分,GitHub 版按 tag+提交区分,Steam 版只显示包版本号。
-
-### 打包
-- 先构建目标 flavor;打包脚本只整理/压缩已有构建产物。
-- 本地测试:先构建 Dev flavor,再 `pwsh scripts/pack-dev.ps1` → `dist/dev/SqueakyRatkin/`。
-- Steam 工坊:先构建 Steam flavor,再 `pwsh scripts/pack-steam.ps1` → `dist/steam/SqueakyRatkin/`。
-- GitHub Release:仅 CI/tag 流程构建 GitHub flavor,再 `pwsh scripts/pack-github.ps1` → `dist/github/SqueakyRatkin-v<ver>.zip`。
-- 内容只含 `About/`、`LoadFolders.xml`、`1.6/`(排除源码/pdb/文档)
-
-## 分支与贡献
-- `main`:发版分支(稳定;tag `v*` 触发 release)。
-- `dev`:开发分支,PR 提到这里。
-
-音频与代码贡献指南见 [`CONTRIBUTING.md`](./CONTRIBUTING.md)。
-
-> 给 AI agent 的开发指引见 [`AGENTS.md`](./AGENTS.md)。
+代码采用 MPL-2.0。原版资产只通过 Def/path 引用，绝不重新分发。贡献说明见 [`CONTRIBUTING.md`](./CONTRIBUTING.md)。标记为 `DEPRECATED` 的历史文档不可作为现行指南。
