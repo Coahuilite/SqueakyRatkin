@@ -67,5 +67,7 @@ $publishedFileId = Join-Path $stageDir 'About\PublishedFileId.txt'
 if (Test-Path -LiteralPath $publishedFileId) { Remove-Item -LiteralPath $publishedFileId -Force }
 Get-ChildItem -LiteralPath $stageDir -Recurse -File -Filter *.pdb | Remove-Item -Force
 Get-ChildItem -LiteralPath $stageDir -Recurse -File -Filter *.gitkeep | Remove-Item -Force
+# Navigation docs (codemap.md) are repository tooling, not distribution content.
+Get-ChildItem -LiteralPath $stageDir -Recurse -File -Filter 'codemap.md' | Remove-Item -Force
 $fileCount = (Get-ChildItem -LiteralPath $stageDir -Recurse -File | Measure-Object).Count
 Write-Host "[stage-package] Staged $fileCount files to $stageDir; Template and built-in OGG mirrors validated."
