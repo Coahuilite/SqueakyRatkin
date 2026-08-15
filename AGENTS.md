@@ -29,6 +29,7 @@ Maintain these boundaries:
 
 - Default scope is the repository root. Reading outside it requires authorization for the exact path, is read-only, and must not broaden to parents, siblings, Steam-wide roots, or global search. The named RimWorld `Player.log` troubleshooting directory is the standing read-only exception; do not broaden it without authorization.
 - Never place personal local state, expanded local paths, diagnostic-log excerpts, credentials, API keys, tokens, private keys, or `PublishedFileId.txt` in Git, documentation, generated artifacts, staging, or reachable history.
+- Every push — release or temporary staging — is preceded by a privacy review of the complete reachable range, not just HEAD. Write documentation privacy-free from the start: no personal local state, expanded paths, log excerpts, credentials, or `PublishedFileId.txt` values.
 - If a real secret enters reachable history, stop first; revoke or rotate it, then perform incident-specific history cleanup. Do not claim cleanup alone resolves the secret.
 - Commit, push, PR, merge, tag, release, Workshop publication, and other externally effective operations require explicit authorization.
 - Repository evidence, stage output, CI output, or one publication channel cannot prove another channel's external state. Treat unknown manual or external state as unverified.

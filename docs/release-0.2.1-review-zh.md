@@ -32,7 +32,21 @@
 - main 独有提交 `1b1fe9e`（"fix: include debug actions in release builds"）在 dev 中已等价存在，未丢失实质内容。
 - CI 的 Node 20 弃用 warning（checkout/setup-dotnet/softprops 被强制运行在 Node 24）为非阻断警告，与 0.2.0 时一致。
 
-## Steam staging（未发布，人工步骤待执行）
+## Steam 发布观察（2026-08-16 页面核验）
+
+| 项 | 观察 |
+|---|---|
+| 页面 URL/ID | `https://steamcommunity.com/sharedfiles/filedetails/?id=3758115669`（与仓库维护源一致，同一 item） |
+| 描述 | 新版英文文案已生效（`Mod version: 0.2.1`、无统计/排障/制作步骤、末尾 `Hide The Book of Squeakudges on a high stool!`） |
+| Updated | Aug 15（Steam 页面时间），与发布会话吻合 |
+| File Size | 1.871 MB |
+| Change Notes | 3 条（维护者自行维护，仓库不含 change note） |
+| 互动 | 79 评分、37 评论（发布前既有） |
+| visibility / preview | 公开可访问；预览图存在 |
+
+注：页面描述与 Updated 时间佐证 0.2.1 已上线；**实际订阅下载的二进制版本未在游戏内验证**——描述/Updated/文件大小与本地 Steam 包（115 文件）一致，但"玩家下载到的 DLL 就是 0.2.1.0"仍属需游戏内确认的边界，当前记为"页面级已核验、二进制级一致但未下载验证"。
+
+## Steam staging 包（本地产物）
 
 | 项 | 值 |
 |---|---|
@@ -42,9 +56,9 @@
 | DLL FileVersion | `0.2.1.0`（Steam flavor，运行时日志只记包版本） |
 | PublishedFileId | 0（stage 排除） |
 
-Steam 发布为人工步骤：复制 stage 到本地上传副本 → 把既有 item ID 只写入副本 `About/PublishedFileId.txt` → 以同一作者 Update（后续版本绝不用 `Initial Workshop Upload`）→ 人工核对同一 item URL/ID、visibility、预览与描述。仓库证据不能证明 Workshop 外部状态。
+Steam 发布为人工步骤：复制 stage 到本地上传副本 → 把既有 item ID 只写入副本 `About/PublishedFileId.txt` → 以同一作者 Update（后续版本绝不用 `Initial Workshop Upload`）→ 人工核对同一 item URL/ID、visibility、预览与描述。
 
 ## 渠道状态
 
 - **GitHub**：完整（tag + CI success + 预期 asset + DLL 身份/哈希/包内容逐项核验）。
-- **Workshop**：unverified——待维护者上传并人工观察后，在本文补充观察记录。
+- **Workshop**：页面级已核验（同一 item、描述 0.2.1、visibility、preview、Updated、文件大小）；二进制下载级验证未做（如后续要闭环，可订阅后在游戏内核对 DLL 版本）。

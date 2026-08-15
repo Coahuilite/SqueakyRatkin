@@ -16,13 +16,14 @@
 - 中文“3A”固定指 AI 规划、AI 编程、AI 维护；英文使用严肃标题 `AI-Generated Work Disclosure`，不得使用 `Masterpiece`。
 - 开头的披露后必须立即说明内置 Example VoicePack 需要主动启用，且不得在两者之前放标题、简介或其他正文。
 - 重点说明 15 个动作的设计；只自然说明未覆盖动作会回退，不在 Workshop 描述中展开三种声音模式。
+- 页面专注模组本身，不展示：音频统计数字（OGG 总数、每动作数量、SoundDef 数）、开发者排障（七击解锁的开发与诊断页）、版本迁移说明（旧版 audio-selection）、VoicePack 制作步骤（作者内容路由到作者指南，页面只留链接）。
 
 ## Example 与兼容事实
 
-- 内置普通 Race Example 覆盖全部 15 个动作，当前包含 15 个 SoundDef 与 41 个 public-domain OGG（当前参考基准，数量允许变化）。
+- 内置普通 Race Example 覆盖全部 15 个动作，音频为 public-domain；页面不写音频统计数字。
 - Example 不会自动选择或启用，也没有特殊权重；新装默认使用原版回退。玩家必须在设置中主动启用 Race Example。
 - 基础运行不需要任何官方 DLC。Biotech 仅为精确 Xenotype `defName` 匹配提供可选增强；没有 Biotech 时，Race 与 Vanilla 仍正常工作。
-- 第三方声音必须作为独立 VoicePack 发布和安装，不能装入主模组目录；0.2.0 不会自动迁移旧版 audio-selection。
+- 第三方声音必须作为独立 VoicePack 发布和安装，不能装入主模组目录；0.2.0 不会自动迁移旧版 audio-selection（该迁移事实页面不展示，属维护参考）。
 
 ## 中文 BBCode
 
@@ -32,16 +33,16 @@
 这里的“3A”与开发预算、团队规模和显卡性能无关。实际版本仍由人类维护者执行审查、测试、打包和发布。
 
 [h2]⚠ 内置 Example VoicePack 需要主动启用[/h2]
-内置 Race Example 覆盖全部 15 个动作，当前包含 41 条 OGG（当前参考基准，数量可能变化），但默认不会自动启用。新安装会先使用原版回退声音；如果想试听 Example，请进入模组设置，主动启用 Race Example。
+内置 Race Example 覆盖全部 15 个动作，但默认不会自动启用。新安装会先使用原版回退声音；如果想试听 Example，请进入模组设置，主动启用 Race Example。
 
 [h1]鼠辈啁啾[/h1]
 
-[b]模组版本：[/b]0.2.0
+[b]模组版本：[/b]0.2.1
 [b]适用版本：[/b]RimWorld 1.6
 
 鼠族当然不是不会说话。
 
-鼠辈啁啾为 NewRatkinPlus 鼠族加入基于动作触发的可选声音反馈。呼唤、吃饭、移动、工作、战斗或休息时，符合条件的鼠族会在合适的时机发出短促啁啾；模组不会改变其行为、数值或战斗逻辑。
+鼠辈啁啾为 NewRatkinPlus 鼠族 加入基于动作触发的可选声音反馈。呼唤、吃饭、移动、工作、战斗或休息时，符合条件的鼠族会在合适的时机发出短促啁啾；模组不会改变其行为、数值或战斗逻辑。
 
 它不只照顾殖民地成员。访客、友方、敌对与地图上其他符合条件的鼠族也走同一套触发与声音选择通路。
 
@@ -72,31 +73,11 @@ VoicePack 可以只覆盖其中一部分动作。某个动作没有合适的自�
 
 [h2]内置 Race Example[/h2]
 
-内置 Example 是一个普通 Race VoicePack：当前为 15 个 SoundDef 对应全部 15 个动作，共 41 条 OGG（当前参考基准，数量可能变化）。它没有自动选择、特殊优先级或额外权重，必须由玩家主动启用。
+内置 Example 是一个覆盖全部 15 个动作的完整 Race VoicePack。它没有自动选择、特殊优先级或额外权重，必须由玩家主动启用。
 
 这些 Example 音频是公共领域素材，可用来试听，也可作为制作独立 VoicePack 的起点。你可以使用、复制、修改和再分发这些音频；完整的权利状态、来源与法域免责声明见 GitHub 仓库中的权利说明。
 
-[h2]从旧版更新到 0.2.0[/h2]
-
-0.2.0 使用新的独立 VoicePack 模型，旧版 audio-selection 不会自动迁移。更新后请打开模组设置，重新检查声音选择；如果要使用内置 Example，请手动启用 Race Example。
-
-第三方声音也必须作为独立 VoicePack 模组安装。不要把旧声音文件或第三方包直接复制进鼠辈啁啾的主模组目录；Steam 更新可能覆盖这些文件，这种布局也不属于 0.2.0 的支持范围。
-
-[h2]制作自己的 VoicePack：简要 7 步[/h2]
-
-[olist]
-[*]复制仓库提供的 Example VoicePack Template，并把副本作为一个独立模组。
-[*]替换为自己的稳定名称、作者、模组身份、许可和全部示例 token。
-[*]先从 Race 范围的 Call 开始，不必一开始就制作全部 15 个动作。
-[*]按 Template 的目录结构放入有权分发的音频；发布推荐 OGG Vorbis。
-[*]建立对应的 PackDef 与 SoundDef，并让目录、资源路径和动作名称保持一致。
-[*]同时启用 NewRatkinPlus、Squeaky Ratkin 与你的 VoicePack，再到设置中手动启用它。
-[*]实机确认声音能够触发，并确认缺少自定义声音的动作仍可正常回退后再发布。
-[/olist]
-
-VoicePack 只能提供声音，不能改变主模组的动作判定、概率、冷却、距离或心情规则。完整 XML、Xenotype、音频格式与发布检查请阅读作者指南。
-
-[h2]兼容性与排障[/h2]
+[h2]兼容性[/h2]
 
 [list]
 [*]适用于 RimWorld 1.6 与 NewRatkinPlus；所需依赖请查看本页 Steam 依赖栏。
@@ -105,26 +86,24 @@ VoicePack 只能提供声音，不能改变主模组的动作判定、概率、�
 [*]不会重新分发 RimWorld 原版音频，也不会把第三方 VoicePack 装入主模组目录。
 [/list]
 
-遇到问题时，请先检查声音选择、Race Example 或第三方 VoicePack 是否已主动启用。设置中还保留了七击解锁的开发与诊断页，可在排障时提供更详细的信息。
-
 [h2]下载、指南与反馈[/h2]
 
 [list]
-[*][url=https://github.com/Coahuilite/SqueakyRatkin/releases/tag/v0.2.0]GitHub Release v0.2.0[/url]
+[*][url=https://github.com/Coahuilite/SqueakyRatkin/releases/tag/v0.2.1]GitHub Release v0.2.1[/url]
 [*][url=https://github.com/Coahuilite/SqueakyRatkin/blob/main/docs/voice-pack-author-guide-zh.md]VoicePack 作者指南（中文）[/url]
 [*][url=https://github.com/Coahuilite/SqueakyRatkin/issues]GitHub Issues：问题反馈[/url]
 [/list]
 
 [h2]许可与音频权利[/h2]
 
-模组代码采用 MPL-2.0。内置 Example 当前的 41 条 OGG 是代码许可之外的公共领域素材；项目与贡献者不对这些音频主张版权或相关权利。RimWorld 原版资产仅按 Def 或资源路径引用，不会重新分发。
+模组代码采用 MPL-2.0。内置 Example 的音频是代码许可之外的公共领域素材；项目与贡献者不对这些音频主张版权或相关权利。RimWorld 原版资产仅按 Def 或资源路径引用，不会重新分发。
 
 第三方 VoicePack 作者应为自己的音频、文本与其他内容选择并声明适当许可，只发布自己有权分发的素材。
 
-[i]今天的《仇恨吱书》上充满欢声笑语。[/i]
+[i]把《仇恨吱书》藏到高脚凳上！[/i]
 ```
 
-维护字符数（中文 BBCode 代码块内，包含标签与换行）：3020。
+维护字符数（中文 BBCode 代码块内，包含标签与换行）：2161。
 
 ## English BBCode
 
@@ -134,11 +113,11 @@ This mod was planned, programmed, and maintained with AI assistance.
 A human maintainer reviews, tests, packages, and publishes each release.
 
 [h2]⚠ The Built-in Example VoicePack Must Be Enabled Manually[/h2]
-The built-in Race Example covers all 15 actions and currently contains 41 OGG clips (a current reference count that may change in future versions), but it is not enabled automatically. A fresh installation starts with Vanilla fallback sounds. To hear the Example, open Mod Settings and enable the Race Example yourself.
+The built-in Race Example covers all 15 actions, but it is not enabled automatically. A fresh installation starts with Vanilla fallback sounds. To hear the Example, open Mod Settings and enable the Race Example yourself.
 
 [h1]Squeaky Ratkin[/h1]
 
-[b]Mod version:[/b] 0.2.0
+[b]Mod version:[/b] 0.2.1
 [b]Game version:[/b] RimWorld 1.6
 
 It is not that Ratkin cannot speak.
@@ -174,31 +153,11 @@ The main mod references action-specific pools assembled from several RimWorld Co
 
 [h2]The built-in Race Example[/h2]
 
-The built-in Example is an ordinary Race VoicePack: 15 SoundDefs currently cover all 15 actions with a total of 41 OGG clips—a current reference baseline, not a fixed contract, and the counts may change in future versions. It has no automatic selection, special priority, or extra weight. The player must enable it manually.
+The built-in Example is a complete Race VoicePack covering all 15 actions. It has no automatic selection, special priority, or extra weight. The player must enable it manually.
 
 The Example clips are public-domain material. They can be used for listening or as the starting point for an independent VoicePack. You may use, copy, modify, and redistribute them; see the rights notice in the GitHub repository for the full status, provenance, and jurisdiction disclaimer.
 
-[h2]Updating from an older version to 0.2.0[/h2]
-
-Version 0.2.0 uses the new independent VoicePack model. Legacy audio-selection settings are not migrated automatically. After updating, open Mod Settings and review your sound selection. Enable the Race Example manually if you want to use it.
-
-Third-party audio must also be installed as an independent VoicePack mod. Do not copy old audio or third-party packs into the Squeaky Ratkin main mod folder. Steam updates may overwrite those files, and that layout is not supported by 0.2.0.
-
-[h2]Making a VoicePack: 7 short steps[/h2]
-
-[olist]
-[*]Copy the Example VoicePack Template from the repository and keep the copy as an independent mod.
-[*]Replace the sample name, author, mod identity, license, and every example token with your own stable values.
-[*]Start with Call at Race scope; there is no need to build all 15 actions at once.
-[*]Place audio you have the right to distribute in the Template's directory structure. OGG Vorbis is recommended for release.
-[*]Create the matching PackDef and SoundDef, keeping directories, resource paths, and action names consistent.
-[*]Enable NewRatkinPlus, Squeaky Ratkin, and your VoicePack, then enable the pack manually in settings.
-[*]Test the sound through real gameplay, and verify that actions without custom audio still fall back correctly before publishing.
-[/olist]
-
-A VoicePack supplies sounds only. It cannot change the main mod's action detection, chances, cooldowns, distances, or mood rules. See the author guide for the complete XML, Xenotype, audio-format, and release checks.
-
-[h2]Compatibility and troubleshooting[/h2]
+[h2]Compatibility[/h2]
 
 [list]
 [*]Made for RimWorld 1.6 and NewRatkinPlus. See the Steam dependency panel on this page for required mods.
@@ -207,31 +166,29 @@ A VoicePack supplies sounds only. It cannot change the main mod's action detecti
 [*]The mod does not redistribute RimWorld audio, and third-party VoicePacks must not be installed inside the main mod folder.
 [/list]
 
-If something is not playing, first check whether your sound selection and the Race Example or third-party VoicePack were enabled manually. A Developer & Diagnostics page can also be unlocked with seven clicks in settings when more detailed troubleshooting information is needed.
-
 [h2]Downloads, guide, and feedback[/h2]
 
 [list]
-[*][url=https://github.com/Coahuilite/SqueakyRatkin/releases/tag/v0.2.0]GitHub Release v0.2.0[/url]
+[*][url=https://github.com/Coahuilite/SqueakyRatkin/releases/tag/v0.2.1]GitHub Release v0.2.1[/url]
 [*][url=https://github.com/Coahuilite/SqueakyRatkin/blob/main/docs/voice-pack-author-guide-zh.md]VoicePack Author Guide (Chinese)[/url]
 [*][url=https://github.com/Coahuilite/SqueakyRatkin/issues]GitHub Issues[/url]
 [/list]
 
 [h2]License and audio rights[/h2]
 
-The mod's code is licensed under MPL-2.0. The 41 OGG clips currently in the built-in Example are public-domain material outside the code license; the project and its contributors claim no copyright or related rights in those clips. RimWorld assets are referenced only by Def or resource path and are not redistributed.
+The mod's code is licensed under MPL-2.0. The built-in Example clips are public-domain material outside the code license; the project and its contributors claim no copyright or related rights in those clips. RimWorld assets are referenced only by Def or resource path and are not redistributed.
 
 Third-party VoicePack authors should choose and state an appropriate license for their own audio, text, and other content, and distribute only material they have the right to share.
 
-[i]Today, The Book of Squeakudges is filled with laughter.[/i]
+[i]Hide The Book of Squeakudges on a high stool![/i]
 ```
 
-维护字符数（English BBCode 代码块内，包含标签与换行）：6989。
+维护字符数（English BBCode 代码块内，包含标签与换行）：4824。
 
 ## 发布前核对
 
 - [ ] 版本事实与实际已发布产物一致；Steam 页面实际更新状态不得从仓库、提交或文案文件推断。
-- [ ] 15 个动作固定；15 个 SoundDef、41 OGG 仅为当前参考数量（允许变化）；Example 必须主动启用的事实正确。
+- [ ] 15 个动作固定；页面不含音频统计数字；Example 必须主动启用的事实正确。
 - [ ] 新装使用原版回退，Example 不自动选择、无特殊权重。
 - [ ] No-DLC 基线与精确 Xenotype 匹配的可选 Biotech 边界正确。
 - [ ] 页面 URL 与正文链接有效，且正文没有重复 Steam 依赖栏内容。
@@ -239,7 +196,7 @@ Third-party VoicePack authors should choose and state an appropriate license for
 - [ ] 两份 BBCode 分别在 Steam 编辑器与实际页面人工预览；无错误标签、截断或超长显示问题。
 - [ ] 两份描述字符数均低于 8000，且维护元信息中的统计已经刷新。
 - [ ] 原版资产不再分发、Example 公共领域权利与第三方作者责任表述正确。
-- [ ] 0.2.0 旧 audio-selection 不自动迁移，第三方 VoicePack 独立安装边界明确。
+- [ ] 第三方 VoicePack 独立安装边界明确；页面不展开迁移说明、开发者排障与 VoicePack 制作步骤。
 - [ ] 中文正式说明使用“鼠族”；英文正式说明使用 Ratkin，玩笑术语仅为 `adorable little mousie` / `mousies`。
 - [ ] 访客、友方、敌对与其他符合条件的非殖民者鼠族/Ratkin 已明确纳入同一通路。
 - [ ] 两个指定披露标题与正文逐字正确，并且紧接 Example 主动启用警告。
