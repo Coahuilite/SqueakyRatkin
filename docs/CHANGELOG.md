@@ -36,7 +36,7 @@ Short release summary.
 - ...
 ```
 
-## Unreleased — 0.2.1
+## [2026-08-16 01:29 UTC+8] Version 0.2.1
 
 Bug-fix release: NewRatkinPlus fork compatibility, seven-click counter reset, and the reworked draggable diagnostics panel.
 

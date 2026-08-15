@@ -1,8 +1,8 @@
 # MEMORY
 
 ## 当前耐久状态
-- 项目为 RimWorld 1.6 模组 **鼠辈啁啾 / Squeaky Ratkin**；永久 `packageId` 为 `coahuilite.squeakyratkin`，产品版本为 `0.2.1`（0.2.1 为已知问题修复版本，三项已完成，待发布）。
-- GitHub `v0.2.0` 已核验；发布事实与 Claim Pack 见 [`docs/release-0.2.0-review-zh.md`](./docs/release-0.2.0-review-zh.md)。
+- 项目为 RimWorld 1.6 模组 **鼠辈啁啾 / Squeaky Ratkin**；永久 `packageId` 为 `coahuilite.squeakyratkin`，产品版本为 `0.2.1`。
+- GitHub `v0.2.1` 已核验（tag + CI + asset + DLL 身份）；Claim Pack 见 [`docs/release-0.2.1-review-zh.md`](./docs/release-0.2.1-review-zh.md)。`v0.2.0` 发布事实与旧 Claim Pack 见 [`docs/release-0.2.0-review-zh.md`](./docs/release-0.2.0-review-zh.md)。
 - Workshop 页面、实际二进制、visibility、preview 与 description 属人工外部状态；当前仓库不能证明，保持未确认，直至维护者报告并记录观察结果。
 
 ## 权威入口

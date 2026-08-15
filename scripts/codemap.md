@@ -44,7 +44,7 @@ staging 顺序与卫生规则：
 2. `Assert-FormalExampleAudio $templateAudio 'Template'`：目录必须存在、**全部文件必须是 `.ogg`**、至少有一个文件、顶层 action 目录必须属于固定 15 个运行时 action、audio key（`<action>/<去扩展名文件名>`）不得重复（防 `x.ogg` 与 `x.OGG` 同 key 双文件）。音频总数、已覆盖的动作子集和每动作数量均不是门禁；当前 41 OGG / 15 action 分布仅为参考基准。
 3. 清空并重建 StageDir，递归拷贝 About / LoadFolders.xml / 1.6 / Extras。
 4. 把 Template 音频镜像到 staged 的 `1.6/Sounds/coahuilite.squeakyratkin/SR_OfficialExample_Race`（此时 built-in 源才诞生），然后 `Assert-ExampleAudioMirrors`：两个根必须不同且互不为祖先目录；实际 key 集合完全一致；**每个 key 的 SHA256 逐文件相等**。
-5. 从 stage 中删除 `About/PublishedFileId.txt`（**Steam identity 排除**）、所有 `*.pdb`、所有 `*.gitkeep`。
+5. 从 stage 中删除 `About/PublishedFileId.txt`（**Steam identity 排除**）、所有 `*.pdb`、所有 `*.gitkeep`、所有 `codemap.md`（导航文档是仓库工具，不属于分发内容）。
 
 当前 Example 参考分布为 41 个 OGG，覆盖全部 15 个运行时 action：Attack 3、Call 4、Death 2、Draft 3、Eat 2、Equip 2、Joy 3、MentalBreak 1、Move 3、Select 3、Sleep 3、Social 3、Undraft 3、Work 3、Wounded 3。它描述当前内容，不是脚本或产品数量合同。
 
@@ -83,7 +83,7 @@ pack-dev.ps1 ──┐   pack-github.ps1 ──┐   pack-steam.ps1 ──┐   
            │  3) 拷贝 About + LoadFolders.xml + 1.6 + Extras → StageDir
            │  4) 镜像 Template 音频 → stage 内 built-in 路径
            │  5) Assert-ExampleAudioMirrors（key 集合 + SHA256）
-           │  6) 删 PublishedFileId.txt / *.pdb / *.gitkeep
+           │  6) 删 PublishedFileId.txt / *.pdb / *.gitkeep / codemap.md
            ▼
 dist/dev/SqueakyRatkin/            dist/github/SqueakyRatkin/          dist/steam/SqueakyRatkin/
    + label .txt                        → zip SqueakyRatkin-<tag>.zip      （SteamCMD 直接上传目录）
