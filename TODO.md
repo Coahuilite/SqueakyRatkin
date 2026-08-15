@@ -6,6 +6,7 @@
 - [x] 修复 fork NewRatkinPlus 因包名不匹配导致 SR 不生效：移除 `LoadFolders.xml` 的 `IfModActive="Solaris.RatkinRaceMod"` 硬门控，改无条件加载，发声注入按 XPath `defName="Ratkin"` 匹配。
 
 ## 0.2.2 — Kiiro 内部实验
+- [x] 分支策略：已从 dev 开 `kiiro-experiment` 分支（起点 `88cbe1c`）；成功后 no-squash 全量 merge 回 dev（保留实验历史）；实验分支不发布。
 - [ ] 使用仅本地、不发布的 Kiiro 薄装配 adapter，在 Kiiro 模组已加载且隐藏实验开关启用时，向标准 HAR `Kiiro_Race` 装配同一共享 `CompSqueaker`；不得复制 Kiiro 资源/代码或形成永久 adapter。长期 Universal core 应按通用 HAR/raceDefName 机制直接支持 Kiiro。
 - [ ] 在 VoicePack Off 或可辨识隔离探针下验证 Kiiro 的组件生命周期，以及 Select、Wounded、Draft、成功 Attack 和周期触发进入共享漏斗；当前全局 `RacePacks` 会复用 Ratkin/Example 音池，禁止把出声视为 race-aware 路由成功或正式 Kiiro 兼容。
 - [ ] 基线组合为 Core + Harmony + HAR + Ancot Library + Kiiro + 本地 adapter，官方 DLC 全关；另行验证 Biotech + 可选 Kiiro gene patch，但不得把 gene patch 作为基础依赖。未经 Kiiro 作者明确许可，不发布或宣传 Kiiro compat 内容。

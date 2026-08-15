@@ -50,6 +50,10 @@ public partial class SqueakyRatkinSettings : ModSettings
     public bool scalePeriodicWithAudiblePopulation = true;
     public bool localizeDebugActions = false;
     public bool developerToolsEnabled = false;
+#if SQUEAKY_EXPERIMENTAL
+    /// <summary>「指猫为鼠」实验开关:启动时向 Kiiro_Race 装配共享发声组件(仅 Dev 构建编译,重启生效)。</summary>
+    public bool experimentalKiiroCompat;
+#endif
     public SqueakDevLoggingMode devLoggingMode = SqueakDevLoggingMode.Auto;
     public float globalCooldownMultiplier = 1f;
     public SqueakDistancePreset distancePreset = SqueakDistancePreset.Balanced;
@@ -125,6 +129,9 @@ public partial class SqueakyRatkinSettings : ModSettings
         Scribe_Values.Look(ref scalePeriodicWithAudiblePopulation, "scalePeriodicWithAudiblePopulation", true);
         Scribe_Values.Look(ref localizeDebugActions, "localizeDebugActions", false);
         Scribe_Values.Look(ref developerToolsEnabled, "developerToolsEnabled", false);
+#if SQUEAKY_EXPERIMENTAL
+        Scribe_Values.Look(ref experimentalKiiroCompat, "experimentalKiiroCompat", false);
+#endif
         Scribe_Values.Look(ref devLoggingMode, "devLoggingMode", SqueakDevLoggingMode.Auto);
         Scribe_Values.Look(ref globalCooldownMultiplier, "globalCooldownMultiplier", 1f);
         Scribe_Values.Look(ref distancePreset, "distancePreset", SqueakDistancePreset.Balanced);

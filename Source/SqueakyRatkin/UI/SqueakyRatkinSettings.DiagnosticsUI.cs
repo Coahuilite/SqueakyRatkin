@@ -97,6 +97,9 @@ public partial class SqueakyRatkinSettings
             + (statisticsHelpOpen ? MeasureStatisticsHelpHeight(width) : 0f) : 0f);
         height += 8f + 34f + (audioPathDiagnosticsOpen ? 34f + Text.CalcHeight("SR.AudioPath.Short".Translate(), width) + 2f
             + 34f + 220f + MeasureAudioDetailHeight(width) : 0f);
+#if SQUEAKY_EXPERIMENTAL
+        height += MeasureKiiroCompatSectionHeight(width);
+#endif
         string buildIdentity = "SR.DevPage.BuildIdentity".Translate(CurrentVersion());
         height += 10f + 34f + MeasureCompactStatusHeight(buildIdentity, width) + 20f;
         return height;
@@ -110,7 +113,42 @@ public partial class SqueakyRatkinSettings
         list.Gap(8f);
         DrawCollapsibleHeader(list, "SR.AudioPath.Header".Translate(), ref audioPathDiagnosticsOpen);
         if (audioPathDiagnosticsOpen) DrawAudioPathDiagnostics(list);
+#if SQUEAKY_EXPERIMENTAL
+        list.Gap(8f);
+        DrawKiiroCompatSection(list);
+#endif
     }
+
+#if SQUEAKY_EXPERIMENTAL
+    private void DrawKiiroCompatSection(Listing_Standard list)
+    {
+        DrawSectionHeader(list, "SR.KiiroCompat.Header".Translate());
+        list.Label("SR.KiiroCompat.Short".Translate());
+        bool value = experimentalKiiroCompat;
+        if (SqueakySettingsUI.Toggle(list.GetRect(34f), "SR.KiiroCompat.Enable".Translate(), ref value,
+                tooltip: "SR.KiiroCompat.Enable.Tooltip".Translate()))
+        {
+            experimentalKiiroCompat = value;
+            QueuePersistence();
+        }
+        string status = KiiroCompatStatusText();
+        SqueakySettingsUI.StatusPanel(list.GetRect(MeasureCompactStatusHeight(status, list.ColumnWidth)), status,
+            SqueakKiiroCompatAdapter.AttachedThisSession ? SqueakySurfaceKind.Emphasized : SqueakySurfaceKind.Base);
+    }
+
+    private string KiiroCompatStatusText()
+    {
+        if (SqueakKiiroCompatAdapter.AttachedThisSession) return "SR.KiiroCompat.Status.Attached".Translate();
+        if (!ModsConfig.IsActive(SqueakKiiroCompatAdapter.KiiroPackageId)) return "SR.KiiroCompat.Status.Missing".Translate();
+        return experimentalKiiroCompat ? "SR.KiiroCompat.Status.Pending".Translate() : "SR.KiiroCompat.Status.Off".Translate();
+    }
+
+    private float MeasureKiiroCompatSectionHeight(float width)
+    {
+        float height = 8f + 34f + Text.CalcHeight("SR.KiiroCompat.Short".Translate(), width) + 2f + 34f;
+        return height + MeasureCompactStatusHeight(KiiroCompatStatusText(), width);
+    }
+#endif
 
     private void DrawActionStatistics(Listing_Standard list)
     {
