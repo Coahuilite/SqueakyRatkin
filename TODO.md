@@ -1,23 +1,23 @@
 # TODO
 
-## 下一会话：0.2.0 发布前收口
-- [ ] 先整理 `MEMORY.md` / `TODO.md`：保留当前签署事实和发布阻塞，降级不再指导工作的测试过程；仅在发生历史冲突时读取 `OBLIVIONIS.md`。
-- [ ] 审阅当前 dirty 工作树的完整 diff，确认只包含已测试接受的 41 条音频更新、成功派发悬浮字门控修复、双语文案、合同、来源/权利文本与打包断言；不要回退或重复转码音频。
-- [ ] 完成发布前文档收口：中英文 README 已与 csproj 0.2.0 对齐；仍须复核 About、CONTRIBUTING、架构/UI/日志合同、VoicePack 指南和 Example README 是否一致。
-- [x] 完成 0.2.0 changelog 发布定稿：双语条目已使用实际 UTC+8 时间，覆盖获接受内容、41 条公共领域 Example 音频与诊断修复，且未污染旧版本历史；这不代表 tag、GitHub Release 或 Workshop 更新已经执行。
-- [ ] 执行当前树与产物隐私审计：本机绝对路径、用户名、Steam/Workspace 路径、日志片段、密钥/令牌、`PublishedFileId.txt`、PDB、源码和不应分发的本地文件；现有 dirty 测试包证据为 Dev/GitHub 各 115 文件、播放池 41、物理音频 82。
-- [ ] 在获得提交授权后，按可审阅边界提交当前未提交改动；提交前检查 `git status`、完整 diff、近期提交，不夹带 dist 或秘密。普通 fast-forward push `dev` 仍需另行明确授权。
-- [ ] 提交后从 clean HEAD 重新运行 mandatory build，并按正式用途构建/打包 Dev、GitHub 与 Steam flavor；重新验证 15/41 精确分布、41/41 镜像 SHA-256、Vorbis/22050/mono、完整解码、115 文件白名单、隐私与构建身份。当前 `-dirty` 包只保留为已测试证据，不作为正式发布物。
-- [ ] 按逐步授权完成发布链：push `dev` → 创建 `dev`→`main` PR → squash merge → 只在进入 `origin/main` 历史的 squash commit 上创建 `v0.2.0` → push tag → 确认 GitHub CI artifact/release → 构建 Steam flavor 并更新既有 Workshop 条目。禁止直接推送 `main`、在 `dev` 打 tag，或复用 0.1.x 的“首次 Workshop 上传”流程。
+## 0.2.1 — 已知问题修复
+- [x] 悬浮诊断重构：pawn 头上改为单字符标记（绿=就绪/金=受阻），详情移入可拖动诊断面板窗口（`SqueakDiagnosticsPanel`，不暂停游戏、不吸收输入、revision 缓存）；面板头部与每行显式显示 Pawn 种族 defName。仅诊断展示，不参与资格、路由或播放决策。
+- [x] 修复七击未完成点击计数：`BeginSettingsSession` 改用 `Time.frameCount` 检测绘制中断，重新打开设置时清零 `versionClickCount`（去掉 `settingsSessionActive` 对称配对状态机）；关闭时 `EndSettingsSession` 双保险清零。只清未完成计数，不改已解锁状态。
+- [x] 修复 fork NewRatkinPlus 因包名不匹配导致 SR 不生效：移除 `LoadFolders.xml` 的 `IfModActive="Solaris.RatkinRaceMod"` 硬门控，改无条件加载，发声注入按 XPath `defName="Ratkin"` 匹配。
 
-## 已完成的 0.2.0 测试证据
-- [x] 用户确认当前 0.2.0 测试版本已完成测试并接受进入发布前收口；此前音频听感、UI 可达性、异种行为、日志字段和成功派发悬浮字复测不再作为未完成测试阻塞。
-- [x] 41 条 Example 正式源通过 15 Action 精确分布、Vorbis/22050/mono 与完整解码；Dev/GitHub 测试包各 115 文件，Template/内置各 41 条且镜像哈希一致。
-- [x] 当前测试产物：Dev DLL SHA-256 `BFD0587F1C0D1D281C402746CA507123AAB7D9724F2380F33E788D1780DEEC1E`；GitHub ZIP SHA-256 `78137213B8CDBDC32ADCBE21F7D4966A0DF4120730272BCCFB5CF5CEDFD75748`。
-- [x] 已补充首次上传后更新既有 Steam Workshop item 的说明：`pack-steam.ps1` 仅 stage；ID 只在本机上传副本使用；后续版本不再使用 `Initial Workshop Upload`。
-- [x] 已完成当前工作树路径卫生：`MEMORY.md` 与 `AUDIO_PROVENANCE.txt` 不再暴露本机盘符、用户名或 Desktop 位置；41 条权威来源事实未改变。
+## 0.2.2 — Kiiro 内部实验
+- [ ] 使用仅本地、不发布的 Kiiro 薄装配 adapter，在 Kiiro 模组已加载且隐藏实验开关启用时，向标准 HAR `Kiiro_Race` 装配同一共享 `CompSqueaker`；不得复制 Kiiro 资源/代码或形成永久 adapter。长期 Universal core 应按通用 HAR/raceDefName 机制直接支持 Kiiro。
+- [ ] 在 VoicePack Off 或可辨识隔离探针下验证 Kiiro 的组件生命周期，以及 Select、Wounded、Draft、成功 Attack 和周期触发进入共享漏斗；当前全局 `RacePacks` 会复用 Ratkin/Example 音池，禁止把出声视为 race-aware 路由成功或正式 Kiiro 兼容。
+- [ ] 基线组合为 Core + Harmony + HAR + Ancot Library + Kiiro + 本地 adapter，官方 DLC 全关；另行验证 Biotech + 可选 Kiiro gene patch，但不得把 gene patch 作为基础依赖。未经 Kiiro 作者明确许可，不发布或宣传 Kiiro compat 内容。
 
-## 后续版本（不属于 0.2.0，不阻断本次发布）
-- [ ] 治理 `SqueakLog`：先建立 srdiag v1 characterization checks，再机械拆分 internal registry/build/once/formatter/sink；不得改变 public typed facade、字段顺序、once key 或事件 ID。
-- [ ] 修复退出模组设置后七击开发选项的未完成点击计数未归零：检查原生关闭按钮、Esc 与 WindowStack 移除是否都到达 `EndSettingsSession`，不要改变已解锁状态。
-- [ ] 仅在再次复现或伴随功能故障时归因 `Accessing TicksAbs but gameStartAbsTick is not set yet`；届时使用无本模组对照或 Dev-only 一次性堆栈探针，不盲改游戏时钟、不吞掉原版错误。
+## 长期架构 — 待设计
+- [ ] 先在单一 Squeaky Ratkin 模组内部完成并验证 Universal core；当 SR 实质只剩 VoicePack 内容时，再物理拆出 Universal Squeaker 前置并让现有 SR Workshop 项目依赖它，禁止过早发布空壳前置或保留双实现。
+- [ ] 设计 VoicePack 单种族声明与路由：每包只能声明一个 `raceDefName`；Race / Xenotype 分别按 `raceDefName` 与 `(raceDefName, xenotypeDefName)` 形成域；同域多个合格包组成带权池并公平抽取。先冻结加载注入窗口、XML ABI、权重语义、旧包迁移和 Scribe schema。
+- [ ] 设计 XML 驱动的 per-race Vanilla fallback profile：精确 `raceDefName` + 15 action→SoundDef 映射；有 profile 的 race 自动启用，无 profile 的 race 只能由玩家显式启用并提示静音风险。选择链固定为 `(race,xenotype) VoicePack → race VoicePack → race fallback → 无声`；不得硬编码 C# race switch 或复制原版资产。
+
+## 明确延后
+- [ ] 仅在 `TicksAbs` 再次复现时调查归因。
+- [ ] 0.2.1 代码卫生（全库代码梳理、`SqueakLog` 职责治理、`srdiag v1` characterization checks）延后到已知问题修复之后；仍须遵守“先 characterization 再拆分、不得改变 public typed facade / 字段顺序 / once key / 事件 ID / 日志行为”。
+
+## 待重新确认
+- [ ] 发布门禁、英文 VoicePack 作者指南和第三方 VoicePack 示例等旧候选方向不再视为已定计划；需要维护者重新确认后才能恢复。

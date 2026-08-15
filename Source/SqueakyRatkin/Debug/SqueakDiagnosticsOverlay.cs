@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
@@ -7,20 +6,28 @@ namespace SqueakyRatkin;
 
 public enum SqueakDiagnosticsMode { Off, Selected, Visible }
 
-/// <summary>Low-frequency diagnostic snapshots; repaint only draws strings prepared during Layout.</summary>
+/// <summary>
+/// Low-frequency diagnostic session. The only on-pawn overlay draw is a single-character mark
+/// (●); all detail lives in the draggable <see cref="SqueakDiagnosticsPanel"/>, which reads the
+/// structured snapshot cache through <see cref="CachedPawns"/> and rebuilds formatted text only
+/// when <see cref="Revision"/> changes. Layout still owns snapshot work; Repaint only draws marks.
+/// </summary>
 public static class SqueakDiagnosticsOverlay
 {
     private const int MaxVisiblePawns = 16;
     private const float SelectedRefreshSeconds = 0.25f;
     private const float VisibleRefreshSeconds = 0.5f;
-    private const float ShadowOffset = 0.035f;
 
-    private sealed class CachedPawn
+    internal const string Mark = "●";
+
+    /// <summary>One cached structured snapshot per tracked pawn. Read-only for the panel; overlay mutates only during Layout refresh.</summary>
+    internal sealed class CachedPawn
     {
         public Pawn Pawn = null!;
         public CompSqueaker Comp = null!;
-        public string Text = string.Empty;
-        public Color Color = Color.white;
+        public SqueakDiagnosticSnapshot Snapshot;
+        public string MarkText = string.Empty;
+        public Color MarkColor = Color.white;
     }
 
     private static readonly List<CachedPawn> cachedPawns = new();
@@ -31,6 +38,22 @@ public static class SqueakDiagnosticsOverlay
     private static Pawn? selectedPawn;
     private static float nextRefreshRealtime;
     private static bool unavailableHookWarningLogged;
+    private static int revision;
+    private static SqueakDiagnosticsPanel? panel;
+
+    /// <summary>Bumped whenever a snapshot entry is updated or removed; the panel rebuilds its formatted cache on change.</summary>
+    internal static int Revision => revision;
+
+    internal static SqueakDiagnosticsMode Mode => mode;
+
+    internal static Pawn? SelectedPawn => selectedPawn;
+
+    /// <summary>Read-only entry access for the panel. Only read during Repaint; the overlay only mutates during Layout.</summary>
+    internal static IReadOnlyList<CachedPawn> CachedPawns => cachedPawns;
+
+    /// <summary>The single readiness rule shared by the mark color and the panel badges.</summary>
+    internal static bool ReadyFor(SqueakDiagnosticSnapshot s) => s.EffectiveTimingReady && s.CurrentActionEnabled
+        && s.VocalCapability.VocalOrganEfficiency > SqueakVocalCapability.VocalSilenceThreshold;
 
     public static void SetMode(SqueakDiagnosticsMode newMode)
     {
@@ -59,6 +82,7 @@ public static class SqueakDiagnosticsOverlay
         mode = newMode;
         cachedMap = Find.CurrentMap;
         CompSqueaker.DiagnosticsEnabled = true;
+        OpenPanel();
     }
 
     /// <summary>Per-frame teardown guard. It must remain free of snapshot, formatting, translation, scan, and draw work.</summary>
@@ -126,7 +150,7 @@ public static class SqueakDiagnosticsOverlay
                 continue;
             }
 
-            DrawCachedText(new Vector2(pawn.DrawPos.x, pawn.DrawPos.z + 1.15f), entry.Text, entry.Color);
+            DrawMark(new Vector2(pawn.DrawPos.x, pawn.DrawPos.z + 1.15f), entry.MarkText, entry.MarkColor);
         }
     }
 
@@ -141,7 +165,7 @@ public static class SqueakDiagnosticsOverlay
             CompSqueaker? comp = pawn.GetComp<CompSqueaker>();
             if (comp != null)
             {
-                RefreshSnapshot(pawn, comp, true);
+                RefreshSnapshot(pawn, comp);
             }
         }
 
@@ -165,14 +189,14 @@ public static class SqueakDiagnosticsOverlay
             CompSqueaker? comp = pawn.GetComp<CompSqueaker>();
             if (comp != null)
             {
-                RefreshSnapshot(pawn, comp, false);
+                RefreshSnapshot(pawn, comp);
             }
         }
 
         RemoveUnrefreshedPawns();
     }
 
-    private static void RefreshSnapshot(Pawn pawn, CompSqueaker comp, bool detailed)
+    private static void RefreshSnapshot(Pawn pawn, CompSqueaker comp)
     {
         if (!entriesByPawn.TryGetValue(pawn, out CachedPawn? entry))
         {
@@ -183,103 +207,22 @@ public static class SqueakDiagnosticsOverlay
         }
 
         refreshedPawns.Add(pawn);
-        SqueakDiagnosticSnapshot snapshot = comp.GetDiagnosticSnapshot();
-        entry.Text = detailed ? FormatSelectedSnapshot(pawn, snapshot) : FormatVisibleSnapshot(pawn, snapshot);
-        entry.Color = snapshot.EffectiveTimingReady && snapshot.CurrentActionEnabled
-            && snapshot.VocalCapability.VocalOrganEfficiency > SqueakVocalCapability.VocalSilenceThreshold
-            ? new Color(0.75f, 1f, 0.75f) : new Color(1f, 0.85f, 0.55f);
+        entry.Snapshot = comp.GetDiagnosticSnapshot();
+        entry.MarkText = Mark;
+        entry.MarkColor = ReadyFor(entry.Snapshot) ? SqueakySettingsUI.Success : SqueakySettingsUI.Gold;
+        revision++;
     }
 
-    private static string FormatSelectedSnapshot(Pawn pawn, SqueakDiagnosticSnapshot s)
+    private static void DrawMark(Vector2 position, string mark, Color color)
     {
-        string action = s.CurrentTimingAction.HasValue ? SqueakLabels.Action(s.CurrentTimingAction.Value) : FormatNone();
-        string modeText = FormatMode(s.CurrentTriggerMode);
-        string clock = FormatClock(s.CurrentCooldownClock);
-        string actionTiming = s.Timing.ActionIntervalSeconds.HasValue
-            ? $"{s.Timing.ActionIntervalSeconds.Value:0.00}s/{s.Timing.ActionRemainingSeconds.GetValueOrDefault():0.00}s"
-            : $"{s.Timing.ActionIntervalTicks.GetValueOrDefault()}t/{s.Timing.ActionRemainingTicks.GetValueOrDefault()}t";
-        string globalTiming = s.Timing.GlobalApplicable
-            ? $"{s.Timing.GlobalCooldownTicks}t/{s.Timing.GlobalRemainingTicks}t"
-            : "SR.Diagnostics.Ignored".Translate().ToString();
-        string xeno = s.Xenotype?.LabelCap ?? "SR.Diagnostics.Global".Translate().ToString();
-        return string.Format("SR.Diagnostics.Line1".Translate().ToString(), pawn.LabelShort, action,
-                FormatBool(s.CurrentActionEnabled), modeText, clock)
-            + "\n" + string.Format("SR.Diagnostics.Line2".Translate().ToString(), s.MasterMultiplier.ToString("0.##"), xeno,
-                s.XenotypeIntervalMultiplier.ToString("0.##"), s.CurrentActionIntervalMultiplier.ToString("0.##"),
-                s.TimeSpeedMultiplier.ToString("0.##"), s.EffectiveProbability.ToString("0.##"),
-                s.VocalCapability.TalkingChance.ToString("0.##"), s.VocalCapability.VocalOrganEfficiency.ToString("0.##"),
-                FormatBool(s.TalkingGateApplied), FormatBool(s.CurrentActionDeathExempt))
-            + "\n" + string.Format("SR.Diagnostics.Line3".Translate().ToString(), actionTiming, globalTiming,
-                FormatBool(s.EffectiveTimingReady),
-                FormatOutcome(s.LastEvaluation), FormatOutcome(s.LastSignificantOutcome))
-            + "\n" + string.Format("SR.Diagnostics.Line4".Translate().ToString(),
-                s.Population.CandidateCount, s.Population.AudibleCount, s.Population.Scale.ToString("0.##"),
-                s.BaseProbability.ToString("0.###"), s.EffectiveProbability.ToString("0.###"),
-                FormatTiming(s.BaseTiming), FormatTiming(s.Timing), FormatBool(s.StartupPending));
-    }
-
-    private static string FormatVisibleSnapshot(Pawn pawn, SqueakDiagnosticSnapshot s)
-    {
-        string action = s.CurrentTimingAction.HasValue ? SqueakLabels.Action(s.CurrentTimingAction.Value) : FormatNone();
-        string state = s.CurrentActionEnabled && s.EffectiveTimingReady
-            && s.VocalCapability.VocalOrganEfficiency > SqueakVocalCapability.VocalSilenceThreshold
-            ? "SR.Diagnostics.Ready".Translate().ToString()
-            : "SR.Diagnostics.Blocked".Translate().ToString();
-        return string.Format("SR.Diagnostics.VisibleLine".Translate().ToString(), pawn.LabelShort, action, state,
-            FormatOutcome(s.LastSignificantOutcome));
-    }
-
-    private static string FormatMode(SqueakTriggerMode? triggerMode) => triggerMode switch
-    {
-        SqueakTriggerMode.EachTime => "SR.Diagnostics.Mode.EachTime".Translate().ToString(),
-        SqueakTriggerMode.RandomOneShot => "SR.Diagnostics.Mode.RandomOneShot".Translate().ToString(),
-        SqueakTriggerMode.External => "SR.Diagnostics.Mode.External".Translate().ToString(),
-        SqueakTriggerMode.Sustained => "SR.Diagnostics.Mode.Sustained".Translate().ToString(),
-        _ => FormatNone()
-    };
-
-    private static string FormatClock(SqueakCooldownClock? cooldownClock) => cooldownClock switch
-    {
-        SqueakCooldownClock.GameTicks => "SR.Diagnostics.Clock.GameTicks".Translate().ToString(),
-        SqueakCooldownClock.Realtime => "SR.Diagnostics.Clock.Realtime".Translate().ToString(),
-        _ => FormatNone()
-    };
-
-    private static string FormatBool(bool value) => value
-        ? "SR.Diagnostics.Bool.True".Translate().ToString()
-        : "SR.Diagnostics.Bool.False".Translate().ToString();
-
-    private static string FormatNone() => "SR.Diagnostics.None".Translate().ToString();
-
-    private static string FormatTiming(SqueakTimingEvaluation timing) => timing.ActionIntervalSeconds.HasValue
-        ? $"{timing.ActionIntervalSeconds.Value:0.00}s/{timing.GlobalCooldownTicks}t"
-        : $"{timing.ActionIntervalTicks.GetValueOrDefault()}t/{timing.GlobalCooldownTicks}t";
-
-    private static string FormatOutcome(SqueakRecentOutcome? outcome) => outcome.HasValue
-        ? string.Format("SR.Diagnostics.Outcome".Translate().ToString(), SqueakLabels.Action(outcome.Value.Action),
-            FormatOutcomeToken(outcome.Value.Outcome), FormatBool(outcome.Value.CooldownConsumed))
-        : FormatNone();
-
-    private static string FormatOutcomeToken(SqueakTriggerOutcome outcome) => outcome switch
-    {
-        SqueakTriggerOutcome.Disabled => "SR.Diagnostics.Outcome.Disabled".Translate().ToString(),
-        SqueakTriggerOutcome.ProbabilityRejected => "SR.Diagnostics.Outcome.ProbabilityRejected".Translate().ToString(),
-        SqueakTriggerOutcome.ActionCooldown => "SR.Diagnostics.Outcome.ActionCooldown".Translate().ToString(),
-        SqueakTriggerOutcome.GlobalCooldown => "SR.Diagnostics.Outcome.GlobalCooldown".Translate().ToString(),
-        SqueakTriggerOutcome.VocalOrgansSilent => "SR.Diagnostics.Outcome.VocalOrgansSilent".Translate().ToString(),
-        SqueakTriggerOutcome.TalkingRejected => "SR.Diagnostics.Outcome.TalkingRejected".Translate().ToString(),
-        SqueakTriggerOutcome.NoSoundFallback => "SR.Diagnostics.Outcome.NoSoundFallback".Translate().ToString(),
-        SqueakTriggerOutcome.Dispatched => "SR.Diagnostics.Outcome.Dispatched".Translate().ToString(),
-        SqueakTriggerOutcome.EligibilityRejected => "SR.Diagnostics.Outcome.EligibilityRejected".Translate().ToString(),
-        SqueakTriggerOutcome.PlaybackFailed => "SR.Diagnostics.Outcome.PlaybackFailed".Translate().ToString(),
-        SqueakTriggerOutcome.PeriodicStartupPending => "SR.Diagnostics.Outcome.PeriodicStartupPending".Translate().ToString(),
-        _ => FormatNone()
-    };
-
-    private static void DrawCachedText(Vector2 position, string text, Color color)
-    {
-        GenMapUI.DrawText(position + new Vector2(ShadowOffset, ShadowOffset), text, Color.black);
-        GenMapUI.DrawText(position, text, color);
+        // GenMapUI.DrawText is locked to Tiny font, so visibility comes from a 4-direction
+        // black outline (same pattern as SqueakMoteMaker.MoteTextWithBackground).
+        const float edge = 0.05f;
+        GenMapUI.DrawText(position + new Vector2(-edge, 0f), mark, Color.black);
+        GenMapUI.DrawText(position + new Vector2(edge, 0f), mark, Color.black);
+        GenMapUI.DrawText(position + new Vector2(0f, -edge), mark, Color.black);
+        GenMapUI.DrawText(position + new Vector2(0f, edge), mark, Color.black);
+        GenMapUI.DrawText(position, mark, color);
     }
 
     private static void RemoveUnrefreshedPawns()
@@ -292,6 +235,7 @@ public static class SqueakDiagnosticsOverlay
                 entry.Comp.ResetDiagnosticState();
                 entriesByPawn.Remove(entry.Pawn);
                 cachedPawns.RemoveAt(i);
+                revision++;
             }
         }
     }
@@ -304,6 +248,38 @@ public static class SqueakDiagnosticsOverlay
         nextRefreshRealtime = 0f;
         mode = SqueakDiagnosticsMode.Off;
         CompSqueaker.DiagnosticsEnabled = false;
+        ClosePanel();
+    }
+
+    private static void ClosePanel()
+    {
+        SqueakDiagnosticsPanel? current = panel;
+        panel = null;
+        // Null the reference before Close() so the panel's PreClose -> NotifyPanelClosed
+        // cannot re-enter ClosePanel (the window is still in the stack during PreClose).
+        if (current != null && current.IsOpen)
+        {
+            current.Close();
+        }
+    }
+
+    /// <summary>Called from the panel's PreClose: the user closed the panel (X/Esc) — tear down the whole diagnostics session. Never re-enters window close.</summary>
+    internal static void NotifyPanelClosed()
+    {
+        panel = null;
+        ClearTrackedPawns();
+        cachedMap = null;
+        selectedPawn = null;
+        nextRefreshRealtime = 0f;
+        mode = SqueakDiagnosticsMode.Off;
+        CompSqueaker.DiagnosticsEnabled = false;
+    }
+
+    private static void OpenPanel()
+    {
+        SqueakDiagnosticsPanel diagnosticsPanel = new();
+        panel = diagnosticsPanel;
+        Find.WindowStack.Add(diagnosticsPanel);
     }
 
     private static void ClearTrackedPawns()

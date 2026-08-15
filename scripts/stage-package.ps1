@@ -13,19 +13,13 @@ function Assert-FormalExampleAudio([string]$AudioRoot, [string]$Role) {
     if (-not (Test-Path -LiteralPath $AudioRoot -PathType Container)) { throw "$Role formal audio root is missing: $AudioRoot" }
     $files = @(Get-ChildItem -LiteralPath $AudioRoot -Recurse -File)
     if (@($files | Where-Object { $_.Extension -ne '.ogg' }).Count -ne 0) { throw "$Role formal audio root contains a non-OGG file." }
-    if ($files.Count -ne 41) { throw "$Role must contain exactly 41 OGG files; found $($files.Count)." }
+    # OGG counts (total and per action) are reference values, not hard limits; they may change in future releases.
+    # Only structural/safety invariants are enforced here: a non-empty audio set, known action directories, and
+    # unique audio keys.
+    if ($files.Count -eq 0) { throw "$Role formal audio root contains no OGG files." }
     $foundActions = @($files | ForEach-Object { (Get-RelativePath $AudioRoot $_.FullName).Split('/')[0] } | Sort-Object -Unique)
-    if (@(Compare-Object $actions $foundActions).Count -ne 0) { throw "$Role must contain audio for exactly the 15 required actions." }
-    foreach ($action in $actions) {
-        $expectedCount = switch ($action) {
-            'Attack' { 3 }; 'Call' { 4 }; 'Death' { 2 }; 'Draft' { 3 }; 'Eat' { 2 }
-            'Equip' { 2 }; 'Joy' { 3 }; 'MentalBreak' { 1 }; 'Move' { 3 }; 'Select' { 3 }
-            'Sleep' { 3 }; 'Social' { 3 }; 'Undraft' { 3 }; 'Work' { 3 }; 'Wounded' { 3 }
-            default { throw "No expected count is defined for action: $action" }
-        }
-        $actualCount = @($files | Where-Object { (Get-RelativePath $AudioRoot $_.FullName).Split('/')[0] -eq $action }).Count
-        if ($actualCount -ne $expectedCount) { throw "$Role action $action must contain exactly $expectedCount OGG file(s); found $actualCount." }
-    }
+    $unknownActions = @($foundActions | Where-Object { $actions -notcontains $_ })
+    if ($unknownActions.Count -ne 0) { throw "$Role contains audio under unknown action director(ies): $($unknownActions -join ', '). Allowed actions: $($actions -join ', ')." }
     $keys = @{}; foreach ($file in $files) { $relative = Get-RelativePath $AudioRoot $file.FullName; $key = (([IO.Path]::GetDirectoryName($relative).Replace('\', '/') + '/' + [IO.Path]::GetFileNameWithoutExtension($relative)).TrimStart('/')); if ($keys.ContainsKey($key)) { throw "$Role has multiple extensions for audio key: $key" }; $keys[$key] = $file }
     return $keys
 }

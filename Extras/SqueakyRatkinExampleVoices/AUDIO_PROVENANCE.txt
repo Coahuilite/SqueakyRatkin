@@ -36,6 +36,7 @@ builds or staging. The maintained, formal audio source is the Template OGG tree:
 That one-time recovery was converted with:
 ffmpeg -v error -xerror -y -i <wav> -map 0:a:0 -c:a libvorbis -q:a 5 <ogg>
 
-The formal Template OGG Vorbis clips are 22050 Hz mono. The staging script validates the
-15-action / 41 OGG Template source and exact per-action counts, then generates and verifies the byte-identical staged built-in
-mirror without requiring FFmpeg in CI.
+The formal Template OGG Vorbis clips are 22050 Hz mono. The staging script validates that the
+non-empty Template uses known runtime action directories, OGG files, and unique audio keys, then
+generates and verifies the byte-identical staged built-in mirror without requiring FFmpeg in CI.
+The current 15-action / 41-OGG distribution is a reference snapshot, not a staging limit.

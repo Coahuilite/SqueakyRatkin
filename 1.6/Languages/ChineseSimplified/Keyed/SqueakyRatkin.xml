@@ -63,7 +63,7 @@
   <SR.AudioBrowser.LayerA>A · 已解析片段</SR.AudioBrowser.LayerA>
   <SR.AudioBrowser.LayerA.Desc>通过原 SubSound 请求一个已解析片段。地图内片段需要当前地图和有效目标。</SR.AudioBrowser.LayerA.Desc>
   <SR.AudioBrowser.LayerB>B · 原生 SoundDef</SR.AudioBrowser.LayerB>
-  <SR.AudioBrowser.LayerB.Desc>按原生上下文请求整个 SoundDef。0.2.0 不支持 Sustainer 和混合上下文定义。</SR.AudioBrowser.LayerB.Desc>
+  <SR.AudioBrowser.LayerB.Desc>按原生上下文请求整个 SoundDef。当前不支持 Sustainer 和混合上下文定义。</SR.AudioBrowser.LayerB.Desc>
   <SR.AudioBrowser.LayerC>C · 最终鼠族</SR.AudioBrowser.LayerC>
   <SR.AudioBrowser.LayerC.Desc>使用当前地图中已生成的鼠族 Pawn，并按正式的异种识别、语音包策略、心情、回退和 InMap 播放路径试听。</SR.AudioBrowser.LayerC.Desc>
   <SR.AudioBrowser.Clip>已解析片段 {0}/{1}</SR.AudioBrowser.Clip>
@@ -91,7 +91,7 @@
   <SR.AudioBrowser.Playability.Playable>当前上下文可试听。</SR.AudioBrowser.Playability.Playable>
   <SR.AudioBrowser.Playability.NoAudio>没有可用的已解析音频。</SR.AudioBrowser.Playability.NoAudio>
   <SR.AudioBrowser.Playability.Failed>音频解析失败。</SR.AudioBrowser.Playability.Failed>
-  <SR.AudioBrowser.Playability.SustainerUnsupported>0.2.0 不支持 Sustainer 试听；仍可请求已解析的单次片段。</SR.AudioBrowser.Playability.SustainerUnsupported>
+  <SR.AudioBrowser.Playability.SustainerUnsupported>当前不支持 Sustainer 试听；仍可请求已解析的单次片段。</SR.AudioBrowser.Playability.SustainerUnsupported>
   <SR.AudioBrowser.Playability.MixedContextUnsupported>混合相机/地图上下文的 SoundDef 不适合原生试听；请试听具体解析片段。</SR.AudioBrowser.Playability.MixedContextUnsupported>
   <SR.AudioBrowser.Playability.UnsafeSoundContext>SoundDef 上下文与此试听路径不匹配。</SR.AudioBrowser.Playability.UnsafeSoundContext>
   <SR.AudioBrowser.Playability.MapRequired>需要当前地图和有效的地图内目标。</SR.AudioBrowser.Playability.MapRequired>
@@ -511,11 +511,43 @@ packageId：{7}
   <SR.Debug.OverlayOn>记录成功派发：开启</SR.Debug.OverlayOn>
   <SR.Debug.OverlayOff>记录成功派发：关闭</SR.Debug.OverlayOff>
   <SR.Debug.CameraIndicator>摄像机：高度 {0}，视野 {1}</SR.Debug.CameraIndicator>
-  <SR.Diagnostics.Line1>{0}：{1} | 启用 {2} | {3} | {4}</SR.Diagnostics.Line1>
-  <SR.Diagnostics.Line2>总控 {0}x | 异种 {1} {2}x | 动作 {3}x | 倍速 {4}x | 概率 {5} | Talking {6} | 发声器官 {7} | Talking 门 {8} | Death 例外 {9}</SR.Diagnostics.Line2>
-  <SR.Diagnostics.Line3>动作 间隔/剩余 {0} | 全局 间隔/剩余 {1} | 就绪 {2} | 最近 {3} | 重要 {4}</SR.Diagnostics.Line3>
-  <SR.Diagnostics.Line4>人口 视野/可听 {0}/{1} · 系数 {2} | 概率 基础/最终 {3}/{4} | 时序 基础/最终 {5}/{6} | 启动等待 {7}</SR.Diagnostics.Line4>
-  <SR.Diagnostics.VisibleLine>{0}：{1} | {2} | 重要 {3}</SR.Diagnostics.VisibleLine>
+  <SR.Diagnostics.Panel.Title>啁啾诊断</SR.Diagnostics.Panel.Title>
+  <SR.Diagnostics.Panel.Mode.Selected>选中</SR.Diagnostics.Panel.Mode.Selected>
+  <SR.Diagnostics.Panel.Mode.Visible>视野内</SR.Diagnostics.Panel.Mode.Visible>
+  <SR.Diagnostics.Panel.NoPawn>未选中任何鼠族。请选择一个鼠族以查看其啁啾状态。</SR.Diagnostics.Panel.NoPawn>
+  <SR.Diagnostics.Panel.Empty>视野内没有可啁啾的鼠族。</SR.Diagnostics.Panel.Empty>
+  <SR.Diagnostics.Panel.PawnHeader>{0} · {1}</SR.Diagnostics.Panel.PawnHeader>
+  <SR.Diagnostics.Panel.CloseHint>再按一次 Esc 关闭面板</SR.Diagnostics.Panel.CloseHint>
+  <SR.Diagnostics.Panel.Section.Trigger>触发</SR.Diagnostics.Panel.Section.Trigger>
+  <SR.Diagnostics.Panel.Section.Multipliers>倍率</SR.Diagnostics.Panel.Section.Multipliers>
+  <SR.Diagnostics.Panel.Section.Probability>概率</SR.Diagnostics.Panel.Section.Probability>
+  <SR.Diagnostics.Panel.Section.Voice>发声</SR.Diagnostics.Panel.Section.Voice>
+  <SR.Diagnostics.Panel.Section.Outcome>结果</SR.Diagnostics.Panel.Section.Outcome>
+  <SR.Diagnostics.Panel.Section.Population>人口</SR.Diagnostics.Panel.Section.Population>
+  <SR.Diagnostics.Panel.Section.Startup>启动</SR.Diagnostics.Panel.Section.Startup>
+  <SR.Diagnostics.Panel.Field.Action>当前动作</SR.Diagnostics.Panel.Field.Action>
+  <SR.Diagnostics.Panel.Field.TriggerMode>触发模式</SR.Diagnostics.Panel.Field.TriggerMode>
+  <SR.Diagnostics.Panel.Field.CooldownClock>冷却时钟</SR.Diagnostics.Panel.Field.CooldownClock>
+  <SR.Diagnostics.Panel.Field.ActionTiming>动作时序</SR.Diagnostics.Panel.Field.ActionTiming>
+  <SR.Diagnostics.Panel.Field.GlobalTiming>全局时序</SR.Diagnostics.Panel.Field.GlobalTiming>
+  <SR.Diagnostics.Panel.Field.TimingReady>时序就绪</SR.Diagnostics.Panel.Field.TimingReady>
+  <SR.Diagnostics.Panel.Field.Master>总控倍率</SR.Diagnostics.Panel.Field.Master>
+  <SR.Diagnostics.Panel.Field.Xenotype>异种</SR.Diagnostics.Panel.Field.Xenotype>
+  <SR.Diagnostics.Panel.Field.XenoMult>异种倍率</SR.Diagnostics.Panel.Field.XenoMult>
+  <SR.Diagnostics.Panel.Field.ActionMult>动作倍率</SR.Diagnostics.Panel.Field.ActionMult>
+  <SR.Diagnostics.Panel.Field.TimeSpeed>时间倍速</SR.Diagnostics.Panel.Field.TimeSpeed>
+  <SR.Diagnostics.Panel.Field.BaseProbability>基础概率</SR.Diagnostics.Panel.Field.BaseProbability>
+  <SR.Diagnostics.Panel.Field.EffectiveProbability>最终概率</SR.Diagnostics.Panel.Field.EffectiveProbability>
+  <SR.Diagnostics.Panel.Field.TalkingChance>说话概率</SR.Diagnostics.Panel.Field.TalkingChance>
+  <SR.Diagnostics.Panel.Field.VocalEfficiency>发声效率</SR.Diagnostics.Panel.Field.VocalEfficiency>
+  <SR.Diagnostics.Panel.Field.TalkingGate>说话门生效</SR.Diagnostics.Panel.Field.TalkingGate>
+  <SR.Diagnostics.Panel.Field.DeathExempt>死亡豁免</SR.Diagnostics.Panel.Field.DeathExempt>
+  <SR.Diagnostics.Panel.Field.LastEvaluation>最近判定</SR.Diagnostics.Panel.Field.LastEvaluation>
+  <SR.Diagnostics.Panel.Field.LastSignificant>最近重要结果</SR.Diagnostics.Panel.Field.LastSignificant>
+  <SR.Diagnostics.Panel.Field.Candidates>候选数</SR.Diagnostics.Panel.Field.Candidates>
+  <SR.Diagnostics.Panel.Field.Audible>可听数</SR.Diagnostics.Panel.Field.Audible>
+  <SR.Diagnostics.Panel.Field.Scale>缩放系数</SR.Diagnostics.Panel.Field.Scale>
+  <SR.Diagnostics.Panel.Field.StartupPending>启动等待中</SR.Diagnostics.Panel.Field.StartupPending>
   <SR.Diagnostics.Global>全局</SR.Diagnostics.Global>
   <SR.Diagnostics.None>无</SR.Diagnostics.None>
   <SR.Diagnostics.Ignored>忽略</SR.Diagnostics.Ignored>

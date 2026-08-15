@@ -63,7 +63,7 @@ Referenced SoundDefs: {2}</SR.AudioBrowser.GroupTip>
   <SR.AudioBrowser.LayerA>A · Resolved clip</SR.AudioBrowser.LayerA>
   <SR.AudioBrowser.LayerA.Desc>Requests one resolved clip through its original SubSound. In-map clips require the current map and a valid target.</SR.AudioBrowser.LayerA.Desc>
   <SR.AudioBrowser.LayerB>B · Native SoundDef</SR.AudioBrowser.LayerB>
-  <SR.AudioBrowser.LayerB.Desc>Requests the whole SoundDef with its native context. Sustainers and mixed-context definitions are not supported in 0.2.0.</SR.AudioBrowser.LayerB.Desc>
+  <SR.AudioBrowser.LayerB.Desc>Requests the whole SoundDef with its native context. Sustainers and mixed-context definitions are not currently supported.</SR.AudioBrowser.LayerB.Desc>
   <SR.AudioBrowser.LayerC>C · Final Ratkin</SR.AudioBrowser.LayerC>
   <SR.AudioBrowser.LayerC.Desc>Uses a spawned Ratkin on the current map and follows the production Xenotype lookup, voice-pack policy, mood, fallback, and InMap playback path.</SR.AudioBrowser.LayerC.Desc>
   <SR.AudioBrowser.Clip>Resolved clip {0}/{1}</SR.AudioBrowser.Clip>
@@ -91,7 +91,7 @@ Referenced SoundDefs: {2}</SR.AudioBrowser.GroupTip>
   <SR.AudioBrowser.Playability.Playable>Playable in the current context.</SR.AudioBrowser.Playability.Playable>
   <SR.AudioBrowser.Playability.NoAudio>No resolved audio is available.</SR.AudioBrowser.Playability.NoAudio>
   <SR.AudioBrowser.Playability.Failed>Audio resolution failed.</SR.AudioBrowser.Playability.Failed>
-  <SR.AudioBrowser.Playability.SustainerUnsupported>Sustainer preview is not supported in 0.2.0. A resolved one-shot clip may still be requested.</SR.AudioBrowser.Playability.SustainerUnsupported>
+  <SR.AudioBrowser.Playability.SustainerUnsupported>Sustainer preview is not currently supported. A resolved one-shot clip may still be requested.</SR.AudioBrowser.Playability.SustainerUnsupported>
   <SR.AudioBrowser.Playability.MixedContextUnsupported>Mixed camera and in-map SoundDefs are not safe for native preview. Preview a resolved clip instead.</SR.AudioBrowser.Playability.MixedContextUnsupported>
   <SR.AudioBrowser.Playability.UnsafeSoundContext>The SoundDef context does not match this preview path.</SR.AudioBrowser.Playability.UnsafeSoundContext>
   <SR.AudioBrowser.Playability.MapRequired>A current map and valid in-map target are required.</SR.AudioBrowser.Playability.MapRequired>
@@ -511,11 +511,43 @@ Actual clip: unavailable. This recorder observes the production choice after a s
   <SR.Debug.OverlayOn>Record successful dispatches: ON</SR.Debug.OverlayOn>
   <SR.Debug.OverlayOff>Record successful dispatches: OFF</SR.Debug.OverlayOff>
   <SR.Debug.CameraIndicator>Camera: height {0}, view size {1}</SR.Debug.CameraIndicator>
-  <SR.Diagnostics.Line1>{0}: {1} | enabled {2} | {3} | {4}</SR.Diagnostics.Line1>
-  <SR.Diagnostics.Line2>master {0}x | xeno {1} {2}x | action {3}x | speed {4}x | probability {5} | Talking {6} | vocal {7} | Talking gate {8} | Death exempt {9}</SR.Diagnostics.Line2>
-  <SR.Diagnostics.Line3>action interval/remaining {0} | global interval/remaining {1} | ready {2} | last {3} | significant {4}</SR.Diagnostics.Line3>
-  <SR.Diagnostics.Line4>population view/audible {0}/{1} · scale {2} | probability base/final {3}/{4} | timing base/final {5}/{6} | startup pending {7}</SR.Diagnostics.Line4>
-  <SR.Diagnostics.VisibleLine>{0}: {1} | {2} | last {3}</SR.Diagnostics.VisibleLine>
+  <SR.Diagnostics.Panel.Title>Squeak diagnostics</SR.Diagnostics.Panel.Title>
+  <SR.Diagnostics.Panel.Mode.Selected>selected</SR.Diagnostics.Panel.Mode.Selected>
+  <SR.Diagnostics.Panel.Mode.Visible>in view</SR.Diagnostics.Panel.Mode.Visible>
+  <SR.Diagnostics.Panel.NoPawn>No pawn selected. Select a pawn to inspect its squeak state.</SR.Diagnostics.Panel.NoPawn>
+  <SR.Diagnostics.Panel.Empty>No squeak-enabled pawns in view.</SR.Diagnostics.Panel.Empty>
+  <SR.Diagnostics.Panel.PawnHeader>{0} · {1}</SR.Diagnostics.Panel.PawnHeader>
+  <SR.Diagnostics.Panel.CloseHint>Press Esc again to close</SR.Diagnostics.Panel.CloseHint>
+  <SR.Diagnostics.Panel.Section.Trigger>Trigger</SR.Diagnostics.Panel.Section.Trigger>
+  <SR.Diagnostics.Panel.Section.Multipliers>Multipliers</SR.Diagnostics.Panel.Section.Multipliers>
+  <SR.Diagnostics.Panel.Section.Probability>Probability</SR.Diagnostics.Panel.Section.Probability>
+  <SR.Diagnostics.Panel.Section.Voice>Voice</SR.Diagnostics.Panel.Section.Voice>
+  <SR.Diagnostics.Panel.Section.Outcome>Outcome</SR.Diagnostics.Panel.Section.Outcome>
+  <SR.Diagnostics.Panel.Section.Population>Population</SR.Diagnostics.Panel.Section.Population>
+  <SR.Diagnostics.Panel.Section.Startup>Startup</SR.Diagnostics.Panel.Section.Startup>
+  <SR.Diagnostics.Panel.Field.Action>Action</SR.Diagnostics.Panel.Field.Action>
+  <SR.Diagnostics.Panel.Field.TriggerMode>Trigger mode</SR.Diagnostics.Panel.Field.TriggerMode>
+  <SR.Diagnostics.Panel.Field.CooldownClock>Cooldown clock</SR.Diagnostics.Panel.Field.CooldownClock>
+  <SR.Diagnostics.Panel.Field.ActionTiming>Action timing</SR.Diagnostics.Panel.Field.ActionTiming>
+  <SR.Diagnostics.Panel.Field.GlobalTiming>Global timing</SR.Diagnostics.Panel.Field.GlobalTiming>
+  <SR.Diagnostics.Panel.Field.TimingReady>Timing ready</SR.Diagnostics.Panel.Field.TimingReady>
+  <SR.Diagnostics.Panel.Field.Master>Master multiplier</SR.Diagnostics.Panel.Field.Master>
+  <SR.Diagnostics.Panel.Field.Xenotype>Xenotype</SR.Diagnostics.Panel.Field.Xenotype>
+  <SR.Diagnostics.Panel.Field.XenoMult>Xeno multiplier</SR.Diagnostics.Panel.Field.XenoMult>
+  <SR.Diagnostics.Panel.Field.ActionMult>Action multiplier</SR.Diagnostics.Panel.Field.ActionMult>
+  <SR.Diagnostics.Panel.Field.TimeSpeed>Time-speed multiplier</SR.Diagnostics.Panel.Field.TimeSpeed>
+  <SR.Diagnostics.Panel.Field.BaseProbability>Base probability</SR.Diagnostics.Panel.Field.BaseProbability>
+  <SR.Diagnostics.Panel.Field.EffectiveProbability>Effective probability</SR.Diagnostics.Panel.Field.EffectiveProbability>
+  <SR.Diagnostics.Panel.Field.TalkingChance>Talking chance</SR.Diagnostics.Panel.Field.TalkingChance>
+  <SR.Diagnostics.Panel.Field.VocalEfficiency>Vocal organ efficiency</SR.Diagnostics.Panel.Field.VocalEfficiency>
+  <SR.Diagnostics.Panel.Field.TalkingGate>Talking gate applied</SR.Diagnostics.Panel.Field.TalkingGate>
+  <SR.Diagnostics.Panel.Field.DeathExempt>Death exempt</SR.Diagnostics.Panel.Field.DeathExempt>
+  <SR.Diagnostics.Panel.Field.LastEvaluation>Last evaluation</SR.Diagnostics.Panel.Field.LastEvaluation>
+  <SR.Diagnostics.Panel.Field.LastSignificant>Last significant</SR.Diagnostics.Panel.Field.LastSignificant>
+  <SR.Diagnostics.Panel.Field.Candidates>Candidates</SR.Diagnostics.Panel.Field.Candidates>
+  <SR.Diagnostics.Panel.Field.Audible>Audible</SR.Diagnostics.Panel.Field.Audible>
+  <SR.Diagnostics.Panel.Field.Scale>Scale</SR.Diagnostics.Panel.Field.Scale>
+  <SR.Diagnostics.Panel.Field.StartupPending>Startup pending</SR.Diagnostics.Panel.Field.StartupPending>
   <SR.Diagnostics.Global>Global</SR.Diagnostics.Global>
   <SR.Diagnostics.None>none</SR.Diagnostics.None>
   <SR.Diagnostics.Ignored>ignored</SR.Diagnostics.Ignored>
