@@ -95,7 +95,7 @@ flowchart LR
 ## Navigation Rules
 
 1. **先根后子**：从本图按目录定位子图，沿六段结构（Responsibility / Key Files / Design / Data & Control Flow / Integration / Change Guidance）逐级下钻；子图之间以相对链接互引（如 `1.6/` → `Source/SqueakyRatkin/` → `Debug/` `Logging/` `UI/` `Patches/`）。
-2. **权威合同**（`docs/`，根图不重复其内容）：`project-architecture-contract.md`（运行时/动作/resolver/VoicePack/Example/发布边界）、`settings-ui-product-contract-zh.md`（设置 UI 产品合同）、`logging-protocol.md`（srdiag v1 日志协议，唯一权威记录）、`voice-pack-author-guide-zh.md`（第三方 VoicePack 接入）、`steam-workshop-page-copy.md`（Workshop 页面维护源）。
+2. **权威合同**（`docs/`，根图不重复其内容）：`project-architecture-contract.md`（运行时/动作/resolver/VoicePack/Example/发布边界）、`settings-ui-product-contract-zh.md`（设置 UI 产品合同）、`logging-protocol.md`（srdiag v1 日志协议，唯一权威记录）、`voice-pack-author-guide-zh.md`（第三方 VoicePack 接入）、`steam-workshop-page-copy-draft.md`（Workshop 页面维护稿）、`release-runbook-zh.md`（发布流程）、`release_review/`（每版本发布回顾与 Claim Pack）。
 3. **契约红线**（跨子图共享，改动前必读对应子图 Change Guidance）：No-DLC/HugsLib 零引用；`SR_` 前缀 defName；`SqueakAction` 枚举 append-only（新增动作三处同步：枚举 + `SqueakActionDefinitions.AudioKey` + `SR_<Action>` SoundDef，再补运行时 hook）；`packageId` 大小写敏感；Template↔built-in 音频实际键集合与 SHA256 镜像一致；csproj `<Version>` 与 git tag 基版本一致；`srdiag fmt=1` 字段顺序与 28 个事件 ID 为兼容面。
 4. **状态所有权**：`dist/`、`1.6/Assemblies/`、staged `1.6/Sounds/` 为构建态（gitignored，脚本全权管理）；仓库维护态为 `About/`、`1.6/`（除 Assemblies）、`Extras/`、`Source/`。
 5. **本图维护约定**：本图是纯汇总层（不复制子图实现细节）；子图更新后只同步「Directory Map」一行、相关入口与红线即可。`AGENTS.md` 不在本图管辖内（其更新需用户另行确认），本图不注册、不引用它。

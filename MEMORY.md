@@ -2,14 +2,14 @@
 
 ## 当前耐久状态
 - 项目为 RimWorld 1.6 模组 **鼠辈啁啾 / Squeaky Ratkin**；永久 `packageId` 为 `coahuilite.squeakyratkin`，产品版本为 `0.2.1`。
-- GitHub `v0.2.1` 已核验（重发后：tag→`31c4e18`、CI success、asset 115 文件逐项核验）；第一次发布（`57dfd1f`）因 codemap 泄漏与 LoadFolders 门控回归作废并已删除。Claim Pack 与两起事故记录见 [`docs/release-0.2.1-review-zh.md`](./docs/release-0.2.1-review-zh.md)；`v0.2.0` 事实见 [`docs/release-0.2.0-review-zh.md`](./docs/release-0.2.0-review-zh.md)。
+- GitHub `v0.2.1` 已核验（重发后：tag→`31c4e18`、CI success、asset 115 文件逐项核验）；第一次发布（`57dfd1f`）因 codemap 泄漏与 LoadFolders 门控回归作废并已删除。Claim Pack 与两起事故记录见 [`docs/release_review/release-0.2.1-review-zh.md`](./docs/release_review/release-0.2.1-review-zh.md)；`v0.2.0` 事实见 [`docs/release_review/release-0.2.0-review-zh.md`](./docs/release_review/release-0.2.0-review-zh.md)。
 - Workshop：维护者已于 2026-08-16 报告发布完成；同一 item URL/ID、版本、visibility、预览与描述的观察细节尚未记录，Claim Pack 内保持待观察，直至维护者补充。
 
 ## 权威入口
 - 仓库导航（外置地图）：根入口 [`codemap.md`](./codemap.md)（纯汇总），具体目录读其 `codemap.md`（如 `Source/SqueakyRatkin/Logging/codemap.md`）。地图可能过期，源码与 `docs/` 现行合同权威。
 - 运行时、动作、resolver、VoicePack、Example 与发布边界：[`docs/project-architecture-contract.md`](./docs/project-architecture-contract.md)。
 - 设置 UI：[`docs/settings-ui-product-contract-zh.md`](./docs/settings-ui-product-contract-zh.md)；日志协议：[`docs/logging-protocol.md`](./docs/logging-protocol.md)。
-- VoicePack 作者约定：[`docs/voice-pack-author-guide-zh.md`](./docs/voice-pack-author-guide-zh.md)；Workshop 页面维护源：[`docs/steam-workshop-page-copy.md`](./docs/steam-workshop-page-copy.md)。
+- VoicePack 作者约定：[`docs/voice-pack-author-guide-zh.md`](./docs/voice-pack-author-guide-zh.md)；Workshop 页面维护源：[`docs/steam-workshop-page-copy-draft.md`](./docs/steam-workshop-page-copy-draft.md)；发布流程：[`docs/release-runbook-zh.md`](./docs/release-runbook-zh.md)。
 
 ## 工程决定与交接
 - 外置地图维护策略：codemap 采用外置增量维护——架构/文件职责变化后只更新受影响子图、根图对应条目与 `.slim/codemap.json`，不因无关改动全量重画；地图会过期，源码与 `docs/` 现行合同权威。导航入口见「权威入口」。
@@ -22,6 +22,6 @@
 - 前置拆分和 VoicePack 目标模型尚未实现；`0.2.1` 不得修改逻辑或 ABI，`0.2.2` 不得用全局 Race 池结果冒充 race-aware 路由。ABI 未冻结前不得修改 XML 标签、域键、Scribe schema 或共享 DLL 边界。
 - 0.2.1 发布复盘（发布/文档流程教训，已写入 Claim Pack）：(a) main/dev 分叉 merge 时，auto-merged 文件不受 `git checkout --ours` 控制——base 与 ours 相同时三方合并会采纳 theirs，曾导致 `LoadFolders.xml` 门控静默回归；此后 merge 必须用 `git diff <修复commit> <merge commit>` 全面核验关键行为文件（`LoadFolders.xml`/csproj/`About.xml`）再推远端。(b) stage 排除清单必须覆盖仓库导航文档（`codemap.md` 已加入 `stage-package.ps1`）；发布前核验包内文件类型白名单与关键文件内容。(c) changelog 标题时间以最终发布为准（tag 重发后需更新）。(d) 若 main 的 squash tree 与 dev 的 merge tree 相同，用 `git merge -s ours origin/main` 保持 dev 纯增量，避免重复三方冲突。
 - `About.xml` 的 `<modVersion>` 方案 A 已确认（0.2.2 实施）：csproj `<Version>` 为主源、`About.xml <modVersion>` 跟随，release 前检查两处一致；同步更新 AGENTS.md 的"唯一手动维护版本"表述（该文件修改需用户确认）。
-- Workshop 页面内容边界（已写入 `docs/steam-workshop-page-copy.md` 维护规则）：页面专注模组本身，不展示音频统计数字、开发者排障（含七击解锁）、版本迁移说明、VoicePack 制作步骤（路由到作者指南只留链接）；末尾俏皮句不加解释；中英结构对称、英文以中文版为准。
+- Workshop 页面内容边界（已写入 `docs/steam-workshop-page-copy-draft.md` 维护规则）：页面专注模组本身，不展示音频统计数字、开发者排障（含七击解锁）、版本迁移说明、VoicePack 制作步骤（路由到作者指南只留链接）；末尾俏皮句不加解释；中英结构对称、英文以中文版为准。
 - 公开 changelog 边界：开发者功能解锁细节（七击等）不进 changelog，只写"关闭模组设置后部分临时 UI 状态未正确重置"级别的模糊表述（0.2.1 条目已按此处理）。
 - 当前目标、开放行动、阻塞与明确延后项见 `TODO.md`。冷证据仅供历史冲突或明确请求，不能覆盖现行合同。

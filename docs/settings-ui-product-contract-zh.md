@@ -1,6 +1,6 @@
 # 鼠辈啁啾设置 UI 产品合同
 
-> 本文是当前设置产品合同。通用 IMGUI 建议见 [`rimworld-mod-ui-design-methodology-zh.md`](./rimworld-mod-ui-design-methodology-zh.md)；运行时与兼容边界见 [`project-architecture-contract.md`](./project-architecture-contract.md)。
+> 本文是当前设置产品合同。通用 IMGUI 建议见 [`../modding_documents/rimworld-mod-ui-design-methodology-zh.md`](../modding_documents/rimworld-mod-ui-design-methodology-zh.md)；运行时与兼容边界见 [`project-architecture-contract.md`](./project-architecture-contract.md)。
 
 ## 产品表面
 

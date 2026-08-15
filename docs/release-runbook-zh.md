@@ -1,6 +1,6 @@
 # Release Runbook（版本无关）
 
-> 唯一发布流程入口。版本相关事实以当次 `docs/release-<version>-review-zh.md`（Claim Pack）为准；本文只描述流程与门禁。
+> 唯一发布流程入口。版本相关事实以当次 `docs/release_review/release-<version>-review-zh.md`（Claim Pack）为准；本文只描述流程与门禁。
 > 每一步的 git/外部影响操作都需要维护者明确授权（见 `AGENTS.md`）。
 
 ## 阶段 0 · dev 发布前准备
