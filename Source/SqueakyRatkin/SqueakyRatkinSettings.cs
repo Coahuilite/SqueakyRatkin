@@ -92,7 +92,7 @@ public partial class SqueakyRatkinSettings : ModSettings
     private bool xenotypeTabRequested;
     private SettingsTab activeTab;
     private int versionClickCount;
-    private bool settingsSessionActive;
+    private int lastSettingsDrawFrame = -1;
     private readonly HashSet<SoundDef> moodExplicitlyResolved = new();
     private int moodClipIndex;
     private SqueakSettingsGameContext drawContext;
@@ -514,14 +514,22 @@ public partial class SqueakyRatkinSettings : ModSettings
 
     internal void BeginSettingsSession()
     {
-        if (settingsSessionActive) return;
-        settingsSessionActive = true;
-        versionClickCount = 0;
+        int frame = Time.frameCount;
+        if (frame == lastSettingsDrawFrame)
+        {
+            return; // 同一渲染帧的重复 pass（Layout/Repaint/输入事件），不重复清零。
+        }
+
+        if (frame > lastSettingsDrawFrame + 1)
+        {
+            versionClickCount = 0; // 跨帧中断 = 重新打开设置窗口。
+        }
+
+        lastSettingsDrawFrame = frame;
     }
 
     internal void EndSettingsSession()
     {
-        settingsSessionActive = false;
         versionClickCount = 0;
     }
 

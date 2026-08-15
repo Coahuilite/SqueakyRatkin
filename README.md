@@ -2,7 +2,7 @@
 
 **English** | [中文](./README.zh-CN.md)
 
-Squeaky Ratkin adds optional one-shot squeaks to NewRatkinPlus Ratkin pawns. The current repository implements the accepted 0.2.0 feature set, and the product version is **0.2.0**; this README is not a release announcement.
+Squeaky Ratkin adds optional one-shot squeaks to NewRatkinPlus Ratkin pawns. The current repository implements the accepted 0.2.0 feature set plus the 0.2.1 bug-fix release, and the product version is **0.2.1**; this README is not a release announcement.
 
 ## Requirements and No-DLC baseline
 
@@ -17,7 +17,7 @@ The fixed 15 actions are `Call`, `Eat`, `Sleep`, `Wounded`, `Select`, `Move`, `S
 
 Audio uses opt-in independent VoicePacks: **Off** plays Vanilla only; **Fallback** resolves Xenotype → Race → Vanilla; **Remix** weights currently playable Xenotype, Race, and Vanilla tiers equally. A Xenotype target is the exact, case-sensitive `XenotypeDef.defName` and is optional.
 
-The main package includes the ordinary Race-only `SR_OfficialExample_Race`; it has 15 SoundDefs and 41 OGG clips: Attack 3, Call 4, Death 2, Draft 3, Eat 2, Equip 2, Joy 3, MentalBreak 1, Move 3, Select 3, Sleep 3, Social 3, Undraft 3, Work 3, and Wounded 3. It is No-DLC and has no automatic selection or special weight. `Extras/SqueakyRatkinExampleVoices/` is a separate directly enableable Race-only Template with its own package ID, PackDef, catalog identity, and resource root. The Template is the only maintained Example audio source; staging mirrors it into the built-in Example.
+The main package includes the ordinary Race-only `SR_OfficialExample_Race`; as a current reference baseline it has 15 SoundDefs and 41 OGG clips: Attack 3, Call 4, Death 2, Draft 3, Eat 2, Equip 2, Joy 3, MentalBreak 1, Move 3, Select 3, Sleep 3, Social 3, Undraft 3, Work 3, and Wounded 3. These counts are a current Example baseline rather than a fixed contract and may vary in future releases. It is No-DLC and has no automatic selection or special weight. `Extras/SqueakyRatkinExampleVoices/` is a separate directly enableable Race-only Template with its own package ID, PackDef, catalog identity, and resource root. The Template is the only maintained Example audio source; staging mirrors it into the built-in Example.
 
 The Example clips are public-domain material outside the MPL-2.0 code license. The project and contributors claim no copyright or related rights in them; they may be used, copied, modified, and redistributed. See [`AUDIO_RIGHTS.txt`](./Extras/SqueakyRatkinExampleVoices/AUDIO_RIGHTS.txt) for the limited provenance/status disclaimer. Start with [`docs/voice-pack-author-guide-zh.md`](./docs/voice-pack-author-guide-zh.md) and [`Extras/SqueakyRatkinExampleVoices/README.md`](./Extras/SqueakyRatkinExampleVoices/README.md); custom audio is an independent VoicePack, never an installation into the main mod.
 
@@ -27,7 +27,7 @@ Settings are immediate with a coalesced save and close flush. There are three re
 
 ## Development, packaging, and versioning
 
-The only manually maintained product version is `<Version>` in `Source/SqueakyRatkin/SqueakyRatkin.csproj` (currently 0.2.0). Builds do not install into RimWorld.
+The only manually maintained product version is `<Version>` in `Source/SqueakyRatkin/SqueakyRatkin.csproj` (currently 0.2.1). Builds do not install into RimWorld.
 
 ```powershell
 dotnet build Source/SqueakyRatkin/SqueakyRatkin.csproj -c Release -p:SqueakyBuildFlavor=Dev

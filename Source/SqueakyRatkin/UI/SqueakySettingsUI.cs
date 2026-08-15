@@ -355,15 +355,18 @@ internal static class SqueakySettingsUI
     {
         PanelFrame(rect, kind);
         Color oldColor = GUI.color;
+        TextAnchor oldAnchor = Text.Anchor;
         GameFont oldFont = Text.Font;
         Text.Font = GameFont.Tiny;
+        Text.Anchor = TextAnchor.MiddleCenter;
         GUI.color = kind == SqueakySurfaceKind.Success ? Success
             : kind == SqueakySurfaceKind.Warning ? new Color(1f, .67f, .48f) : Muted;
-        Rect content = rect.ContractedBy(8f, 5f);
+        Rect content = rect.ContractedBy(8f, 2f);
         if (!tooltip.NullOrEmpty()) content.xMax -= HelpSize + HelpGap;
         Widgets.Label(content, text);
         if (!tooltip.NullOrEmpty()) HelpIndicator(new Rect(rect.xMax - HelpSize - 7f, rect.y + 7f, HelpSize, HelpSize), tooltip);
         Text.Font = oldFont;
+        Text.Anchor = oldAnchor;
         GUI.color = oldColor;
     }
 
