@@ -80,7 +80,7 @@
 - **新增硬依赖**：仅当缺少该 mod 时本 mod 无法运行才加入 `modDependencies`；只影响顺序的用 `loadAfter`；**DLC/HugsLib 永远不得进入 About.xml**（No-DLC 契约，见 `../AGENTS.md`）。
 - **想让"无 NewRatkinPlus 就不加载"成为现实**：不要在 `LoadFolders.xml` 用 `IfModActive` 门控本体（那会变成事实硬开关，且使改 packageId 的 fork 失效）；需改 XML Patch 为条件式（或接受现状：无条件加载、无 Ratkin def 时 XPath 静默 no-op）。改动前先与 `../1.6/` 地图对齐。
 - **新增游戏版本（如 2.0）**：`About.xml` `supportedVersions` 加条目；`LoadFolders.xml` 加 `<v2.0>` 块；`stage-package.ps1` 同步纳入复制列表（参考 Extras 包自己的 LoadFolders 模式）。
-- **改版本号**：`csproj <Version>` 与 git tag 基版本必须一致（release.yml 强制校验），两处同步改。
+- **改版本号**：csproj `<Version>` 是主源；`About.xml <modVersion>` 必须跟随同一值；release tag 基版本必须等于 csproj `<Version>`（release.yml 强制校验）。
 - **改图标/描述**：直接改 `About/` 文件后重跑 `pack-*`；CI 不校验图标内容，但 `stage-package.ps1` 会校验 OGG 契约，音频变更需先走 Template 源。
 
 ---

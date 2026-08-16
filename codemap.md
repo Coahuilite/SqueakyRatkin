@@ -16,12 +16,11 @@
 
 | 入口 | 位置 | 说明 |
 |---|---|---|
-| 游戏加载 | `About/About.xml` + 根 `LoadFolders.xml` | `ModLister` 读元数据 → 依赖校验/排序 → `InitLoadFolders`（NewRatkinPlus 激活时挂 `[1.6, /]`，1.6 优先）→ 载入 `1.6/` 的 Patches / Defs / Assemblies / Languages |
+| 游戏加载 | `About/About.xml` + 根 `LoadFolders.xml` | `ModLister` 读元数据 → 依赖校验/排序 → `InitLoadFolders` 无条件挂 `[1.6, /]`（1.6 优先）→ 载入 `1.6/` 的 Patches / Defs / Assemblies / Languages |
 | C# 装配点 | `Source/SqueakyRatkin/Mod.cs`（`SqueakyRatkinMod` ctor） | 唯一 Mod 入口：`Harmony.PatchAll()`（id `coahuilite.squeakyratkin`）→ `ExecuteWhenFinished` 启动链（resolver 主线程初始化、catalog 刷新、设置应用、迁移 flush） |
 | Harmony 事件转译 | `Source/SqueakyRatkin/Patches/` | 15 个 patch：伤害/攻击/死亡/选中/整编/装备/精神崩溃/周期成员/诊断生命周期/设置窗口关闭等 → `CompSqueaker.Notify_*` 等下游 |
-| 设置工作台 | `Mod.DoSettingsWindowContents` → `UI/` | 四页：Basics / SoundMood / Xenotype / Developer（七击解锁）；业务写入 → `QueuePersistence` → 350 ms 防抖保存 |
-*23|| 调试入口 | `Debug/` + `[DebugAction]` 菜单 | overlay（单字符标记 + 可拖动诊断面板）、音频路径环形缓冲、触发漏斗统计、音频浏览工作台；四层门控（DevMode / `developerToolsEnabled` / `EffectiveDevLogging` / `AudioPathDiagnostics.Enabled`） |
-| 日志出口 | `Logging/SqueakLog.cs` | 唯一日志出口：closed typed facade（25 事件方法覆盖 28 事件 ID）+ `srdiag fmt=1` 机器字段 → Verse `Log` |
+| 调试入口 | `Debug/` + `[DebugAction]` 菜单 | overlay（单字符标记 + 可拖动诊断面板）、音频路径环形缓冲、触发漏斗统计、音频浏览工作台；四层门控（DevMode / `developerToolsEnabled` / `EffectiveDevLogging` / `AudioPathDiagnostics.Enabled`） |
+| 日志出口 | `Logging/SqueakLog.cs` + `Logging/SqueakLogProtocol.cs` | 唯一 closed typed facade（25 事件方法/28 EventId）+ internal registry/once/formatter/sink + `srdiag fmt=1` → Verse `Log`；`tools/SqueakLogCharacterization` 锁协议 |
 | 构建/打包 | `scripts/pack-*.ps1` + `.github/workflows/` | `dotnet build -p:SqueakyBuildFlavor=<F>` → `stage-package.ps1` → `dist/<flavor>/` |
 
 ## Architecture / Data Flow
@@ -77,25 +76,21 @@ flowchart LR
 | `Source/SqueakyRatkin/Patches/` | [Source/SqueakyRatkin/Patches/codemap.md](Source/SqueakyRatkin/Patches/codemap.md) | Harmony 集成层（15 patch）：RimWorld 事件 → `CompSqueaker.Notify_*` / 周期成员 / 诊断生命周期 / 设置窗口关闭；patch 薄、业务判断在 Comp |
 | `Source/SqueakyRatkin/UI/` | [Source/SqueakyRatkin/UI/codemap.md](Source/SqueakyRatkin/UI/codemap.md) | 设置工作台 composition layer：四页 UI、局部编辑缓冲（draft）、诊断面板与音频浏览入口；不拥有业务写入与保存协调 |
 | `Source/SqueakyRatkin/Debug/` | [Source/SqueakyRatkin/Debug/codemap.md](Source/SqueakyRatkin/Debug/codemap.md) | 诊断与开发者工具：overlay、DebugAction 菜单、音频路径追踪、触发漏斗统计、mote、音频浏览工作台（四层门控） |
-| `Source/SqueakyRatkin/Logging/` | [Source/SqueakyRatkin/Logging/codemap.md](Source/SqueakyRatkin/Logging/codemap.md) | 唯一日志出口：`SqueakLog` closed typed facade（25 事件方法覆盖 28 事件 ID + `srdiag fmt=1`），注册表/once/formatter/sink 内聚于一个静态类（P0 治理目标） |
+| `Source/SqueakyRatkin/Logging/` | [Source/SqueakyRatkin/Logging/codemap.md](Source/SqueakyRatkin/Logging/codemap.md) | 唯一日志出口：public `SqueakLog` facade（25 事件方法/28 EventId）与 internal `SqueakLogProtocol`（registry/once/formatter/sink）；双 flavor characterization 锁协议 |
 | `scripts/` | [scripts/codemap.md](scripts/codemap.md) | 构建/打包流水线：`stage-package.ps1` 唯一 staging 引擎 + dev/github/steam 三个 flavor 包装脚本；守护 Template→built-in 音频镜像、版本纪律与发布包边界。 |
 
-相邻但无独立子图：`Extras/SqueakyRatkinExampleVoices/`（随包分发的独立示例包，Template 音频唯一维护源）、`docs/`（权威合同，见 Navigation Rules）、`1.6/Languages/`（本地化）、`1.6/Assemblies/` 与 `dist/`（gitignored 构建态）。
+相邻但无独立子图：`Extras/SqueakyRatkinExampleVoices/`（随包分发的独立示例包，Template 音频唯一维护源）、`docs/`（权威合同与内部规划笔记，见 Navigation Rules）、`1.6/Languages/`（本地化）、`1.6/Assemblies/` 与 `dist/`（gitignored 构建态）。
 
 ## Current Change Surface
 
-**权威状态**：[`TODO.md`](TODO.md)（0.2.1 已知问题修复 / 0.2.2 Kiiro 实验 / 明确延后 / 待重新确认）与 [`MEMORY.md`](MEMORY.md)（当前耐久状态、权威入口、工程决定与交接）。当前 0.2.1 三项已知问题修复（`TODO.md`）：
+**权威状态**：[`TODO.md`](TODO.md)（0.2.2 代码卫生与可读化 / 独立 Kiiro 实验 / 0.3.x 内部通用化筹备）与 [`MEMORY.md`](MEMORY.md)（耐久状态、权威入口、工程决定与交接）。当前 0.2.2 的先决卫生工作：全库梳理已完成；`tools/SqueakLogCharacterization` 已锁 28-event `srdiag v1` 协议；`SqueakLog` 已从 registry/once/formatter/sink 机械拆分，public facade 与日志行为不变。0.3.x 设计笔记已落地；其余事项见 TODO。
 
-1. **悬浮诊断重构**：pawn 头上改为单字符标记（`●`，绿=就绪/金=其余，带黑阴影），复杂状态移入可拖动诊断面板窗口（Selected 单 pawn 分节详情 / Visible ≤16 行列表，均显式显示 Pawn 种族 `defName`，仅诊断展示不参与资格/路由/播放决策）；面板按 overlay `Revision` 缓存格式化文本，X/Esc 关闭联动 `SetMode(Off)`。
-2. **修复七击开发选项未完成点击计数不归零**（已修复）：`BeginSettingsSession` 改用 `Time.frameCount` 检测绘制中断，重新打开设置时清零 `versionClickCount`。只清未完成计数，不改变已解锁状态。
-3. **修复 fork NewRatkinPlus 因包名不匹配导致 SR 不生效**（已修复）：移除 `LoadFolders.xml` 的 `IfModActive="Solaris.RatkinRaceMod"` 硬门控，改无条件加载，发声注入按 XPath `defName="Ratkin"` 匹配。
-
-其余：`TODO.md` 明确延后项（`TicksAbs` 再次复现时再调查归因、0.2.1 代码卫生）与待重新确认项（发布门禁、英文 VoicePack 作者指南、第三方 VoicePack 示例包方向——需维护者确认后才能恢复）。打包侧当前无开放任务；任何内容契约改动（音频数量/版本/依赖）必须同步 `scripts/stage-package.ps1` 校验表。
+明确延后：仅 `TicksAbs` 再现时调查归因。Kiiro 实验仍在 `kiiro-experiment` 分支，不入 0.2.2；D（Biotech 异种域）、通用化后再议的 merge、实验完整复盘均挂起。任何内容契约改动（音频数量/版本/依赖）必须同步 `scripts/stage-package.ps1` 校验表。
 
 ## Navigation Rules
 
 1. **先根后子**：从本图按目录定位子图，沿六段结构（Responsibility / Key Files / Design / Data & Control Flow / Integration / Change Guidance）逐级下钻；子图之间以相对链接互引（如 `1.6/` → `Source/SqueakyRatkin/` → `Debug/` `Logging/` `UI/` `Patches/`）。
-2. **权威合同**（`docs/`，根图不重复其内容）：`project-architecture-contract.md`（运行时/动作/resolver/VoicePack/Example/发布边界）、`settings-ui-product-contract-zh.md`（设置 UI 产品合同）、`logging-protocol.md`（srdiag v1 日志协议，唯一权威记录）、`voice-pack-author-guide-zh.md`（第三方 VoicePack 接入）、`steam-workshop-page-copy-draft.md`（Workshop 页面维护稿）、`release-runbook-zh.md`（发布流程）、`release_review/`（每版本发布回顾与 Claim Pack）。
+2. **权威合同与规划**：现行合同（`docs/project-architecture-contract.md`、`settings-ui-product-contract-zh.md`、`logging-protocol.md`、`voice-pack-author-guide-zh.md`、`steam-workshop-page-copy-draft.md`、`release-runbook-zh.md`、`release_review/`）定义当前行为；[`docs/internal-universalization-design-note-zh.md`](docs/internal-universalization-design-note-zh.md) 仅是 0.3.x 内部规划输入，不覆盖合同。根图不重复这些文档内容。
 3. **契约红线**（跨子图共享，改动前必读对应子图 Change Guidance）：No-DLC/HugsLib 零引用；`SR_` 前缀 defName；`SqueakAction` 枚举 append-only（新增动作三处同步：枚举 + `SqueakActionDefinitions.AudioKey` + `SR_<Action>` SoundDef，再补运行时 hook）；`packageId` 大小写敏感；Template↔built-in 音频实际键集合与 SHA256 镜像一致；csproj `<Version>` 与 git tag 基版本一致；`srdiag fmt=1` 字段顺序与 28 个事件 ID 为兼容面。
 4. **状态所有权**：`dist/`、`1.6/Assemblies/`、staged `1.6/Sounds/` 为构建态（gitignored，脚本全权管理）；仓库维护态为 `About/`、`1.6/`（除 Assemblies）、`Extras/`、`Source/`。
 5. **本图维护约定**：本图是纯汇总层（不复制子图实现细节）；子图更新后只同步「Directory Map」一行、相关入口与红线即可。`AGENTS.md` 不在本图管辖内（其更新需用户另行确认），本图不注册、不引用它。
