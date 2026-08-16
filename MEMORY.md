@@ -1,7 +1,7 @@
 # MEMORY
 
 ## 当前耐久状态
-- 项目为 RimWorld 1.6 模组 **鼠辈啁啾 / Squeaky Ratkin**；永久 `packageId` 为 `coahuilite.squeakyratkin`，产品版本为 `0.2.1`。
+- 项目为 RimWorld 1.6 模组 **鼠辈啁啾 / Squeaky Ratkin**；永久 `packageId` 为 `coahuilite.squeakyratkin`，dev 版本为 `0.2.2`（发布准备中），最新已发布版本 `0.2.1`。
 - GitHub `v0.2.1` 已核验（重发后：tag→`31c4e18`、CI success、asset 115 文件逐项核验）；第一次发布（`57dfd1f`）因 codemap 泄漏与 LoadFolders 门控回归作废并已删除。Claim Pack 与两起事故记录见 [`docs/release_review/release-0.2.1-review-zh.md`](./docs/release_review/release-0.2.1-review-zh.md)；`v0.2.0` 事实见 [`docs/release_review/release-0.2.0-review-zh.md`](./docs/release_review/release-0.2.0-review-zh.md)。
 - Workshop：维护者已于 2026-08-16 报告发布完成；同一 item URL/ID、版本、visibility、预览与描述的观察细节尚未记录，Claim Pack 内保持待观察，直至维护者补充。
 
@@ -18,7 +18,7 @@
 - `srdiag v1` characterization 载体已定：`tools/SqueakLogCharacterization` 是纯 net472 控制台 harness，链接编译真实 `Logging/SqueakLog.cs`，只以 `Verse.Log` 与 `SqueakyRatkinMod` 测试桩隔离 RimWorld；固定构建 identity，覆盖 28 个事件、输出序列化、once/1024 清空、dev/release gate、异常吞没与路径脱敏。它是 `SqueakLog` 治理前后不可变的日志协议护栏。
 - 0.2.2 `SqueakLog` 卫生已完成：`SqueakLog.cs` 保留唯一 public facade、模式/build 状态和 `Emit` 编排；新增 internal `Logging/SqueakLogProtocol.cs` 承担 registry、once、formatter/text、sink 和 internal 协议类型。双 flavor characterization 与主模组构建均通过；public facade、28 EventId、human 文案、visibility/level、once key、srdiag 字段顺序/编码、整体吞异常边界未变。
 - `CompSqueaker` 相位计算卫生已完成：生产 materialization 与诊断计算共用 `CalculatePeriodicStartupReadyTick`，公式只保留一份；全树零调用的 internal `SqueakPeriodicPopulation.GetScale` 已删除，公开 zero-call API 仍待 ABI 决策。
-- `About.xml` 已加入 `<modVersion>0.2.1</modVersion>`，与当前 csproj `<Version>0.2.1` 一致；AGENTS.md 的版本主源表述尚未改，待用户显式确认（该文档不在本轮范围）。
+- `About.xml` `<modVersion>` 与 csproj `<Version>` 已推进至 `0.2.2` 并保持同步；AGENTS.md 已补充版本主源表述（csproj 主源、modVersion 跟随）。
 - `CompSqueaker.IsSocializing` 的五个 job marker 已集中为命名数组，行为不变；Ratkin/浏览器语义字面量暂不越过各自适配边界，留待 `0.3.x` 通用化设计。
 - 0.3.x 内部普遍化设计笔记已落地于 [`docs/internal-universalization-design-note-zh.md`](./docs/internal-universalization-design-note-zh.md)：先在单一 SR 内完成 race-aware Universal core 与迁移验证，再按六项可重复拆分门物理拆出 US；文档是规划输入，不覆盖现行合同。下一步仍是实现前的模型/ABI/characterization 设计，不是 Kiiro adapter merge。
 - 长期方向是 Universal Squeaker 前置：基础设施发现 race；有内置 Vanilla fallback profile 的 race 自动启用，无内置 profile 的 race 默认不启用，但允许玩家显式启用并明确提示“无 fallback 且无可用 VoicePack 时不会发声”。VoicePack 每包且只能服务一个 race，同域多个包组成带权池公平抽取，Xenotype 域按 `(raceDefName, xenotypeDefName)` 路由。VoicePack 作为标准 RimWorld 从模组管理，完整启动生效；热重载不支持但不主动阻止。

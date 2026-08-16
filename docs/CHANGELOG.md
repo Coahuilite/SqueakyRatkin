@@ -36,6 +36,18 @@ Short release summary.
 - ...
 ```
 
+## Unreleased — 0.2.2
+
+Internal code-hygiene and readability release; no player-facing behavior changes.
+
+### Changed
+- Refactored the internal logging module into a public facade and internal protocol modules; log output, event IDs, and field order are unchanged.
+- Deduplicated periodic startup phase math and centralized the social-job marker list in the squeak component.
+- Removed an unused internal helper.
+
+### Packaging
+- Added `About.xml` `<modVersion>` metadata kept in sync with the csproj version.
+
 ## [2026-08-16 01:54 UTC+8] Version 0.2.1
 
 Bug-fix release: NewRatkinPlus fork compatibility, a settings cleanup fix, and the reworked draggable diagnostics panel.

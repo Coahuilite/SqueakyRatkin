@@ -9,6 +9,7 @@
 - Permanent `packageId`: `coahuilite.squeakyratkin`.
 - C# namespace: `SqueakyRatkin`.
 - Permanent brands are **`鼠辈啁啾`** and **`Squeaky Ratkin`**; never translate, normalize, or copy-edit them. In ordinary Simplified Chinese prose, call the Ratkin race `鼠族`; identifiers, paths, logs, and proper names are exempt.
+- Product version source: `Source/SqueakyRatkin/SqueakyRatkin.csproj` `<Version>` is primary; `About/About.xml` `<modVersion>` must follow it; Assembly/File versions derive from the csproj version.
 
 ## Memory protocol
 
