@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ModMetaData>
   <packageId>coahuilite.squeakyratkin</packageId>
+  <modVersion>0.2.1</modVersion>
   <name>Squeaky Ratkin</name>
   <author>Coahuilite</author>
   <supportedVersions>
