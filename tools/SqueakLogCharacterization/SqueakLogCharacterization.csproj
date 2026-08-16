@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net472</TargetFramework>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <AssemblyName>SqueakyLogCharacterization</AssemblyName>
+    <RootNamespace>SqueakyRatkin.Characterization</RootNamespace>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <InformationalVersion>0.0.0+char</InformationalVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Dev'">
+    <DefineConstants>$(DefineConstants);SQUEAKY_DEV</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\Source\SqueakyRatkin\Logging\SqueakLog.cs" Link="SqueakLog.cs" />
+    <Compile Include="..\..\Source\SqueakyRatkin\Logging\SqueakLogProtocol.cs" Link="SqueakLogProtocol.cs" />
+  </ItemGroup>
+
+</Project>
