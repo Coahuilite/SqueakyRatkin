@@ -36,7 +36,7 @@ Short release summary.
 - ...
 ```
 
-## [2026-08-16 23:07 UTC+8] Version 0.2.2
+## [2026-08-16 23:17 UTC+8] Version 0.2.2
 
 Internal code-hygiene and readability release; no player-facing behavior changes.
 
