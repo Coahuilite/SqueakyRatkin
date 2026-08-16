@@ -6,10 +6,12 @@
 - [x] 修复 fork NewRatkinPlus 因包名不匹配导致 SR 不生效：移除 `LoadFolders.xml` 的 `IfModActive="Solaris.RatkinRaceMod"` 硬门控，改无条件加载，发声注入按 XPath `defName="Ratkin"` 匹配。
 
 ## 0.2.2 — Kiiro 内部实验
-- [x] 分支策略：已从 dev 开 `kiiro-experiment` 分支（起点 `88cbe1c`）；成功后 no-squash 全量 merge 回 dev（保留实验历史）；实验分支不发布。
-- [ ] 使用仅本地、不发布的 Kiiro 薄装配 adapter，在 Kiiro 模组已加载且隐藏实验开关启用时，向标准 HAR `Kiiro_Race` 装配同一共享 `CompSqueaker`；不得复制 Kiiro 资源/代码或形成永久 adapter。长期 Universal core 应按通用 HAR/raceDefName 机制直接支持 Kiiro。
-- [ ] 在 VoicePack Off 或可辨识隔离探针下验证 Kiiro 的组件生命周期，以及 Select、Wounded、Draft、成功 Attack 和周期触发进入共享漏斗；当前全局 `RacePacks` 会复用 Ratkin/Example 音池，禁止把出声视为 race-aware 路由成功或正式 Kiiro 兼容。
-- [ ] 基线组合为 Core + Harmony + HAR + Ancot Library + Kiiro + 本地 adapter，官方 DLC 全关；另行验证 Biotech + 可选 Kiiro gene patch，但不得把 gene patch 作为基础依赖。未经 Kiiro 作者明确许可，不发布或宣传 Kiiro compat 内容。
+- [x] 分支策略：已从 dev 开 `kiiro-experiment` 分支（起点 `88cbe1c`）；实验分支不发布，merge 回 dev 的时点与授权待定。
+- [x] 薄装配 adapter（commit `a0c1708`）：Kiiro 已加载且隐藏实验开关启用时，启动深克隆 Ratkin 的 `CompProperties_Squeaker` 挂入标准 HAR `Kiiro_Race.comps`；`SQUEAKY_EXPERIMENTAL` 编译门限 Dev flavor（Steam/GitHub flavor 物理不含）；开关 OFF 启动=不装配=默认行为。未复制 Kiiro 资源/代码；无新增 resolver/settings/logging 事件。
+- [x] 实机验证 A/B/C/E：A 开关关零装配（设置无键 + 零 Kiiro 派发）；B 状态行「本会话已装配」+ 26 条派发多动作覆盖（Wounded 因全局 Disabled 为零）；C 隔离探针 Off 静默、取消 Example 勾选后 Kiiro 走 Fallback 原版层、勾选后走 Example 池；E 回基线 Kiiro 静默且 Ratkin 正常发声。均经 Player.log 交叉核验；归因局限：日志 target 仅 thingIDNumber，不含种族信息。
+- [ ] D 暂缓（用户决定）：Biotech + Kiiro Baseliner 异种域验证；受控 DLC 全关基线补测。
+- [ ] 日志覆盖缺口（用户指出，暂不实现）：部分环节日志打少（装配/探针阶段无显式记录），仅记录，待后续决定。
+- [x] 0.2.2 发布定位调整（用户决定）：0.2.2 发布不包含 Kiiro 实验性兼容功能；实验在 `kiiro-experiment` 分支独立继续。
 - [ ] `About.xml` 增加 `<modVersion>`（方案 A 已确认）：csproj `<Version>` 为主源、About.xml 跟随，release 前检查两处一致；同步更新 AGENTS.md 的"唯一手动维护版本"表述（AGENTS.md 修改需用户确认）。
 
 ## 发布卫生（0.2.1 复盘产生）
