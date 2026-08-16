@@ -19,14 +19,13 @@
 | 隐私审计 | 完整可达范围扫描 0 真实命中；dev↔main 树一致（diff 0 行） |
 
 ## Steam staging / 发布观察
-
-- staging 包：115 文件；0 PDB / 0 `PublishedFileId.txt` / 0 codemap.md；DLL FileVersion `0.2.2.0`；`LoadFolders.xml` 无门控；OGG 镜像校验通过。
-- 发布观察：unverified（维护者待手动上传 Workshop；`PublishedFileId.txt` 只写入本地上传副本）。
+- 发布观察：维护者已于 2026-08-16 报告发布完成；页面级观察（item URL/ID、版本、visibility、预览、描述、change notes）待补，届时更新本节与渠道状态。
+- `PublishedFileId.txt` 只写入本地上传副本，未进入 Git 或 staging。
 
 ## 渠道状态
 
 - GitHub：完整。
-- Workshop：unverified。
+- Workshop：维护者报告已发布（页面级观察待补）。
 
 ## 0.2.2 内容回顾（卫生与可读化，无玩家可见行为变化）
 
