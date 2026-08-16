@@ -1,7 +1,7 @@
 # MEMORY
 
 ## 当前耐久状态
-- 项目为 RimWorld 1.6 模组 **鼠辈啁啾 / Squeaky Ratkin**；永久 `packageId` 为 `coahuilite.squeakyratkin`，dev 版本为 `0.2.2`（发布准备中），最新已发布版本 `0.2.1`。
+- 项目为 RimWorld 1.6 模组 **鼠辈啁啾 / Squeaky Ratkin**；永久 `packageId` 为 `coahuilite.squeakyratkin`，产品版本 `0.2.2`：GitHub 已发布并核验（tag `v0.2.2`→`03ebb6b`、CI `31955162848` success、资产 115 文件逐项核验），Claim Pack 见 [`docs/release_review/release-0.2.2-review-zh.md`](./docs/release_review/release-0.2.2-review-zh.md)；Workshop 待维护者手动上传（staging 已核验，unverified）。
 - GitHub `v0.2.1` 已核验（重发后：tag→`31c4e18`、CI success、asset 115 文件逐项核验）；第一次发布（`57dfd1f`）因 codemap 泄漏与 LoadFolders 门控回归作废并已删除。Claim Pack 与两起事故记录见 [`docs/release_review/release-0.2.1-review-zh.md`](./docs/release_review/release-0.2.1-review-zh.md)；`v0.2.0` 事实见 [`docs/release_review/release-0.2.0-review-zh.md`](./docs/release_review/release-0.2.0-review-zh.md)。
 - Workshop：维护者已于 2026-08-16 报告发布完成；同一 item URL/ID、版本、visibility、预览与描述的观察细节尚未记录，Claim Pack 内保持待观察，直至维护者补充。
 
