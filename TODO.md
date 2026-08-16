@@ -9,9 +9,8 @@
 - [x] 全库代码梳理：scout 已覆盖 Source/SqueakyRatkin 全部 47 个 C# 文件，产出 18 条问题清单与 top5 顺序；关键结论已进入 `MEMORY.md`/Logging 子图。
 - [x] `SqueakLog` 职责治理（卫生第一刀）：在 characterization 护栏下机械拆为 public facade 与 internal `SqueakLogProtocol`（registry / once / formatter / sink）；不新增日志事件、不改 public facade、事件 ID、字段顺序、once key、human 文案或整体吞异常边界。
 - [x] `srdiag v1` logging characterization checks：`tools/SqueakLogCharacterization` 链接真实 `SqueakLog.cs` 的纯 net472 控制台 harness（Verse.Log 桩、无游戏目录）已覆盖 28 事件、序列化、once/1024 清空、Dev/release gate、吞异常、路径脱敏与双 flavor。它只锁日志协议；`CompSqueaker` 触发/路由基线须在其拆分前单列。
-- [x] `About.xml` 增加 `<modVersion>`（方案 A）：已写入 `0.2.1` 并与当前 csproj `<Version>` 同步；两处一致性检查已完成。AGENTS.md「唯一手动维护版本」表述尚待用户显式确认，属于后续文档治理，不阻塞本项。
+- [x] `About.xml` 增加 `<modVersion>`（方案 A）：与 csproj `<Version>` 同步、一致性检查完成；AGENTS.md 版本主源表述随本次发布准备补充。
 - [x] `CompSqueaker` 相位计算去重：`MaterializePeriodicStartupPhase` 与诊断路径共用 `CalculatePeriodicStartupReadyTick`；主模组与双 flavor logging harness 构建/运行通过。
-- [ ] `CompSqueaker` 分层（TimingModel / 诊断面迁出）：中风险，须先建立触发/路由 characterization 基线；本轮不实施。
 - [x] 字面量外置（本轮低风险项）：`CompSqueaker.IsSocializing` 的五个 job marker 已集中为 `SocialJobMarkers`；Ratkin 适配字面量与浏览器语义数组仍保留在各自数据/适配边界，待 Universal 阶段统一。
 - [x] 清理无调用方 internal helper：删除 `SqueakPeriodicPopulation.GetScale`（全树零调用）；public zero-call APIs 未删，需 ABI 决策。
 ## Kiiro 实验（`kiiro-experiment` 分支独立进行，不属于 0.2.2）
@@ -32,6 +31,10 @@
 - [ ] 先在单一 Squeaky Ratkin 模组内部完成并验证 Universal core；当 SR 实质只剩 VoicePack 内容时，再物理拆出 Universal Squeaker 前置并让现有 SR Workshop 项目依赖它，禁止过早发布空壳前置或保留双实现。
 - [ ] 设计 VoicePack 单种族声明与路由：每包只能声明一个 `raceDefName`；Race / Xenotype 分别按 `raceDefName` 与 `(raceDefName, xenotypeDefName)` 形成域；同域多个合格包组成带权池并公平抽取。先冻结加载注入窗口、XML ABI、权重语义、旧包迁移和 Scribe schema。
 - [ ] 设计 XML 驱动的 per-race Vanilla fallback profile：精确 `raceDefName` + 15 action→SoundDef 映射；有 profile 的 race 自动启用，无 profile 的 race 只能由玩家显式启用并提示静音风险。选择链固定为 `(race,xenotype) VoicePack → race VoicePack → race fallback → 无声`；不得硬编码 C# race switch 或复制原版资产。
+- [ ] `CompSqueaker` 分层（TimingModel 独立、枚举/配置并入 `SqueakActionModel`、诊断面迁出）：0.3.0 先立触发/路由 characterization 基线再拆（原 0.2.2 项移至此处）。
+- [ ] `SqueakyRatkinSettings` 拆 partial：ExposeData+迁移 / 运行时桥分离；Scribe 契约面需存档 fixture。
+- [ ] `XenotypeUI` 拆出 Race 域编辑器；UI 三档缩放验证成本高，单独排期。
+- [ ] Debug 入口合并（通用化重构后执行）：删除 7 个重复 DebugAction（统计×3、记录开关×2、清除/复制×2），相机指示器与 overlay 模式开关迁入开发者页；同步 settings-ui 合同 DebugAction 门控表述与 Debug 子图「四层门控」描述。
 
 ## 明确延后
 - [ ] 仅在 `TicksAbs` 再次复现时调查归因。
