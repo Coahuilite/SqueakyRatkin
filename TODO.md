@@ -9,7 +9,7 @@
 - [x] 分支策略：已从 dev 开 `kiiro-experiment` 分支（起点 `88cbe1c`）；实验分支不发布，merge 回 dev 的时点与授权待定。
 - [x] 薄装配 adapter（commit `a0c1708`）：Kiiro 已加载且隐藏实验开关启用时，启动深克隆 Ratkin 的 `CompProperties_Squeaker` 挂入标准 HAR `Kiiro_Race.comps`；`SQUEAKY_EXPERIMENTAL` 编译门限 Dev flavor（Steam/GitHub flavor 物理不含）；开关 OFF 启动=不装配=默认行为。未复制 Kiiro 资源/代码；无新增 resolver/settings/logging 事件。
 - [x] 实机验证 A/B/C/E：A 开关关零装配（设置无键 + 零 Kiiro 派发）；B 状态行「本会话已装配」+ 26 条派发多动作覆盖（Wounded 因全局 Disabled 为零）；C 隔离探针 Off 静默、取消 Example 勾选后 Kiiro 走 Fallback 原版层、勾选后走 Example 池；E 回基线 Kiiro 静默且 Ratkin 正常发声。均经 Player.log 交叉核验；归因局限：日志 target 仅 thingIDNumber，不含种族信息。
-- [ ] D 暂缓（用户决定）：Biotech + Kiiro Baseliner 异种域验证；受控 DLC 全关基线补测。
+- [ ] D 暂缓（用户决定）：Biotech + Kiiro Baseliner 异种域验证（仅剩此项；受控 DLC 全关基线已补测通过——开关 ON、官方 DLC 全关时装配与发声正常）。
 - [ ] 日志覆盖缺口（用户指出，暂不实现）：部分环节日志打少（装配/探针阶段无显式记录），仅记录，待后续决定。
 - [x] 0.2.2 发布定位调整（用户决定）：0.2.2 发布不包含 Kiiro 实验性兼容功能；实验在 `kiiro-experiment` 分支独立继续。
 - [ ] `About.xml` 增加 `<modVersion>`（方案 A 已确认）：csproj `<Version>` 为主源、About.xml 跟随，release 前检查两处一致；同步更新 AGENTS.md 的"唯一手动维护版本"表述（AGENTS.md 修改需用户确认）。
