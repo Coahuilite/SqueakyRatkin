@@ -19,7 +19,7 @@
 | `pack-github.ps1` | `-Version` 参数必须匹配严格 SemVer 2.0 tag 正则；产出 `dist/github/SqueakyRatkin-<Version>.zip` |
 | `pack-steam.ps1` | 要求 csproj **恰好一个**非空 `<Version>`；产出未压缩目录 `dist/steam/SqueakyRatkin` 供 SteamCMD 上传 |
 | `Source/SqueakyRatkin/SqueakyRatkin.csproj` | `<Version>`（identity 唯一来源）、`<SqueakyBuildFlavor>`（默认 `Dev` → `SQUEAKY_<FLAVOR>` DefineConstants）、`<SqueakyInformationalVersion>`（覆盖运行时 informational）、`<OutputPath>..\..\1.6\Assemblies</OutputPath>`、Release 下 `DebugType=none` |
-| `LoadFolders.xml`（根） | 主 mod 挂载：`Solaris.RatkinRaceMod` 激活时挂 `/` 与 `1.6` |
+| `LoadFolders.xml`（根） | 主 mod 挂载：无条件加载 `/` 与 `1.6`；发声内容是否命中由 XML Patch 的 `defName="Ratkin"` XPath 决定 |
 | `Extras/SqueakyRatkinExampleVoices/LoadFolders.xml` | Extras 独立 mod：`v1.6` 下挂 `1.6/Race` |
 | `.github/workflows/ci.yml` | Dev flavor 构建 + dev snapshot 打包 + artifact 上传 |
 | `.github/workflows/release.yml` | tag 校验 → GitHub flavor 构建 → `pack-github.ps1` → GitHub Release |

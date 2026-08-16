@@ -36,13 +36,25 @@ Short release summary.
 - ...
 ```
 
-## [2026-08-16 01:29 UTC+8] Version 0.2.1
+## [2026-08-16 23:07 UTC+8] Version 0.2.2
 
-Bug-fix release: NewRatkinPlus fork compatibility, seven-click counter reset, and the reworked draggable diagnostics panel.
+Internal code-hygiene and readability release; no player-facing behavior changes.
+
+### Changed
+- Refactored the internal logging module into a public facade and internal protocol modules; log output, event IDs, and field order are unchanged.
+- Deduplicated periodic startup phase math and centralized the social-job marker list in the squeak component.
+- Removed an unused internal helper.
+
+### Packaging
+- Added `About.xml` `<modVersion>` metadata kept in sync with the csproj version.
+
+## [2026-08-16 01:54 UTC+8] Version 0.2.1
+
+Bug-fix release: NewRatkinPlus fork compatibility, a settings cleanup fix, and the reworked draggable diagnostics panel.
 
 ### Fixed
 - Removed the `LoadFolders.xml` `IfModActive="Solaris.RatkinRaceMod"` package gate that silently disabled the mod with NewRatkinPlus forks using a different packageId; content now always loads and the squeak comp is injected by the `defName="Ratkin"` XPath target.
-- The seven-click developer unlock counter now resets when the settings window reopens; an incomplete count no longer survives closing settings.
+- Fixed temporary settings UI state that was not reset after closing Mod Settings.
 
 ### Changed
 - Diagnostics overlay rework: pawns show a single outlined `●` marker instead of multi-line text; full detail, including the race `defName`, lives in a draggable, non-pausing panel with a responsive two-column grid, wrapped long values, content-adaptive height (no scrollbar), screen-edge collision, and double-Esc close.

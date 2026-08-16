@@ -76,9 +76,6 @@ internal static class SqueakPeriodicPopulation
         if (ReferenceEquals(snapshotMap, map)) { snapshotMap = null; snapshotTick = int.MinValue; snapshot = EmptySnapshot; }
     }
 
-    /// <summary>Production maintenance: at most one shared registry scan per game tick.</summary>
-    internal static float GetScale(FloatRange audibleDistance) => Maintain(audibleDistance).Scale;
-
     /// <summary>Explicit diagnostic/production maintenance. At most one O(N) scan per game tick.</summary>
     internal static Snapshot Maintain(FloatRange audibleDistance)
     {

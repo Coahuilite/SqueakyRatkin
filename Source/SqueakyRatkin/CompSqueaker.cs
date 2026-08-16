@@ -212,6 +212,7 @@ public class SqueakDistancePresetConfig
 /// </summary>
 public class CompSqueaker : ThingComp
 {
+    private static readonly string[] SocialJobMarkers = { "Chat", "Social", "Visit", "Lovin", "Entertain" };
     public static bool ScaleCooldownWithTimeSpeed = true;
     public static bool ScaleFrequencyWithTalking = true;
     public static bool ScalePeriodicWithAudiblePopulation = true;
@@ -567,16 +568,7 @@ public class CompSqueaker : ThingComp
         int index = (int)action;
         if (periodicStartupPhaseMaterialized[index] || !startupAnchorRecorded) return;
         periodicStartupPhaseMaterialized[index] = true;
-        int actionTicks = timing.ActionIntervalTicks.GetValueOrDefault();
-        if (timing.ActionIntervalSeconds.HasValue)
-        {
-            // Realtime clocks still need a stable game-tick phase. A paused/invalid multiplier must not erase it.
-            actionTicks = Mathf.CeilToInt(timing.ActionIntervalSeconds.Value * 60f * SafeTickRateMultiplier(tickRateMultiplier));
-        }
-        int governingTicks = timing.GlobalApplicable ? Math.Max(actionTicks, timing.GlobalCooldownTicks) : actionTicks;
-        periodicStartupReadyTicks[index] = governingTicks > 0
-            ? startupAnchorTick + 1 + (int)(StablePawnActionPhase(Pawn.ThingID, action) % (uint)governingTicks)
-            : startupAnchorTick;
+        periodicStartupReadyTicks[index] = CalculatePeriodicStartupReadyTick(action, timing, tickRateMultiplier);
     }
 
     private int CalculatePeriodicStartupReadyTick(SqueakAction action, SqueakTimingEvaluation timing, float tickRateMultiplier)
@@ -1070,11 +1062,9 @@ public class CompSqueaker : ThingComp
             return false;
         }
 
-        return d.IndexOf("Chat", StringComparison.OrdinalIgnoreCase) >= 0
-            || d.IndexOf("Social", StringComparison.OrdinalIgnoreCase) >= 0
-            || d.IndexOf("Visit", StringComparison.OrdinalIgnoreCase) >= 0
-            || d.IndexOf("Lovin", StringComparison.OrdinalIgnoreCase) >= 0
-            || d.IndexOf("Entertain", StringComparison.OrdinalIgnoreCase) >= 0;
+        foreach (string marker in SocialJobMarkers)
+            if (d.IndexOf(marker, StringComparison.OrdinalIgnoreCase) >= 0) return true;
+        return false;
     }
 
 }
