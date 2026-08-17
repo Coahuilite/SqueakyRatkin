@@ -46,7 +46,7 @@ public static class SqueakDebug
         sample.dispatched++;
         if (now >= sample.nextDetail)
         {
-            SqueakLog.AudioDispatchOk(action.ToString(), pawn.thingIDNumber.ToString(), def.defName, sample.suppressed);
+            SqueakLog.AudioDispatchOk(action.ToString(), pawn.thingIDNumber.ToString(), def.defName, sample.suppressed, pawn.LabelShort, pawn.ThingID);
             sample.suppressed = 0;
             sample.nextDetail = now + 5f;
         }
