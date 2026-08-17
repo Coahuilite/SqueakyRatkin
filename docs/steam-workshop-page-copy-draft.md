@@ -14,14 +14,14 @@
 - 正式或技术英文使用 `Ratkin`；明确的玩笑处只使用 `adorable little mousie` / `mousies`，禁止 `rat-rats`、`mousefolk`。
 - 中文中“鼠鼠”“鼠辈”仅用于模组名或明确玩笑；普通正式说明使用“鼠族”。
 - 中文“3A”固定指 AI 规划、AI 编程、AI 维护；英文使用严肃标题 `AI-Generated Work Disclosure`，不得使用 `Masterpiece`。
-- 开头的披露后必须立即说明内置 Example VoicePack 需要主动启用，且不得在两者之前放标题、简介或其他正文。
+- 开头的披露后必须立即说明内置 Example VoicePack 的默认状态（0.2.3 起新装默认启用，可随时在设置中关闭），且不得在两者之前放标题、简介或其他正文。
 - 重点说明 15 个动作的设计；只自然说明未覆盖动作会回退，不在 Workshop 描述中展开三种声音模式。
 - 页面专注模组本身，不展示：音频统计数字（OGG 总数、每动作数量、SoundDef 数）、开发者排障（七击解锁的开发与诊断页）、版本迁移说明（旧版 audio-selection）、VoicePack 制作步骤（作者内容路由到作者指南，页面只留链接）。
 
 ## Example 与兼容事实
 
 - 内置普通 Race Example 覆盖全部 15 个动作，音频为 public-domain；页面不写音频统计数字。
-- Example 不会自动选择或启用，也没有特殊权重；新装默认使用原版回退。玩家必须在设置中主动启用 Race Example。
+- Example 无特殊权重；0.2.3 起新装默认启用内置 Race Example（从未调整过音源策略的旧配置自动迁移一次），显式关闭或选择其它包的配置不受影响。
 - 基础运行不需要任何官方 DLC。Biotech 仅为精确 Xenotype `defName` 匹配提供可选增强；没有 Biotech 时，Race 与 Vanilla 仍正常工作。
 - 第三方声音必须作为独立 VoicePack 发布和安装，不能装入主模组目录；0.2.0 不会自动迁移旧版 audio-selection（该迁移事实页面不展示，属维护参考）。
 
@@ -32,8 +32,8 @@
 本模组是一款由 AI 规划、AI 编程、AI 维护的模组。
 这里的“3A”与开发预算、团队规模和显卡性能无关。实际版本仍由人类维护者执行审查、测试、打包和发布。
 
-[h2]⚠ 内置 Example VoicePack 需要主动启用[/h2]
-内置 Race Example 覆盖全部 15 个动作，但默认不会自动启用。新安装会先使用原版回退声音；如果想试听 Example，请进入模组设置，主动启用 Race Example。
+[h2]⚠ 内置 Example VoicePack 新装默认启用[/h2]
+内置 Race Example 覆盖全部 15 个动作，且新装默认启用。如果你更想用原版回退声音或其它 VoicePack，可以在模组设置中随时切换或关闭。
 
 [h1]鼠辈啁啾[/h1]
 
@@ -73,7 +73,7 @@ VoicePack 可以只覆盖其中一部分动作。某个动作没有合适的自�
 
 [h2]内置 Race Example[/h2]
 
-内置 Example 是一个覆盖全部 15 个动作的完整 Race VoicePack。它没有自动选择、特殊优先级或额外权重，必须由玩家主动启用。
+内置 Example 是一个覆盖全部 15 个动作的完整 Race VoicePack。它没有特殊优先级或额外权重；0.2.3 起新装默认启用，可随时在设置中关闭。
 
 这些 Example 音频是公共领域素材，可用来试听，也可作为制作独立 VoicePack 的起点。你可以使用、复制、修改和再分发这些音频；完整的权利状态、来源与法域免责声明见 GitHub 仓库中的权利说明。
 
@@ -112,8 +112,8 @@ VoicePack 可以只覆盖其中一部分动作。某个动作没有合适的自�
 This mod was planned, programmed, and maintained with AI assistance.
 A human maintainer reviews, tests, packages, and publishes each release.
 
-[h2]⚠ The Built-in Example VoicePack Must Be Enabled Manually[/h2]
-The built-in Race Example covers all 15 actions, but it is not enabled automatically. A fresh installation starts with Vanilla fallback sounds. To hear the Example, open Mod Settings and enable the Race Example yourself.
+[h2]⚠ The Built-in Example VoicePack Is Enabled by Default[/h2]
+The built-in Race Example covers all 15 actions and is enabled by default on fresh installs. Prefer the Vanilla fallback sounds or another VoicePack? Open Mod Settings and switch or disable it at any time.
 
 [h1]Squeaky Ratkin[/h1]
 
@@ -153,7 +153,7 @@ The main mod references action-specific pools assembled from several RimWorld Co
 
 [h2]The built-in Race Example[/h2]
 
-The built-in Example is a complete Race VoicePack covering all 15 actions. It has no automatic selection, special priority, or extra weight. The player must enable it manually.
+The built-in Example is a complete Race VoicePack covering all 15 actions. It has no special priority or extra weight. Since 0.2.3 it is enabled by default on fresh installs and can be disabled in settings at any time.
 
 The Example clips are public-domain material. They can be used for listening or as the starting point for an independent VoicePack. You may use, copy, modify, and redistribute them; see the rights notice in the GitHub repository for the full status, provenance, and jurisdiction disclaimer.
 
@@ -188,8 +188,8 @@ Third-party VoicePack authors should choose and state an appropriate license for
 ## 发布前核对
 
 - [ ] 版本事实与实际已发布产物一致；Steam 页面实际更新状态不得从仓库、提交或文案文件推断。
-- [ ] 15 个动作固定；页面不含音频统计数字；Example 必须主动启用的事实正确。
-- [ ] 新装使用原版回退，Example 不自动选择、无特殊权重。
+- [ ] 15 个动作固定；页面不含音频统计数字；Example 默认启用（0.2.3 起）的事实正确。
+- [ ] 新装默认启用内置 Example；显式关闭不受影响；Example 无特殊权重。
 - [ ] No-DLC 基线与精确 Xenotype 匹配的可选 Biotech 边界正确。
 - [ ] 页面 URL 与正文链接有效，且正文没有重复 Steam 依赖栏内容。
 - [ ] 不显示 `packageId`，不包含 change note，两种语言没有混排。
@@ -199,5 +199,5 @@ Third-party VoicePack authors should choose and state an appropriate license for
 - [ ] 第三方 VoicePack 独立安装边界明确；页面不展开迁移说明、开发者排障与 VoicePack 制作步骤。
 - [ ] 中文正式说明使用“鼠族”；英文正式说明使用 Ratkin，玩笑术语仅为 `adorable little mousie` / `mousies`。
 - [ ] 访客、友方、敌对与其他符合条件的非殖民者鼠族/Ratkin 已明确纳入同一通路。
-- [ ] 两个指定披露标题与正文逐字正确，并且紧接 Example 主动启用警告。
+- [ ] 两个指定披露标题与正文逐字正确，并且紧接 Example 默认状态说明。
 - [ ] 每种语言只有一个指定的末尾俏皮句，未混入另一语言的书名或其他结尾梗。

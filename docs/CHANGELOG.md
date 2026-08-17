@@ -36,6 +36,16 @@ Short release summary.
 - ...
 ```
 
+## Unreleased — 0.2.3
+
+Default voice-source policy change (enhancement): fresh installs and configs that never set a voice-source policy now default to the built-in Race Example instead of the pure Vanilla fallback.
+
+### Changed
+- Fresh installs enable the built-in Race Example (a 15-action Ratkin voice pack) by default; pristine-default old configs migrate once. Explicit modes and existing pack selections are never overwritten, and the pack can be disabled or switched at any time in settings.
+
+### Fixed
+- Fixed baby and toddler Ratkin sounding like guinea pigs under default settings: the default state previously fell through to the Vanilla fallback tier, whose actions (Select/Wounded/Death/Call and others) are mostly built from guinea pig clips — exactly the actions young Ratkin can trigger.
+
 ## [2026-08-16 23:17 UTC+8] Version 0.2.2
 
 Internal code-hygiene and readability release; no player-facing behavior changes.

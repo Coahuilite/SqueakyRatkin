@@ -40,6 +40,19 @@ XenotypeAudioDomain  = (RaceKey, XenotypeKey)
 - 行为/mood 的继承继续是 XML comp 默认 → 全局设置 → `(race,xenotype)` delta；音频选择与行为设置保持分离。
 - fallback profile 是 XML 数据：精确 `raceDefName` 与 15 个 action→SoundDef 映射。拥有内置 profile 的 race 可默认启用；无 profile 的 race 只能由玩家显式启用，并明确提示“无 fallback 且无可用 VoicePack 时不会发声”。不得写 C# race switch，也不得复制原版资产。
 
+## 年龄维度（规划输入，0.2.3 玩家反馈产生）
+
+事实基础：当前路由与年龄无关（0.2.3 排查已取证，全库无生命阶段分支）；婴幼儿默认听感问题已由默认启用内置包缓解，但"不同年龄段听感差异化"仍是真实产品需求。年龄支持必须与 race-aware 域模型**同期设计、同期冻结 XML ABI**，避免第二次 Scribe 迁移。
+
+- **标签形式**：`SqueakVoicePackAction` 增加可选年龄标签（field-presence，如 `Baby`/`Toddler`/`Child`/`Adult` 或 RimWorld 生命阶段 DefName）；**未声明 = 全年龄适用**，第三方存量包零改动、零迁移。选择时按 pawn 当前生命阶段过滤可用条目。
+- **年龄调制轴**：独立于 mood 的调制维度（pitch/volume/jitter 的年龄系数），XML 数据驱动（per-race 或全局默认），不得写 C# age switch；与 `SqueakMoodMod` 同构叠加。
+- **兼容边界**：`SqueakAction` 枚举不变（append-only）；年龄标签只扩展 `SqueakVoicePackAction` 与调制数据模型；srdiag 协议如需记录年龄身份，先设计新协议版本。
+- **实现窗口**：0.3.1（race-aware catalog/resolver）之后作为设计输入进入 0.3.2 冻结；不提前进入 0.2.x。
+
+## 日志协议候选（srdiag v2，规划输入）
+
+- `SettingsOrigin` 事件：记录本次会话 ModSettings 来源（`FreshCreated`=文件缺失用字段默认值 / `LoadedFromFile`=磁盘反序列化），用于排障区分"全新安装"与"设置文件丢失"。现状：正常 fresh 路径在框架（`LoadedModManager.ReadModSettings` 静默 `new T()`，仅反序列化异常时 Warning）与 SR 侧（locked 28 事件无此项）均无日志。随 0.3.x 日志协议版本化（该版本本来需记录 race 身份）一次扩展，不单独改动 locked facade。
+
 ## 装配与发现边界
 
 最终实现应以通用 race profile/registry 驱动，而不是以 `Kiiro_Race` 等专名 adapter 驱动：
