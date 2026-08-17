@@ -36,7 +36,7 @@ Short release summary.
 - ...
 ```
 
-## Unreleased — 0.2.3
+## [2026-08-17 22:12 UTC+8] Version 0.2.3
 
 Default voice-source policy change (enhancement): fresh installs and configs that never set a voice-source policy now default to the built-in Race Example instead of the pure Vanilla fallback.
 
