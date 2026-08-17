@@ -14,7 +14,7 @@
 - 正式或技术英文使用 `Ratkin`；明确的玩笑处只使用 `adorable little mousie` / `mousies`，禁止 `rat-rats`、`mousefolk`。
 - 中文中“鼠鼠”“鼠辈”仅用于模组名或明确玩笑；普通正式说明使用“鼠族”。
 - 中文“3A”固定指 AI 规划、AI 编程、AI 维护；英文使用严肃标题 `AI-Generated Work Disclosure`，不得使用 `Masterpiece`。
-- 开头的披露后必须立即说明内置 Example VoicePack 的默认状态（0.2.3 起新装默认启用，可随时在设置中关闭），且不得在两者之前放标题、简介或其他正文。
+- 开头的披露后必须立即说明内置 Example VoicePack 的默认状态（0.2.3 起新装默认启用，可随时在设置中关闭），并标注公告失效提示（预计 0.3.0，届时以新公告为准），且不得在两者之前放标题、简介或其他正文。
 - 重点说明 15 个动作的设计；只自然说明未覆盖动作会回退，不在 Workshop 描述中展开三种声音模式。
 - 页面专注模组本身，不展示：音频统计数字（OGG 总数、每动作数量、SoundDef 数）、开发者排障（七击解锁的开发与诊断页）、版本迁移说明（旧版 audio-selection）、VoicePack 制作步骤（作者内容路由到作者指南，页面只留链接）。
 
@@ -22,6 +22,7 @@
 
 - 内置普通 Race Example 覆盖全部 15 个动作，音频为 public-domain；页面不写音频统计数字。
 - Example 无特殊权重；0.2.3 起新装默认启用内置 Race Example（从未调整过音源策略的旧配置自动迁移一次），显式关闭或选择其它包的配置不受影响。
+- 默认启用公告携带失效提示（预计 0.3.0）：0.3.x 通用化可能再次调整默认音源策略，页面发布时核对失效版本与当前规划一致。
 - 基础运行不需要任何官方 DLC。Biotech 仅为精确 Xenotype `defName` 匹配提供可选增强；没有 Biotech 时，Race 与 Vanilla 仍正常工作。
 - 第三方声音必须作为独立 VoicePack 发布和安装，不能装入主模组目录；0.2.0 不会自动迁移旧版 audio-selection（该迁移事实页面不展示，属维护参考）。
 
@@ -34,10 +35,11 @@
 
 [h2]⚠ 内置 Example VoicePack 新装默认启用[/h2]
 内置 Race Example 覆盖全部 15 个动作，且新装默认启用。如果你更想用原版回退声音或其它 VoicePack，可以在模组设置中随时切换或关闭。
+[i]本公告预计在 0.3.0 版本失效；届时默认音源策略可能再次调整，以新版本公告为准。[/i]
 
 [h1]鼠辈啁啾[/h1]
 
-[b]模组版本：[/b]0.2.1
+[b]模组版本：[/b]0.2.3
 [b]适用版本：[/b]RimWorld 1.6
 
 鼠族当然不是不会说话。
@@ -89,7 +91,7 @@ VoicePack 可以只覆盖其中一部分动作。某个动作没有合适的自�
 [h2]下载、指南与反馈[/h2]
 
 [list]
-[*][url=https://github.com/Coahuilite/SqueakyRatkin/releases/tag/v0.2.1]GitHub Release v0.2.1[/url]
+[*][url=https://github.com/Coahuilite/SqueakyRatkin/releases/tag/v0.2.3]GitHub Release v0.2.3[/url]
 [*][url=https://github.com/Coahuilite/SqueakyRatkin/blob/main/docs/voice-pack-author-guide-zh.md]VoicePack 作者指南（中文）[/url]
 [*][url=https://github.com/Coahuilite/SqueakyRatkin/issues]GitHub Issues：问题反馈[/url]
 [/list]
@@ -100,10 +102,10 @@ VoicePack 可以只覆盖其中一部分动作。某个动作没有合适的自�
 
 第三方 VoicePack 作者应为自己的音频、文本与其他内容选择并声明适当许可，只发布自己有权分发的素材。
 
-[i]把《仇恨吱书》藏到高脚凳上！[/i]
+[i]这次，就连至高鼠王也没法翻开仇恨吱书了。[/i]
 ```
 
-维护字符数（中文 BBCode 代码块内，包含标签与换行）：2161。
+维护字符数（中文 BBCode 代码块内，包含标签与换行）：2284。
 
 ## English BBCode
 
@@ -114,10 +116,11 @@ A human maintainer reviews, tests, packages, and publishes each release.
 
 [h2]⚠ The Built-in Example VoicePack Is Enabled by Default[/h2]
 The built-in Race Example covers all 15 actions and is enabled by default on fresh installs. Prefer the Vanilla fallback sounds or another VoicePack? Open Mod Settings and switch or disable it at any time.
+[i]This notice is expected to expire in version 0.3.0; the default voice-source policy may change again, and the new version's notice takes precedence.[/i]
 
 [h1]Squeaky Ratkin[/h1]
 
-[b]Mod version:[/b] 0.2.1
+[b]Mod version:[/b] 0.2.3
 [b]Game version:[/b] RimWorld 1.6
 
 It is not that Ratkin cannot speak.
@@ -169,7 +172,7 @@ The Example clips are public-domain material. They can be used for listening or 
 [h2]Downloads, guide, and feedback[/h2]
 
 [list]
-[*][url=https://github.com/Coahuilite/SqueakyRatkin/releases/tag/v0.2.1]GitHub Release v0.2.1[/url]
+[*][url=https://github.com/Coahuilite/SqueakyRatkin/releases/tag/v0.2.3]GitHub Release v0.2.3[/url]
 [*][url=https://github.com/Coahuilite/SqueakyRatkin/blob/main/docs/voice-pack-author-guide-zh.md]VoicePack Author Guide (Chinese)[/url]
 [*][url=https://github.com/Coahuilite/SqueakyRatkin/issues]GitHub Issues[/url]
 [/list]
@@ -180,10 +183,10 @@ The mod's code is licensed under MPL-2.0. The built-in Example clips are public-
 
 Third-party VoicePack authors should choose and state an appropriate license for their own audio, text, and other content, and distribute only material they have the right to share.
 
-[i]Hide The Book of Squeakudges on a high stool![/i]
+[i]This time, even the Ratkin High King cannot open The Book of Squeakudges.[/i]
 ```
 
-维护字符数（English BBCode 代码块内，包含标签与换行）：4824。
+维护字符数（English BBCode 代码块内，包含标签与换行）：5104。
 
 ## 发布前核对
 
@@ -199,5 +202,5 @@ Third-party VoicePack authors should choose and state an appropriate license for
 - [ ] 第三方 VoicePack 独立安装边界明确；页面不展开迁移说明、开发者排障与 VoicePack 制作步骤。
 - [ ] 中文正式说明使用“鼠族”；英文正式说明使用 Ratkin，玩笑术语仅为 `adorable little mousie` / `mousies`。
 - [ ] 访客、友方、敌对与其他符合条件的非殖民者鼠族/Ratkin 已明确纳入同一通路。
-- [ ] 两个指定披露标题与正文逐字正确，并且紧接 Example 默认状态说明。
+- [ ] 两个指定披露标题与正文逐字正确，并且紧接 Example 默认状态说明与公告失效提示（预计 0.3.0）。
 - [ ] 每种语言只有一个指定的末尾俏皮句，未混入另一语言的书名或其他结尾梗。
