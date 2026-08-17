@@ -21,7 +21,7 @@
 
 - **每动作单 Def + 运行时调制**：心情音色不拆 Def，由运行时 `SoundInfo` 的 `pitchFactor/volumeFactor` 叠加（`CompSqueaker` 的 moodMods）；SoundDef 层 `pitchRange` 只保留基础随机（中性 0.95~1.05，`SR_Death` 0.8~0.9）。`volumeRange 45~55`、`distRange 15~70`（后者运行时被 distancePreset 覆盖）。
 - **Vanilla 回退 grain 策略**：`AudioGrain_Folder` 展开整个原版 clip 文件夹（如 `Pawn/Animal/Boomrat/Boomrat_Call`、`Pawn/Animal/Eating/Rodent`、`Pawn/Animal/GuineaPig/Death`），`AudioGrain_Clip` 只引用已确认存在的原版 clipPath（如 `Pawn_Guineapig_Pain_08`）；文件夹与单 clip 可同 SubSound 混用。
-- **Example 与 15-action 关系**：`SR_OfficialExample_Race` 的 actions 当前恰为 15 条、与 `SqueakAction` 枚举一一对应（当前参考基准，随 Template 镜像的实际键集合变化），每条引用一个 `SR_OfficialExample_Race_<Action>`。Example **无运行时特权**：与第三方 VoicePack 同一选择/权重规则（Fallback：Xenotype→Race→Vanilla；Remix：各 tier 等权，pack 内等权）；新装默认 Off（纯 Vanilla），须玩家在设置中主动启用。`SqueakVoicePackScope.Race` 的 pack 无 target，不依赖 Biotech。
+- - **Example 与 15-action 关系**：`SR_OfficialExample_Race` 的 actions 当前恰为 15 条、与 `SqueakAction` 枚举一一对应（当前参考基准，随 Template 镜像的实际键集合变化），每条引用一个 `SR_OfficialExample_Race_<Action>`。Example **无运行时特权**：与第三方 VoicePack 同一选择/权重规则（Fallback：Xenotype→Race→Vanilla；Remix：各 tier 等权，pack 内等权）；0.2.3 起新装/从未显式配置的安装默认启用（`SqueakyRatkinSettings` 迁移：`voicePackMode` 节点缺失 → Fallback + 种子 Race 选择记录；显式模式不被覆盖）。`SqueakVoicePackScope.Race` 的 pack 无 target，不依赖 Biotech。
 - **`SR_Call_Preview` 与 `SR_Call` 职责分离**：`SR_Call` 是生产 Call 音池（播放时由调用方提供已解析的 production/native clip）；`SR_Call_Preview` 只做 on-camera 试听，`_Preview` 后缀被 `ResolvedAudioPack` 排除出生产解析。
 
 ## Data & Control Flow

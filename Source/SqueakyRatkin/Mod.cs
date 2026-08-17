@@ -58,6 +58,8 @@ public class SqueakyRatkinMod : Mod
             // Bind before catalog/settings code can call any resolver mutator.
             SqueakRuntimeResolver.InitializeMainThread();
             SqueakXenotypeCatalog.Refresh();
+            // 0.2.3 默认种子先于首次运行时发布,新装与旧配置统一入口。
+            Settings.EnsureBuiltInRaceDefault();
             Settings.ApplyToRuntime();
             // The first and only startup consumption of a schema migration happens after main-thread binding.
             Settings.QueuePendingMigrationPersistence();

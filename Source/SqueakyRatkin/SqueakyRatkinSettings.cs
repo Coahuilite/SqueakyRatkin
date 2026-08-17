@@ -38,11 +38,17 @@ public enum SqueakDistancePreset { Conservative, Balanced, Strong, Custom }
 /// </summary>
 public partial class SqueakyRatkinSettings : ModSettings
 {
-    private const int CurrentSettingsSchemaVersion = 2;
+    // v3 (0.2.3): pristine-default configs migrate to Fallback with the built-in Race Example enabled.
+    private const int CurrentSettingsSchemaVersion = 3;
     private static readonly FloatRange FallbackBalancedDistanceRange = new(15f, 50f);
 
-    public SqueakVoicePackMode voicePackMode = SqueakVoicePackMode.Off;
+    // 0.2.3 产品决策:默认音源策略为 Fallback(内置 Race Example 开启)。Scribe 省略等于默认值的节点,
+    // 因此"从未显式选择"的配置(无 voicePackMode 节点)天然落到 Fallback;显式 Off 仍写入节点并保留。
+    public SqueakVoicePackMode voicePackMode = SqueakVoicePackMode.Fallback;
     public int voicePackSchemaVersion = 1;
+    // 0.2.3:内置 Race Example 默认种子标记。true 表示已尝试过一次默认种子(无论是否成功),避免玩家
+    // 日后清空选择后再次被种子;无文件的新装与旧配置(节点缺失)都经启动链 EnsureBuiltInRaceDefault 处理。
+    public bool voicePackDefaultSeeded;
     // v2 folds the old temporary 1.2 cooldown baseline into shipped XML intervals and restores multiplier 1.0.
     public int settingsSchemaVersion = CurrentSettingsSchemaVersion;
     public bool scaleCooldownWithTimeSpeed = true;
@@ -88,6 +94,7 @@ public partial class SqueakyRatkinSettings : ModSettings
     private bool distanceRangeWasLoaded;
     private bool scaleFrequencyWithTalkingWasLoaded;
     private bool settingsSchemaWasLoaded;
+    private bool voicePackModeWasLoaded;
     private bool migrationPersistencePending;
     private bool xenotypeTabRequested;
     private SettingsTab activeTab;
@@ -114,9 +121,11 @@ public partial class SqueakyRatkinSettings : ModSettings
             settingsSchemaWasLoaded = false;
             distanceRangeWasLoaded = false;
             scaleFrequencyWithTalkingWasLoaded = false;
+            voicePackModeWasLoaded = false;
         }
-        Scribe_Values.Look(ref voicePackMode, "voicePackMode", SqueakVoicePackMode.Off);
+        Scribe_Values.Look(ref voicePackMode, "voicePackMode", SqueakVoicePackMode.Fallback);
         Scribe_Values.Look(ref voicePackSchemaVersion, "voicePackSchemaVersion", 1);
+        Scribe_Values.Look(ref voicePackDefaultSeeded, "voicePackDefaultSeeded", false);
         // The marker must survive even at its default v2 value; otherwise a future explicit 1.2 is indistinguishable
         // from an unmarked pre-v2 test profile on the next load.
         Scribe_Values.Look(ref settingsSchemaVersion, "settingsSchemaVersion", CurrentSettingsSchemaVersion, forceSave: true);
@@ -134,6 +143,9 @@ public partial class SqueakyRatkinSettings : ModSettings
             scaleFrequencyWithTalkingWasLoaded = Scribe.loader?.curXmlParent?["scaleFrequencyWithTalking"] != null;
             distanceRangeWasLoaded = Scribe.loader?.curXmlParent?["distanceRange"] != null;
             settingsSchemaWasLoaded = Scribe.loader?.curXmlParent?["settingsSchemaVersion"] != null;
+            // Scribe omits fields whose value equals the default, so an absent voicePackMode node
+            // means the player never touched the voice source policy (pristine default state).
+            voicePackModeWasLoaded = Scribe.loader?.curXmlParent?["voicePackMode"] != null;
         }
         Scribe_Collections.Look(ref moodOverrides, "moodOverrides", LookMode.Value, LookMode.Deep);
         Scribe_Collections.Look(ref voicePackSelections, "voicePackSelections", LookMode.Deep);
@@ -173,6 +185,8 @@ public partial class SqueakyRatkinSettings : ModSettings
             }
             distanceRange = ClampDistanceRange(distanceRange);
             if (voicePackSelections == null) voicePackSelections = new List<VoicePackSelectionRecord>();
+            // 0.2.3 默认种子在启动链 EnsureBuiltInRaceDefault() 统一执行:无文件的新装不经过 ExposeData,
+            // 因此 PostLoadInit 不是可靠入口;显式模式(节点存在)与新装都靠 voicePackModeWasLoaded 区分。
 
             if (xenotypePresets == null)
             {
@@ -203,6 +217,16 @@ public partial class SqueakyRatkinSettings : ModSettings
         CompSqueaker.ApplyDistanceRange(ClampDistanceRange(distanceRange));
     }
 
+    /// <summary>内置官方 Example Race pack 的持久化 key;经 DefDatabase 解析并与 TryGetPackKey 同规则,避免硬编码漂移。</summary>
+    private const string BuiltInRacePackDefName = "SR_OfficialExample_Race";
+
+    private static bool TryGetBuiltInRacePackKey(out string key)
+    {
+        key = "";
+        SqueakVoicePackDef? pack = DefDatabase<SqueakVoicePackDef>.GetNamedSilentFail(BuiltInRacePackDefName);
+        return pack != null && pack.TryGetPackKey(out key);
+    }
+
     /// <summary>Cheap controls are same-frame static runtime values and never rebuild the resolver.</summary>
     public void NotifyCheapRuntimeChanged()
     {
@@ -221,6 +245,29 @@ public partial class SqueakyRatkinSettings : ModSettings
     public void FlushPendingRuntimeForPreview() => SqueakRuntimeResolver.FlushPendingRuntimeChanges(true);
     public bool TryGetSelectedSqueaker(out Pawn? pawn, out CompSqueaker? squeaker) => drawContext.TryGetSelectedSqueaker(out pawn, out squeaker);
     public SqueakSettingsGameContext CurrentDrawContext => drawContext;
+
+    /// <summary>0.2.3 默认种子:仅对从未显式选择音源策略的配置执行一次(voicePackDefaultSeeded 持久化标记)。
+    /// 无文件的新装不经过 ExposeData,旧配置(voicePackMode 节点缺失)由 Scribe 默认值直接落到 Fallback,
+    /// 两者都经此启动链入口种子内置 Race Example;显式模式与已有 Race 选择不被覆盖。
+    /// 必须在主线程启动链、ApplyToRuntime 之前调用,使首次发布的快照即含内置包。</summary>
+    internal void EnsureBuiltInRaceDefault()
+    {
+        if (voicePackDefaultSeeded || voicePackModeWasLoaded) return;
+        voicePackDefaultSeeded = true;
+        bool hasRaceSelection = voicePackSelections != null && voicePackSelections.Any(x => x != null && x.scope == SqueakVoicePackScope.Race);
+        if (hasRaceSelection) return;
+        if (TryGetBuiltInRacePackKey(out string builtInKey))
+        {
+            voicePackSelections ??= new List<VoicePackSelectionRecord>();
+            voicePackSelections.Add(new VoicePackSelectionRecord
+            {
+                scope = SqueakVoicePackScope.Race,
+                enabledPackKeys = new List<string> { builtInKey }
+            });
+            migrationPersistencePending = true;
+        }
+        // 内置 def 不可用(极端)时仅标记已尝试;保持原 Vanilla 回退,缺包通知会引导玩家。
+    }
 
     /// <summary>Consumes a PostLoadInit migration only from the main-thread startup callback.</summary>
     internal void QueuePendingMigrationPersistence()
