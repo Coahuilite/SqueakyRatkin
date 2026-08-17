@@ -24,12 +24,12 @@
 |---|---|
 | 构建 flavor | Steam（本地 `pack-steam.ps1`） |
 | staging 包 | `dist/steam/SqueakyRatkin`：115 文件；0 PDB；0 PublishedFileId.txt；0 codemap.md；OGG 41 镜像校验 |
-| 上传 | 未执行（待维护者） |
+| 上传 | 维护者已报告上传成功（2026-08-18）；页面观察待补 |
 
 ## 渠道状态
 
 - GitHub：完整。
-- Workshop：unverified（staging 已核验，上传与页面观察待维护者）。
+- Workshop：维护者已报告上传成功（2026-08-18）；页面级观察（Updated/描述版本/可见性/预览）待维护者补充后记录。
 
 ## 验证记录
 
