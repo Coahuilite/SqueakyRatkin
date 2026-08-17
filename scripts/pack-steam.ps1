@@ -26,7 +26,19 @@ if ($versionNodes.Count -ne 1 -or [string]::IsNullOrWhiteSpace($versionNodes[0].
 }
 $version = $versionNodes[0].InnerText.Trim()
 
-& (Join-Path $PSScriptRoot "stage-package.ps1") -ProjectRoot $root -StageDir $stageDir
+try {
+    $null = Get-Command -Name git -CommandType Application -ErrorAction Stop
+}
+catch {
+    throw "Git is required to create the package label, but was not found on PATH."
+}
+$shortCommitOutput = @(& git -C $root rev-parse --short HEAD 2>$null)
+if ($LASTEXITCODE -ne 0 -or $shortCommitOutput.Count -ne 1) {
+    throw "Failed to determine the current Git commit for package labeling."
+}
+$shortCommit = ([string]$shortCommitOutput[0]).Trim()
+
+& (Join-Path $PSScriptRoot "stage-package.ps1") -ProjectRoot $root -StageDir $stageDir -VersionLabel $version -BuildFlavor steam -CommitLabel $shortCommit
 
 $fileCount = (Get-ChildItem -LiteralPath $stageDir -Recurse -File | Measure-Object).Count
 Write-Host "[pack-steam] Staged $fileCount files to $stageDir"

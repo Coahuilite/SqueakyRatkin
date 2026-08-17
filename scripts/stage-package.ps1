@@ -1,6 +1,9 @@
 param(
     [string]$ProjectRoot = (Split-Path -Parent $PSScriptRoot),
-    [Parameter(Mandatory = $true)][string]$StageDir
+    [Parameter(Mandatory = $true)][string]$StageDir,
+    [string]$VersionLabel,
+    [string]$BuildFlavor = 'unknown',
+    [string]$CommitLabel = 'unknown'
 )
 
 Set-StrictMode -Version Latest
@@ -69,5 +72,11 @@ Get-ChildItem -LiteralPath $stageDir -Recurse -File -Filter *.pdb | Remove-Item 
 Get-ChildItem -LiteralPath $stageDir -Recurse -File -Filter *.gitkeep | Remove-Item -Force
 # Navigation docs (codemap.md) are repository tooling, not distribution content.
 Get-ChildItem -LiteralPath $stageDir -Recurse -File -Filter 'codemap.md' | Remove-Item -Force
+# Package identity label: lets anyone verify how fresh a distributed package is without
+# inspecting the DLL. Written after all exclusion steps so it is never filtered out.
+if (-not [string]::IsNullOrWhiteSpace($VersionLabel)) {
+    $labelContent = "SqueakyRatkin $VersionLabel`r`nbuild=$BuildFlavor`r`ncommit=$CommitLabel`r`n"
+    [System.IO.File]::WriteAllText((Join-Path $stageDir 'version.txt'), $labelContent)
+}
 $fileCount = (Get-ChildItem -LiteralPath $stageDir -Recurse -File | Measure-Object).Count
 Write-Host "[stage-package] Staged $fileCount files to $stageDir; Template and built-in OGG mirrors validated."
