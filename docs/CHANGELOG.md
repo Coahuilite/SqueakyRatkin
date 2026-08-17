@@ -36,7 +36,7 @@ Short release summary.
 - ...
 ```
 
-## Unreleased — 0.2.4
+## [2026-08-18 00:10 UTC+8] Version 0.2.4
 
 ### Fixed
 - Fixed baby giggling/crying (Biotech BabyFits mental states) being misreported as a mental-break voice: the mental-break hook now targets the game's actual mental-break entry (`MentalBreakWorker.TryStart`), so non-break mental states no longer trigger the break sound. The fix is generic across races and all non-break states.
