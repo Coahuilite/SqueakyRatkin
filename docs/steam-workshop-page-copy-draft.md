@@ -41,7 +41,7 @@
 
 [h1]鼠辈啁啾[/h1]
 
-[b]模组版本：[/b]0.2.3
+[b]模组版本：[/b]0.2.4
 [b]适用版本：[/b]RimWorld 1.6
 
 鼠族当然不是不会说话。
@@ -93,7 +93,7 @@ VoicePack 可以只覆盖其中一部分动作。某个动作没有合适的自�
 [h2]下载、指南与反馈[/h2]
 
 [list]
-[*][url=https://github.com/Coahuilite/SqueakyRatkin/releases/tag/v0.2.3]GitHub Release v0.2.3[/url]
+[*][url=https://github.com/Coahuilite/SqueakyRatkin/releases/tag/v0.2.4]GitHub Release v0.2.4[/url]
 [*][url=https://github.com/Coahuilite/SqueakyRatkin/blob/main/docs/voice-pack-author-guide-zh.md]VoicePack 作者指南（中文）[/url]
 [*][url=https://github.com/Coahuilite/SqueakyRatkin/issues]GitHub Issues：问题反馈[/url]
 [/list]
@@ -123,7 +123,7 @@ Also since 0.2.4, giggling and crying babies no longer play the mental-break sou
 
 [h1]Squeaky Ratkin[/h1]
 
-[b]Mod version:[/b] 0.2.3
+[b]Mod version:[/b] 0.2.4
 [b]Game version:[/b] RimWorld 1.6
 
 It is not that Ratkin cannot speak.
@@ -175,7 +175,7 @@ The Example clips are public-domain material. They can be used for listening or 
 [h2]Downloads, guide, and feedback[/h2]
 
 [list]
-[*][url=https://github.com/Coahuilite/SqueakyRatkin/releases/tag/v0.2.3]GitHub Release v0.2.3[/url]
+[*][url=https://github.com/Coahuilite/SqueakyRatkin/releases/tag/v0.2.4]GitHub Release v0.2.4[/url]
 [*][url=https://github.com/Coahuilite/SqueakyRatkin/blob/main/docs/voice-pack-author-guide-zh.md]VoicePack Author Guide (Chinese)[/url]
 [*][url=https://github.com/Coahuilite/SqueakyRatkin/issues]GitHub Issues[/url]
 [/list]
