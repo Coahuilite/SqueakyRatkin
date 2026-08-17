@@ -22,6 +22,7 @@ At every non-trivial session:
 Maintain these boundaries:
 
 - Update `MEMORY.md` only when durable facts or the open action surface changes; keep it compact.
+- Compact by default: settled release/implementation details live in `docs/release_review/` (Claim Packs, process review) and runbook; MEMORY keeps only pointers. Do not grow MEMORY with finished work.
 - Update `TODO.md` only when its current task surface changes.
 - Do not store session narratives, transient artifacts, raw logs, completed test matrices, commit chains, or release checklists in either active memory file.
 - Documentation edits alone are not memory events; external-state summaries never override their authoritative source.
