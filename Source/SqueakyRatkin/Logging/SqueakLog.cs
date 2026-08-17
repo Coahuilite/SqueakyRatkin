@@ -54,7 +54,7 @@ public static class SqueakLog
     public static void TriggerAttemptFailed(string action, Exception ex) => Emit(SqueakLogEvent.TriggerAttemptFailed, new SqueakLogData(action: action, exception: ex), true);
     public static void AudioNoSound(string action) => Emit(SqueakLogEvent.AudioNoSound, new SqueakLogData(action: action), true);
     public static void AudioDispatchFailed(string action, string sound, Exception ex) => Emit(SqueakLogEvent.AudioDispatchFailed, new SqueakLogData(action: action, sound: sound, exception: ex), true);
-    public static void AudioDispatchOk(string action, string target, string sound, int suppressed) { if (!ShouldEmitDev) return; Emit(SqueakLogEvent.AudioDispatchOk, new SqueakLogData(action: action, target: target, sound: sound, suppressedDetail: suppressed), false); }
+    public static void AudioDispatchOk(string action, string target, string sound, int suppressed, string? pawnName = null, string? pawnId = null) { if (!ShouldEmitDev) return; Emit(SqueakLogEvent.AudioDispatchOk, new SqueakLogData(action: action, target: target, sound: sound, suppressedDetail: suppressed, pawnName: pawnName, pawnId: pawnId), false); }
     public static void TriggerOutcomeSummary(int dispatched, int suppressed) { if (!ShouldEmitDev) return; Emit(SqueakLogEvent.TriggerOutcomeSummary, new SqueakLogData(dispatched: dispatched, suppressedDetail: suppressed), false); }
     public static void HookAttackUnavailable() => Emit(SqueakLogEvent.HookAttackUnavailable, default, true);
     public static void HookAttackTargetSkipped(string target, string reason) { if (!ShouldEmitDev) return; Emit(SqueakLogEvent.HookAttackTargetSkipped, new SqueakLogData(target: target, reason: reason), true); }

@@ -13,9 +13,9 @@ internal enum SqueakLogEvent { ModStartIdentity, ModStartReady, LoggingModeEnabl
 
 internal readonly struct SqueakLogData
 {
-    internal readonly string? Action, Target, Pack, Reason, Sound, Source; internal readonly int? Count, Dispatched, SuppressedDetail; internal readonly bool? Enabled; internal readonly Exception? Exception;
-    internal SqueakLogData(string? action = null, string? target = null, string? pack = null, string? reason = null, string? sound = null, string? source = null, int? count = null, int? dispatched = null, int? suppressedDetail = null, bool? enabled = null, Exception? exception = null)
-    { Action = action; Target = target; Pack = pack; Reason = reason; Sound = sound; Source = source; Count = count; Dispatched = dispatched; SuppressedDetail = suppressedDetail; Enabled = enabled; Exception = exception; }
+    internal readonly string? Action, Target, Pack, Reason, Sound, Source, PawnName, PawnId; internal readonly int? Count, Dispatched, SuppressedDetail; internal readonly bool? Enabled; internal readonly Exception? Exception;
+    internal SqueakLogData(string? action = null, string? target = null, string? pack = null, string? reason = null, string? sound = null, string? source = null, int? count = null, int? dispatched = null, int? suppressedDetail = null, bool? enabled = null, Exception? exception = null, string? pawnName = null, string? pawnId = null)
+    { Action = action; Target = target; Pack = pack; Reason = reason; Sound = sound; Source = source; Count = count; Dispatched = dispatched; SuppressedDetail = suppressedDetail; Enabled = enabled; Exception = exception; PawnName = pawnName; PawnId = pawnId; }
 }
 
 internal readonly struct SqueakLogDefinition
@@ -138,6 +138,8 @@ internal static class SqueakLogFormatter
         Add(builder, "dispatched", data.Dispatched);
         Add(builder, "suppressed_detail", data.SuppressedDetail);
         Add(builder, "enabled", data.Enabled);
+        Add(builder, "pawn", data.PawnName);
+        Add(builder, "pawn_id", data.PawnId);
         if (data.Exception != null)
         {
             var site = data.Exception.TargetSite;

@@ -60,7 +60,7 @@ internal static class Program
         SqueakLog.TriggerAttemptFailed("Select", new Exception("trigger failed"));
         SqueakLog.AudioNoSound("Move");
         SqueakLog.AudioDispatchFailed("Attack", "SR_Attack_1", new Exception("dispatch failed"));
-        SqueakLog.AudioDispatchOk("Select", "12345", "SR_OfficialExample_Race_Select", 0);
+        SqueakLog.AudioDispatchOk("Select", "12345", "SR_OfficialExample_Race_Select", 0, "Mousy", "Thing_Ratkin12345");
         SqueakLog.TriggerOutcomeSummary(7, 2);
         SqueakLog.HookAttackUnavailable();
         SqueakLog.HookAttackTargetSkipped("999", "not player ordered");
@@ -90,7 +90,7 @@ internal static class Program
             D("error", "daily", "trigger.attempt.failed", "Squeak trigger attempt failed.", action: "Select", trailing: " ex_type=System.Exception ex_msg=trigger%20failed"),
             D("warning", "daily", "audio.dispatch.no_sound", "No fallback SoundDef was found.", action: "Move"),
             D("error", "daily", "audio.dispatch.failed", "Squeak audio dispatch failed.", action: "Attack", trailing: " sound=SR_Attack_1 ex_type=System.Exception ex_msg=dispatch%20failed"),
-            D("info", "dev_only", "audio.dispatch.ok", "Squeak audio dispatched.", action: "Select", target: "12345", trailing: " sound=SR_OfficialExample_Race_Select suppressed_detail=0"),
+            D("info", "dev_only", "audio.dispatch.ok", "Squeak audio dispatched.", action: "Select", target: "12345", trailing: " sound=SR_OfficialExample_Race_Select suppressed_detail=0 pawn=Mousy pawn_id=Thing_Ratkin12345"),
             D("info", "dev_only", "trigger.outcome.summary", "Squeak trigger outcome summary was recorded.", trailing: " dispatched=7 suppressed_detail=2"),
             D("error", "daily", "hook.attack.unavailable", "Attack squeak hook is unavailable."),
             D("warning", "dev_only", "hook.attack.target_skipped", "An Attack hook target was skipped.", target: "999", trailing: " reason=not%20player%20ordered"),
@@ -136,7 +136,7 @@ internal static class Program
     {
         Reset(SqueakDevLoggingMode.Disabled);
         SqueakLog.StartupIdentity();
-        SqueakLog.AudioDispatchOk("Select", "1", "s", 0);
+        SqueakLog.AudioDispatchOk("Select", "1", "s", 0, "P", "Thing_Ratkin1");
         SqueakLog.HookAttackUnavailable();
         SqueakLog.OverlayChanged(true);
         SqueakLog.PackRejected("p1", 1);
