@@ -48,6 +48,7 @@ XenotypeAudioDomain  = (RaceKey, XenotypeKey)
 - **年龄调制轴**：独立于 mood 的调制维度（pitch/volume/jitter 的年龄系数），XML 数据驱动（per-race 或全局默认），不得写 C# age switch；与 `SqueakMoodMod` 同构叠加。
 - **兼容边界**：`SqueakAction` 枚举不变（append-only）；年龄标签只扩展 `SqueakVoicePackAction` 与调制数据模型；srdiag 协议如需记录年龄身份，先设计新协议版本。
 - **实现窗口**：0.3.1（race-aware catalog/resolver）之后作为设计输入进入 0.3.2 冻结；不提前进入 0.2.x。
+- **Crying/Giggling 动作兼容（0.2.4 排查产出）**：Biotech 婴幼儿的哭/笑是 `MentalFitDef` 驱动的 mental state（`MentalStates_BabyFits`，`stateEffecter: BabyCrying/BabyGiggling` 是原版专属音频）。0.3.x 年龄域设计时把它们作为 Baby 年龄标签动作纳入（VoicePack 可为哭/笑提供专属音频，与既有周期动作正交）。0.2.4 已修复其被误报为精神崩溃的问题（hook 收窄至 `MentalBreakWorker.TryStart`），此兼容不影响该修复。
 
 ## 日志协议候选（srdiag v2，规划输入）
 
