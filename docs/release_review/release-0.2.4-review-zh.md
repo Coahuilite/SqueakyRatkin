@@ -29,7 +29,7 @@
 ## 渠道状态
 
 - GitHub：完整。
-- Workshop：维护者已报告上传成功（2026-08-18）；页面级观察（Updated/描述版本/可见性/预览）待维护者补充后记录。
+- Workshop：维护者已上传（0.2.4）；页面级核验完成（2026-08-18）：同一 item URL/ID `3758115669`、标题 "Squeaky Ratkin"、File Size 1.872 MB、Posted 5 Jul、Updated 17 Aug 09:22、6 Change Notes、visibility public、标签 Mod/1.6；中英文描述均同步最新草稿（默认开启 + 0.2.4 婴幼儿 fits 说明 + 0.3.0 失效公告 + 版本 0.2.4 + 至高鼠王俏皮句 + v0.2.4 下载链接）。二进制下载级验证边界：页面核验 ≠ 玩家下载内容已验证。
 
 ## 验证记录
 

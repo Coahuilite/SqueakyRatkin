@@ -1,7 +1,7 @@
 # MEMORY
 
 ## 当前耐久状态
-- 项目为 RimWorld 1.6 模组 **鼠辈啁啾 / Squeaky Ratkin**；永久 `packageId` 为 `coahuilite.squeakyratkin`，产品版本 `0.2.4`：GitHub 已发布并核验（tag `v0.2.4`→`53686f9`、Release CI `32044477840` success、资产 115 文件逐项核验），Claim Pack 见 [`docs/release_review/release-0.2.4-review-zh.md`](./docs/release_review/release-0.2.4-review-zh.md)（含三项流程自我批评）；Workshop 已由维护者报告上传成功（页面级观察待补）。
+- 项目为 RimWorld 1.6 模组 **鼠辈啁啾 / Squeaky Ratkin**；永久 `packageId` 为 `coahuilite.squeakyratkin`，产品版本 `0.2.4`：GitHub 已发布并核验（tag `v0.2.4`→`53686f9`、Release CI `32044477840` success、资产 115 文件逐项核验），Claim Pack 见 [`docs/release_review/release-0.2.4-review-zh.md`](./docs/release_review/release-0.2.4-review-zh.md)（含三项流程自我批评）；Workshop 已上传且**页面级核验完成**（同一 item 3758115669、Updated 17 Aug 09:22、中英文案同步 0.2.4 草稿）。
 - 产品版本 `0.2.3`：GitHub 已发布并核验（tag `v0.2.3`→`fca5fa6`、Release CI `32038162813` success、资产 115 文件逐项核验），Claim Pack 见 [`docs/release_review/release-0.2.3-review-zh.md`](./docs/release_review/release-0.2.3-review-zh.md)；Workshop 未上传（staging 已核验）。
 - GitHub `v0.2.1` 已核验（重发后：tag→`31c4e18`、CI success、asset 115 文件逐项核验）；第一次发布（`57dfd1f`）因 codemap 泄漏与 LoadFolders 门控回归作废并已删除。Claim Pack 与两起事故记录见 [`docs/release_review/release-0.2.1-review-zh.md`](./docs/release_review/release-0.2.1-review-zh.md)；`v0.2.0` 事实见 [`docs/release_review/release-0.2.0-review-zh.md`](./docs/release_review/release-0.2.0-review-zh.md)。
 - Workshop：`0.2.1` 与 `0.2.2` 均已由维护者报告发布完成（2026-08-16）；两者页面级观察细节（item URL/ID、版本、visibility、预览、描述）待维护者补充后记录于各自 Claim Pack。
