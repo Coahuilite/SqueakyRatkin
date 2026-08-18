@@ -78,6 +78,7 @@ XenotypeAudioDomain  = (RaceKey, XenotypeKey)
 
 1. **装配层**：装配只执行 pack 声明（与 US 阶段同构：内置包声明 `raceDefName=Ratkin` + 15 action 音频与可选 fallback 数据）。发现只产生候选；0.3.x 仓库内唯一声明 = Ratkin → 装配表 `{Ratkin}`，其余 HAR race（如 Kiiro）无声明包 → 不装配 → 不发声，与 0.2.x 行为一致。
 2. **catalog = 装配域，不是发现域**：`SqueakXenotypeCatalog` 及其通用化形态只注册已装配域条目（0.3.x = `(Ratkin, *)`，xenotype 子域沿用 `HarRatkinXenotypeDiscovery` 的 HAR `raceRestriction`/`whiteXenotypeList` 反射限定——0.2.x 现状机制）。**UI 的唯一枚举通道 = catalog 快照**（现状 `XenotypeUI` 已如此）；非 Ratkin race/xenotype 的发现结果只进独立候选列表（dev 诊断可见），不进 catalog、不进 UI。
+3. **薄编程限制层（版本限定 filter，主闸）**：引入集中式产品域过滤器（如 `ProductDomainFilter`）——版本限定的薄编程限制，显式把产品域主动限制在 Ratkin 域（0.3.x 常量 = `{Ratkin}`；US 阶段扩展为内置表域 `{Ratkin, Kiiro}` 并叠加 pack 声明生态域）。三处入口强制经过它：catalog 构建过滤、UI/分配器枚举投影、内置 fallback 装配。语义要点：filter 是**集中一处、白名单数据表驱动、随版本冻结**的对象，不是散落各处的 `raceDefName == "Ratkin"` 特判——机制通用、限制版本化，满足拆分门 1；数据缺席（无非 Ratkin 条目）从主防线降为次防线，filter 是结构上不可能越过的主闸。
 2. **域校验层**：0.3.1 后 VoicePack 声明 `raceDefName`；catalog/resolver 允许列表 = 已装配 profiles（数据），非 Ratkin 包拒绝加载 + dev 可见日志。不写 `raceDefName == "Ratkin"` 类 C# 特例。防止第三方包造成"半支持"困惑。
 3. **fallback 层**：选择链末端"无声"是机制；Ratkin 有 profile 自动启用是数据。
 4. **交付物防暴露审计（0.3.x 全窗口）**：页面文案不变（Ratkin 专属承诺）；作者指南不新增 profile schema 章节（US 拆分前不公开、标注未冻结）；README/changelog 不写"内部通用化"（只写玩家可见变化）；设置 UI 无新可见项；srdiag v1 冻结（race 身份等 v2）。
