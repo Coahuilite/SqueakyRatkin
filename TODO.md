@@ -28,10 +28,13 @@
 
 ## 0.3.x — 内部通用化与拆分筹备（承接长期架构）
 - [x] 起草「内部普遍化设计笔记」（[`docs/internal-universalization-design-note-zh.md`](docs/internal-universalization-design-note-zh.md)）：冻结 race 发现/域模型/装配边界/池路由/迁移顺序与六项物理拆分门；该笔记是规划输入，不覆盖现行合同。
+- [x] **0.3.x 架构决策（2026-08-18，分支 `0.3.x`）**：四方案并行比拼（内核但薄 / 契约先行分层 / 数据驱动极简 / 双内核渐进替换），采纳「内核但薄」——决策逻辑进零 Verse 引用 `Kernel/` 编译集 + `tools/KernelCharacterization` 黄金语料，不拆程序集；吸收契约派的迁移事务性/UI 泄漏点修复/BabyFits 源码核验 hook，与对拍派的黄金语料升级。实施唯一入口：[`docs/0.3x-refactor-architecture-decision-zh.md`](docs/0.3x-refactor-architecture-decision-zh.md)。
+- [ ] 0.3.0：`Enums.cs` 提取；`Kernel/` 骨架（域键/池/链/调制/内置表）；`tools/KernelCharacterization`（纯度门+单测+黄金语料）；resolver 接内核（注入 `(Ratkin,*)`）；同变更删 `ChoosePack`/`vanilla` 字典/`Or`/`ResolvedAudioPack`；语料固化（详见决策文档 §5）。
+- [ ] 0.3.1：`SqueakVoicePackDef` +`raceDefName`/validator/Example 声明；catalog filter 闸+域化收集+`GetTargetCandidates` assembled-only 投影（修 canonical/har hint 泄漏点）；事务性 Scribe 迁移（schema 3→4/1→2，fixture 先行）；srdiag v2（SettingsOrigin+race 身份）；试验名单开关；两处接缝切核+旧路径同变更删除；外来 race per-race 池实证（合成输入，不进交付）。
+- [ ] 0.3.2：`BuiltInFallbackTable`+`SqueakFallbackProfileStore`（Config 副本单写者）；pack fallback 字段；年龄全套（`ageTag`/`SqueakLifeStageResolver`/`ComposeModulation`/Crying+Giggling append 15/16+`TryStartMentalState` hook）；合同提升（17 动作、Fallback 末端→profile→无声、fallback 写通道工件化）；UI fallback 编辑器/重建/浏览器下放；XML ABI 冻结。
 - [ ] 先在单一 Squeaky Ratkin 模组内部完成并验证 Universal core；当 SR 实质只剩 VoicePack 内容时，再物理拆出 Universal Squeaker 前置并让现有 SR Workshop 项目依赖它，禁止过早发布空壳前置或保留双实现。
 - [ ] 设计 VoicePack 单种族声明与路由：每包只能声明一个 `raceDefName`；Race / Xenotype 分别按 `raceDefName` 与 `(raceDefName, xenotypeDefName)` 形成域；同域多个合格包组成带权池并公平抽取。先冻结加载注入窗口、XML ABI、权重语义、旧包迁移和 Scribe schema。
-- [ ] 设计 XML 驱动的 per-race Vanilla fallback profile：精确 `raceDefName` + 15 action→SoundDef 映射；有 profile 的 race 自动启用，无 profile 的 race 只能由玩家显式启用并提示静音风险。选择链固定为 `(race,xenotype) VoicePack → race VoicePack → race fallback → 无声`；不得硬编码 C# race switch 或复制原版资产。
-- [ ] `CompSqueaker` 分层（TimingModel 独立、枚举/配置并入 `SqueakActionModel`、诊断面迁出）：0.3.0 先立触发/路由 characterization 基线再拆（原 0.2.2 项移至此处）。
+- [ ] 设计 XML 驱动的 per-race Vanilla fallback profile：精确 `raceDefName` + 17 action→SoundDef 映射；有 profile 的 race 自动启用，无 profile 的 race 只能由玩家显式启用并提示静音风险。选择链固定为 `(race,xenotype) VoicePack → race VoicePack → pack fallback → 内置 profile → 无声`；不得硬编码 C# race switch 或复制原版资产。
 - [ ] `SqueakyRatkinSettings` 拆 partial：ExposeData+迁移 / 运行时桥分离；Scribe 契约面需存档 fixture。
 - [ ] `XenotypeUI` 拆出 Race 域编辑器；UI 三档缩放验证成本高，单独排期。
 - [ ] Debug 入口合并（通用化重构后执行）：删除 7 个重复 DebugAction（统计×3、记录开关×2、清除/复制×2），相机指示器与 overlay 模式开关迁入开发者页；同步 settings-ui 合同 DebugAction 门控表述与 Debug 子图「四层门控」描述。
