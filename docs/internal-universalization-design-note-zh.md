@@ -109,9 +109,10 @@ XenotypeAudioDomain  = (RaceKey, XenotypeKey)
 最终实现应以通用 race profile/registry 驱动，而不是以 `Kiiro_Race` 等专名 adapter 驱动：
 
 1. **发现**只产生候选，不自动使任何 race 可发声；唯一例外是 **US 内置 fallback profile 声明的受支持 race**——那是维护者主动保底（无 pack 时路由原版音频），不是发现产物，控制权在维护者。
-2. **装配**只对明确受支持的 profile 或玩家显式启用的 race 执行；配置来源应是 canonical `CompProperties_Squeaker` 模板，而不是把 Ratkin 的 Def 当作永久模板来源。
-3. `CompSqueaker` 继续是 Harmony 派发资格；不得在 patch 中叠加第二个 race-name/`IsRatkin` gate。
-4. Kiiro 分支保留为受控侦察证据；未来进入 dev 的只能是通用装配机制，不是 adapter 的 no-squash 搬运。
+2. **路由零 HAR 依赖（HAR 反射 = 发现增强，非前提）**：装配/触发/派发/池选择全不依赖 HAR——pack 声明 `raceDefName` 即路由，对 HAR 种族与**非 HAR 种族（含原版 Human 等智人种）同等适用**，第三方可为任何 race（含人类）做语音包；HAR 缺失/反射失败 → xenotype 发现降级为空，US 完整运行。HAR 反射层仅用于支持 HAR 种族的异种发现（`raceRestriction`/`whiteXenotypeList`），是增强面不是前提面。
+3. **装配**只对明确受支持的 profile 或玩家显式启用的 race 执行；配置来源应是 canonical `CompProperties_Squeaker` 模板，而不是把 Ratkin 的 Def 当作永久模板来源。
+4. `CompSqueaker` 继续是 Harmony 派发资格；不得在 patch 中叠加第二个 race-name/`IsRatkin` gate。
+5. Kiiro 分支保留为受控侦察证据；未来进入 dev 的只能是通用装配机制，不是 adapter 的 no-squash 搬运。
 
 ## 分阶段实施与验证门
 
