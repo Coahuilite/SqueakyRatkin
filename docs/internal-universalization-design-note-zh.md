@@ -65,6 +65,17 @@ XenotypeAudioDomain  = (RaceKey, XenotypeKey)
 5. **0.3.2 "设置 UI 候选"细化**：交付域渲染框架与显式 opt-in 结构（无 profile race 的玩家开关），玩家可见面不变；opt-in 入口仅在存在可装配的非默认 race 时出现。
 6. **玩家反馈顺延**：社区评论中的多 race 请求（绮罗/沃芬/美狐等）是 US 阶段需求信号，不提前在 SR UI/页面承诺。
 
+## 数据配置限定：0.3.x 只服务 Ratkin（防过早暴露）
+
+机制全通用（拆分门 1：逻辑层零 Ratkin 硬编码），**交付数据只有 Ratkin**——数据面即限制面，四层限定全部数据驱动，无 C# 特例：
+
+1. **装配层**：装配只执行 profile 声明（canonical `SqueakyRaceProfile` XML：`raceDefName` + 15 action→SoundDef fallback）。发现只产生候选；0.3.x 仓库内唯一 profile = Ratkin → 装配表 `{Ratkin}`，其余 HAR race（如 Kiiro）无 profile → 不装配 → 不发声，与 0.2.x 行为一致。
+2. **域校验层**：0.3.1 后 VoicePack 声明 `raceDefName`；catalog/resolver 允许列表 = 已装配 profiles（数据），非 Ratkin 包拒绝加载 + dev 可见日志。不写 `raceDefName == "Ratkin"` 类 C# 特例。防止第三方包造成"半支持"困惑。
+3. **fallback 层**：选择链末端"无声"是机制；Ratkin 有 profile 自动启用是数据。
+4. **交付物防暴露审计（0.3.x 全窗口）**：页面文案不变（Ratkin 专属承诺）；作者指南不新增 profile schema 章节（US 拆分前不公开、标注未冻结）；README/changelog 不写"内部通用化"（只写玩家可见变化）；设置 UI 无新可见项；srdiag v1 冻结（race 身份等 v2）。
+5. **风险护栏**：玩家手改 XML 自加 profile 属自行 mod 范畴（不受支持、文档不教）；Kiiro 实验 adapter 不 merge；0.3.1 外来 race 池实证是内部测试证据，不进交付物。
+6. **阶段验证门补充**：0.3.0 装配表 = {Ratkin} + 行为等价基线 + 其他 race 零装配；0.3.1 外来 race per-race 池内部端到端实证（生产数据仍只 Ratkin）；0.3.2 无 profile race 默认静音实测 + Ratkin fallback 数据可验证。
+
 ## 装配与发现边界
 
 最终实现应以通用 race profile/registry 驱动，而不是以 `Kiiro_Race` 等专名 adapter 驱动：
