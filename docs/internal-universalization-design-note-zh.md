@@ -64,7 +64,7 @@ XenotypeAudioDomain  = (RaceKey, XenotypeKey)
 
 **内核通用 ≠ 对外表现通用。** 通用化全程（0.3.0 起至 US 拆分发布）玩家可见体验与 0.2.x 保持一致，防止"半成品多种族"观感与承诺 gap：
 
-1. **UI 数据驱动渲染已装配域**：设置 UI 按已装配 races（有 profile 或已装配内容者）渲染；0.3.x 期间装配表 = `{Ratkin}`，三个常规页结构与文案保持现状，投影为单 Ratkin 域视图。谁有可发声内容，谁出现在 UI——社区 race 获得 VoicePack/profile 时 UI 自动承接，无需改代码，也不预先展示空 race 页。
+1. **UI 数据驱动渲染已装配域**：设置 UI（含包分配器/编辑器）按已装配 races（有 profile 或已装配内容者）渲染；0.3.x 期间装配表 = `{Ratkin}`，三个常规页结构与文案保持现状，投影为单 Ratkin 域视图。**分配器/编辑器枚举唯一通道 = catalog 快照（已装配域），禁止直接枚举 DefDatabase/发现列表**；非 Ratkin race/xenotype 候选只进 dev 诊断（候选列表 + 诊断面板），release 设置面不可见。谁有可发声内容，谁出现在 UI——社区 race 获得 VoicePack/profile 时 UI 自动承接，无需改代码，也不预先展示空 race 页。
 2. **装配层 = 通用机制 + profile 数据**：仅 Ratkin profile 装配（0.3.x）；不引入 Kiiro 式专名适配器作为"限制层"——数据面即限制面，通用装配机制本身只对受支持 profile 执行（装配边界 1-2 条）。
 3. **泄漏面审计**：设置 schema 的 race 域是内部格式（玩家不可见）；srdiag race 身份进 v2 协议（已有候选）；诊断面板显示 defName 为现状功能，不新增公开泄漏。
 4. **可见性宣告点 = US 拆分发布（单版本原子事件）**：US 新 item 上线 + SR 同 item 原地收缩为 VoicePack 并依赖 US，一次完成；不存在双实现共存窗口。宣告多种族时已有 ≥1 外来 race per-race 池实证与 profile 数据，承诺与交付同步。
@@ -77,11 +77,12 @@ XenotypeAudioDomain  = (RaceKey, XenotypeKey)
 机制全通用（拆分门 1：逻辑层零 Ratkin 硬编码），**交付数据只有 Ratkin**——数据面即限制面，四层限定全部数据驱动，无 C# 特例：
 
 1. **装配层**：装配只执行 pack 声明（与 US 阶段同构：内置包声明 `raceDefName=Ratkin` + 15 action 音频与可选 fallback 数据）。发现只产生候选；0.3.x 仓库内唯一声明 = Ratkin → 装配表 `{Ratkin}`，其余 HAR race（如 Kiiro）无声明包 → 不装配 → 不发声，与 0.2.x 行为一致。
+2. **catalog = 装配域，不是发现域**：`SqueakXenotypeCatalog` 及其通用化形态只注册已装配域条目（0.3.x = `(Ratkin, *)`，xenotype 子域沿用 `HarRatkinXenotypeDiscovery` 的 HAR `raceRestriction`/`whiteXenotypeList` 反射限定——0.2.x 现状机制）。**UI 的唯一枚举通道 = catalog 快照**（现状 `XenotypeUI` 已如此）；非 Ratkin race/xenotype 的发现结果只进独立候选列表（dev 诊断可见），不进 catalog、不进 UI。
 2. **域校验层**：0.3.1 后 VoicePack 声明 `raceDefName`；catalog/resolver 允许列表 = 已装配 profiles（数据），非 Ratkin 包拒绝加载 + dev 可见日志。不写 `raceDefName == "Ratkin"` 类 C# 特例。防止第三方包造成"半支持"困惑。
 3. **fallback 层**：选择链末端"无声"是机制；Ratkin 有 profile 自动启用是数据。
 4. **交付物防暴露审计（0.3.x 全窗口）**：页面文案不变（Ratkin 专属承诺）；作者指南不新增 profile schema 章节（US 拆分前不公开、标注未冻结）；README/changelog 不写"内部通用化"（只写玩家可见变化）；设置 UI 无新可见项；srdiag v1 冻结（race 身份等 v2）。
 5. **风险护栏**：玩家手改 XML 自加 profile 属自行 mod 范畴（不受支持、文档不教）；Kiiro 实验 adapter 不 merge；0.3.1 外来 race 池实证是内部测试证据，不进交付物。
-6. **阶段验证门补充**：0.3.0 装配表 = {Ratkin} + 行为等价基线 + 其他 race 零装配；0.3.1 外来 race per-race 池内部端到端实证（生产数据仍只 Ratkin）；0.3.2 无 profile race 默认静音实测 + Ratkin fallback 数据可验证。
+6. **阶段验证门补充**：0.3.0 装配表 = {Ratkin} + 行为等价基线 + 其他 race 零装配；0.3.1 外来 race per-race 池内部端到端实证（生产数据仍只 Ratkin）；0.3.2 无 profile race 默认静音实测 + Ratkin fallback 数据可验证。**UI 无泄漏断言**（0.3.0 起每阶段）：设置页/分配器渲染的 race 行 == {Ratkin}、xenotype 行 == Ratkin 限定集（快照对比 0.2.x 基线）；catalog 内非装配域条目数 == 0。
 
 ## 内置 fallback profile 存储设计（已决议）
 
