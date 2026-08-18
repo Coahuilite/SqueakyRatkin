@@ -38,8 +38,11 @@ XenotypeAudioDomain  = (RaceKey, XenotypeKey)
 ```
 
 - **路由两级并存，控制权分离**：①**pack 主导**——每个 VoicePack 必须声明且只服务一个 `raceDefName`（Xenotype Pack 还必须声明 `xenotypeDefName`）；有声明支持该 race 的 pack，US 即把 pack 内音频路由给该 race 的 pawn——Ratkin 同理、Kiiro 同理、任何其他种族同理，无 US 内置种族特判。同域的 PackDef 组成稳定、带权且公平的池。②**US 内置 fallback profile 是维护者主动维护的最终保底**——精确 `raceDefName` 的 15 个 action→原版 SoundDef 引用表（只引用原版资产，不复制、不重分发），在无 pack 启用（或 pack 缺该 action 且无自带 fallback）时将受支持 race 的语音路由到原版音频；**谁进内置表、何时更新由维护者决策**，不随社区生态漂移。表外 race 无 pack = 无声（显式 opt-in + 静音风险提示保留，0.3.2 结构）。
+- **内置表规划起点 = `{Ratkin, Kiiro}`（受支持、有 fallback 的 race）**：
+  - **Ratkin**：双存在——SR 收缩后的 Example VoicePack（声明 `raceDefName=Ratkin`、完整 15 action 与 fallback 数据，保持 0.2.x 听感基线）主导路由；同时在内置表（包缺失/关闭时仍有原版兜底）。
+  - **Kiiro**：仅内置表兜底（无 pack 亦发声，路由原版音频）；社区 pack 可补充主导层。
+  - **Kiiro 入表的发布边界**：内置表条目是 XML 数据（不含 Kiiro 资源）；但 Kiiro 相关发布与公告仍受其 Workshop 衍生作品限制约束（既有决议：未经作者明确许可不得发布或宣传 Kiiro compat 内容）——条目可随作者许可核验同步推进，公告与发布以许可为门。
 - **pack 的 fallback 声明为可选字段**：pack 声明优先于 US 内置表；均缺则无声。
-- SR 收缩后即一个声明 `raceDefName=Ratkin`、携带完整 15 action 与 fallback 数据的普通 pack，以保持 0.2.x 听感基线；Ratkin 同时也在 US 内置表（双保险，包缺失时仍有原版兜底）。
 - 行为/mood 的继承继续是 XML comp 默认 → 全局设置 → `(race,xenotype)` delta；音频选择与行为设置保持分离。
 - 不得写 C# race switch，也不得复制原版资产。
 
