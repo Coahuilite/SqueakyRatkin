@@ -32,13 +32,14 @@ XenotypeAudioDomain  = (RaceKey, XenotypeKey)
 选择链：
 (race, xenotype) VoicePack 池
   → race VoicePack 池
-  → race fallback profile
+  → pack 声明的 fallback（可选）
   → 无声
 ```
 
-- 每个 VoicePack 必须声明且只服务一个 `raceDefName`；Xenotype Pack 还必须声明一个 `xenotypeDefName`。同域的 PackDef 组成稳定、带权且公平的池。
+- **US 是纯路由内核：路由面 = pack 声明面**。每个 VoicePack 必须声明且只服务一个 `raceDefName`（Xenotype Pack 还必须声明 `xenotypeDefName`）；有声明支持该 race 的 pack，US 即把 pack 内音频路由给该 race 的 pawn——Ratkin 同理、Kiiro 同理、任何其他种族同理，无 US 内置种族特判或默认表。同域的 PackDef 组成稳定、带权且公平的池。
+- **profile/fallback 由 pack 决定**：pack 可声明自己的 fallback（精确 `raceDefName` 的 15 个 action→SoundDef 映射，可选字段）；无 fallback 声明或全池无声时，该 action 落空为无声。US 自身不携带任何 race→sound 映射数据（含 Ratkin→Boomrat 之类）；SR 收缩后即一个声明 `raceDefName=Ratkin`、携带完整 15 action 与 fallback 数据的普通 pack，以保持 0.2.x 听感基线。
 - 行为/mood 的继承继续是 XML comp 默认 → 全局设置 → `(race,xenotype)` delta；音频选择与行为设置保持分离。
-- fallback profile 是 XML 数据：精确 `raceDefName` 与 15 个 action→SoundDef 映射。拥有内置 profile 的 race 可默认启用；无 profile 的 race 只能由玩家显式启用，并明确提示“无 fallback 且无可用 VoicePack 时不会发声”。不得写 C# race switch，也不得复制原版资产。
+- 不得写 C# race switch，也不得复制原版资产。
 
 ## 年龄维度（规划输入，0.2.3 玩家反馈产生）
 
@@ -69,7 +70,7 @@ XenotypeAudioDomain  = (RaceKey, XenotypeKey)
 
 机制全通用（拆分门 1：逻辑层零 Ratkin 硬编码），**交付数据只有 Ratkin**——数据面即限制面，四层限定全部数据驱动，无 C# 特例：
 
-1. **装配层**：装配只执行 profile 声明（canonical `SqueakyRaceProfile` XML：`raceDefName` + 15 action→SoundDef fallback）。发现只产生候选；0.3.x 仓库内唯一 profile = Ratkin → 装配表 `{Ratkin}`，其余 HAR race（如 Kiiro）无 profile → 不装配 → 不发声，与 0.2.x 行为一致。
+1. **装配层**：装配只执行 pack 声明（与 US 阶段同构：内置包声明 `raceDefName=Ratkin` + 15 action 音频与可选 fallback 数据）。发现只产生候选；0.3.x 仓库内唯一声明 = Ratkin → 装配表 `{Ratkin}`，其余 HAR race（如 Kiiro）无声明包 → 不装配 → 不发声，与 0.2.x 行为一致。
 2. **域校验层**：0.3.1 后 VoicePack 声明 `raceDefName`；catalog/resolver 允许列表 = 已装配 profiles（数据），非 Ratkin 包拒绝加载 + dev 可见日志。不写 `raceDefName == "Ratkin"` 类 C# 特例。防止第三方包造成"半支持"困惑。
 3. **fallback 层**：选择链末端"无声"是机制；Ratkin 有 profile 自动启用是数据。
 4. **交付物防暴露审计（0.3.x 全窗口）**：页面文案不变（Ratkin 专属承诺）；作者指南不新增 profile schema 章节（US 拆分前不公开、标注未冻结）；README/changelog 不写"内部通用化"（只写玩家可见变化）；设置 UI 无新可见项；srdiag v1 冻结（race 身份等 v2）。
