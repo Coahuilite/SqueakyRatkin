@@ -79,6 +79,11 @@ XenotypeAudioDomain  = (RaceKey, XenotypeKey)
 1. **装配层**：装配只执行 pack 声明（与 US 阶段同构：内置包声明 `raceDefName=Ratkin` + 15 action 音频与可选 fallback 数据）。发现只产生候选；0.3.x 仓库内唯一声明 = Ratkin → 装配表 `{Ratkin}`，其余 HAR race（如 Kiiro）无声明包 → 不装配 → 不发声，与 0.2.x 行为一致。
 2. **catalog = 装配域，不是发现域**：`SqueakXenotypeCatalog` 及其通用化形态只注册已装配域条目（0.3.x = `(Ratkin, *)`，xenotype 子域沿用 `HarRatkinXenotypeDiscovery` 的 HAR `raceRestriction`/`whiteXenotypeList` 反射限定——0.2.x 现状机制）。**UI 的唯一枚举通道 = catalog 快照**（现状 `XenotypeUI` 已如此）；非 Ratkin race/xenotype 的发现结果只进独立候选列表（dev 诊断可见），不进 catalog、不进 UI。
 3. **薄编程限制层（版本限定 filter，主闸）——仅限 0.3.x 的临时机制**：引入集中式产品域过滤器（如 `ProductDomainFilter`），显式把产品域主动限制在 Ratkin 域（0.3.x 常量 = `{Ratkin}`）。三处入口强制经过它：catalog 构建过滤、UI/分配器枚举投影、内置 fallback 装配。语义要点：filter 是**集中一处、白名单数据表驱动、随版本冻结**的对象，不是散落各处的 `raceDefName == "Ratkin"` 特判——机制通用、限制版本化，满足拆分门 1；数据缺席（无非 Ratkin 条目）从主防线降为次防线，filter 是结构上不可能越过的主闸。**0.4.x US 发布时移除 filter**——US 内核不存在限制域，对 HAR 种族通用兼容（任何 race 有 pack 声明即路由）；**fallback 是唯一保留 race 域匹配的地方**（内置表按 race 匹配音源以实现兜底），表外 race 无 pack = 无声。
+4. **试验性兼容名单（filter 的配置化升级，0.3.x 通用化完成后引入）**：
+   - **形态**：filter 名单从编译期常量改为**独立配置承载**——两份名单：default（`{Ratkin}`）与 experimental（如 `{Ratkin, Kiiro, Miho}`），由隐藏试验性开关切换（开 → 名单**替换**为 experimental，非叠加）。
+   - **开关可见性**：试验性开关是隐藏设置项（Scribe 持久化，**UI 不渲染**——防过早暴露通用面 + Kiiro/Miho 许可门未过的宣传约束）；release 默认 off；dev flavor/设置文件可改（玩家手改属自行 mod 范畴）。沿用 `kiiro-experiment` 先例纪律：不宣传、不进 changelog 细节（模糊表述边界）、无专名 resolver/settings/logging 分支（名单是数据，机制仍通用）。
+   - **git/发布线**：该机制是**通用形态**（配置驱动名单，非 Kiiro adapter），0.3.x 通用化完成后**直接进 dev**（不建实验分支）；随 0.3.x 末版发布（默认 off 无玩家可见影响）；0.4.x 移除 filter 时本机制一并退役（US 无限制域，名单无意义）。
+   - **许可衔接**：experimental 名单内的 Kiiro/Miho 条目是 defName 数据（无资源、无 UI 展示）；公开宣传/公告仍以各自作者许可为门。
 2. **域校验层**：0.3.1 后 VoicePack 声明 `raceDefName`；catalog/resolver 允许列表 = 已装配 profiles（数据），非 Ratkin 包拒绝加载 + dev 可见日志。不写 `raceDefName == "Ratkin"` 类 C# 特例。防止第三方包造成"半支持"困惑。
 3. **fallback 层**：选择链末端"无声"是机制；Ratkin 有 profile 自动启用是数据。
 4. **交付物防暴露审计（0.3.x 全窗口）**：页面文案不变（Ratkin 专属承诺）；作者指南不新增 profile schema 章节（US 拆分前不公开、标注未冻结）；README/changelog 不写"内部通用化"（只写玩家可见变化）；设置 UI 无新可见项；srdiag v1 冻结（race 身份等 v2）。
