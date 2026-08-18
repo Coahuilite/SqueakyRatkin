@@ -54,6 +54,17 @@ XenotypeAudioDomain  = (RaceKey, XenotypeKey)
 
 - `SettingsOrigin` 事件：记录本次会话 ModSettings 来源（`FreshCreated`=文件缺失用字段默认值 / `LoadedFromFile`=磁盘反序列化），用于排障区分"全新安装"与"设置文件丢失"。现状：正常 fresh 路径在框架（`LoadedModManager.ReadModSettings` 静默 `new T()`，仅反序列化异常时 Warning）与 SR 侧（locked 28 事件无此项）均无日志。随 0.3.x 日志协议版本化（该版本本来需记录 race 身份）一次扩展，不单独改动 locked facade。
 
+## UI 可见性与玩家体验边界（0.3.x 全窗口与拆分发布）
+
+**内核通用 ≠ 对外表现通用。** 通用化全程（0.3.0 起至 US 拆分发布）玩家可见体验与 0.2.x 保持一致，防止"半成品多种族"观感与承诺 gap：
+
+1. **UI 数据驱动渲染已装配域**：设置 UI 按已装配 races（有 profile 或已装配内容者）渲染；0.3.x 期间装配表 = `{Ratkin}`，三个常规页结构与文案保持现状，投影为单 Ratkin 域视图。谁有可发声内容，谁出现在 UI——社区 race 获得 VoicePack/profile 时 UI 自动承接，无需改代码，也不预先展示空 race 页。
+2. **装配层 = 通用机制 + profile 数据**：仅 Ratkin profile 装配（0.3.x）；不引入 Kiiro 式专名适配器作为"限制层"——数据面即限制面，通用装配机制本身只对受支持 profile 执行（装配边界 1-2 条）。
+3. **泄漏面审计**：设置 schema 的 race 域是内部格式（玩家不可见）；srdiag race 身份进 v2 协议（已有候选）；诊断面板显示 defName 为现状功能，不新增公开泄漏。
+4. **可见性宣告点 = US 拆分发布（单版本原子事件）**：US 新 item 上线 + SR 同 item 原地收缩为 VoicePack 并依赖 US，一次完成；不存在双实现共存窗口。宣告多种族时已有 ≥1 外来 race per-race 池实证与 profile 数据，承诺与交付同步。
+5. **0.3.2 "设置 UI 候选"细化**：交付域渲染框架与显式 opt-in 结构（无 profile race 的玩家开关），玩家可见面不变；opt-in 入口仅在存在可装配的非默认 race 时出现。
+6. **玩家反馈顺延**：社区评论中的多 race 请求（绮罗/沃芬/美狐等）是 US 阶段需求信号，不提前在 SR UI/页面承诺。
+
 ## 装配与发现边界
 
 最终实现应以通用 race profile/registry 驱动，而不是以 `Kiiro_Race` 等专名 adapter 驱动：
