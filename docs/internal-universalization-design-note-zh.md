@@ -82,6 +82,16 @@ XenotypeAudioDomain  = (RaceKey, XenotypeKey)
 5. **风险护栏**：玩家手改 XML 自加 profile 属自行 mod 范畴（不受支持、文档不教）；Kiiro 实验 adapter 不 merge；0.3.1 外来 race 池实证是内部测试证据，不进交付物。
 6. **阶段验证门补充**：0.3.0 装配表 = {Ratkin} + 行为等价基线 + 其他 race 零装配；0.3.1 外来 race per-race 池内部端到端实证（生产数据仍只 Ratkin）；0.3.2 无 profile race 默认静音实测 + Ratkin fallback 数据可验证。
 
+## 内置 fallback profile 存储设计（已决议）
+
+**载体 = C# 单源 + Config 工作副本；不设分发 profile 文件**（无随包 XML、无双源）：
+
+1. **C# 单源**：维护者数据的唯一事实源——只读目录类（如 `SqueakBuiltInFallbackCatalog`）持有 race→15 action→SoundDef defName 映射与 profile 内容版本；内置表谁进谁出 = 该类条目（0.3.x 仅 Ratkin；US 阶段加 Kiiro 即扩表，数据限定语义不变）。C# 编译期冻结：改表必编译，防未更新（XML 运行时才暴露，弃用为内置表载体）。**数据驱动不违背**：内置表是维护者控制的数据（编译期数据仍是数据）；第三方扩展面（VoicePack）保持 XML Def，两条线分开。
+2. **SoundDef 本体仍随包 Def XML**（`Defs/SoundDefs/SR_*.xml`，原版引用）——RimWorld DefDatabase 加载机制边界，不进 Config；Config 副本存的是映射表结构，不含音频定义。
+3. **Config 工作副本**：启动时按 packageId 隔离写入（如 `SqueakyRatkin_Profile_<race>.xml`），承载**玩家 override + 持久化**；模组更新不覆盖同版本副本。副本缺失/损坏/内容版本 < 单源版本 → 以单源重建覆盖（不合并——版本升级意味着原始表变更，旧 override 无意义）。
+4. **生命周期**：启动时 DefDatabase 就绪后解析 SoundDef 引用（`GetNamedSilentFail` 校验，缺失记日志）；加载/校验/重建事件走日志（race 身份 → srdiag v2 候选，不临时塞 v1 字段）。可选增强：设置页"重置为出厂"按钮。
+5. **与 0.3.x 数据限定的衔接**：单源只有 Ratkin 条目 = 非 Ratkin 无 fallback = 无声（装配面天然受限）；玩家手改 Config 副本属自行 mod 范畴。
+
 ## 装配与发现边界
 
 最终实现应以通用 race profile/registry 驱动，而不是以 `Kiiro_Race` 等专名 adapter 驱动：
