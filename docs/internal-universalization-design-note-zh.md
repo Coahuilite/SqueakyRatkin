@@ -129,6 +129,8 @@ XenotypeAudioDomain  = (RaceKey, XenotypeKey)
 
 ## 设置、存档与 Workshop 迁移
 
+- **卸载安全硬纪律**：任何版本（SR/US）卸载后不得影响存档——存档内不写任何永久 mod 数据（def 经 XPath 运行期注入；设置/profile 副本在 Config 区）；卸载后存档正常加载游玩，仅 squeak 消失；Config 残留文件无害可删。0.3.x 迁移与 US 拆分必须保持此性质（迁移只动 Config/设置，不动存档）。
+
 - 把当前 Race 选择显式迁为 `RaceAudioDomain(Ratkin)`；把当前 Xenotype 行为/音频目标迁为 `(Ratkin, xenotypeDefName)`。迁移通过递增 schema 版本实现，必须幂等、可重启、失败不丢旧记录。
 - 迁移前先保存真实旧设置 fixture；迁移后验证 immediate runtime publish、约 350 ms 合并保存、窗口 close flush、无 Biotech 安全降级，以及 orphan/dormant 语义。
 - 物理拆分时，US 使用新 packageId；SR 保持现有 packageId 和 Workshop item，变为依赖 US 的 VoicePack。必须在真实 save modlist 上验证 `SR → US + SR` 的升级路径；不得把 staging 成功当作订阅、保存或 Workshop 状态的证据。
