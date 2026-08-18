@@ -70,6 +70,7 @@ XenotypeAudioDomain  = (RaceKey, XenotypeKey)
 4. **可见性宣告点 = US 拆分发布（单版本原子事件）**：US 新 item 上线 + SR 同 item 原地收缩为 VoicePack 并依赖 US，一次完成；不存在双实现共存窗口。宣告多种族时已有 ≥1 外来 race per-race 池实证与 profile 数据，承诺与交付同步。
 5. **0.3.2 "设置 UI 候选"细化**：交付域渲染框架与显式 opt-in 结构（无 profile race 的玩家开关），玩家可见面不变；opt-in 入口仅在存在可装配的非默认 race 时出现。
 6. **玩家反馈顺延**：社区评论中的多 race 请求（绮罗/沃芬/美狐等）是 US 阶段需求信号，不提前在 SR UI/页面承诺。
+7. **设置面例外（Ratkin 域内正式化）**：fallback 路由编辑器、主动重建按钮、原版音频浏览器下放均为 Ratkin 单域能力 UI 化（0.2.x 只能 raw XML 编辑的通道转正），**不展示 race 维度、不出现非 Ratkin 条目**——不属于通用面暴露，与第 1 条（渲染已装配域）一致。
 
 ## 数据配置限定：0.3.x 只服务 Ratkin（防过早暴露）
 
@@ -89,8 +90,12 @@ XenotypeAudioDomain  = (RaceKey, XenotypeKey)
 1. **C# 单源**：维护者数据的唯一事实源——只读目录类（如 `SqueakBuiltInFallbackCatalog`）持有 race→15 action→SoundDef defName 映射与 profile 内容版本；内置表谁进谁出 = 该类条目（0.3.x 仅 Ratkin；US 阶段加 Kiiro 即扩表，数据限定语义不变）。C# 编译期冻结：改表必编译，防未更新（XML 运行时才暴露，弃用为内置表载体）。**数据驱动不违背**：内置表是维护者控制的数据（编译期数据仍是数据）；第三方扩展面（VoicePack）保持 XML Def，两条线分开。
 2. **SoundDef 本体仍随包 Def XML**（`Defs/SoundDefs/SR_*.xml`，原版引用）——RimWorld DefDatabase 加载机制边界，不进 Config；Config 副本存的是映射表结构，不含音频定义。
 3. **Config 工作副本**：启动时按 packageId 隔离写入（如 `SqueakyRatkin_Profile_<race>.xml`），承载**玩家 override + 持久化**；模组更新不覆盖同版本副本。副本缺失/损坏/内容版本 < 单源版本 → 以单源重建覆盖（不合并——版本升级意味着原始表变更，旧 override 无意义）。
-4. **生命周期**：启动时 DefDatabase 就绪后解析 SoundDef 引用（`GetNamedSilentFail` 校验，缺失记日志）；加载/校验/重建事件走日志（race 身份 → srdiag v2 候选，不临时塞 v1 字段）。可选增强：设置页"重置为出厂"按钮。
-5. **与 0.3.x 数据限定的衔接**：单源只有 Ratkin 条目 = 非 Ratkin 无 fallback = 无声（装配面天然受限）；玩家手改 Config 副本属自行 mod 范畴。
+4. **生命周期**：启动时 DefDatabase 就绪后解析 SoundDef 引用（`GetNamedSilentFail` 校验，缺失记日志）；加载/校验/重建事件走日志（race 身份 → srdiag v2 候选，不临时塞 v1 字段）。
+5. **设置面（玩家正式入口，替代 raw 文件编辑）**——三项均为 Ratkin 域内正式化（现有能力 UI 化，非通用面暴露）：
+   - **fallback 路由编辑器**：设置 UI 内按 15 action 选择音源（SoundDef），保存到 Config 副本；采用 field-presence delta（复用 `XenotypeMoodOverride` 模式：只存玩家改过的 action，与单源默认合并，未改项随单源版本演进）。
+   - **主动重建按钮**：设置页"重置内置 fallback 为出厂状态"→ 以单源覆盖 Config 副本（含确认提示；不触碰玩家其他设置）。
+   - **原版音频浏览器下放**：`SqueakAudioBrowser` 从 Debug 迁入正式设置面（搜索/试听/选择原版音频，只引用不复制），作为路由编辑器的音源选择入口。
+6. **与 0.3.x 数据限定的衔接**：单源只有 Ratkin 条目 = 非 Ratkin 无 fallback = 无声（装配面天然受限）；玩家手改 Config 副本属自行 mod 范畴（设置面为正式通道，raw 编辑不阻止）。
 
 ## 装配与发现边界
 
