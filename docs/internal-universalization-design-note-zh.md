@@ -32,12 +32,14 @@ XenotypeAudioDomain  = (RaceKey, XenotypeKey)
 选择链：
 (race, xenotype) VoicePack 池
   → race VoicePack 池
-  → pack 声明的 fallback（可选）
+  → pack 自带 fallback（可选）
+  → US 内置 fallback profile（维护者保底）
   → 无声
 ```
 
-- **US 是纯路由内核：路由面 = pack 声明面**。每个 VoicePack 必须声明且只服务一个 `raceDefName`（Xenotype Pack 还必须声明 `xenotypeDefName`）；有声明支持该 race 的 pack，US 即把 pack 内音频路由给该 race 的 pawn——Ratkin 同理、Kiiro 同理、任何其他种族同理，无 US 内置种族特判或默认表。同域的 PackDef 组成稳定、带权且公平的池。
-- **profile/fallback 由 pack 决定**：pack 可声明自己的 fallback（精确 `raceDefName` 的 15 个 action→SoundDef 映射，可选字段）；无 fallback 声明或全池无声时，该 action 落空为无声。US 自身不携带任何 race→sound 映射数据（含 Ratkin→Boomrat 之类）；SR 收缩后即一个声明 `raceDefName=Ratkin`、携带完整 15 action 与 fallback 数据的普通 pack，以保持 0.2.x 听感基线。
+- **路由两级并存，控制权分离**：①**pack 主导**——每个 VoicePack 必须声明且只服务一个 `raceDefName`（Xenotype Pack 还必须声明 `xenotypeDefName`）；有声明支持该 race 的 pack，US 即把 pack 内音频路由给该 race 的 pawn——Ratkin 同理、Kiiro 同理、任何其他种族同理，无 US 内置种族特判。同域的 PackDef 组成稳定、带权且公平的池。②**US 内置 fallback profile 是维护者主动维护的最终保底**——精确 `raceDefName` 的 15 个 action→原版 SoundDef 引用表（只引用原版资产，不复制、不重分发），在无 pack 启用（或 pack 缺该 action 且无自带 fallback）时将受支持 race 的语音路由到原版音频；**谁进内置表、何时更新由维护者决策**，不随社区生态漂移。表外 race 无 pack = 无声（显式 opt-in + 静音风险提示保留，0.3.2 结构）。
+- **pack 的 fallback 声明为可选字段**：pack 声明优先于 US 内置表；均缺则无声。
+- SR 收缩后即一个声明 `raceDefName=Ratkin`、携带完整 15 action 与 fallback 数据的普通 pack，以保持 0.2.x 听感基线；Ratkin 同时也在 US 内置表（双保险，包缺失时仍有原版兜底）。
 - 行为/mood 的继承继续是 XML comp 默认 → 全局设置 → `(race,xenotype)` delta；音频选择与行为设置保持分离。
 - 不得写 C# race switch，也不得复制原版资产。
 
@@ -81,7 +83,7 @@ XenotypeAudioDomain  = (RaceKey, XenotypeKey)
 
 最终实现应以通用 race profile/registry 驱动，而不是以 `Kiiro_Race` 等专名 adapter 驱动：
 
-1. **发现**只产生候选，不自动使任何 race 可发声。
+1. **发现**只产生候选，不自动使任何 race 可发声；唯一例外是 **US 内置 fallback profile 声明的受支持 race**——那是维护者主动保底（无 pack 时路由原版音频），不是发现产物，控制权在维护者。
 2. **装配**只对明确受支持的 profile 或玩家显式启用的 race 执行；配置来源应是 canonical `CompProperties_Squeaker` 模板，而不是把 Ratkin 的 Def 当作永久模板来源。
 3. `CompSqueaker` 继续是 Harmony 派发资格；不得在 patch 中叠加第二个 race-name/`IsRatkin` gate。
 4. Kiiro 分支保留为受控侦察证据；未来进入 dev 的只能是通用装配机制，不是 adapter 的 no-squash 搬运。
