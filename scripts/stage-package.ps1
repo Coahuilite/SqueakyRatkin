@@ -3,7 +3,8 @@ param(
     [Parameter(Mandatory = $true)][string]$StageDir,
     [string]$VersionLabel,
     [string]$BuildFlavor = 'unknown',
-    [string]$CommitLabel = 'unknown'
+    [string]$CommitLabel = 'unknown',
+    [switch]$CreateZip
 )
 
 Set-StrictMode -Version Latest
@@ -80,3 +81,10 @@ if (-not [string]::IsNullOrWhiteSpace($VersionLabel)) {
 }
 $fileCount = (Get-ChildItem -LiteralPath $stageDir -Recurse -File | Measure-Object).Count
 Write-Host "[stage-package] Staged $fileCount files to $stageDir; Template and built-in OGG mirrors validated."
+
+if ($CreateZip) {
+    $zipPath = Join-Path (Split-Path -Parent $stageDir) "SqueakyRatkin-$BuildFlavor-v$VersionLabel-$CommitLabel.zip"
+    if (Test-Path -LiteralPath $zipPath -PathType Leaf) { Remove-Item -LiteralPath $zipPath -Force }
+    Compress-Archive -Path (Join-Path $stageDir '*') -DestinationPath $zipPath
+    Write-Host "[stage-package] Created zip $zipPath"
+}
