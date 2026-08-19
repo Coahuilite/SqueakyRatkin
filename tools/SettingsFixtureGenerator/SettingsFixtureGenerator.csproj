@@ -15,6 +15,9 @@
   <ItemGroup>
     <!-- 0.2.4 真实序列化代码（与 v0.2.4 tag 逐字节一致，harness 链接编译） -->
     <Compile Include="..\..\Source\SqueakyRatkin\SqueakVoicePackModels.cs" Link="Linked\SqueakVoicePackModels.cs" />
+    <Compile Include="..\..\Source\SqueakyRatkin\SqueakVoicePackDomain.cs" Link="Linked\SqueakVoicePackDomain.cs" />
+    <Compile Include="..\..\Source\SqueakyRatkin\SqueakActionDomain.cs" Link="Linked\SqueakActionDomain.cs" />
+    <Compile Include="..\..\Source\SqueakyRatkin\ActionKey.cs" Link="Linked\ActionKey.cs" />
     <Compile Include="..\..\Source\SqueakyRatkin\SqueakXenotypePresetModels.cs" Link="Linked\SqueakXenotypePresetModels.cs" />
     <Compile Include="..\..\Source\SqueakyRatkin\SqueakGlobalActionPolicy.cs" Link="Linked\SqueakGlobalActionPolicy.cs" />
     <Compile Include="..\..\Source\SqueakyRatkin\SqueakActionModel.cs" Link="Linked\SqueakActionModel.cs" />

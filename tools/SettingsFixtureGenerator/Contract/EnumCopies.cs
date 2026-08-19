@@ -1,21 +1,12 @@
-using System;
 using System.Collections.Generic;
 using Verse;
 
 namespace SqueakyRatkin;
 
-// ---- 0.2.4 枚举副本（序数稳定性红线）----
-// 这些枚举定义在 Source/SqueakyRatkin/CompSqueaker.cs（0.2.4），因 CompSqueaker 依赖面
-// （RimWorld/Verse.Sound/UnityEngine）无法在纯 net472 harness 中链接，此处按 v0.2.4 tag
-// 逐值复制。存档按名序列化 + Scribe 保存用 ToString()：只要名字与序数不变即与真实代码等价。
-// 红线：SqueakAction 为 append-only（0.3.x 提取到领域文件时保持名字与序数不变）。
-public enum SqueakMood { Good, Neutral, Bad, Break }
-
-public enum SqueakAction { Call, Eat, Sleep, Wounded, Select, Move, Social, Joy, Death, Draft, Undraft, Attack, Work, Equip, MentalBreak }
-
-public enum SqueakCooldownClock { GameTicks, Realtime }
-
-public enum SqueakTriggerMode { EachTime, RandomOneShot, External, Sustained }
+// ---- 0.2.4 副本（无法真实链接的类型）----
+// SqueakAction/SqueakMood/SqueakCooldownClock/SqueakTriggerMode 现由真实链接的
+// SqueakActionDomain.cs 提供；SqueakVoicePackMode/Scope 由 SqueakVoicePackDomain.cs 提供。
+// 以下类型仍定义于不可链接文件（CompSqueaker.cs / SqueakyRatkinSettings.cs），此处按 v0.2.4 tag 复制。
 
 public enum SqueakTriggerOutcome { NotAttempted, Success, Cooldown, ProbabilitySkipped, VocalBlocked, Silent }
 
