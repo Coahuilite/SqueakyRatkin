@@ -71,41 +71,53 @@ internal static class Program
         return failures == 0 ? 0 : 1;
     }
 
-    /// <summary>全矩阵语料生成。确定性：每 case 独立 roll 流（seed 派生），同输入同输出。</summary>
+    /// <summary>全矩阵语料生成。确定性：每 case 独立 roll 流（seed 派生），同输入同输出。
+    /// 场景集 = 内核构造场景（S1-S5）+ fixture 驱动场景（F03-F07，§5 步骤 6）。</summary>
     private static string GenerateCorpus()
     {
         StringBuilder sb = new();
         sb.Append("# 0.3.0 golden corpus - kernel Select (SqueakPoolRegistry). Lines: scenario|mode|domain|action|seed|gate|soundKey|tier|poolStableKey; '-' = none.\n");
-        sb.Append("# Rebuilt by tools/KernelCharacterization; scenarios frozen in Scenarios.cs. Any delta on replay = regression.\n");
+        sb.Append("# Rebuilt by tools/KernelCharacterization; scenarios frozen in Scenarios.cs (S1-S5 constructed, F03-F07 fixture-driven from fixtures/input). Any delta on replay = regression.\n");
+        string fixturesRoot = Path.Combine(FindRepositoryRoot(), "fixtures");
         foreach (string scenario in Scenarios.ScenarioNames)
         {
             SqueakPoolRegistry registry = Scenarios.BuildRegistry(scenario);
-            foreach (SqueakyRatkin.SqueakVoicePackMode mode in new[] { SqueakyRatkin.SqueakVoicePackMode.Off, SqueakyRatkin.SqueakVoicePackMode.Fallback, SqueakyRatkin.SqueakVoicePackMode.Remix })
+            AppendScenarioCases(sb, scenario, registry, Scenarios.DomainsFor(scenario));
+        }
+        foreach (string scenario in Scenarios.FixtureScenarioNames)
+        {
+            SqueakPoolRegistry registry = Scenarios.BuildFixtureRegistry(scenario, fixturesRoot);
+            AppendScenarioCases(sb, scenario, registry, Scenarios.DomainsForFixture(scenario));
+        }
+        return sb.ToString();
+    }
+
+    private static void AppendScenarioCases(StringBuilder sb, string scenario, SqueakPoolRegistry registry, AudioDomain[] domains)
+    {
+        foreach (SqueakyRatkin.SqueakVoicePackMode mode in new[] { SqueakyRatkin.SqueakVoicePackMode.Off, SqueakyRatkin.SqueakVoicePackMode.Fallback, SqueakyRatkin.SqueakVoicePackMode.Remix })
+        {
+            foreach (AudioDomain domain in domains)
             {
-                foreach (AudioDomain domain in Scenarios.DomainsFor(scenario))
+                foreach (int actionIndex in Range(0, SqueakyRatkin.SqueakActionDefinitions.Count))
                 {
-                    foreach (int actionIndex in Range(0, SqueakyRatkin.SqueakActionDefinitions.Count))
+                    SqueakyRatkin.SqueakAction action = (SqueakyRatkin.SqueakAction)actionIndex;
+                    string actionKey = SqueakyRatkin.ActionKey.For(action)!;
+                    foreach (long seed in Seeds)
                     {
-                        SqueakyRatkin.SqueakAction action = (SqueakyRatkin.SqueakAction)actionIndex;
-                        string actionKey = SqueakyRatkin.ActionKey.For(action)!;
-                        foreach (long seed in Seeds)
+                        foreach (SimGate gate in new[] { SimGate.All, SimGate.Partial })
                         {
-                            foreach (SimGate gate in new[] { SimGate.All, SimGate.Partial })
-                            {
-                                ChainResult result = registry.Select(
-                                    new SelectionContext(domain, actionKey, AgeBucket.Adult, false),
-                                    mode, gate, new LcgRandom(seed));
-                                sb.Append(scenario).Append('|').Append(ModeName(mode)).Append('|').Append(domain).Append('|')
-                                  .Append(actionKey).Append('|').Append(seed).Append('|').Append(gate == SimGate.All ? "all" : "partial").Append('|')
-                                  .Append(result.SoundKey ?? "-").Append('|').Append(TierName(result.Tier)).Append('|')
-                                  .Append(result.PoolStableKey ?? "-").Append('\n');
-                            }
+                            ChainResult result = registry.Select(
+                                new SelectionContext(domain, actionKey, AgeBucket.Adult, false),
+                                mode, gate, new LcgRandom(seed));
+                            sb.Append(scenario).Append('|').Append(ModeName(mode)).Append('|').Append(domain).Append('|')
+                              .Append(actionKey).Append('|').Append(seed).Append('|').Append(gate == SimGate.All ? "all" : "partial").Append('|')
+                              .Append(result.SoundKey ?? "-").Append('|').Append(TierName(result.Tier)).Append('|')
+                              .Append(result.PoolStableKey ?? "-").Append('\n');
                         }
                     }
                 }
             }
         }
-        return sb.ToString();
     }
 
     private static string ModeName(SqueakyRatkin.SqueakVoicePackMode mode) => mode switch
