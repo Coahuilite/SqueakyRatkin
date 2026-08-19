@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<SettingsBlock>
+	<ModSettings>
+		<voicePackMode>Remix</voicePackMode>
+		<settingsSchemaVersion>3</settingsSchemaVersion>
+		<moodOverrides>
+			<keys />
+			<values />
+		</moodOverrides>
+		<voicePackSelections>
+			<li>
+				<targetDefName>Sanguophage</targetDefName>
+				<enabledPackKeys />
+			</li>
+		</voicePackSelections>
+		<xenotypePresets />
+		<globalActionEnabled>
+			<li>
+				<action>Attack</action>
+				<enabled>False</enabled>
+				<scope>Disabled</scope>
+			</li>
+		</globalActionEnabled>
+	</ModSettings>
+</SettingsBlock>
