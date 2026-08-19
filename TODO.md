@@ -37,8 +37,9 @@
 - [x] 0.3.0 resolver 接入：`BuildSnapshot` 经内核 builder + 注入 `(Ratkin,*)`（`SqueakKernelAdapter`）；换面/不换面分类审计（4 换面项承接 + 不换面项零改动 + dev 豁免单列）
 - [x] 0.3.0 同变更删除 `ChoosePack`/`vanilla` 字典/`Or`/`ResolvedAudioPack`（无长期 shim）
 - [x] 0.3.0 语料固化 + 验证门离线面全绿（内核语料 3782 例回放零 delta/SqueakLog 双 flavor v1 不变/主模组 Dev+Steam flavor 0 error/fixture 9 场景字节稳定）
-- [ ] 0.3.0 发布门槛实机面（A/B 听感时机实机对比、C 面 UI 快照断言、H 面受控 DLC 全关基线；G 面性能对比可选）——`docs/0.3x-release-gate-checklist-zh.md` 待办清单
-- [ ] 0.3.0 三项发布决策定案（双轨/措辞/热修）+ 双轨发布执行（GitHub prerelease → Steam）——待维护者回机
+- [x] 0.3.0 发布门槛实机面（2026-08-19）：A 池归属 147 次 dispatch 全命中内置 Example、B 时机计数区间正常（精确对照按维护者决定放弃）、C 设置 UI 确认 Ratkin 正常识别、H No-DLC 基线绿（旧档 NRE 为 RimWorld 内核 DLC 降级噪音，非 SR）——八面全绿；实机结果待发布定案时落检查表
+- [ ] 0.3.0 三项发布决策定案（双轨/措辞/热修）+ 双轨发布执行——**暂缓**（维护者指示，择日 merge dev 后再议；`docs/0.3x-release-gate-checklist-zh.md` 待办）
+- [ ] merge 0.3.x → dev（择日；分支无交叉提交预期 fast-forward；merge 前跑三 harness 基线，见 `docs/handoff-0.3.0-zh.md` §5）
 - [ ] 0.3.1：`SqueakVoicePackDef` +`raceDefName`/validator/Example 声明；catalog filter 闸+域化收集+`GetTargetCandidates` assembled-only 投影（修 canonical/har hint 泄漏点）；事务性 Scribe 迁移（schema 3→4/1→2，fixture 先行）；srdiag v2（SettingsOrigin+race 身份+**action 字段定型字符串键**）；试验名单开关；两处接缝切核+旧路径同变更删除；外来 race per-race 池实证（合成输入，不进交付）。
 - [ ] 0.3.2：`BuiltInFallbackTable`+`SqueakFallbackProfileStore`（Config 副本单写者）；pack fallback 字段；年龄全套（`ageTag`/`SqueakLifeStageResolver`/`ComposeModulation`/Crying+Giggling append 15/16+`TryStartMentalState` hook）；合同提升（17 动作、Fallback 末端→profile→无声、fallback 写通道工件化）；UI fallback 编辑器/重建/浏览器下放；XML ABI 定型。
 - [ ] 0.4.x 动作门落地（US 拆分窗口）：`SqueakActionDef`/`SqueakActionRegistry`/`SqueakCompat`；`SqueakVoicePackAction.action` 枚举→string（节点名不变零迁移）；validator 键解析（内置 known/外部未注册 dormant/非法 error）；**玩家总闸 `allowExternalActions`（设置项默认开，policy 层实现，UI 可见）**；作者指南动作注册章节公开；内置 17 键语料回放零 delta 验收；无第三方需求信号则退回封闭（§2.2 放弃信号）。
