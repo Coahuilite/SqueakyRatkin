@@ -30,7 +30,15 @@
 - [x] 起草「内部普遍化设计笔记」（[`docs/internal-universalization-design-note-zh.md`](docs/internal-universalization-design-note-zh.md)）：冻结 race 发现/域模型/装配边界/池路由/迁移顺序与六项物理拆分门；该笔记是规划输入，不覆盖现行合同。
 - [x] **0.3.x 架构决策（2026-08-18，分支 `0.3.x`）**：四方案并行比拼（内核但薄 / 契约先行分层 / 数据驱动极简 / 双内核渐进替换），采纳「内核但薄」——决策逻辑进零 Verse 引用 `Kernel/` 编译集 + `tools/KernelCharacterization` 黄金语料，不拆程序集；吸收契约派的迁移事务性/UI 泄漏点修复/BabyFits 源码核验 hook，与对拍派的黄金语料升级。实施唯一入口：[`docs/0.3x-refactor-architecture-decision-zh.md`](docs/0.3x-refactor-architecture-decision-zh.md)。
 - [x] **动作门开放策略决策（2026-08-18）**：三方向比拼（封闭 Apple / 受控开放 Android 清单 / 全面开放 Intent），采纳**受控开放**——`SqueakActionDef` 注册 + `SqueakCompat` 门面 + 全闸门复用，0.4.x US 拆分与消费者同窗口落地；0.3.x 仅两件零成本前置：内核动作键出生即字符串（`ActionKey`，内置=枚举名）、srdiag v2 `action` 字段定型字符串键。决策文档 §2.2。
-- [ ] 0.3.0：纯枚举按领域归属提取 + `ActionKey` 边界映射（内核统一字符串动作键）；`Kernel/` 骨架（域键/池/链/调制/内置表）；`tools/KernelCharacterization`（纯度门+单测+黄金语料）；resolver 接内核（注入 `(Ratkin,*)`）；同变更删 `ChoosePack`/`vanilla` 字典/`Or`/`ResolvedAudioPack`；语料固化（设置全项矩阵，含语义规范评审记录与换面/不换面审计，详见决策文档 §5）
+- [x] 0.3.0 前置：抓取 0.2.4 真实设置 fixture 入库（§6.2，改码前；无 schema 新装/Off/Fallback/多 selection/last-wins/消失 PackKey/Biotech inactive/损坏）
+- [x] 0.3.0 枚举与键：纯枚举按领域归属提取（动作域/包域，namespace 不变）+ `ActionKey` 边界映射（内置=枚举名）
+- [x] 0.3.0 `Kernel/` 骨架：域键/域池（`SqueakPoolRegistry`，PackKey 序数排序+带权累计权重）+ 选择链/fallback 合并/调制合成（`Select(ctx,mode,gate,rolls)`）+ 内置表种子（= `SqueakActionDefinitions.AudioKey`）
+- [x] 0.3.0 `tools/KernelCharacterization`：纯度门 + 单测（41 断言）+ 语料生成器（S1-S5 + F03-F07 fixture 驱动，3782 例）；语义规范评审随提交（`docs/0.3x-equivalence-review-zh.md`：14 行对照 + 换面/不换面审计 + dev 豁免）
+- [x] 0.3.0 resolver 接入：`BuildSnapshot` 经内核 builder + 注入 `(Ratkin,*)`（`SqueakKernelAdapter`）；换面/不换面分类审计（4 换面项承接 + 不换面项零改动 + dev 豁免单列）
+- [x] 0.3.0 同变更删除 `ChoosePack`/`vanilla` 字典/`Or`/`ResolvedAudioPack`（无长期 shim）
+- [x] 0.3.0 语料固化 + 验证门离线面全绿（内核语料 3782 例回放零 delta/SqueakLog 双 flavor v1 不变/主模组 Dev+Steam flavor 0 error/fixture 9 场景字节稳定）
+- [ ] 0.3.0 发布门槛实机面（A/B 听感时机实机对比、C 面 UI 快照断言、H 面受控 DLC 全关基线；G 面性能对比可选）——`docs/0.3x-release-gate-checklist-zh.md` 待办清单
+- [ ] 0.3.0 三项发布决策定案（双轨/措辞/热修）+ 双轨发布执行（GitHub prerelease → Steam）——待维护者回机
 - [ ] 0.3.1：`SqueakVoicePackDef` +`raceDefName`/validator/Example 声明；catalog filter 闸+域化收集+`GetTargetCandidates` assembled-only 投影（修 canonical/har hint 泄漏点）；事务性 Scribe 迁移（schema 3→4/1→2，fixture 先行）；srdiag v2（SettingsOrigin+race 身份+**action 字段定型字符串键**）；试验名单开关；两处接缝切核+旧路径同变更删除；外来 race per-race 池实证（合成输入，不进交付）。
 - [ ] 0.3.2：`BuiltInFallbackTable`+`SqueakFallbackProfileStore`（Config 副本单写者）；pack fallback 字段；年龄全套（`ageTag`/`SqueakLifeStageResolver`/`ComposeModulation`/Crying+Giggling append 15/16+`TryStartMentalState` hook）；合同提升（17 动作、Fallback 末端→profile→无声、fallback 写通道工件化）；UI fallback 编辑器/重建/浏览器下放；XML ABI 定型。
 - [ ] 0.4.x 动作门落地（US 拆分窗口）：`SqueakActionDef`/`SqueakActionRegistry`/`SqueakCompat`；`SqueakVoicePackAction.action` 枚举→string（节点名不变零迁移）；validator 键解析（内置 known/外部未注册 dormant/非法 error）；**玩家总闸 `allowExternalActions`（设置项默认开，policy 层实现，UI 可见）**；作者指南动作注册章节公开；内置 17 键语料回放零 delta 验收；无第三方需求信号则退回封闭（§2.2 放弃信号）。
