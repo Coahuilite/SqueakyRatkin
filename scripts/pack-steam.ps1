@@ -38,6 +38,16 @@ if ($LASTEXITCODE -ne 0 -or $shortCommitOutput.Count -ne 1) {
 }
 $shortCommit = ([string]$shortCommitOutput[0]).Trim()
 
+# Steam is the final publish step: it must be clean AND Steam-release-state. A package built from
+# uncommitted changes would mislabel provenance (commit=<HEAD sha>) and bypass review gates.
+$statusOutput = @(& git -C $root status --porcelain --untracked-files=normal 2>$null)
+if ($LASTEXITCODE -ne 0) {
+    throw "Failed to determine whether the Git working tree is clean for Steam packaging."
+}
+if ($statusOutput.Count -gt 0) {
+    throw "Steam packaging requires a clean working tree (uncommitted changes present). Commit first - Steam is the final release step."
+}
+
 & (Join-Path $PSScriptRoot "stage-package.ps1") -ProjectRoot $root -StageDir $stageDir -VersionLabel $version -BuildFlavor steam -CommitLabel $shortCommit
 
 $fileCount = (Get-ChildItem -LiteralPath $stageDir -Recurse -File | Measure-Object).Count

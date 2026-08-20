@@ -50,6 +50,19 @@ $templateAudio = Join-Path $extrasSource '1.6\Race\Sounds\coahuilite.squeakyratk
 $builtInSourceAudio = Join-Path $versionedSource 'Sounds\coahuilite.squeakyratkin\SR_OfficialExample_Race'
 $assemblyPath = Join-Path $versionedSource 'Assemblies\SqueakyRatkin.dll'
 
+
+# Version discipline (all channels): the staged About.xml must carry the same product version as
+# the package label derived from the csproj. Fail before staging so no half-built package exists.
+if (-not [string]::IsNullOrWhiteSpace($VersionLabel)) {
+    [xml]$aboutXml = Get-Content -LiteralPath (Join-Path $aboutSource 'About.xml') -Raw
+    $modVersionNode = $aboutXml.SelectSingleNode('/ModMetaData/modVersion')
+    if ($null -eq $modVersionNode -or [string]::IsNullOrWhiteSpace($modVersionNode.InnerText)) {
+        throw "About.xml is missing <modVersion>; product version source must stay in sync."
+    }
+    if ($modVersionNode.InnerText.Trim() -ne $VersionLabel) {
+        throw "About.xml <modVersion> ($($modVersionNode.InnerText.Trim())) does not match package version ($VersionLabel). Update About.xml or the csproj <Version>."
+    }
+}
 if (-not (Test-Path -LiteralPath $assemblyPath -PathType Leaf)) { throw "Missing built assembly: $assemblyPath. Build the desired flavor before staging." }
 if (-not (Test-Path -LiteralPath $extrasSource -PathType Container)) { throw "Missing Template extras package: $extrasSource" }
 if (Test-Path -LiteralPath $builtInSourceAudio) { throw "Unexpected built-in Example audio source exists: $builtInSourceAudio. The Template must remain the only maintained OGG source." }
