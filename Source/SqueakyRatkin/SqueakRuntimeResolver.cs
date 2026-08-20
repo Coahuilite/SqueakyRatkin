@@ -191,7 +191,13 @@ public static class SqueakRuntimeResolver
                 SoundDef? sound = DefDatabase<SoundDef>.GetNamedSilentFail(SqueakActionDefinitions.Get(action).AudioKey);
                 if (sound != null) known.Add(sound);
             }
-            return new SqueakRuntimeSnapshot(new Dictionary<string, ResolvedSqueakContext>(), SqueakyRatkin.Kernel.SqueakPoolRegistry.Empty, known, SqueakVoicePackMode.Off, actions, null);
+            // 0.3.0 错误路径修复：重建失败快照必须保留 0.2.4 语义——vanilla 兜底仍可用
+            //（种子内置表 + Off），不得退化为完全静音。池条目为空、内置表照常注入。
+            SqueakyRatkin.Kernel.SqueakPoolRegistry registry = new(
+                Array.Empty<SqueakyRatkin.Kernel.VoicePackEntry>(),
+                SqueakKernelAdapter.BuildBuiltIn(),
+                SqueakyRatkin.Kernel.DomainFilter.Everything);
+            return new SqueakRuntimeSnapshot(new Dictionary<string, ResolvedSqueakContext>(), registry, known, SqueakVoicePackMode.Off, actions, null);
         }
         catch { return SqueakRuntimeSnapshot.GlobalOnly; }
     }
@@ -239,7 +245,7 @@ public sealed class SqueakRuntimeSnapshot
             ? new SqueakyRatkin.Kernel.AudioDomain(new SqueakyRatkin.Kernel.RaceKey("Ratkin"), new SqueakyRatkin.Kernel.XenotypeKey(context.Xenotype.defName))
             : new SqueakyRatkin.Kernel.AudioDomain(new SqueakyRatkin.Kernel.RaceKey("Ratkin"), null);
         SqueakyRatkin.Kernel.SelectionContext ctx = new(domain, actionKey, SqueakyRatkin.Kernel.AgeBucket.Adult, production);
-        SqueakyRatkin.Kernel.ChainResult result = Registry.Select(ctx, VoicePackMode, SqueakKernelAdapter.GateFor(pawn, map, target, production), SqueakKernelAdapter.Rolls);
+        SqueakyRatkin.Kernel.ChainResult result = Registry.Select(ctx, VoicePackMode, SqueakKernelAdapter.GateFor(pawn, map, target), SqueakKernelAdapter.Rolls);
         return SqueakKernelAdapter.ToChoice(result);
     }
 }

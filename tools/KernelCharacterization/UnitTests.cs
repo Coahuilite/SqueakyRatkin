@@ -12,6 +12,7 @@ public static class UnitTests
         DomainKeys(ref failures);
         ActionKeyMapping(ref failures);
         BuiltInTable(ref failures);
+        FailurePathFallback(ref failures);
         PoolOrdering(ref failures);
         SelectOff(ref failures);
         SelectFallbackChain(ref failures);
@@ -68,6 +69,18 @@ public static class UnitTests
         Check(table.For(new RaceKey("Kiiro")) == null, "unknown race returns null", ref failures);
         Check(table.TryGetSoundKey(Scenarios.Ratkin, "Call", out string? k) && k == "SR_Call", "TryGetSoundKey Call=SR_Call", ref failures);
         Check(table.TryGetSoundKey(Scenarios.Ratkin, "other.mod:SR_X", out _) == false, "TryGetSoundKey external key false", ref failures);
+    }
+
+    /// <summary>BuildFallback 形状（0.3.0 错误路径修复回归）：无池条目 + 种子内置表 + Off 仍放 SR_* 兜底；
+    /// 空内置表（GlobalOnly 形状）才静音。锁 v0.2.4 重建失败快照语义。</summary>
+    private static void FailurePathFallback(ref int failures)
+    {
+        SqueakPoolRegistry failureRegistry = new(Array.Empty<VoicePackEntry>(), Scenarios.BuildBuiltIn(), DomainFilter.Everything);
+        ChainResult hit = failureRegistry.Select(Ctx(Scenarios.RaceDomain, SqueakyRatkin.SqueakAction.Call), SqueakyRatkin.SqueakVoicePackMode.Off, SimGate.All, new LcgRandom(1));
+        Check(hit.Tier == ChainTier.BuiltInFallback && hit.SoundKey == "SR_Call" && hit.PoolStableKey == null, "failure-path registry resolves built-in SR_Call", ref failures);
+        SqueakPoolRegistry emptyTable = new(Array.Empty<VoicePackEntry>(), BuiltInFallbackTable.Empty, DomainFilter.Everything);
+        ChainResult none = emptyTable.Select(Ctx(Scenarios.RaceDomain, SqueakyRatkin.SqueakAction.Call), SqueakyRatkin.SqueakVoicePackMode.Off, SimGate.All, new LcgRandom(1));
+        Check(none.IsNone, "empty built-in table resolves to silence", ref failures);
     }
 
     private static void PoolOrdering(ref int failures)

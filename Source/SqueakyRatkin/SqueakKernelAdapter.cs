@@ -17,20 +17,19 @@ internal static class SqueakKernelAdapter
 {
     private static readonly AudioDomain RatkinRaceDomain = new(new RaceKey("Ratkin"), null);
 
-    /// <summary>playability 函子：携带旧 Playable 的 pawn/map/target/production 上下文（旧 Choose/Choice 同参）。</summary>
+    /// <summary>playability 函子：携带旧 Playable 的 pawn/map/target 上下文；production 语义统一取 ctx.Production
+    /// （与调用方同源，避免 gate 捕获标志与 SelectionContext 错配）。</summary>
     private sealed class KernelGate : ISoundGate
     {
         private readonly Pawn? pawn;
         private readonly Map? map;
         private readonly TargetInfo? target;
-        private readonly bool production;
 
-        public KernelGate(Pawn? pawn, Map? map, TargetInfo? target, bool production)
+        public KernelGate(Pawn? pawn, Map? map, TargetInfo? target)
         {
             this.pawn = pawn;
             this.map = map;
             this.target = target;
-            this.production = production;
         }
 
         public bool Playable(string soundKey, SelectionContext ctx)
@@ -38,7 +37,7 @@ internal static class SqueakKernelAdapter
             if (soundKey == null) return false;
             SoundDef? sound = DefDatabase<SoundDef>.GetNamedSilentFail(soundKey);
             if (sound == null) return false;
-            return (production ? SqueakSoundAvailabilityCache.GetProductionPlayability(sound, pawn) : SqueakSoundAvailabilityCache.GetNativePlayability(sound, map, target)) == SqueakSoundPlayability.Playable;
+            return (ctx.Production ? SqueakSoundAvailabilityCache.GetProductionPlayability(sound, pawn) : SqueakSoundAvailabilityCache.GetNativePlayability(sound, map, target)) == SqueakSoundPlayability.Playable;
         }
     }
 
@@ -48,8 +47,9 @@ internal static class SqueakKernelAdapter
         public double Next01() => Rand.Value;
     }
 
-    public static ISoundGate GateFor(Pawn? pawn, Map? map, TargetInfo? target, bool production)
-        => new KernelGate(pawn, map, target, production);
+    public static ISoundGate GateFor(Pawn? pawn, Map? map, TargetInfo? target)
+        => new KernelGate(pawn, map, target);
+
 
     public static IRollSource Rolls => new RandRollSource();
 
@@ -80,7 +80,8 @@ internal static class SqueakKernelAdapter
         return entries;
     }
 
-    /// <summary>KnownMapSoundDefs 收集（旧 AddKnown 语义：catalog 全量 pack 音频，含未选择；距离应用覆盖依赖）。</summary>
+    /// <summary>KnownMapSoundDefs 收集（旧 AddKnown 语义：catalog 全量 pack 音频，含未选择；与旧 ResolvedAudioPack
+    /// 构造一致，排除 _Preview 后缀 transport；距离应用覆盖依赖）。</summary>
     public static HashSet<SoundDef> CollectKnownSounds(SqueakXenotypeCatalogSnapshot catalog)
     {
         HashSet<SoundDef> known = new();
@@ -155,7 +156,8 @@ internal static class SqueakKernelAdapter
             if (entry == null) continue;
             foreach (SoundDef sound in entry.sounds ?? new List<SoundDef>())
             {
-                if (sound != null && !result.Contains(sound)) result.Add(sound);
+                if (sound == null || sound.defName.EndsWith("_Preview", StringComparison.Ordinal) || result.Contains(sound)) continue;
+                result.Add(sound);
             }
         }
         return result;

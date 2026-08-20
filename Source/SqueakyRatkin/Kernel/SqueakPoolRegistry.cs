@@ -8,16 +8,12 @@ public sealed class DomainPool
 {
     public readonly AudioDomain Domain;
     public readonly IReadOnlyList<VoicePackEntry> Entries;
-    public readonly double TotalWeight;
 
     internal DomainPool(AudioDomain domain, List<VoicePackEntry> entries)
     {
         Domain = domain;
         entries.Sort((a, b) => StringComparer.Ordinal.Compare(a.PackKey, b.PackKey));
         Entries = entries;
-        double total = 0;
-        foreach (VoicePackEntry entry in entries) total += Math.Max(0, entry.Weight);
-        TotalWeight = total;
     }
 }
 
@@ -105,7 +101,7 @@ public sealed class SqueakPoolRegistry
     /// <summary>内置表 tier：TryParseBuiltIn（内置键 ↔ 枚举名一致性由 validator 双向锁）+ profile 键 + gate。</summary>
     private ChainResult SelectBuiltIn(SelectionContext ctx, ISoundGate gate)
     {
-        if (!builtIn.TryGetSoundKey(ctx.Domain.Race, ctx.ActionKey, out string? key)) return ChainResult.None;
+        if (!builtIn.TryGetSoundKey(ctx.Domain.Race, ctx.ActionKey, out string? key) || key == null) return ChainResult.None;
         return gate.Playable(key, ctx) ? new ChainResult(key, ChainTier.BuiltInFallback, null) : ChainResult.None;
     }
 
@@ -138,14 +134,14 @@ public sealed class SqueakPoolRegistry
     private static VoicePackEntry DrawEntry(List<VoicePackEntry> valid, IRollSource rolls)
     {
         if (valid.Count == 1) return valid[0];
+        // 构造期已过滤 Weight <= 0（见 ctor），此处权重恒正。
         double total = 0;
-        foreach (VoicePackEntry entry in valid) total += Math.Max(0, entry.Weight);
-        if (total <= 0) return valid[0];
+        foreach (VoicePackEntry entry in valid) total += entry.Weight;
         double roll = rolls.Next01() * total;
         double cumulative = 0;
         foreach (VoicePackEntry entry in valid)
         {
-            cumulative += Math.Max(0, entry.Weight);
+            cumulative += entry.Weight;
             if (roll < cumulative) return entry;
         }
         return valid[valid.Count - 1];
