@@ -9,11 +9,13 @@ $ErrorActionPreference = "Stop"
 
 # 一次输入本地自动校验（2026-08-20）。
 # 顺序（fail-fast，任一失败即停并给出该检查的单独重跑命令）：
-#   1-3  三 harness：内核纯度门 + 扩展断言 + 已提交语料 3782 例字节回放；
-#        设置 fixture 9 场景字节稳定；日志协议 v1 双 flavor（Release + Dev）。
-#   4    fixtures/ 零 delta 门（语料与期望文件必须与提交内容逐字节一致）。
-#   5-7   主模组 Dev flavor 构建 → Steam flavor 构建 → Dev 重建（恢复 Assemblies 为 Dev 态）；
+#   1-4  四 harness：内核纯度门 + 扩展断言 + 双语料字节回放（0.3.0 冻结 3782 例只读 + 0.3.1
+#        17 动作+彩蛋维度 10406 例）；设置 fixture 9 场景字节稳定；Config 副本三场景 harness
+#        （缺失/损坏/版本低→重建、delta 合并、重置覆盖，0.3.1 波 4a）；日志协议 v1 双 flavor（Release + Dev）。
+#   5    fixtures/ 零 delta 门（语料与期望文件必须与提交内容逐字节一致）。
+#   6-8   主模组 Dev flavor 构建 → Steam flavor 构建 → Dev 重建（恢复 Assemblies 为 Dev 态）；
 #         TreatWarningsAsErrors=true 锁定 0 warning 基线。
+#   9    ConfigCopyCharacterization harness（第 9 项，0.3.1 波 4a）。
 # -PackDev   ：校验全绿后追加 dev 包（pack-dev，允许脏树并自动 -dirty 标签）。
 # -PackSteam ：校验全绿后追加 Steam 包（build-steam = Steam flavor 构建 + pack-steam 干净树硬门；
 #              发布前最终态，结束后 Assemblies 为 Steam 态）。
@@ -44,7 +46,7 @@ function Invoke-Check {
     Write-Host 'OK'
 }
 
-Invoke-Check 'KernelCharacterization (purity gate, extended asserts, committed corpus 3782 byte replay)' `
+Invoke-Check 'KernelCharacterization (purity gate, extended asserts, dual corpus byte replay: 0.3.0 frozen + 0.3.1 17-action/egg)' `
     'dotnet run --project tools/KernelCharacterization -c Release' `
     { dotnet run --project (Join-Path $root 'tools\KernelCharacterization') -c Release }
 
@@ -75,6 +77,10 @@ Invoke-Check 'main mod Steam flavor build (warnings as errors)' `
 Invoke-Check 'main mod Dev flavor rebuild (restore Assemblies to Dev state)' `
     'dotnet build Source/SqueakyRatkin/SqueakyRatkin.csproj -c Release -p:TreatWarningsAsErrors=true' `
     { dotnet build $projectFile -c Release -p:TreatWarningsAsErrors=true }
+
+Invoke-Check 'ConfigCopyCharacterization (store lifecycle: missing/corrupt/stale rebuild, delta merge, reset overwrite)' `
+    'dotnet run --project tools/ConfigCopyCharacterization -c Release' `
+    { dotnet run --project (Join-Path $root 'tools\ConfigCopyCharacterization') -c Release }
 
 Write-Host '[verify] all checks passed.'
 

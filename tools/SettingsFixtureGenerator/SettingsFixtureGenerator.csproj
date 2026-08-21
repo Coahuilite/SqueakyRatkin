@@ -19,6 +19,7 @@
     <Compile Include="..\..\Source\SqueakyRatkin\Kernel\Domain.cs" Link="Linked\Domain.cs" />
     <Compile Include="..\..\Source\SqueakyRatkin\SqueakVoicePackDomain.cs" Link="Linked\SqueakVoicePackDomain.cs" />
     <Compile Include="..\..\Source\SqueakyRatkin\Kernel\SqueakActionDomain.cs" Link="Linked\SqueakActionDomain.cs" />
+    <Compile Include="..\..\Source\SqueakyRatkin\Kernel\SqueakActionPlan.cs" Link="Linked\SqueakActionPlan.cs" />
     <Compile Include="..\..\Source\SqueakyRatkin\SqueakXenotypePresetModels.cs" Link="Linked\SqueakXenotypePresetModels.cs" />
     <Compile Include="..\..\Source\SqueakyRatkin\SqueakSettingsMigration.cs" Link="Linked\SqueakSettingsMigration.cs" />
     <Compile Include="..\..\Source\SqueakyRatkin\SqueakyRatkinSettings.ExposeData.cs" Link="Linked\SqueakyRatkinSettings.ExposeData.cs" />

@@ -9,15 +9,17 @@ namespace SqueakyRatkin.KernelCharacterization;
 /// <summary>
 /// Kernel 验证门（决策 §5 验证门 + §4.9 黄金语料）。
 /// 1) 单测：语义规范逐条断言（UnitTests）。
-/// 2) 正常运行：设置全项矩阵（场景 × mode × 域 × 15 action × 多种子 × gate 面）生成确定性
-///    输入→期望 ChainResult 字节，并在写入前与 fixtures/corpus/corpus-0.3.0.txt 的冻结基线比较。
+/// 2) 正常运行：设置全项矩阵（场景 × mode × 域 × 17 action × 彩蛋开关 × 多种子 × gate 面）生成确定性
+///    输入→期望 ChainResult 字节，并在写入前与 fixtures/corpus/corpus-0.3.1.txt 的冻结基线比较。
 ///    只有显式 <c>--update-corpus</c> 维护模式可以重建该基线。
-/// 0.3.1 切核：以同 harness（仅 Kernel 链接）回放 frozen corpus，任何 byte delta = 回归。
-/// 语料场景构造（Scenarios.cs）在 0.3.x 窗口内不得改动。
+/// 3) 双语料回放：corpus-0.3.0.txt（15 动作冻结基线，0.3.0 固化）逐字节回放，任何 delta = 0.3.0 语义回归，
+///    该文件永不被 --update-corpus 触碰；corpus-0.3.1.txt（17 动作 + 彩蛋维度）为当前基线。
+/// 语料场景构造（Scenarios.cs）在 0.3.x 窗口内不得改动；扩展场景（S6-egg/S7-two-races）只进 0.3.1 语料。
 /// </summary>
 internal static class Program
 {
-    private const string CorpusFileName = "corpus-0.3.0.txt";
+    private const string LegacyCorpusFileName = "corpus-0.3.0.txt";
+    private const string CorpusFileName = "corpus-0.3.1.txt";
     private const string UpdateCorpusArgument = "--update-corpus";
     private static readonly long[] Seeds = { 1, 2, 3 };
     private static readonly UTF8Encoding Utf8WithoutBom = new(false);
@@ -48,10 +50,13 @@ internal static class Program
 
         string corpusDir = Path.Combine(FindRepositoryRoot(), "fixtures", "corpus");
         string corpusPath = Path.Combine(corpusDir, CorpusFileName);
+        string legacyPath = Path.Combine(corpusDir, LegacyCorpusFileName);
+
+        Console.WriteLine("Golden corpus generation (17 actions + egg dimension)...");
         string corpus;
         try
         {
-            corpus = GenerateCorpus();
+            corpus = GenerateCorpus(legacy: false);
         }
         catch (Exception ex)
         {
@@ -86,8 +91,37 @@ internal static class Program
             failures++;
         }
 
+        // 0.3.0 冻结语料：只读回放。任何 delta 必须修场景构造/镜像（不得 --update-corpus 覆盖）。
+        Console.WriteLine("Legacy 0.3.0 corpus replay (frozen, read-only)...");
+        string legacyCorpus;
+        try
+        {
+            legacyCorpus = GenerateCorpus(legacy: true);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine("  legacy corpus generation exception: " + ex.GetType().FullName + " :: " + ex.Message);
+            return 1;
+        }
+        byte[] legacyGenerated = Utf8WithoutBom.GetBytes(legacyCorpus);
+        if (!File.Exists(legacyPath))
+        {
+            Console.Error.WriteLine("  FAIL: committed legacy corpus missing: " + legacyPath);
+            return 1;
+        }
+        byte[] legacyBaseline = File.ReadAllBytes(legacyPath);
+        if (BytesEqual(legacyGenerated, legacyBaseline))
+        {
+            Console.WriteLine("  ok: legacy 0.3.0 corpus replay zero delta (byte-identical, " + CountLines(legacyCorpus) + " cases)");
+        }
+        else
+        {
+            Console.Error.WriteLine("  FAIL: legacy corpus delta detected (generated " + legacyGenerated.Length + " bytes, baseline " + legacyBaseline.Length + " bytes) — frozen file must not be regenerated; restore legacy scenario constructions.");
+            failures++;
+        }
+
         Console.WriteLine("Replay determinism check...");
-        byte[] replay = Utf8WithoutBom.GetBytes(GenerateCorpus());
+        byte[] replay = Utf8WithoutBom.GetBytes(GenerateCorpus(legacy: false));
         if (BytesEqual(generated, replay))
         {
             Console.WriteLine("  ok: deterministic replay zero delta");
@@ -110,47 +144,63 @@ internal static class Program
     }
 
     /// <summary>全矩阵语料生成。确定性：每 case 独立 roll 流（seed 派生），同输入同输出。
-    /// 场景集 = 内核构造场景（S1-S5）+ fixture 驱动场景（F03-F07，§5 步骤 6）。</summary>
-    private static string GenerateCorpus()
+    /// legacy=true = 0.3.0 冻结格式（15 动作、无彩蛋列、场景 S1-S5 + F03-F07，逐字节复刻已提交 corpus-0.3.0.txt）；
+    /// legacy=false = 0.3.1 格式（17 动作、彩蛋开关维度、场景 S1-S7 + F03-F07）。</summary>
+    private static string GenerateCorpus(bool legacy)
     {
         StringBuilder sb = new();
-        sb.Append("# 0.3.0 golden corpus - kernel Select (SqueakPoolRegistry). Lines: scenario|mode|domain|action|seed|gate|soundKey|tier|poolStableKey; '-' = none.\n");
-        sb.Append("# Rebuilt by tools/KernelCharacterization; scenarios frozen in Scenarios.cs (S1-S5 constructed, F03-F07 fixture-driven from fixtures/input). Any delta on replay = regression.\n");
+        if (legacy)
+        {
+            sb.Append("# 0.3.0 golden corpus - kernel Select (SqueakPoolRegistry). Lines: scenario|mode|domain|action|seed|gate|soundKey|tier|poolStableKey; '-' = none.\n");
+            sb.Append("# Rebuilt by tools/KernelCharacterization; scenarios frozen in Scenarios.cs (S1-S5 constructed, F03-F07 fixture-driven from fixtures/input). Any delta on replay = regression.\n");
+        }
+        else
+        {
+            sb.Append("# 0.3.1 golden corpus - kernel Select (SqueakPoolRegistry). Lines: scenario|mode|domain|action|seed|gate|eggs|soundKey|tier|poolStableKey; '-' = none.\n");
+            sb.Append("# Rebuilt by tools/KernelCharacterization; scenarios frozen in Scenarios.cs (S1-S7 constructed incl. egg/two-race, F03-F07 fixture-driven from fixtures/input). Any delta on replay = regression.\n");
+        }
         string fixturesRoot = Path.Combine(FindRepositoryRoot(), "fixtures");
-        foreach (string scenario in Scenarios.ScenarioNames)
+        string[] constructed = legacy ? Scenarios.ScenarioNames : Scenarios.ExtendedScenarioNames;
+        foreach (string scenario in constructed)
         {
             SqueakPoolRegistry registry = Scenarios.BuildRegistry(scenario);
-            AppendScenarioCases(sb, scenario, registry, Scenarios.DomainsFor(scenario));
+            AppendScenarioCases(sb, scenario, registry, Scenarios.DomainsFor(scenario), legacy);
         }
         foreach (string scenario in Scenarios.FixtureScenarioNames)
         {
             SqueakPoolRegistry registry = Scenarios.BuildFixtureRegistry(scenario, fixturesRoot);
-            AppendScenarioCases(sb, scenario, registry, Scenarios.DomainsForFixture(scenario));
+            AppendScenarioCases(sb, scenario, registry, Scenarios.DomainsForFixture(scenario), legacy);
         }
         return sb.ToString();
     }
 
-    private static void AppendScenarioCases(StringBuilder sb, string scenario, SqueakPoolRegistry registry, AudioDomain[] domains)
+    private static void AppendScenarioCases(StringBuilder sb, string scenario, SqueakPoolRegistry registry, AudioDomain[] domains, bool legacy)
     {
+        int actionCount = legacy ? ActionAudioKeyMirror.BuiltInCount : ActionAudioKeyMirror.Count;
+        bool[] eggFlags = legacy ? new[] { false } : new[] { false, true };
         foreach (SelectionMode mode in new[] { SelectionMode.Off, SelectionMode.Fallback, SelectionMode.Remix })
         {
             foreach (AudioDomain domain in domains)
             {
-                foreach (int actionIndex in Range(0, ActionAudioKeyMirror.Count))
+                foreach (int actionIndex in Range(0, actionCount))
                 {
                     SqueakyRatkin.SqueakAction action = (SqueakyRatkin.SqueakAction)actionIndex;
                     string actionKey = ActionKey.For(action)!;
-                    foreach (long seed in Seeds)
+                    foreach (bool allowEggs in eggFlags)
                     {
-                        foreach (SimGate gate in new[] { SimGate.All, SimGate.Partial })
+                        foreach (long seed in Seeds)
                         {
-                            ChainResult result = registry.Select(
-                                new SelectionContext(domain, actionKey, AgeBucket.Adult, false, false),
-                                mode, gate, new LcgRandom(seed));
-                            sb.Append(scenario).Append('|').Append(ModeName(mode)).Append('|').Append(domain).Append('|')
-                              .Append(actionKey).Append('|').Append(seed).Append('|').Append(gate == SimGate.All ? "all" : "partial").Append('|')
-                              .Append(result.SoundKey ?? "-").Append('|').Append(TierName(result.Tier)).Append('|')
-                              .Append(result.PoolStableKey ?? "-").Append('\n');
+                            foreach (SimGate gate in new[] { SimGate.All, SimGate.Partial })
+                            {
+                                ChainResult result = registry.Select(
+                                    new SelectionContext(domain, actionKey, AgeBucket.Adult, false, allowEggs),
+                                    mode, gate, new LcgRandom(seed));
+                                sb.Append(scenario).Append('|').Append(ModeName(mode)).Append('|').Append(domain).Append('|')
+                                  .Append(actionKey).Append('|').Append(seed).Append('|').Append(gate == SimGate.All ? "all" : "partial").Append('|');
+                                if (!legacy) sb.Append(allowEggs ? "on" : "off").Append('|');
+                                sb.Append(result.SoundKey ?? "-").Append('|').Append(TierName(result.Tier)).Append('|')
+                                  .Append(result.PoolStableKey ?? "-").Append('\n');
+                            }
                         }
                     }
                 }

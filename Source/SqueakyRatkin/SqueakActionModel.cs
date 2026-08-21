@@ -1,23 +1,8 @@
 namespace SqueakyRatkin;
 
-public enum SqueakVocalGatePolicy { ApplyTalkingGate, ExemptTalkingGate }
-public enum SqueakActionScope { Disabled, AnyOccurrence, ActiveCommand }
-
-[System.Flags]
-public enum SqueakActionScopeSupport { None = 0, AnyOccurrence = 1, ActiveCommand = 2 }
-
-/// <summary>Fixed built-in action metadata; this deliberately is not an extensible registry.</summary>
-public readonly struct SqueakActionDefinition
-{
-    public readonly SqueakAction Action;
-    public readonly string DisplayKey;
-    public readonly string AudioKey;
-    public readonly SqueakVocalGatePolicy VocalGatePolicy;
-    public readonly SqueakActionScopeSupport SupportedScopes;
-    public readonly SqueakActionScope DefaultScope;
-    internal SqueakActionDefinition(SqueakAction action, string displayKey, string audioKey, SqueakVocalGatePolicy vocalGatePolicy, SqueakActionScopeSupport supportedScopes, SqueakActionScope defaultScope)
-    { Action = action; DisplayKey = displayKey; AudioKey = audioKey; VocalGatePolicy = vocalGatePolicy; SupportedScopes = supportedScopes; DefaultScope = defaultScope; }
-}
+// 适配层产品元数据（0.3.1 波 4a：SqueakActionPlan/SqueakTriggerInvocation/SqueakActionDefinition 等
+// 纯类型已移入 Kernel/SqueakActionPlan.cs；本文件只保留 SR 产品常量与绑定 SqueakActionConfig 的工厂，
+// 不入内核编译单元——「SqueakActionModel 出 harness」）。
 
 /// <summary>Single source for the shipped built-in actions and their SoundDef keys.
 /// 0.3.1 波 3c：Crying/Giggling append（序数 15/16）；其 AudioKey 指向不存在的 SoundDef（GetNamedSilentFail
@@ -56,32 +41,14 @@ public static class SqueakActionDefinitions
     }
 }
 
-/// <summary>Per-Comp fixed action plan populated from XML. Missing actions remain unconfigured.</summary>
-public readonly struct SqueakActionPlan
+/// <summary>
+/// Adapter-side plan factories（0.3.1 波 4a）：把纯 <see cref="SqueakActionPlan"/> 形状绑定到产品元数据
+/// （<see cref="SqueakActionDefinitions"/> 的 SR_* 键）与不可链接的 <see cref="SqueakActionConfig"/>。
+/// 内核编译集不包含本类（SR 产品常量不入内核编译单元）。
+/// </summary>
+public static class SqueakActionPlanFactory
 {
-    public readonly SqueakActionDefinition Definition;
-    public readonly bool Configured;
-    public readonly SqueakTriggerMode Mode;
-    public readonly int MinIntervalTicks;
-    public readonly float ProbabilityPerCheck;
-    public readonly bool IgnoreGlobalCooldown;
-    public readonly SqueakCooldownClock CooldownClock;
-    internal SqueakActionPlan(SqueakActionDefinition definition, bool configured, SqueakTriggerMode mode, int minIntervalTicks, float probabilityPerCheck, bool ignoreGlobalCooldown, SqueakCooldownClock cooldownClock)
-    { Definition = definition; Configured = configured; Mode = mode; MinIntervalTicks = minIntervalTicks; ProbabilityPerCheck = probabilityPerCheck; IgnoreGlobalCooldown = ignoreGlobalCooldown; CooldownClock = cooldownClock; }
-    internal static SqueakActionPlan Unconfigured(SqueakAction action) => new(SqueakActionDefinitions.Get(action), false, SqueakTriggerMode.RandomOneShot, 300, .02f, false, SqueakCooldownClock.GameTicks);
-    internal static SqueakActionPlan FromLegacy(SqueakActionConfig config) => new(SqueakActionDefinitions.Get(config.action), true, config.mode, config.minIntervalTicks, config.probabilityPerCheck, config.ignoreGlobalCooldown, config.cooldownClock);
-}
+    public static SqueakActionPlan Unconfigured(SqueakAction action) => new(SqueakActionDefinitions.Get(action), false, SqueakTriggerMode.RandomOneShot, 300, .02f, false, SqueakCooldownClock.GameTicks);
 
-public enum SqueakTriggerOrigin { Periodic, Wounded, Select, Death, Draft, Undraft, Attack, Equip, MentalBreak, Crying, Giggling }
-public enum SqueakInvocationSource { Periodic, StateEvent, PlayerSelection, ActiveCommand }
-
-/// <summary>Explicit trigger source; non-periodic hooks preserve legacy probability skipping.</summary>
-public readonly struct SqueakTriggerInvocation
-{
-    public readonly SqueakTriggerOrigin Origin;
-    public readonly SqueakInvocationSource Source;
-    public bool SkipsRandomOneShotProbability => Origin != SqueakTriggerOrigin.Periodic;
-    public bool IsExternal => Origin != SqueakTriggerOrigin.Periodic;
-    public bool IsActiveCommand => Source == SqueakInvocationSource.ActiveCommand;
-    public SqueakTriggerInvocation(SqueakTriggerOrigin origin, SqueakInvocationSource source) { Origin = origin; Source = source; }
+    public static SqueakActionPlan FromLegacy(SqueakActionConfig config) => new(SqueakActionDefinitions.Get(config.action), true, config.mode, config.minIntervalTicks, config.probabilityPerCheck, config.ignoreGlobalCooldown, config.cooldownClock);
 }

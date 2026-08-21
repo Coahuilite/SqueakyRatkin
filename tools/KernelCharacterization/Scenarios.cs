@@ -15,13 +15,15 @@ namespace SqueakyRatkin.KernelCharacterization;
 public static class Scenarios
 {
     public static readonly RaceKey Ratkin = new("Ratkin");
+    public static readonly RaceKey Kiiro = new("Kiiro");
     public static readonly XenotypeKey XenoA = new("XenoA");
 
-    /// <summary>内置表种子：本 harness 的 15 项 AudioKey 镜像投影；内核键空间另保留 17 个 built-in key。</summary>
+    /// <summary>内置表种子：本 harness 的 15 项 AudioKey 镜像投影（Crying/Giggling 无内置 SoundDef，不播种）。
+    /// 内核键空间保留 17 个 built-in key，但内置表只列 15 个映射（§4.7 默认静默）。</summary>
     public static BuiltInFallbackTable BuildBuiltIn()
     {
         Dictionary<string, string> keys = new(StringComparer.Ordinal);
-        for (int i = 0; i < ActionAudioKeyMirror.Count; i++)
+        for (int i = 0; i < ActionAudioKeyMirror.BuiltInCount; i++)
         {
             SqueakyRatkin.SqueakAction action = (SqueakyRatkin.SqueakAction)i;
             keys[ActionKey.For(action)!] = ActionAudioKeyMirror.For(action);
@@ -30,6 +32,11 @@ public static class Scenarios
     }
 
     public static string[] ScenarioNames { get; } = { "S1-empty", "S2-builtin-seed", "S3-builtin-plus-xeno", "S4-orphan-xeno", "S5-dormant-xeno" };
+
+    /// <summary>0.3.1 波 4a 扩展场景（语料 17 动作矩阵重建 + 彩蛋维度 + per-race 池隔离）：
+    /// S6-egg（彩蛋开关维度：加性池成员）；S7-two-races（Ratkin/Kiiro 两 race 池互不串扰）。
+    /// 0.3.0 冻结语料（corpus-0.3.0.txt）只回放 <see cref="ScenarioNames"/> + Fixture 场景，构造不得改动。</summary>
+    public static string[] ExtendedScenarioNames { get; } = { "S1-empty", "S2-builtin-seed", "S3-builtin-plus-xeno", "S4-orphan-xeno", "S5-dormant-xeno", "S6-egg", "S7-two-races" };
 
     /// <summary>fixture 驱动场景（§5 步骤 6：0.2.4 真实设置 fixture 驱动语料）：输入 = fixtures/input/*.xml 的 selection 状态。
     /// 映射：F03→03-explicit-off（无选择）；F04→04-fallback-seeded；F05→05-multi-selections-lastwins（同域 last-wins）；
@@ -172,20 +179,43 @@ public static class Scenarios
                 {
                     RaceEntry("coahuilite.squeakyratkin:SR_OfficialExample_Race", 2),
                 }, builtIn, DomainFilter.Everything);
+            case "S6-egg":
+                // 彩蛋维度：EggPack 的 Call 有普通+彩蛋变体（开关开 = 加性池成员），Move 只有彩蛋变体
+                // （开关关 = 该 pack 无 Move 候选 → 其他 pack/内置兜底）。开关作为 SelectionContext.AllowEggs 路由输入。
+                return new SqueakPoolRegistry(new[]
+                {
+                    RaceEntry("coahuilite.squeakyratkin:SR_OfficialExample_Race", 2),
+                    EggRaceEntry(),
+                }, builtIn, DomainFilter.Everything);
+            case "S7-two-races":
+                // per-race 池隔离：Ratkin + Kiiro 两 race 池；内置表只含 Ratkin（Kiiro Off = 静默，
+                // Kiiro 查询绝不落入 Ratkin 池或 Ratkin 内置）。
+                return new SqueakPoolRegistry(new[]
+                {
+                    RaceEntry("coahuilite.squeakyratkin:SR_OfficialExample_Race", 2),
+                    RaceEntry("kiiro.mod:SR_KiiroVoice", 2, KiiroDomain),
+                }, builtIn, DomainFilter.Everything);
             default:
                 throw new ArgumentException("Unknown scenario: " + scenario);
         }
     }
 
     public static AudioDomain RaceDomain => new(Ratkin, null);
+    public static AudioDomain KiiroDomain => new(Kiiro, null);
     public static AudioDomain XenoDomain => new(Ratkin, XenoA);
 
     public static AudioDomain[] DomainsFor(string scenario)
     {
-        // S3 的域注入面含 (Ratkin,XenoA)；其余场景只有 (Ratkin,null)。
-        return scenario == "S3-builtin-plus-xeno"
-            ? new[] { RaceDomain, XenoDomain }
-            : new[] { RaceDomain };
+        // S3 的域注入面含 (Ratkin,XenoA)；S7 含 Kiiro race 域；其余场景只有 (Ratkin,null)。
+        switch (scenario)
+        {
+            case "S3-builtin-plus-xeno":
+                return new[] { RaceDomain, XenoDomain };
+            case "S7-two-races":
+                return new[] { RaceDomain, KiiroDomain };
+            default:
+                return new[] { RaceDomain };
+        }
     }
 
     private static VoicePackEntry RaceEntry(string packKey, int soundCount)
@@ -193,9 +223,51 @@ public static class Scenarios
         return Entry(packKey, RaceDomain, soundCount, muteLast: false);
     }
 
+    private static VoicePackEntry RaceEntry(string packKey, int soundCount, AudioDomain domain)
+    {
+        return Entry(packKey, domain, soundCount, muteLast: false);
+    }
+
     private static VoicePackEntry XenoEntry(string packKey, int soundCount)
     {
         return Entry(packKey, XenoDomain, soundCount, muteLast: true);
+    }
+
+    /// <summary>彩蛋 pack（§2.4 语义）：Call = 普通 + 彩蛋变体（同权混抽）；Move = 仅彩蛋变体；
+    /// 其余动作 = 普通变体。条目级 IsEgg 由 SelectionContext.AllowEggs 过滤。</summary>
+    private static VoicePackEntry EggRaceEntry()
+    {
+        Dictionary<string, IReadOnlyList<ActionSoundSet>> actions = new();
+        for (int i = 0; i < ActionAudioKeyMirror.Count; i++)
+        {
+            SqueakyRatkin.SqueakAction action = (SqueakyRatkin.SqueakAction)i;
+            string audioKey = ActionAudioKeyMirror.For(action);
+            List<ActionSoundSet> sets;
+            if (action == SqueakyRatkin.SqueakAction.Call)
+            {
+                sets = new List<ActionSoundSet>
+                {
+                    new(new[] { "egg.mod:SR_EggPack_" + audioKey + "_0" }, null, 1f),
+                    new(new[] { "egg.mod:SR_EggPack_" + audioKey + "_Egg" }, null, 1f, isEgg: true),
+                };
+            }
+            else if (action == SqueakyRatkin.SqueakAction.Move)
+            {
+                sets = new List<ActionSoundSet>
+                {
+                    new(new[] { "egg.mod:SR_EggPack_" + audioKey + "_Egg" }, null, 1f, isEgg: true),
+                };
+            }
+            else
+            {
+                sets = new List<ActionSoundSet>
+                {
+                    new(new[] { "egg.mod:SR_EggPack_" + audioKey + "_0" }, null, 1f),
+                };
+            }
+            actions[ActionKeyFor(action)] = sets;
+        }
+        return new VoicePackEntry("egg.mod:SR_EggPack", RaceDomain, 1f, actions);
     }
 
     private static VoicePackEntry Entry(string packKey, AudioDomain domain, int soundCount, bool muteLast)

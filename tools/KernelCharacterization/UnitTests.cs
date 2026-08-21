@@ -32,6 +32,9 @@ public static class UnitTests
         PackFallbackTier(ref failures);
         EggFiltering(ref failures);
         PackWeight(ref failures);
+        TimingModelRules(ref failures);
+        TriggerInvocationRules(ref failures);
+        PerRacePoolIsolation(ref failures);
     }
 
     private static void Check(bool condition, string name, ref int failures)
@@ -79,10 +82,10 @@ public static class UnitTests
         Check(!ActionKey.TryParseBuiltIn("call", out _), "TryParseBuiltIn wrong case false", ref failures);
     }
 
-    /// <summary>0.3.1 波 3c 五处同步离线断言（决策 §2.3：枚举/XML/SoundDef/本地化/统计 机械检查）：
+    /// <summary>0.3.1 波 3c/4a 五处同步离线断言（决策 §2.3：枚举/XML/SoundDef/本地化/统计 机械检查）：
     /// ① 枚举名序 == BuiltInActionKeys 17 键序；② 内置表 15 项且不列 Crying/Giggling（SoundDef 面默认静默）；
     /// ③ SoundDef XML 无 SR_Crying/SR_Giggling defName（缺席是有意同步）；④ 双语本地化含 SR.Action.Crying/Giggling；
-    /// ⑤ 语料范围守卫：镜像保持 15（0.3.2 扩 17 动作矩阵时随语料同变更重建）。</summary>
+    /// ⑤ 语料范围守卫：镜像 17 == 枚举 17（0.3.1 波 4a 语料 17 动作矩阵同变更重建）。</summary>
     private static void ActionFiveWaySync(ref int failures)
     {
         string root = Program.FindRepositoryRoot();
@@ -92,7 +95,7 @@ public static class UnitTests
         Check(namesMatch, "five-way sync: enum names/ordinals == BuiltInActionKeys (17)", ref failures);
 
         FallbackProfile? profile = Scenarios.BuildBuiltIn().For(Scenarios.Ratkin);
-        bool builtInExcludes = profile != null && profile.SoundKeys.Count == ActionAudioKeyMirror.Count
+        bool builtInExcludes = profile != null && profile.SoundKeys.Count == ActionAudioKeyMirror.BuiltInCount
             && !profile.SoundKeys.ContainsKey("Crying") && !profile.SoundKeys.ContainsKey("Giggling");
         Check(builtInExcludes, "five-way sync: built-in table 15 mappings without Crying/Giggling (default silence)", ref failures);
 
@@ -119,15 +122,15 @@ public static class UnitTests
         }
         Check(localizationPresent, "five-way sync: SR.Action.Crying/Giggling present in both languages", ref failures);
 
-        Check(ActionAudioKeyMirror.Count == 15,
-            "five-way sync: corpus scope stays 15-action (mirror moves only with the 0.3.2 17-action corpus)", ref failures);
+        Check(ActionAudioKeyMirror.Count == 17 && ActionAudioKeyMirror.BuiltInCount == 15,
+            "five-way sync: corpus mirror 17-action with 15 built-in mappings (wave 4a corpus rebuild)", ref failures);
     }
 
     private static void BuiltInTable(ref int failures)
     {
         BuiltInFallbackTable table = Scenarios.BuildBuiltIn();
         FallbackProfile? profile = table.For(Scenarios.Ratkin);
-        Check(profile != null && profile.SoundKeys.Count == ActionAudioKeyMirror.Count && !profile.SoundKeys.ContainsKey("Crying"),
+        Check(profile != null && profile.SoundKeys.Count == ActionAudioKeyMirror.BuiltInCount && !profile.SoundKeys.ContainsKey("Crying"),
             "built-in Ratkin profile has current 15 mappings", ref failures);
         Check(table.For(new RaceKey("Kiiro")) == null, "unknown race returns null", ref failures);
         Check(table.TryGetSoundKey(Scenarios.Ratkin, "Call", out string? k) && k == "SR_Call", "TryGetSoundKey Call=SR_Call", ref failures);
@@ -246,7 +249,8 @@ public static class UnitTests
             SqueakPoolRegistry registry = Scenarios.BuildRegistry(scenario);
             foreach (AudioDomain domain in Scenarios.DomainsFor(scenario))
             {
-                foreach (int i in Range(0, ActionAudioKeyMirror.Count))
+                // Off = 内置表兜底：只对 15 个有内置 SoundDef 映射的动作成立；Crying/Giggling 无内置条目 = 静默。
+                foreach (int i in Range(0, ActionAudioKeyMirror.BuiltInCount))
                 {
                     SqueakyRatkin.SqueakAction action = (SqueakyRatkin.SqueakAction)i;
                     ChainResult result = registry.Select(Ctx(domain, action), SelectionMode.Off, SimGate.All, new LcgRandom(1));
@@ -256,6 +260,13 @@ public static class UnitTests
                         Check(false, "Off " + scenario + " " + domain + " " + action, ref failures);
                         return;
                     }
+                }
+                ChainResult crying = registry.Select(Ctx(domain, SqueakyRatkin.SqueakAction.Crying), SelectionMode.Off, SimGate.All, new LcgRandom(1));
+                ChainResult giggling = registry.Select(Ctx(domain, SqueakyRatkin.SqueakAction.Giggling), SelectionMode.Off, SimGate.All, new LcgRandom(1));
+                if (!crying.IsNone || !giggling.IsNone)
+                {
+                    Check(false, "Off unmapped Crying/Giggling must be silent", ref failures);
+                    return;
                 }
             }
         }
@@ -537,10 +548,180 @@ public static class UnitTests
         Check(none.IsNone, "nonpositive direct pack weight is rejected", ref failures);
     }
 
+    /// <summary>0.3.1 波 4a 漏斗纯逻辑提取：SqueakTimingModel 纯求值语义逐条断言（决策 §5 漏斗纯逻辑提取）。
+    /// 数学与 0.2.4 CompSqueaker 内嵌实现逐字节等价（提取 = 同变更，无新时序语义）。</summary>
+    private static void TimingModelRules(ref int failures)
+    {
+        SqueakActionPlan plan = TestPlan(300);
+        SqueakTimingEvaluation fresh = SqueakTimingModel.Evaluate(Timing(0, plan));
+        Check(fresh.ActionIntervalTicks == 300 && fresh.ActionIntervalSeconds == null && fresh.ActionRemainingTicks == 300
+            && fresh.GlobalCooldownTicks == 216 && fresh.GlobalRemainingTicks == 216,
+            "timing game-tick fresh state (300/216 intervals, 300/216 remaining)", ref failures);
+        Check(!fresh.ActionReady && !fresh.GlobalReady && !fresh.TimingReady,
+            "timing fresh state not ready", ref failures);
+
+        SqueakTimingEvaluation elapsed = SqueakTimingModel.Evaluate(Timing(300, plan));
+        Check(elapsed.ActionReady && elapsed.ActionRemainingTicks == 0 && elapsed.GlobalReady && elapsed.GlobalRemainingTicks == 0 && elapsed.TimingReady,
+            "timing ready when elapsed reaches interval", ref failures);
+
+        SqueakTimingEvaluation timeSpeed = SqueakTimingModel.Evaluate(Timing(0, plan, timeSpeed: 3f));
+        Check(timeSpeed.ActionIntervalTicks == 900 && timeSpeed.GlobalCooldownTicks == 648,
+            "timing time-speed scaling (300*3, 216*3)", ref failures);
+        SqueakTimingEvaluation noScale = SqueakTimingModel.Evaluate(Timing(0, plan, timeSpeed: 3f, scaleTimeSpeed: false));
+        Check(noScale.ActionIntervalTicks == 300 && noScale.GlobalCooldownTicks == 216,
+            "timing time-speed disabled keeps base ticks", ref failures);
+
+        SqueakTimingEvaluation chain = SqueakTimingModel.Evaluate(Timing(0, plan, overall: 2f, action: 1.5f, master: 0.5f));
+        Check(chain.ActionIntervalTicks == 450,
+            "timing multiplier chain rounds staged (300*2*1.5=900, then *0.5=450)", ref failures);
+
+        SqueakTimingEvaluation zero = SqueakTimingModel.Evaluate(Timing(0, TestPlan(0), globalBase: 0));
+        Check(zero.ActionIntervalTicks == 0 && zero.ActionReady && zero.GlobalCooldownTicks == 0 && zero.GlobalReady && zero.TimingReady,
+            "timing zero interval means no cooldown", ref failures);
+
+        SqueakTimingEvaluation sanitized = SqueakTimingModel.Evaluate(Timing(0, plan, overall: float.NaN, action: float.PositiveInfinity, timeSpeed: float.NaN));
+        Check(sanitized.ActionIntervalTicks == 300 && sanitized.GlobalCooldownTicks == 216,
+            "timing sanitizes NaN/Infinity multipliers to identity", ref failures);
+
+        SqueakTimingEvaluation population = SqueakTimingModel.Evaluate(Timing(0, plan, populationScale: 2f));
+        Check(population.ActionIntervalTicks == 600 && population.GlobalCooldownTicks == 432,
+            "timing population scale multiplies ticks", ref failures);
+
+        SqueakActionPlan ignoring = TestPlan(300, ignoreGlobalCooldown: true);
+        SqueakTimingEvaluation ignoreGlobal = SqueakTimingModel.Evaluate(Timing(0, ignoring));
+        Check(!ignoreGlobal.GlobalApplicable && ignoreGlobal.TimingReady == ignoreGlobal.ActionReady,
+            "timing ignore-global makes TimingReady equal ActionReady", ref failures);
+
+        SqueakActionPlan realtime = TestPlan(300, clock: SqueakCooldownClock.Realtime);
+        SqueakTimingEvaluation rtPending = SqueakTimingModel.Evaluate(Timing(0, realtime, nowRealtime: 104f, lastActionRealtime: 100f));
+        Check(rtPending.ActionIntervalTicks == null && rtPending.ActionIntervalSeconds == 5f
+            && rtPending.ActionRemainingSeconds == 1f && !rtPending.ActionReady,
+            "timing realtime clock uses seconds and elapsed realtime", ref failures);
+        SqueakTimingEvaluation rtReady = SqueakTimingModel.Evaluate(Timing(0, realtime, nowRealtime: 105f, lastActionRealtime: 100f));
+        Check(rtReady.ActionReady && rtReady.ActionRemainingSeconds == 0f,
+            "timing realtime ready at 5s", ref failures);
+        SqueakTimingEvaluation rtPopulation = SqueakTimingModel.Evaluate(Timing(0, realtime, nowRealtime: 0f, lastActionRealtime: 0f, populationScale: 2f));
+        Check(rtPopulation.ActionIntervalSeconds == 10f,
+            "timing realtime population scale multiplies seconds", ref failures);
+
+        SqueakTimingEvaluation clamped = SqueakTimingModel.Evaluate(Timing(0, TestPlan(int.MaxValue), lastActionTick: 0));
+        Check(clamped.ActionRemainingTicks == int.MaxValue,
+            "timing remaining ticks clamps at int.MaxValue", ref failures);
+
+        Check(SqueakTimingModel.GetActionIntervalTicks(300, 1f, 1f, 1f, true, 2f) == 600,
+            "timing public GetActionIntervalTicks helper", ref failures);
+        Check(SqueakTimingModel.GetActionIntervalSeconds(300, 1f, 1f, 1f) == 5f,
+            "timing public GetActionIntervalSeconds helper", ref failures);
+        Check(SqueakTimingModel.GetGlobalCooldownTicks(216, 2f, true, 1f) == 432,
+            "timing public GetGlobalCooldownTicks helper", ref failures);
+    }
+
+    /// <summary>0.3.1 波 4a 漏斗纯逻辑提取：SqueakTriggerInvocation 语义（非周期跳过 RandomOneShot 概率）。</summary>
+    private static void TriggerInvocationRules(ref int failures)
+    {
+        SqueakTriggerInvocation periodic = new(SqueakTriggerOrigin.Periodic, SqueakInvocationSource.Periodic);
+        Check(!periodic.SkipsRandomOneShotProbability && !periodic.IsExternal && !periodic.IsActiveCommand,
+            "invocation periodic keeps probability and is not external", ref failures);
+
+        SqueakTriggerInvocation wounded = new(SqueakTriggerOrigin.Wounded, SqueakInvocationSource.StateEvent);
+        Check(wounded.SkipsRandomOneShotProbability && wounded.IsExternal && !wounded.IsActiveCommand,
+            "invocation state event skips probability and is external", ref failures);
+
+        SqueakTriggerInvocation draft = new(SqueakTriggerOrigin.Draft, SqueakInvocationSource.ActiveCommand);
+        Check(draft.IsActiveCommand && draft.IsExternal && draft.SkipsRandomOneShotProbability,
+            "invocation active command carries IsActiveCommand", ref failures);
+
+        SqueakTriggerInvocation select = new(SqueakTriggerOrigin.Select, SqueakInvocationSource.PlayerSelection);
+        Check(select.IsExternal && !select.IsActiveCommand,
+            "invocation player selection is external but not active command", ref failures);
+
+        SqueakTriggerInvocation crying = new(SqueakTriggerOrigin.Crying, SqueakInvocationSource.StateEvent);
+        SqueakTriggerInvocation giggling = new(SqueakTriggerOrigin.Giggling, SqueakInvocationSource.StateEvent);
+        Check(crying.IsExternal && giggling.IsExternal,
+            "invocation BabyFits origins are external", ref failures);
+    }
+
+    /// <summary>0.3.1 波 4a per-race 池隔离 harness（决策 §5：两 race 池互不串扰）：
+    /// Ratkin/Kiiro 两 race 池 + 仅 Ratkin 内置表；跨模式/种子断言零交叉。</summary>
+    private static void PerRacePoolIsolation(ref int failures)
+    {
+        SqueakPoolRegistry registry = Scenarios.BuildRegistry("S7-two-races");
+        DomainPool? ratkinPool = registry.PoolFor(Scenarios.RaceDomain);
+        DomainPool? kiiroPool = registry.PoolFor(Scenarios.KiiroDomain);
+        Check(ratkinPool != null && ratkinPool.Entries.Count == 1 && ratkinPool.Entries[0].PackKey == "coahuilite.squeakyratkin:SR_OfficialExample_Race",
+            "per-race Ratkin pool holds only Ratkin pack", ref failures);
+        Check(kiiroPool != null && kiiroPool.Entries.Count == 1 && kiiroPool.Entries[0].PackKey == "kiiro.mod:SR_KiiroVoice",
+            "per-race Kiiro pool holds only Kiiro pack", ref failures);
+
+        // Ratkin 查询绝不返回 Kiiro 包键（三模式 × 多种子）。
+        foreach (SelectionMode mode in new[] { SelectionMode.Off, SelectionMode.Fallback, SelectionMode.Remix })
+        {
+            for (int seed = 1; seed <= 40; seed++)
+            {
+                ChainResult result = registry.Select(Ctx(Scenarios.RaceDomain, SqueakyRatkin.SqueakAction.Call, allowEggs: false), mode, SimGate.All, new LcgRandom(seed));
+                if (result.PoolStableKey != null && result.PoolStableKey.StartsWith("kiiro.mod:", StringComparison.Ordinal))
+                {
+                    Check(false, "per-race Ratkin query leaked Kiiro pack: " + result.PoolStableKey, ref failures);
+                    return;
+                }
+            }
+        }
+
+        // Kiiro 查询只返回 Kiiro 包键；Off = 静默（内置表 per-race，Kiiro 无 profile）。
+        for (int seed = 1; seed <= 40; seed++)
+        {
+            ChainResult off = registry.Select(Ctx(Scenarios.KiiroDomain, SqueakyRatkin.SqueakAction.Call, allowEggs: false), SelectionMode.Off, SimGate.All, new LcgRandom(seed));
+            if (!off.IsNone)
+            {
+                Check(false, "per-race Kiiro Off must be silent (no built-in profile)", ref failures);
+                return;
+            }
+            ChainResult fallback = registry.Select(Ctx(Scenarios.KiiroDomain, SqueakyRatkin.SqueakAction.Call, allowEggs: false), SelectionMode.Fallback, SimGate.All, new LcgRandom(seed));
+            if (fallback.PoolStableKey != "kiiro.mod:SR_KiiroVoice" || (fallback.SoundKey != null && !fallback.SoundKey.StartsWith("kiiro.mod:", StringComparison.Ordinal)))
+            {
+                Check(false, "per-race Kiiro Fallback must resolve only Kiiro pack", ref failures);
+                return;
+            }
+        }
+
+        // Kiiro 域无池（只有 Ratkin 池）→ Fallback 不越域落入 Ratkin 池/内置（链不跨 race）。
+        SqueakPoolRegistry ratkinOnly = new(new[]
+        {
+            ScenariosEntry("coahuilite.squeakyratkin:SR_OfficialExample_Race", Scenarios.RaceDomain, sounds: 1),
+        }, Scenarios.BuildBuiltIn(), DomainFilter.Everything);
+        ChainResult noLeak = ratkinOnly.Select(Ctx(Scenarios.KiiroDomain, SqueakyRatkin.SqueakAction.Call, allowEggs: false), SelectionMode.Fallback, SimGate.All, new LcgRandom(1));
+        Check(noLeak.IsNone, "per-race Kiiro query never falls through to Ratkin pool or Ratkin built-in", ref failures);
+
+        // xeno 子域隔离：Kiiro+Xeno 池只在 Kiiro+Xeno 域可见；Ratkin+Xeno 查询不得命中。
+        AudioDomain ratkinXeno = new(Scenarios.Ratkin, Scenarios.XenoA);
+        AudioDomain kiiroXeno = new(Scenarios.Kiiro, Scenarios.XenoA);
+        SqueakPoolRegistry xenoIsolated = new(new[]
+        {
+            ScenariosEntry("ratkin.mod:SR_RatkinXeno", ratkinXeno, sounds: 1),
+            ScenariosEntry("kiiro.mod:SR_KiiroXeno", kiiroXeno, sounds: 1),
+        }, Scenarios.BuildBuiltIn(), DomainFilter.Everything);
+        ChainResult kx = xenoIsolated.Select(Ctx(kiiroXeno, SqueakyRatkin.SqueakAction.Call, allowEggs: false), SelectionMode.Fallback, SimGate.All, new LcgRandom(2));
+        Check(kx.PoolStableKey == "kiiro.mod:SR_KiiroXeno", "per-race Kiiro+xeno resolves its exact pool", ref failures);
+        ChainResult rx = xenoIsolated.Select(Ctx(ratkinXeno, SqueakyRatkin.SqueakAction.Call, allowEggs: false), SelectionMode.Fallback, SimGate.All, new LcgRandom(2));
+        Check(rx.PoolStableKey == "ratkin.mod:SR_RatkinXeno", "per-race Ratkin+xeno resolves its exact pool", ref failures);
+    }
+
     // ---- helpers ----
 
     private static SelectionContext Ctx(AudioDomain domain, SqueakyRatkin.SqueakAction action, AgeBucket age = AgeBucket.Adult, bool allowEggs = false)
         => new(domain, ActionKey.For(action)!, age, false, allowEggs);
+
+    private static SqueakActionDefinition TestDefinition()
+        => new(SqueakyRatkin.SqueakAction.Call, "SR.Action.Call", "SR_Call", SqueakVocalGatePolicy.ApplyTalkingGate, SqueakActionScopeSupport.AnyOccurrence, SqueakActionScope.AnyOccurrence);
+
+    private static SqueakActionPlan TestPlan(int minIntervalTicks, bool ignoreGlobalCooldown = false, SqueakCooldownClock clock = SqueakCooldownClock.GameTicks)
+        => new(TestDefinition(), true, SqueakTriggerMode.RandomOneShot, minIntervalTicks, .02f, ignoreGlobalCooldown, clock);
+
+    private static SqueakTimingInput Timing(int nowTick, SqueakActionPlan plan, float nowRealtime = 0f, float timeSpeed = 1f,
+        float overall = 1f, float action = 1f, int lastActionTick = 0, float lastActionRealtime = 0f,
+        int lastGlobalTick = 0, int globalBase = 216, float master = 1f, bool scaleTimeSpeed = true, float populationScale = 1f)
+        => new(nowTick, nowRealtime, timeSpeed, plan, overall, action, lastActionTick, lastActionRealtime,
+            lastGlobalTick, globalBase, master, scaleTimeSpeed, populationScale);
 
     private static IEnumerable<int> Range(int from, int count) { for (int i = from; i < from + count; i++) yield return i; }
 
