@@ -239,13 +239,13 @@ public sealed class SqueakRuntimeSnapshot
     public SqueakSoundChoice ChooseProductionSound(ResolvedSqueakContext context, SqueakAction action, Pawn pawn) => Choose(context, action, pawn, pawn.MapHeld, new TargetInfo(pawn), true);
     private SqueakSoundChoice Choose(ResolvedSqueakContext context, SqueakAction action, Pawn? pawn, Map? map, TargetInfo? target, bool production)
     {
-        string? actionKey = ActionKey.For(action);
+        string? actionKey = SqueakyRatkin.Kernel.ActionKey.For(action);
         if (actionKey == null) return SqueakSoundChoice.None;
         SqueakyRatkin.Kernel.AudioDomain domain = context.Xenotype != null
             ? new SqueakyRatkin.Kernel.AudioDomain(new SqueakyRatkin.Kernel.RaceKey("Ratkin"), new SqueakyRatkin.Kernel.XenotypeKey(context.Xenotype.defName))
             : new SqueakyRatkin.Kernel.AudioDomain(new SqueakyRatkin.Kernel.RaceKey("Ratkin"), null);
         SqueakyRatkin.Kernel.SelectionContext ctx = new(domain, actionKey, SqueakyRatkin.Kernel.AgeBucket.Adult, production);
-        SqueakyRatkin.Kernel.ChainResult result = Registry.Select(ctx, VoicePackMode, SqueakKernelAdapter.GateFor(pawn, map, target), SqueakKernelAdapter.Rolls);
+        SqueakyRatkin.Kernel.ChainResult result = Registry.Select(ctx, SqueakKernelAdapter.ToSelectionMode(VoicePackMode), SqueakKernelAdapter.GateFor(pawn, map, target), SqueakKernelAdapter.Rolls);
         return SqueakKernelAdapter.ToChoice(result);
     }
 }

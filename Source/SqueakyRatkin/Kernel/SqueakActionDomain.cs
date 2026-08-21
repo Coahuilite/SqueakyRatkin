@@ -1,6 +1,6 @@
 namespace SqueakyRatkin;
 
-// 动作域枚举（零 Verse 引用，供 Kernel/ 链接编译；0.3.0 自 CompSqueaker.cs 原样提取，namespace 不变，存档按名序列化安全）。
+// 动作域枚举（0.3.1 波 1 移入 Kernel/；零游戏运行时引用，namespace 不变以维持存档按名序列化 ABI）。
 // 红线：SqueakAction 为 append-only，序数稳定（0.3.2 在末尾 append Crying/Giggling）。
 
 public enum SqueakMood { Good, Neutral, Bad, Break }

@@ -4,22 +4,33 @@ using System.Collections.Generic;
 namespace SqueakyRatkin.Kernel;
 
 /// <summary>
-/// 内置 fallback 单源表（§4.6，内核 C# 编译期冻结）。0.3.0 骨架：种子 = SqueakActionDefinitions.AudioKey
-/// （15 动作全列，Ratkin 条目 = SR_* 引用听感等价）；0.3.2 正式数据（Crying/Giggling 无内置音频不列条目，
-/// pack 声明才发声）+ SqueakFallbackProfileStore（适配层，Config 副本单写者，0.3.2）。
-/// FallbackProfile.SoundKeys 键保持枚举（内置专用，构建断言仅内置键，§2.2 内置表不开放外部键）。
+/// 内置 fallback 单源表（§4.6，内核 C# 编译期冻结）。profile 的动作键始终是字符串，
+/// 并由 <see cref="BuiltInActionKeys"/> 封闭校验；0.3.1 的 Ratkin 种子仅镜像已有 15 个
+/// <c>SqueakActionDefinitions.AudioKey</c>，Crying/Giggling 保留键没有内置 SoundDef 映射。
 /// </summary>
 public sealed class FallbackProfile
 {
     public readonly RaceKey Race;
     public readonly int Version;
-    public readonly IReadOnlyDictionary<SqueakyRatkin.SqueakAction, string> SoundKeys;
+    public readonly IReadOnlyDictionary<string, string> SoundKeys;
 
-    public FallbackProfile(RaceKey race, int version, IReadOnlyDictionary<SqueakyRatkin.SqueakAction, string> soundKeys)
+    public FallbackProfile(RaceKey race, int version, IReadOnlyDictionary<string, string> soundKeys)
     {
         Race = race;
         Version = version;
         SoundKeys = soundKeys ?? throw new ArgumentNullException(nameof(soundKeys));
+        foreach (KeyValuePair<string, string> entry in SoundKeys)
+        {
+            if (!BuiltInActionKeys.Contains(entry.Key))
+                throw new ArgumentException("Fallback profile contains a non-built-in action key: " + entry.Key, nameof(soundKeys));
+        }
+    }
+
+    /// <summary>纯字符串查表：只有内置清单内的键可以命中 profile。</summary>
+    public bool TryGetSoundKey(string actionKey, out string? soundKey)
+    {
+        soundKey = null;
+        return BuiltInActionKeys.Contains(actionKey) && SoundKeys.TryGetValue(actionKey, out soundKey);
     }
 }
 
@@ -42,14 +53,12 @@ public sealed class BuiltInFallbackTable
 
     public FallbackProfile? For(RaceKey race) => byRace.TryGetValue(race, out FallbackProfile? profile) ? profile : null;
 
-    /// <summary>Select 内置 tier 查表：内置键（= 枚举名）→ profile 键 → gate 由调用方执行。</summary>
+    /// <summary>Select 内置 tier 查表：字符串 action key 经内置清单校验后映射到 profile SoundDef key。</summary>
     public bool TryGetSoundKey(RaceKey race, string actionKey, out string? soundKey)
     {
         soundKey = null;
         FallbackProfile? profile = For(race);
-        if (profile == null) return false;
-        if (!SqueakyRatkin.ActionKey.TryParseBuiltIn(actionKey, out SqueakyRatkin.SqueakAction action)) return false;
-        return profile.SoundKeys.TryGetValue(action, out soundKey);
+        return profile != null && profile.TryGetSoundKey(actionKey, out soundKey);
     }
 }
 

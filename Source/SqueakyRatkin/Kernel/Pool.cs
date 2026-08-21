@@ -83,7 +83,7 @@ public readonly struct SelectionContext
     }
 }
 
-/// <summary>随机源：适配层包 Verse.Rand（预览走 PushState）。确定性 = 同 roll 序列同结果。</summary>
+/// <summary>随机源：适配层提供运行时随机数；预览可注入确定性来源。相同 roll 序列必得相同结果。</summary>
 public interface IRollSource
 {
     double Next01();

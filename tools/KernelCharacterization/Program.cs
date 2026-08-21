@@ -9,21 +9,29 @@ namespace SqueakyRatkin.KernelCharacterization;
 /// <summary>
 /// Kernel 验证门（决策 §5 验证门 + §4.9 黄金语料）。
 /// 1) 单测：语义规范逐条断言（UnitTests）。
-/// 2) 黄金语料生成：设置全项矩阵（场景 × mode × 域 × 15 action × 多种子 × gate 面）→ 确定性
-///    输入→期望 ChainResult 行，写入 fixtures/corpus/corpus-0.3.0.txt；生成后立即回放（零 delta 自检）。
-/// 0.3.1 切核：以同 harness（仅更新 Kernel 链接）回放 corpus，任何 delta = 回归。
+/// 2) 正常运行：设置全项矩阵（场景 × mode × 域 × 15 action × 多种子 × gate 面）生成确定性
+///    输入→期望 ChainResult 字节，并在写入前与 fixtures/corpus/corpus-0.3.0.txt 的冻结基线比较。
+///    只有显式 <c>--update-corpus</c> 维护模式可以重建该基线。
+/// 0.3.1 切核：以同 harness（仅 Kernel 链接）回放 frozen corpus，任何 byte delta = 回归。
 /// 语料场景构造（Scenarios.cs）在 0.3.x 窗口内不得改动。
 /// </summary>
 internal static class Program
 {
     private const string CorpusFileName = "corpus-0.3.0.txt";
+    private const string UpdateCorpusArgument = "--update-corpus";
     private static readonly long[] Seeds = { 1, 2, 3 };
+    private static readonly UTF8Encoding Utf8WithoutBom = new(false);
 
-    private static int Main()
+    private static int Main(string[] args)
     {
+        if (args.Length > 1 || (args.Length == 1 && !string.Equals(args[0], UpdateCorpusArgument, StringComparison.Ordinal)))
+        {
+            Console.Error.WriteLine("Usage: SqueakyKernelCharacterization [--update-corpus]");
+            return 2;
+        }
         try
         {
-            return Run();
+            return Run(args.Length == 1);
         }
         catch (Exception ex)
         {
@@ -32,15 +40,13 @@ internal static class Program
         }
     }
 
-    private static int Run()
+    private static int Run(bool updateCorpus)
     {
         int failures = 0;
         Console.WriteLine("Unit tests...");
         UnitTests.RunAll(ref failures);
 
-        Console.WriteLine("Golden corpus...");
         string corpusDir = Path.Combine(FindRepositoryRoot(), "fixtures", "corpus");
-        Directory.CreateDirectory(corpusDir);
         string corpusPath = Path.Combine(corpusDir, CorpusFileName);
         string corpus;
         try
@@ -52,23 +58,55 @@ internal static class Program
             Console.Error.WriteLine("  corpus generation exception: " + ex.GetType().FullName + " :: " + ex.Message);
             return 1;
         }
-        File.WriteAllText(corpusPath, corpus, new UTF8Encoding(false));
-        Console.WriteLine("  corpus written: " + corpusPath + " (" + CountLines(corpus) + " cases)");
+        byte[] generated = Utf8WithoutBom.GetBytes(corpus);
 
-        Console.WriteLine("Replay self-check...");
-        string replay = GenerateCorpus();
-        if (replay == corpus)
+        Console.WriteLine(updateCorpus ? "Golden corpus update..." : "Golden corpus replay...");
+        if (updateCorpus)
         {
-            Console.WriteLine("  ok: replay zero delta");
+            Directory.CreateDirectory(corpusDir);
+            File.WriteAllBytes(corpusPath, generated);
+            Console.WriteLine("  corpus updated: " + corpusPath + " (" + CountLines(corpus) + " cases)");
+        }
+        else if (!File.Exists(corpusPath))
+        {
+            Console.Error.WriteLine("  FAIL: committed corpus missing: " + corpusPath);
+            return 1;
+        }
+
+        byte[] baseline = File.ReadAllBytes(corpusPath);
+        if (BytesEqual(generated, baseline))
+        {
+            Console.WriteLine(updateCorpus
+                ? "  ok: updated corpus byte-stable"
+                : "  ok: committed corpus replay zero delta (byte-identical)");
         }
         else
         {
-            Console.Error.WriteLine("  FAIL: replay delta detected");
+            Console.Error.WriteLine("  FAIL: corpus delta detected (generated " + generated.Length + " bytes, baseline " + baseline.Length + " bytes)");
+            failures++;
+        }
+
+        Console.WriteLine("Replay determinism check...");
+        byte[] replay = Utf8WithoutBom.GetBytes(GenerateCorpus());
+        if (BytesEqual(generated, replay))
+        {
+            Console.WriteLine("  ok: deterministic replay zero delta");
+        }
+        else
+        {
+            Console.Error.WriteLine("  FAIL: deterministic replay delta detected");
             failures++;
         }
 
         Console.WriteLine(failures == 0 ? "Kernel characterization passed." : "Kernel characterization FAILED (" + failures + ").");
         return failures == 0 ? 0 : 1;
+    }
+
+    private static bool BytesEqual(byte[] left, byte[] right)
+    {
+        if (left.Length != right.Length) return false;
+        for (int i = 0; i < left.Length; i++) if (left[i] != right[i]) return false;
+        return true;
     }
 
     /// <summary>全矩阵语料生成。确定性：每 case 独立 roll 流（seed 派生），同输入同输出。
@@ -94,14 +132,14 @@ internal static class Program
 
     private static void AppendScenarioCases(StringBuilder sb, string scenario, SqueakPoolRegistry registry, AudioDomain[] domains)
     {
-        foreach (SqueakyRatkin.SqueakVoicePackMode mode in new[] { SqueakyRatkin.SqueakVoicePackMode.Off, SqueakyRatkin.SqueakVoicePackMode.Fallback, SqueakyRatkin.SqueakVoicePackMode.Remix })
+        foreach (SelectionMode mode in new[] { SelectionMode.Off, SelectionMode.Fallback, SelectionMode.Remix })
         {
             foreach (AudioDomain domain in domains)
             {
-                foreach (int actionIndex in Range(0, SqueakyRatkin.SqueakActionDefinitions.Count))
+                foreach (int actionIndex in Range(0, ActionAudioKeyMirror.Count))
                 {
                     SqueakyRatkin.SqueakAction action = (SqueakyRatkin.SqueakAction)actionIndex;
-                    string actionKey = SqueakyRatkin.ActionKey.For(action)!;
+                    string actionKey = ActionKey.For(action)!;
                     foreach (long seed in Seeds)
                     {
                         foreach (SimGate gate in new[] { SimGate.All, SimGate.Partial })
@@ -120,10 +158,10 @@ internal static class Program
         }
     }
 
-    private static string ModeName(SqueakyRatkin.SqueakVoicePackMode mode) => mode switch
+    private static string ModeName(SelectionMode mode) => mode switch
     {
-        SqueakyRatkin.SqueakVoicePackMode.Off => "Off",
-        SqueakyRatkin.SqueakVoicePackMode.Fallback => "Fallback",
+        SelectionMode.Off => "Off",
+        SelectionMode.Fallback => "Fallback",
         _ => "Remix",
     };
 

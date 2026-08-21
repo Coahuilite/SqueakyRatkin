@@ -57,20 +57,20 @@ public sealed class SqueakPoolRegistry
         poolsByDomain = pools;
     }
 
-    /// <summary>0.3.0 选择链求值（语义规范见类注释）。</summary>
-    public ChainResult Select(SelectionContext ctx, SqueakyRatkin.SqueakVoicePackMode mode, ISoundGate gate, IRollSource rolls)
+    /// <summary>选择链求值。<see cref="SelectionMode"/> 是内核 API，适配层负责从设置枚举映射。</summary>
+    public ChainResult Select(SelectionContext ctx, SelectionMode mode, ISoundGate gate, IRollSource rolls)
     {
         if (gate == null) throw new ArgumentNullException(nameof(gate));
         if (rolls == null) throw new ArgumentNullException(nameof(rolls));
         ChainResult vanilla = SelectBuiltIn(ctx, gate);
-        if (mode == SqueakyRatkin.SqueakVoicePackMode.Off) return vanilla;
+        if (mode == SelectionMode.Off) return vanilla;
 
         ChainResult x = ctx.Domain.Xenotype != null
             ? SelectTier(PoolFor(ctx.Domain), ChainTier.XenotypePack, ctx, gate, rolls)
             : ChainResult.None;
         ChainResult r = SelectTier(PoolFor(new AudioDomain(ctx.Domain.Race, null)), ChainTier.RacePack, ctx, gate, rolls);
 
-        if (mode == SqueakyRatkin.SqueakVoicePackMode.Fallback) return x.IsNone ? (r.IsNone ? vanilla : r) : x;
+        if (mode == SelectionMode.Fallback) return x.IsNone ? (r.IsNone ? vanilla : r) : x;
 
         // Remix：三级等权折叠，固定序 [xeno, race, builtin]（旧实现同序）。
         ChainResult tier0 = x, tier1 = r, tier2 = vanilla;

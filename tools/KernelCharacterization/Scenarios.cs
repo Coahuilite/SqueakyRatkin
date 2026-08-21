@@ -17,14 +17,14 @@ public static class Scenarios
     public static readonly RaceKey Ratkin = new("Ratkin");
     public static readonly XenotypeKey XenoA = new("XenoA");
 
-    /// <summary>内置表种子（0.3.0：15 动作全列 = SqueakActionDefinitions.AudioKey 投影，单源）。</summary>
+    /// <summary>内置表种子：本 harness 的 15 项 AudioKey 镜像投影；内核键空间另保留 17 个 built-in key。</summary>
     public static BuiltInFallbackTable BuildBuiltIn()
     {
-        Dictionary<SqueakyRatkin.SqueakAction, string> keys = new();
-        for (int i = 0; i < SqueakyRatkin.SqueakActionDefinitions.Count; i++)
+        Dictionary<string, string> keys = new(StringComparer.Ordinal);
+        for (int i = 0; i < ActionAudioKeyMirror.Count; i++)
         {
             SqueakyRatkin.SqueakAction action = (SqueakyRatkin.SqueakAction)i;
-            keys[action] = SqueakyRatkin.SqueakActionDefinitions.Get(action).AudioKey;
+            keys[ActionKey.For(action)!] = ActionAudioKeyMirror.For(action);
         }
         return new BuiltInFallbackTable(new[] { new FallbackProfile(Ratkin, 1, keys) });
     }
@@ -80,12 +80,12 @@ public static class Scenarios
                         if (key.NodeType == System.Xml.XmlNodeType.Element && !string.IsNullOrEmpty(key.InnerText)) keys.Add(key.InnerText);
                     }
                 }
-                selections[ComposeDomainKey(ParseScope(scope), target)] = keys;
+                selections[ComposeDomainKey(scope, target)] = keys;
             }
         }
 
         List<VoicePackEntry> entries = new();
-        AddFixtureDomain(entries, selections, SqueakyRatkin.SqueakVoicePackScope.Race, "");
+        AddFixtureDomain(entries, selections, "Race", "");
         // Biotech 注入面：F07 = dormant（Biotech 关，xeno 域不注入 → 查询该域回退）；其余场景注入全部 xeno 选择域。
         if (scenario != "F07-inactive")
         {
@@ -93,7 +93,7 @@ public static class Scenarios
             {
                 if (!pair.Key.StartsWith("Xenotype:", StringComparison.Ordinal)) continue;
                 string target = pair.Key.Substring("Xenotype:".Length);
-                AddFixtureDomain(entries, selections, SqueakyRatkin.SqueakVoicePackScope.Xenotype, target);
+                AddFixtureDomain(entries, selections, "Xenotype", target);
             }
         }
         return new SqueakPoolRegistry(entries, BuildBuiltIn(), DomainFilter.Everything);
@@ -114,10 +114,10 @@ public static class Scenarios
         return domains.ToArray();
     }
 
-    private static void AddFixtureDomain(List<VoicePackEntry> entries, IReadOnlyDictionary<string, HashSet<string>> selections, SqueakyRatkin.SqueakVoicePackScope scope, string target)
+    private static void AddFixtureDomain(List<VoicePackEntry> entries, IReadOnlyDictionary<string, HashSet<string>> selections, string scope, string target)
     {
         if (!selections.TryGetValue(ComposeDomainKey(scope, target), out HashSet<string>? keys)) return;
-        AudioDomain domain = scope == SqueakyRatkin.SqueakVoicePackScope.Race
+        AudioDomain domain = scope == "Race"
             ? RaceDomain
             : new AudioDomain(Ratkin, new XenotypeKey(target));
         foreach (string packKey in keys)
@@ -128,27 +128,22 @@ public static class Scenarios
         }
     }
 
-    /// <summary>pack 定义构造（fixture 无音频数据）：声音 key = packKey + "_" + AudioKey + "_" + s。
-    /// 注意：仅对「有 pack 定义」的 key 构造；orphan key（如 SR_GonePack_9999）在此处不表达 pack 缺失——
-    /// 语料对 orphan 语义的体现 = 无池（F06 场景无 Race 池：key 无法解析为域成员）。
-    /// 为实现该语义，F06 的 key 不构造条目：由调用方在 F06 场景跳过构造。</summary>
+    /// <summary>pack 定义构造（fixture 无音频数据）：声音 key = packKey + "_" + AudioKey + "_" + s。</summary>
     private static VoicePackEntry EntryFor(string packKey, AudioDomain domain)
     {
         Dictionary<string, ActionSoundSet> actions = new();
-        for (int i = 0; i < SqueakyRatkin.SqueakActionDefinitions.Count; i++)
+        for (int i = 0; i < ActionAudioKeyMirror.Count; i++)
         {
             SqueakyRatkin.SqueakAction action = (SqueakyRatkin.SqueakAction)i;
-            string audioKey = SqueakyRatkin.SqueakActionDefinitions.Get(action).AudioKey;
+            string audioKey = ActionAudioKeyMirror.For(action);
             actions[ActionKeyFor(action)] = new ActionSoundSet(new[] { packKey + "_" + audioKey + "_0" }, null, 1f);
         }
         return new VoicePackEntry(packKey, domain, 1f, actions);
     }
 
-    private static SqueakyRatkin.SqueakVoicePackScope ParseScope(string text) => text == "Xenotype" ? SqueakyRatkin.SqueakVoicePackScope.Xenotype : SqueakyRatkin.SqueakVoicePackScope.Race;
-
-    /// <summary>等价于真实 VoicePackSelectionRecord.ComposeDomainKey（无法链接 Verse 依赖文件，语义逐字相同）。</summary>
-    private static string ComposeDomainKey(SqueakyRatkin.SqueakVoicePackScope scope, string targetDefName)
-        => scope == SqueakyRatkin.SqueakVoicePackScope.Race ? "Race" : scope == SqueakyRatkin.SqueakVoicePackScope.Xenotype ? "Xenotype:" + (targetDefName ?? "") : "";
+    /// <summary>等价于真实 VoicePackSelectionRecord.ComposeDomainKey 的本地字符串镜像。</summary>
+    private static string ComposeDomainKey(string scope, string targetDefName)
+        => scope == "Race" ? "Race" : scope == "Xenotype" ? "Xenotype:" + (targetDefName ?? "") : "";
 
     /// <summary>场景 → 注册表（语料与回放共用同一构造）。</summary>
     public static SqueakPoolRegistry BuildRegistry(string scenario)
@@ -209,10 +204,10 @@ public static class Scenarios
     private static VoicePackEntry Entry(string packKey, AudioDomain domain, int soundCount, bool muteLast)
     {
         Dictionary<string, ActionSoundSet> actions = new();
-        for (int i = 0; i < SqueakyRatkin.SqueakActionDefinitions.Count; i++)
+        for (int i = 0; i < ActionAudioKeyMirror.Count; i++)
         {
             SqueakyRatkin.SqueakAction action = (SqueakyRatkin.SqueakAction)i;
-            string audioKey = SqueakyRatkin.SqueakActionDefinitions.Get(action).AudioKey;
+            string audioKey = ActionAudioKeyMirror.For(action);
             List<string> sounds = new(soundCount);
             for (int s = 0; s < soundCount; s++)
             {
@@ -225,5 +220,5 @@ public static class Scenarios
         return new VoicePackEntry(packKey, domain, 1f, actions);
     }
 
-    private static string ActionKeyFor(SqueakyRatkin.SqueakAction action) => SqueakyRatkin.ActionKey.For(action)!;
+    private static string ActionKeyFor(SqueakyRatkin.SqueakAction action) => ActionKey.For(action)!;
 }

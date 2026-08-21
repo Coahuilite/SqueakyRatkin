@@ -9,7 +9,7 @@ $ErrorActionPreference = "Stop"
 
 # 一次输入本地自动校验（2026-08-20）。
 # 顺序（fail-fast，任一失败即停并给出该检查的单独重跑命令）：
-#   1-3  三 harness：内核纯度门 + 43 断言 + 语料 3782 生成/回放；
+#   1-3  三 harness：内核纯度门 + 48 断言 + 已提交语料 3782 例字节回放；
 #        设置 fixture 9 场景字节稳定；日志协议 v1 双 flavor（Release + Dev）。
 #   4    fixtures/ 零 delta 门（语料与期望文件必须与提交内容逐字节一致）。
 #   5-7   主模组 Dev flavor 构建 → Steam flavor 构建 → Dev 重建（恢复 Assemblies 为 Dev 态）；
@@ -39,7 +39,7 @@ function Invoke-Check {
     Write-Host 'OK'
 }
 
-Invoke-Check 'KernelCharacterization (purity gate, 43 asserts, corpus 3782)' `
+Invoke-Check 'KernelCharacterization (purity gate, 48 asserts, committed corpus 3782 byte replay)' `
     'dotnet run --project tools/KernelCharacterization -c Release' `
     { dotnet run --project (Join-Path $root 'tools\KernelCharacterization') -c Release }
 

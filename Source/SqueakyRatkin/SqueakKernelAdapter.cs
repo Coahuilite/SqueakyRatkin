@@ -53,14 +53,23 @@ internal static class SqueakKernelAdapter
 
     public static IRollSource Rolls => new RandRollSource();
 
+    /// <summary>产品设置枚举到内核选择枚举的唯一映射点。</summary>
+    public static SelectionMode ToSelectionMode(SqueakVoicePackMode mode) => mode switch
+    {
+        SqueakVoicePackMode.Fallback => SelectionMode.Fallback,
+        SqueakVoicePackMode.Remix => SelectionMode.Remix,
+        _ => SelectionMode.Off,
+    };
+
     /// <summary>内置表（0.3.0 种子 = SqueakActionDefinitions.AudioKey 单源投影，15 动作全列）。</summary>
     public static BuiltInFallbackTable BuildBuiltIn()
     {
-        Dictionary<SqueakAction, string> keys = new();
+        Dictionary<string, string> keys = new(StringComparer.Ordinal);
         for (int i = 0; i < SqueakActionDefinitions.Count; i++)
         {
             SqueakAction action = (SqueakAction)i;
-            keys[action] = SqueakActionDefinitions.Get(action).AudioKey;
+            string? actionKey = ActionKey.For(action);
+            if (actionKey != null) keys[actionKey] = SqueakActionDefinitions.Get(action).AudioKey;
         }
         return new BuiltInFallbackTable(new[] { new FallbackProfile(new RaceKey("Ratkin"), 1, keys) });
     }

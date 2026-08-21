@@ -16,14 +16,10 @@
     <DefineConstants>$(DefineConstants);SQUEAKY_DEV</DefineConstants>
   </PropertyGroup>
 
-  <!-- 纯度门：仅链接零 Verse 引用文件（Kernel/ + 领域枚举 + 动作定义 + ActionKey）。
-       Kernel 文件一旦引用 Verse/Unity，本工程编译失败 = 纯度违反（决策 §3.2）。 -->
+  <!-- 纯度门：迁移清单就是 Kernel/*.cs，零根文件链接。
+       Kernel 文件一旦引用 Verse/Unity/RimWorld，本工程编译失败 = 纯度违反（决策 §3.2）。 -->
   <ItemGroup>
     <Compile Include="..\..\Source\SqueakyRatkin\Kernel\*.cs" Link="Kernel\%(Filename)%(Extension)" />
-    <Compile Include="..\..\Source\SqueakyRatkin\SqueakActionDomain.cs" Link="Linked\SqueakActionDomain.cs" />
-    <Compile Include="..\..\Source\SqueakyRatkin\SqueakVoicePackDomain.cs" Link="Linked\SqueakVoicePackDomain.cs" />
-    <Compile Include="..\..\Source\SqueakyRatkin\SqueakActionModel.cs" Link="Linked\SqueakActionModel.cs" />
-    <Compile Include="..\..\Source\SqueakyRatkin\ActionKey.cs" Link="Linked\ActionKey.cs" />
   </ItemGroup>
 
 </Project>

@@ -3,7 +3,7 @@ using System;
 namespace SqueakyRatkin.Kernel;
 
 // 域键（§4.2）：AudioDomain(Race, Xenotype?) 取代旧 scope+targetDefName 字符串域键。
-// 零 Verse 引用；PoolKey 序数排序保证跨重建稳定（orphan 语义沿用）。
+// 零游戏运行时引用；PoolKey 序数排序保证跨重建稳定（orphan 语义沿用）。
 // 手写值相等（net472 无 record）：AudioDomain 是池字典键。
 
 public readonly struct RaceKey : IEquatable<RaceKey>

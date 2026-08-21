@@ -36,6 +36,10 @@ Short release summary.
 - ...
 ```
 
+## Unreleased — 0.3.1
+
+- Development snapshot; no release notes yet.
+
 ## [2026-08-21 09:35 UTC+8] Version 0.3.0
 
 Internal kernel refactor (maintenance update). Functions and settings should behave exactly like 0.2.4; please report any behavioral differences.

@@ -7,7 +7,7 @@
     <Nullable>enable</Nullable>
     <AssemblyName>SqueakyRatkin</AssemblyName>
     <RootNamespace>SqueakyRatkin</RootNamespace>
-    <Version>0.3.0</Version>
+    <Version>0.3.1</Version>
     <VersionPrefix>$(Version)</VersionPrefix>
     <AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
     <FileVersion>$(VersionPrefix).0</FileVersion>
