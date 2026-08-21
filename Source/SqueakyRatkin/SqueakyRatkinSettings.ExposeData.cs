@@ -25,6 +25,10 @@ public partial class SqueakyRatkinSettings
     private bool voicePackModeWasLoaded;
     private bool migrationPersistencePending;
     private bool migrationPersistenceBlocked;
+    // Reached only when a settings file was successfully deserialized through Scribe (ReadModSettings ran
+    // ExposeData in LoadingVars). A fresh or unreadable file never reaches it -> SettingsOrigin FreshCreated.
+    private bool settingsLoadedFromFile;
+    internal bool SettingsLoadedFromFile => settingsLoadedFromFile;
     internal bool MigrationPersistencePendingForFixture => migrationPersistencePending;
     internal bool MigrationPersistenceBlockedForFixture => migrationPersistenceBlocked;
     internal bool IsPersistenceBlockedByMigrationFailure => migrationPersistenceBlocked;
@@ -39,6 +43,7 @@ public partial class SqueakyRatkinSettings
             distanceRangeWasLoaded = false;
             scaleFrequencyWithTalkingWasLoaded = false;
             voicePackModeWasLoaded = false;
+            settingsLoadedFromFile = true;
         }
 
         Scribe_Values.Look(ref voicePackMode, "voicePackMode", SqueakVoicePackMode.Fallback);

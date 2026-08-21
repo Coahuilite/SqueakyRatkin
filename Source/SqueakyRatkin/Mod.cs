@@ -49,6 +49,9 @@ public class SqueakyRatkinMod : Mod
         Settings = GetSettings<SqueakyRatkinSettings>();
         // Loading may run on LongEvent's worker thread. PostLoadInit only records a pending migration;
         // this constructor must not consume it, read Unity Time, initialize resolver/UI state, or publish runtime.
+        // SettingsOrigin (srdiag v2): LoadedFromFile = Scribe deserialization completed (ExposeData ran);
+        // FreshCreated = no file or an unreadable file the framework replaced with a new defaults instance.
+        SqueakLog.SettingsOrigin(Settings.SettingsLoadedFromFile ? SqueakSettingsOrigin.LoadedFromFile : SqueakSettingsOrigin.FreshCreated);
         SqueakLog.StartupIdentity();
         Harmony.PatchAll();
 

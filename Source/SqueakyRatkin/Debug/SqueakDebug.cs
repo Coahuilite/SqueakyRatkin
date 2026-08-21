@@ -23,11 +23,22 @@ public static class SqueakDebug
         SqueakLog.ResetSession();
     }
 
+    /// <summary>srdiag v2 tier vocabulary (0.3.1): xenotype_pack / race_pack / vanilla / "-" for none.
+    /// The adapter collapses ChainTier (incl. built-in fallback) into SqueakSoundSource before this point;
+    /// pack_fallback/built_in_fallback values are reserved for the 0.3.2 pack-fallback chain end.</summary>
+    private static string ProtocolTier(SqueakSoundSource source) => source switch
+    {
+        SqueakSoundSource.XenotypePack => "xenotype_pack",
+        SqueakSoundSource.RacePack => "race_pack",
+        SqueakSoundSource.Vanilla => "vanilla",
+        _ => "-",
+    };
+
     public static void NotifySqueak(Pawn pawn, SqueakAction action, SqueakMood mood, SqueakSoundChoice choice)
     {
         SoundDef? def = choice.Sound;
         if (def == null) return;
-        NotifyAudioDispatched(pawn, action, def);
+        NotifyAudioDispatched(pawn, action, choice);
         SqueakAudioPathDiagnostics.RecordDispatched(pawn, action, mood, choice);
 
         if (AudioPathDiagnosticsEnabled && pawn?.Map != null)
@@ -38,15 +49,28 @@ public static class SqueakDebug
     }
 
     /// <summary>Detailed logging is independent; successful-dispatch motes are controlled by the audio-path diagnostics switch above.</summary>
-    private static void NotifyAudioDispatched(Pawn pawn, SqueakAction action, SoundDef def)
+    private static void NotifyAudioDispatched(Pawn pawn, SqueakAction action, SqueakSoundChoice choice)
     {
         if (!SqueakLog.EffectiveDevLogging) return;
+        SoundDef? def = choice.Sound;
+        if (def == null) return;
         float now = Time.realtimeSinceStartup;
         if (!audioSamples.TryGetValue(action, out AudioSample? sample)) { sample = new AudioSample(); audioSamples.Add(action, sample); }
         sample.dispatched++;
         if (now >= sample.nextDetail)
         {
             SqueakLog.AudioDispatchOk(action.ToString(), pawn.thingIDNumber.ToString(), def.defName, sample.suppressed, pawn.LabelShort, pawn.ThingID);
+            // srdiag v2 route record shares the same success-path rate control as audio.dispatch.ok.
+            // action carries the string action key (built-in = enum name, byte-identical to v1);
+            // race/xenotype carry exact DefNames; tier uses the protocol vocabulary.
+            SqueakLog.AudioRouteSelected(
+                SqueakyRatkin.Kernel.ActionKey.For(action) ?? action.ToString(),
+                pawn.def?.defName ?? SqueakProductDomainFilter.PrimaryRaceDefName,
+                pawn.genes?.Xenotype?.defName,
+                pawn.thingIDNumber.ToString(),
+                def.defName,
+                ProtocolTier(choice.Source),
+                choice.PoolStableKey);
             sample.suppressed = 0;
             sample.nextDetail = now + 5f;
         }

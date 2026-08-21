@@ -28,6 +28,7 @@ internal static class Program
         VerifySilentFailureBoundary();
         VerifyEncodingAndExceptionMetadata();
         VerifyInvalidLoggingModeFallsBackToAuto();
+        VerifyV2Protocol();
 
         if (failures == 0)
         {
@@ -206,6 +207,59 @@ internal static class Program
             AssertLines(nameof(VerifyInvalidLoggingModeFallsBackToAuto), Human("info", "Squeaky Ratkin startup completed."));
     }
 
+    /// <summary>srdiag v2 (0.3.1 wave 2c): fmt=2 header, fixed v2 core order with race/[xenotype],
+    /// string action keys, tier, settings.origin, and the log-v2 once domain. All v1 asserts above
+    /// are untouched and re-verify that the 28-event fmt=1 bytes are unchanged.</summary>
+    private static void VerifyV2Protocol()
+    {
+        Reset(SqueakDevLoggingMode.Enabled);
+        SqueakLog.SettingsOrigin(SqueakSettingsOrigin.FreshCreated);
+        SqueakLog.AudioRouteSelected("Select", "Ratkin", null, "12345", "SR_OfficialExample_Race_Select", "race_pack", "coahuilite.squeakyratkin:SR_OfficialExample_Race");
+        SqueakLog.AudioRouteSelected("coahuilite.squeakyratkin.external_action", "Ratkin", "Baseliner", "777", "SR_Baseliner_Select", "xenotype_pack", "coahuilite.squeakyratkin:SR_Baseliner");
+        SqueakLog.AudioRouteSelected("Move", "Ratkin", null, "1", "SR_Move_1", "vanilla", null);
+
+        AssertLines(nameof(VerifyV2Protocol) + " enabled",
+            V2("info", "daily", "settings.origin", "Mod settings origin: FreshCreated.", trailing: " settings_origin=FreshCreated"),
+            V2("info", "dev_only", "audio.route.selected", "Squeak audio route was selected.", action: "Select", target: "12345", pack: "coahuilite.squeakyratkin:SR_OfficialExample_Race", race: "Ratkin", trailing: " sound=SR_OfficialExample_Race_Select tier=race_pack"),
+            V2("info", "dev_only", "audio.route.selected", "Squeak audio route was selected.", action: "coahuilite.squeakyratkin.external_action", target: "777", pack: "coahuilite.squeakyratkin:SR_Baseliner", race: "Ratkin", xenotype: "Baseliner", trailing: " sound=SR_Baseliner_Select tier=xenotype_pack"),
+            V2("info", "dev_only", "audio.route.selected", "Squeak audio route was selected.", action: "Move", target: "1", pack: "-", race: "Ratkin", trailing: " sound=SR_Move_1 tier=vanilla"));
+
+        // log-v2 once: the first settings.origin claim wins per session; ResetSession reopens the domain.
+        Reset(SqueakDevLoggingMode.Enabled);
+        SqueakLog.SettingsOrigin(SqueakSettingsOrigin.LoadedFromFile);
+        SqueakLog.SettingsOrigin(SqueakSettingsOrigin.FreshCreated);
+        AssertLines(nameof(VerifyV2Protocol) + " once",
+            V2("info", "daily", "settings.origin", "Mod settings origin: LoadedFromFile.", trailing: " settings_origin=LoadedFromFile"));
+        SqueakLog.ResetSession();
+        Verse.Log.Reset();
+        SqueakLog.SettingsOrigin(SqueakSettingsOrigin.FreshCreated);
+        AssertLines(nameof(VerifyV2Protocol) + " once reset",
+            V2("info", "daily", "settings.origin", "Mod settings origin: FreshCreated.", trailing: " settings_origin=FreshCreated"));
+
+        // log-v1 and log-v2 once domains are independent: identical payload fields claim separate keys.
+        Reset(SqueakDevLoggingMode.Enabled);
+        SqueakLog.SettingsOrigin(SqueakSettingsOrigin.FreshCreated);
+        SqueakLog.PackRejected("p1", 1);
+        SqueakLog.PackRejected("p1", 2);
+        SqueakLog.SettingsOrigin(SqueakSettingsOrigin.LoadedFromFile);
+        AssertLines(nameof(VerifyV2Protocol) + " independent once",
+            V2("info", "daily", "settings.origin", "Mod settings origin: FreshCreated.", trailing: " settings_origin=FreshCreated"),
+            D("warning", "daily", "voicepack.pack.rejected", "A VoicePack was rejected.", pack: "p1", trailing: " reason=duplicate_key count=1"));
+
+        // v2 values flow through the same percent-encoding/sanitization rules as v1.
+        Reset(SqueakDevLoggingMode.Enabled);
+        SqueakLog.AudioRouteSelected("some package.action", "Ra tin", null, "t 1", "SR_1", "race_pack", null);
+        AssertLines(nameof(VerifyV2Protocol) + " encoding",
+            V2("info", "dev_only", "audio.route.selected", "Squeak audio route was selected.", action: "some%20package.action", target: "t%201", race: "Ra%20tin", trailing: " sound=SR_1 tier=race_pack"));
+
+        // Gating: v2 Daily keeps the human-only shape while detailed logging is ineffective; v2 DevOnly is silent.
+        Reset(SqueakDevLoggingMode.Disabled);
+        SqueakLog.SettingsOrigin(SqueakSettingsOrigin.FreshCreated);
+        SqueakLog.AudioRouteSelected("Select", "Ratkin", null, "1", "SR_1", "race_pack", null);
+        AssertLines(nameof(VerifyV2Protocol) + " disabled",
+            Human("info", "Mod settings origin: FreshCreated."));
+    }
+
     private static Exception CreateNestedException()
     {
         try
@@ -239,6 +293,13 @@ internal static class Program
 
     private static string Human(string level, string text) => level + "|" + Prefix + text;
     private static string Format(Verse.Log.Entry entry) => entry.Level + "|" + entry.Text;
+
+    /// <summary>v2 expected line: fixed core order fmt=2 lvl vis evt action target pack race [xenotype] build build_id.
+    /// xenotype = null omits the optional field; pass "-" explicitly to assert an explicit dash.</summary>
+    private static string V2(string level, string visibility, string eventId, string human, string action = "-", string target = "-", string pack = "-", string race = "-", string? xenotype = null, string trailing = "")
+    {
+        return level + "|" + Prefix + human + " || srdiag fmt=2 lvl=" + level + " vis=" + visibility + " evt=" + eventId + " action=" + action + " target=" + target + " pack=" + pack + " race=" + race + (xenotype == null ? "" : " xenotype=" + xenotype) + " build=" + Build + " build_id=" + BuildId + trailing;
+    }
 
     private static void AssertLines(string name, params string[] expected)
     {

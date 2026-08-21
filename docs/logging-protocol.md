@@ -45,9 +45,36 @@ Values use invariant-culture formatting. Missing values and the literal `N/A` ar
 
 Do not put localized text, pawn labels, filesystem paths, or raw `Exception.ToString()` into the protocol. Exception information is suffix-only: type, inner type, target site, and sanitized message. Sanitization first replaces CR/LF and removes remaining control characters, replaces DOS drive paths, UNC paths, device paths, `file:` URIs, Unix absolute paths, and relative `./` or `../` paths with `<path>`, then truncates to 256 characters. Percent encoding occurs after this sanitization.
 
+## `srdiag` v2 Machine Contract (0.3.1)
+
+The v1 contract above is unchanged and remains the emission format of the original 28-event registry. v2 is a versioned extension of the same one-line suffix: records that carry v2-only facts (settings origin, race/xenotype identity, route tier) begin `srdiag fmt=2` and use the fixed v2 field order below. v1 parsers keep accepting fmt=1 records; **no v1 event ever gains v2 fields** (the closed typed facade cannot express them — v2 fields are not stuffed into fmt=1 records).
+
+The v2 mandatory core fields appear once, in this exact order:
+
+```
+fmt lvl vis evt action target pack race [xenotype] build build_id
+```
+
+- `action` is the string action key (0.3.1 定型, §2.2 of the architecture decision): built-in = enum name (byte-identical to the v1 action value), external = `packageId.defName`. The percent-encoding whitelist already includes `.`, so external keys are written verbatim.
+- `race` is the exact, case-sensitive `ThingDef.defName` of the routing domain; missing is `-`. `xenotype` is present only when the domain has one and is the exact `XenotypeDef.defName`. Only DefNames are written — never labels, HAR package names, or player-mutable text.
+- `settings_origin`, `sound`, and `tier` are event-specific fields appended after the core in the fixed per-event order below. Encoding, sanitization, truncation, exception metadata, and DevOnly gating are identical to v1.
+
+Event-specific fields:
+
+| Event | Fields (fixed order) |
+| --- | --- |
+| `settings.origin` | `settings_origin=FreshCreated\|LoadedFromFile` |
+| `audio.route.selected` | `sound=<SoundDef.defName>` `tier=<tier>` |
+
+`settings.origin` is Daily Info, emitted once per session at startup, right after the settings object is read. **Origin detection:** `LoadedFromFile` = a settings file was successfully deserialized through Scribe (ExposeData reached LoadingVars); `FreshCreated` = no file, or an unreadable file — the framework discards the broken parse, warns, and returns a new field-defaults instance, which is reported as FreshCreated. The sentence is parameterized by the closed two-value origin set (precedent: `mod.start.identity` parameterizes by build/build_id).
+
+`audio.route.selected` is DevOnly Info and follows the same success-path volume control as `audio.dispatch.ok` (one record per action per five seconds, emitted alongside it). `tier` vocabulary in 0.3.1: `xenotype_pack`, `race_pack`, `vanilla`, `-` for none; `pack_fallback`/`built_in_fallback` are reserved for the 0.3.2 pack-fallback chain end.
+
+Once keys are namespaced per protocol version: fmt=1 records claim the `log-v1` domain and fmt=2 records the `log-v2` domain, so the two never collide.
+
 ## Once and Success-Path Volume Control
 
-The registry's exact-once key comprises the event plus action, target, pack, reason, and exception type. It is claimed under a lock, making duplicate suppression thread-safe. The session retains at most 1024 keys; when a new claim reaches that limit, the registry clears and accepts the new key. A logging-session reset also clears it.
+The registry's exact-once key comprises the event plus action, target, pack, reason, and exception type, namespaced per protocol version (`log-v1` for fmt=1 records, `log-v2` for fmt=2 records). It is claimed under a lock, making duplicate suppression thread-safe. The session retains at most 1024 keys; when a new claim reaches that limit, the registry clears and accepts the new key. A logging-session reset also clears it.
 
 When detailed logging is effective, successful audio dispatches emit `audio.dispatch.ok` immediately for the first success of each action. Further detail for that action is limited to one record per five seconds; suppressed detail is counted. `trigger.outcome.summary` aggregates dispatched and suppressed-detail counts at most once per 60 seconds. This rate control does not alter operational warning/error visibility or severity.
 
@@ -85,6 +112,10 @@ The table below is the actual closed registry. The human-sentence column reprodu
 | `devtools.overlay.changed` | DevOnly | Info | `Diagnostics overlay state changed.` |
 | `devtools.camera_indicator.changed` | DevOnly | Info | `Camera indicator state changed.` |
 | `devtools.workbench.open_failed` | Daily | Warning | `Animal Voice Workbench could not be opened.` |
+| `settings.origin` | Daily | Info | `Mod settings origin: <FreshCreated\|LoadedFromFile>.` |
+| `audio.route.selected` | DevOnly | Info | `Squeak audio route was selected.` |
+
+The last two rows are the 0.3.1 v2 extension records (fmt=2); the 28 rows above them are the locked v1 surface (fmt=1) and remain byte-immutable.
 
 `voicepack.pack.rejected` uses the pack key as `pack`. `reason` carries `duplicate_key` (default, same key loaded more than once) or `domain_filtered` (0.3.1 race-aware: `raceDefName` outside the product domain whitelist), with `count` = the number of duplicate instances for the former.
 
