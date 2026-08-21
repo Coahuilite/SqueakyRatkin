@@ -27,7 +27,12 @@ function Invoke-Check {
     param([string]$Name, [string]$Retry, [scriptblock]$Action)
 
     Write-Host -NoNewline "[run] $Name ... "
-    & $Action *> $tempLog
+    # PS 5.1（PowerShell/PowerShell#3996）：$ErrorActionPreference=Stop 时，原生命令的 stderr 会变成
+    # 终止性 NativeCommandError（即使 *> 已重定向），某些 5.1 版本/7.3+ 都会触发。harness 的失败判定
+    # 只依赖 $LASTEXITCODE，故原生调用期间临时降为 Continue，结束后恢复——脚本级 fail-fast 语义不变。
+    $previousEap = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try { & $Action *> $tempLog } finally { $ErrorActionPreference = $previousEap }
     $code = $LASTEXITCODE
     if ($code -ne 0) {
         Write-Host 'FAIL'
