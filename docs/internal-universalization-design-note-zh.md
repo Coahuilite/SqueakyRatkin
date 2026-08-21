@@ -50,6 +50,10 @@ XenotypeAudioDomain  = (RaceKey, XenotypeKey)
 
 事实基础：当前路由与年龄无关（0.2.3 排查已取证，全库无生命阶段分支）；婴幼儿默认听感问题已由默认启用内置包缓解，但"不同年龄段听感差异化"仍是真实产品需求。年龄支持必须与 race-aware 域模型**同期设计、同期冻结 XML ABI**，避免第二次 Scribe 迁移。
 
+**RimWorld 1.6 年龄认定事实基线（2026-08-21，RimSage 反编译源码 + wiki 一手核验）**：每 race 在 ThingDef XML 定义 `lifeStageAges` 列表（`(LifeStageDef, minAge)` 升序）；判定 = 按生物年龄取 `minAge < years` 的最后一条 → `pawn.ageTracker.CurLifeStage`；`pawn.DevelopmentalStage` = `CurLifeStage?.developmentalStage ?? Adult`（Pawn.cs:2022）。发育阶段枚举 `DevelopmentalStage : uint`（Verse）= None/Newborn/Baby/Child/Adult，**无 Toddler**。原版 Human race 1.6 五段：`HumanlikeBaby` 0–3（Baby，voxPitch 1.6）/`HumanlikeChild` 3–9（Child，voxPitch 1.2）/`HumanlikePreTeenager` 9–13（Child，voxPitch 1.2，MayRequire Biotech）/`HumanlikeTeenager` 13–18（Adult 默认值）/`HumanlikeAdult` 18+（Adult）。无 Biotech 时 PreTeenager 条目剔除（Child 3–13）；判定机制全 Core 数据驱动，婴儿/儿童生成内容是 Biotech 的。判定用生物年龄（`AgeBiologicalYearsFloat`），年龄阈值只存在于 race XML 数据，无 C# 硬编码。
+
+**SR 映射口径（据此定案）**：内核 `AgeBucket {Baby, Toddler, Child, Adult}` 保留四值（ABI 已定型，append-only）；`SqueakLifeStageResolver` 按 LifeStageDef defName → AgeBucket 的 XML 数据表映射（默认 Adult）。1.6 原版映射：HumanlikeBaby→Baby、HumanlikeChild→Child、HumanlikePreTeenager→Child、HumanlikeTeenager→Adult、HumanlikeAdult→Adult；**Toddler 桶在 RimWorld 1.6 无原生生命阶段对应**（保留为第三方 race 预留桶，原版表不产生 Toddler）。SR 不得自行按年龄阈值重算阶段（复制原版 minAge 数据 = 双事实源漂移风险），一律经 `CurLifeStage.defName` 查表；表外 defName → Adult。
+
 - **标签形式**：`SqueakVoicePackAction` 增加可选年龄标签（field-presence，如 `Baby`/`Toddler`/`Child`/`Adult` 或 RimWorld 生命阶段 DefName）；**未声明 = 全年龄适用**，第三方存量包零改动、零迁移。选择时按 pawn 当前生命阶段过滤可用条目。
 - **年龄调制轴**：独立于 mood 的调制维度（pitch/volume/jitter 的年龄系数），XML 数据驱动（per-race 或全局默认），不得写 C# age switch；与 `SqueakMoodMod` 同构叠加。
 - **兼容边界**：`SqueakAction` 枚举不变（append-only）；年龄标签只扩展 `SqueakVoicePackAction` 与调制数据模型；srdiag 协议如需记录年龄身份，先设计新协议版本。
