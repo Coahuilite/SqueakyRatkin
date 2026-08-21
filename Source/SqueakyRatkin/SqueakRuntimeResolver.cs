@@ -133,7 +133,7 @@ public static class SqueakRuntimeResolver
             foreach (VoicePackSelectionRecord record in settings.voicePackSelections ?? new List<VoicePackSelectionRecord>())
                 if (record != null && record.scope == SqueakVoicePackScope.Xenotype && !string.IsNullOrEmpty(record.xenotypeDefName)) targets.Add(record.xenotypeDefName);
             foreach (string target in behavior.Keys) targets.Add(target);
-            foreach (string target in catalog.HarHintDefNames) targets.Add(target);
+            // 2b-2 assembled-only：HAR hint 不再进 runtime contexts（非装配域无独立 context，回退 global）。
             foreach (string target in targets)
             {
                 catalog.XenotypeByDefName.TryGetValue(target, out XenotypeDef? xenotype);
@@ -253,10 +253,13 @@ public sealed class SqueakRuntimeSnapshot
     {
         string? actionKey = SqueakyRatkin.Kernel.ActionKey.For(action);
         if (actionKey == null) return SqueakSoundChoice.None;
-        // 2b-2：域身份来自 context（产品 race + 运行时 xenotype defName），不再构造 Ratkin 字面量域。
+        // 域身份 = pawn 真实 race（race-aware 路由：外来 race pawn 命中自身域，池空/无内置 profile = 无声，
+        // 绝不串扰进产品域）；race 不可得时防御回退 context.Race。xenotype 维度沿用 canonical 校验过的 context.Xenotype。
+        string? pawnRace = pawn?.def?.defName;
+        string raceDefName = string.IsNullOrEmpty(pawnRace) ? context.Race.DefName : pawnRace!;
         SqueakyRatkin.Kernel.AudioDomain domain = context.Xenotype != null
-            ? new SqueakyRatkin.Kernel.AudioDomain(context.Race, new SqueakyRatkin.Kernel.XenotypeKey(context.Xenotype.defName))
-            : new SqueakyRatkin.Kernel.AudioDomain(context.Race, null);
+            ? new SqueakyRatkin.Kernel.AudioDomain(new SqueakyRatkin.Kernel.RaceKey(raceDefName), new SqueakyRatkin.Kernel.XenotypeKey(context.Xenotype.defName))
+            : new SqueakyRatkin.Kernel.AudioDomain(new SqueakyRatkin.Kernel.RaceKey(raceDefName), null);
         SqueakyRatkin.Kernel.SelectionContext ctx = new(domain, actionKey, SqueakyRatkin.Kernel.AgeBucket.Adult, production);
         SqueakyRatkin.Kernel.ChainResult result = Registry.Select(ctx, SqueakKernelAdapter.ToSelectionMode(VoicePackMode), SqueakKernelAdapter.GateFor(pawn, map, target), SqueakKernelAdapter.Rolls);
         return SqueakKernelAdapter.ToChoice(result);
