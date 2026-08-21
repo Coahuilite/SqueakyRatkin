@@ -14,8 +14,9 @@ public static class SqueakXenotypeCatalog
     private static SqueakXenotypeCatalogSnapshot current = SqueakXenotypeCatalogSnapshot.Empty;
     public static SqueakXenotypeCatalogSnapshot Current => Volatile.Read(ref current);
 
-    public static void Refresh()
+    public static void Refresh(SqueakyRatkinSettings? settings = null)
     {
+        settings ??= SqueakyRatkinMod.Settings;
         try
         {
             Dictionary<string, List<SqueakVoicePackDef>> groups = new(StringComparer.Ordinal);
@@ -23,9 +24,8 @@ public static class SqueakXenotypeCatalog
             {
                 if (!SqueakVoicePackValidator.IsValid(pack)) continue;
                 if (pack.scope != SqueakVoicePackScope.Race && pack.scope != SqueakVoicePackScope.Xenotype) continue;
-                // 0.3.1 域闸（主闸）：非装配域 raceDefName 的包拒绝加载，dev 可见日志 reason=domain_filtered。
-                // 白名单在 SqueakProductDomainFilter 集中一处；此处不写任何 race 特判。
-                if (!SqueakProductDomainFilter.Contains(pack.raceDefName))
+                // Catalog admission and resolver pool assembly consume the same hidden replacement roster.
+                if (!SqueakProductDomainFilter.Contains(pack.raceDefName, settings))
                 {
                     if (pack.TryGetPackKey(out string filteredKey)) SqueakLog.PackRejected(filteredKey, 1, "domain_filtered");
                     continue;
@@ -161,7 +161,7 @@ public sealed class SqueakXenotypeCatalogSnapshot
         }
         foreach (string name in XenotypePacksByDefName.Keys) AddSource(name, "declared_pack");
         foreach (VoicePackSelectionRecord selection in selections ?? Array.Empty<VoicePackSelectionRecord>())
-            if (selection != null && selection.scope == SqueakVoicePackScope.Xenotype) AddSource(selection.targetDefName, "selection");
+            if (selection != null && selection.scope == SqueakVoicePackScope.Xenotype) AddSource(selection.xenotypeDefName, "selection");
         foreach (XenotypePresetRecord preset in presets ?? Array.Empty<XenotypePresetRecord>())
             if (preset != null) AddSource(preset.xenotypeDefName, "preset");
         if (SqueakLog.ShouldEmitDev)

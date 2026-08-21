@@ -15,8 +15,6 @@ namespace SqueakyRatkin;
 /// </summary>
 internal static class SqueakKernelAdapter
 {
-    private static readonly AudioDomain RatkinRaceDomain = new(new RaceKey("Ratkin"), null);
-
     /// <summary>playability 函子：携带旧 Playable 的 pawn/map/target 上下文；production 语义统一取 ctx.Production
     /// （与调用方同源，避免 gate 捕获标志与 SelectionContext 错配）。</summary>
     private sealed class KernelGate : ISoundGate
@@ -74,7 +72,7 @@ internal static class SqueakKernelAdapter
         return new BuiltInFallbackTable(new[] { new FallbackProfile(new RaceKey("Ratkin"), 1, keys) });
     }
 
-    /// <summary>选择面投影：Race 域 (Ratkin,null) + Xenotype 域 (Ratkin,target)（Biotech 由调用方决定注入面）。</summary>
+    /// <summary>2b-1 retains the legacy string-domain bridge; 2b-2 moves it to AudioDomain end-to-end.</summary>
     public static List<VoicePackEntry> BuildEntries(SqueakXenotypeCatalogSnapshot catalog, IReadOnlyDictionary<string, HashSet<string>> selections)
     {
         List<VoicePackEntry> entries = new();
@@ -82,9 +80,7 @@ internal static class SqueakKernelAdapter
         if (ModsConfig.BiotechActive)
         {
             foreach (KeyValuePair<string, IReadOnlyList<SqueakVoicePackDef>> group in catalog.XenotypePacksByDefName)
-            {
                 AddDomain(entries, group.Value, selections, SqueakVoicePackScope.Xenotype, group.Key);
-            }
         }
         return entries;
     }
@@ -121,7 +117,7 @@ internal static class SqueakKernelAdapter
     {
         if (!selections.TryGetValue(VoicePackSelectionRecord.ComposeDomainKey(scope, target), out HashSet<string>? keys)) return;
         AudioDomain domain = scope == SqueakVoicePackScope.Race
-            ? RatkinRaceDomain
+            ? new AudioDomain(new RaceKey("Ratkin"), null)
             : new AudioDomain(new RaceKey("Ratkin"), new XenotypeKey(target));
         foreach (SqueakVoicePackDef pack in candidates)
         {

@@ -101,7 +101,7 @@ public static class SqueakRuntimeResolver
         if (!EnsureMainThread()) { published = Current; return false; }
         Dictionary<SqueakAction, RuntimeActionDelta> globalActions = BuildGlobalActions(settings);
         try { published = BuildSnapshot(settings, catalog, globalActions); }
-        catch (Exception ex) { SqueakLog.ResolverRebuildFailed(ex); published = BuildFallback(globalActions); }
+        catch (Exception ex) { SqueakLog.ResolverRebuildFailed(ex); published = BuildFallback(globalActions, settings); }
         Volatile.Write(ref current, published);
         ResolverRebuildCount++;
         RuntimeFlushCount++;
@@ -120,15 +120,15 @@ public static class SqueakRuntimeResolver
         Dictionary<string, RuntimeBuilder> behavior = BuildBehavior(settings);
         Dictionary<string, HashSet<string>> selection = BuildSelections(settings.voicePackSelections);
         HashSet<SoundDef> known = SqueakKernelAdapter.CollectKnownSounds(catalog);
-        // 0.3.0 注入面：选择存在的域（Race (Ratkin,*) + Biotech 时 Xenotype (Ratkin,target)）。
+        // 2b-1 preserves the two-part string-domain bridge; 2b-2 moves this to AudioDomain end-to-end.
         List<SqueakyRatkin.Kernel.VoicePackEntry> entries = SqueakKernelAdapter.BuildEntries(catalog, selection);
-        SqueakyRatkin.Kernel.SqueakPoolRegistry registry = new(entries, SqueakKernelAdapter.BuildBuiltIn(), ProductDomainFilter);
+        SqueakyRatkin.Kernel.SqueakPoolRegistry registry = new(entries, SqueakKernelAdapter.BuildBuiltIn(), SqueakProductDomainFilter.KernelFilterFor(settings));
         Dictionary<string, ResolvedSqueakContext> contexts = new(StringComparer.Ordinal);
         if (ModsConfig.BiotechActive)
         {
             HashSet<string> targets = new(catalog.XenotypePacksByDefName.Keys, StringComparer.Ordinal);
             foreach (VoicePackSelectionRecord record in settings.voicePackSelections ?? new List<VoicePackSelectionRecord>())
-                if (record != null && record.scope == SqueakVoicePackScope.Xenotype && !string.IsNullOrEmpty(record.targetDefName)) targets.Add(record.targetDefName);
+                if (record != null && record.scope == SqueakVoicePackScope.Xenotype && !string.IsNullOrEmpty(record.xenotypeDefName)) targets.Add(record.xenotypeDefName);
             foreach (string target in behavior.Keys) targets.Add(target);
             foreach (string target in catalog.HarHintDefNames) targets.Add(target);
             foreach (string target in targets)
@@ -165,7 +165,7 @@ public static class SqueakRuntimeResolver
         Dictionary<string, HashSet<string>> result = new(StringComparer.Ordinal);
         foreach (VoicePackSelectionRecord record in records ?? Array.Empty<VoicePackSelectionRecord>())
         {
-            if (record == null || (record.scope != SqueakVoicePackScope.Race && record.scope != SqueakVoicePackScope.Xenotype) || (record.scope == SqueakVoicePackScope.Xenotype && string.IsNullOrEmpty(record.targetDefName))) continue;
+            if (record == null || (record.scope != SqueakVoicePackScope.Race && record.scope != SqueakVoicePackScope.Xenotype) || (record.scope == SqueakVoicePackScope.Xenotype && string.IsNullOrEmpty(record.xenotypeDefName))) continue;
             result[record.DomainKey] = new HashSet<string>((record.enabledPackKeys ?? new List<string>()).Where(k => !string.IsNullOrEmpty(k)), StringComparer.Ordinal);
         }
         return result;
@@ -181,7 +181,7 @@ public static class SqueakRuntimeResolver
         return new ResolvedSqueakContext(xenotype, builder?.overallIntervalMultiplier ?? 1f, actions, builder?.BuildMoods());
     }
 
-    private static SqueakRuntimeSnapshot BuildFallback(Dictionary<SqueakAction, RuntimeActionDelta> actions)
+    private static SqueakRuntimeSnapshot BuildFallback(Dictionary<SqueakAction, RuntimeActionDelta> actions, SqueakyRatkinSettings settings)
     {
         try
         {
@@ -191,22 +191,17 @@ public static class SqueakRuntimeResolver
                 SoundDef? sound = DefDatabase<SoundDef>.GetNamedSilentFail(SqueakActionDefinitions.Get(action).AudioKey);
                 if (sound != null) known.Add(sound);
             }
-            // 0.3.0 错误路径修复：重建失败快照必须保留 0.2.4 语义——vanilla 兜底仍可用
-            //（种子内置表 + Off），不得退化为完全静音。池条目为空、内置表照常注入。
-            // 错误路径快照与正常路径同闸：池过滤同样收口到产品域（0.3.1 主闸），防非装配域复活。
+            // Error-path registry uses the exact same hidden roster as the normal publish path.
             SqueakyRatkin.Kernel.SqueakPoolRegistry registry = new(
                 Array.Empty<SqueakyRatkin.Kernel.VoicePackEntry>(),
                 SqueakKernelAdapter.BuildBuiltIn(),
-                ProductDomainFilter);
+                SqueakProductDomainFilter.KernelFilterFor(settings));
             return new SqueakRuntimeSnapshot(new Dictionary<string, ResolvedSqueakContext>(), registry, known, SqueakVoicePackMode.Off, actions, null);
         }
         catch { return SqueakRuntimeSnapshot.GlobalOnly; }
     }
     private static SqueakVoicePackMode NormalizeMode(SqueakVoicePackMode mode) => mode == SqueakVoicePackMode.Fallback || mode == SqueakVoicePackMode.Remix ? mode : SqueakVoicePackMode.Off;
     private static float Sanitize(float value) => float.IsNaN(value) || float.IsInfinity(value) ? 1f : Math.Max(0f, value);
-
-    /// <summary>0.3.1 主闸投影：池装配（条目域 + 内置 tier 上下文）强制经过产品域过滤器（0.4.x 移除）。</summary>
-    private static readonly SqueakyRatkin.Kernel.DomainFilter ProductDomainFilter = SqueakProductDomainFilter.ToKernelFilter();
 
     private sealed class RuntimeBuilder { public float overallIntervalMultiplier = 1f; private readonly Dictionary<SqueakAction, RuntimeActionBuilder> actions = new(); private readonly Dictionary<SqueakMood, RuntimeMoodBuilder> moods = new(); public RuntimeActionBuilder GetAction(SqueakAction a) { if (!actions.TryGetValue(a, out RuntimeActionBuilder? v)) { v = new RuntimeActionBuilder(); actions.Add(a, v); } return v; } public RuntimeMoodBuilder GetMood(SqueakMood m) { if (!moods.TryGetValue(m, out RuntimeMoodBuilder? v)) { v = new RuntimeMoodBuilder(); moods.Add(m, v); } return v; } public Dictionary<SqueakAction, RuntimeActionDelta> BuildActions() => actions.ToDictionary(x => x.Key, x => x.Value.Build()); public Dictionary<SqueakMood, RuntimeMoodDelta> BuildMoods() => moods.ToDictionary(x => x.Key, x => x.Value.Build()); }
     private sealed class RuntimeActionBuilder { public bool Enabled = true; public float IntervalMultiplier = 1f; public float ProbabilityMultiplier = 1f; public RuntimeActionDelta Build() => new(Enabled ? SqueakActionScope.AnyOccurrence : SqueakActionScope.Disabled, IntervalMultiplier, ProbabilityMultiplier); }

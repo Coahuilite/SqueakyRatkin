@@ -2,7 +2,9 @@
 <SettingsBlock>
 	<ModSettings>
 		<voicePackMode>Off</voicePackMode>
-		<settingsSchemaVersion>3</settingsSchemaVersion>
+		<voicePackSchemaVersion>2</voicePackSchemaVersion>
+		<settingsSchemaVersion>4</settingsSchemaVersion>
+		<experimentalRaceAllowlist />
 		<moodOverrides>
 			<keys>
 				<li>Bad</li>

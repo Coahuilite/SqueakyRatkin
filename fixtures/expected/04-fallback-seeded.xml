@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <SettingsBlock>
 	<ModSettings>
+		<voicePackSchemaVersion>2</voicePackSchemaVersion>
 		<voicePackDefaultSeeded>True</voicePackDefaultSeeded>
-		<settingsSchemaVersion>3</settingsSchemaVersion>
+		<settingsSchemaVersion>4</settingsSchemaVersion>
+		<experimentalRaceAllowlist />
 		<moodOverrides>
 			<keys />
 			<values />
@@ -10,6 +12,7 @@
 		<voicePackSelections>
 			<li>
 				<scope>Race</scope>
+				<raceDefName>Ratkin</raceDefName>
 				<enabledPackKeys>
 					<li>coahuilite.squeakyratkin:SR_OfficialExample_Race</li>
 				</enabledPackKeys>

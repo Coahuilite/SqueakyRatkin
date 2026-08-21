@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <SettingsBlock>
 	<ModSettings>
-		<settingsSchemaVersion>3</settingsSchemaVersion>
+		<voicePackSchemaVersion>2</voicePackSchemaVersion>
+		<settingsSchemaVersion>4</settingsSchemaVersion>
+		<experimentalRaceAllowlist />
 		<moodOverrides>
 			<keys />
 			<values />
@@ -9,7 +11,8 @@
 		<voicePackSelections>
 			<li>
 				<scope>Xenotype</scope>
-				<targetDefName>InactiveXeno_NotLoaded</targetDefName>
+				<raceDefName>Ratkin</raceDefName>
+				<xenotypeDefName>InactiveXeno_NotLoaded</xenotypeDefName>
 				<enabledPackKeys>
 					<li>other.mod:SR_InactiveXenoVoice</li>
 				</enabledPackKeys>
@@ -17,6 +20,7 @@
 		</voicePackSelections>
 		<xenotypePresets>
 			<li>
+				<raceDefName>Ratkin</raceDefName>
 				<xenotypeDefName>InactiveXeno_NotLoaded</xenotypeDefName>
 				<moodOverrides />
 				<actionOverrides />

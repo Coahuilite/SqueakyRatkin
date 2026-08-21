@@ -84,23 +84,32 @@ internal static class SqueakVoicePackValidator
     }
 }
 
-/// <summary>Canonical, last-wins persisted selection for a Race or Xenotype domain.</summary>
+/// <summary>Canonical, last-wins persisted selection for one exact Race or Xenotype domain.
+/// raceDefName is required after v4 migration; Xenotype scope additionally requires xenotypeDefName.
+/// targetDefName is a v1 load-only Scribe source and is never serialized or used as record runtime state.</summary>
 public class VoicePackSelectionRecord : IExposable
 {
     public SqueakVoicePackScope scope = SqueakVoicePackScope.Unspecified;
-    public string targetDefName = "";
+    public string raceDefName = "";
+    public string xenotypeDefName = "";
+    [System.NonSerialized] internal string legacyTargetDefName = "";
     public List<string> enabledPackKeys = new();
 
     public void ExposeData()
     {
         Scribe_Values.Look(ref scope, "scope", SqueakVoicePackScope.Unspecified);
-        Scribe_Values.Look(ref targetDefName, "targetDefName", "");
+        Scribe_Values.Look(ref raceDefName, "raceDefName", "");
+        Scribe_Values.Look(ref xenotypeDefName, "xenotypeDefName", "");
+        if (Scribe.mode == LoadSaveMode.LoadingVars)
+            Scribe_Values.Look(ref legacyTargetDefName, "targetDefName", "");
         Scribe_Collections.Look(ref enabledPackKeys, "enabledPackKeys", LookMode.Value);
         if (Scribe.mode == LoadSaveMode.PostLoadInit && enabledPackKeys == null) enabledPackKeys = new List<string>();
     }
 
+    // Retained through 2b-1 so existing public settings APIs and string-domain consumers remain source-stable.
+    // 2b-2 removes this legacy string key in favor of AudioDomain.
     public static string ComposeDomainKey(SqueakVoicePackScope scope, string targetDefName) => scope == SqueakVoicePackScope.Race ? "Race" : scope == SqueakVoicePackScope.Xenotype ? "Xenotype:" + (targetDefName ?? "") : "";
-    public string DomainKey => ComposeDomainKey(scope, targetDefName);
+    public string DomainKey => ComposeDomainKey(scope, xenotypeDefName);
 }
 
 public enum SqueakVoicePackDomainState { Available, Dormant, TargetUnavailable, Orphan }

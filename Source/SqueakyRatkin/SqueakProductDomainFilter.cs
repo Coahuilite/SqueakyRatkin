@@ -1,33 +1,42 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using SqueakyRatkin.Kernel;
 
 namespace SqueakyRatkin;
 
 /// <summary>
-/// 0.3.x 版本限定产品域过滤器（决策文档 §4.4；0.4.x US 拆分时移除）。集中一处、白名单数据表驱动、
-/// 随版本冻结，结构上不可能越过：catalog 构建过滤、GetTargetCandidates assembled-only 投影、
-/// 池/内置 fallback 装配三处入口都强制经过它。0.3.x 装配域常量 = {Ratkin}；试验名单配置化升级
-/// 是 0.3.x 通用化完成后的独立机制，不在此对象内。本类不写任何 race 特判，只有数据。
+/// 0.3.x version-scoped product-domain filter. A hidden Settings list may replace the default roster;
+/// this adapter is removed together with the filter in 0.4.x and is never referenced by Kernel code.
 /// </summary>
 public static class SqueakProductDomainFilter
 {
-    /// <summary>0.3.x 装配域白名单（编译期冻结常量，Ordinal 精确匹配）。</summary>
-    public static readonly IReadOnlyCollection<string> AllowedRaceDefNames = Array.AsReadOnly(new[] { "Ratkin" });
+    public const string PrimaryRaceDefName = "Ratkin";
+    private static readonly IReadOnlyCollection<string> DefaultRaceDefNames = Array.AsReadOnly(new[] { PrimaryRaceDefName });
 
-    /// <summary>闸谓词：pack.raceDefName 是否属于装配域。</summary>
-    public static bool Contains(string? raceDefName)
+    public static IReadOnlyCollection<string> AllowedRaceDefNames => DefaultRaceDefNames;
+
+    /// <summary>Catalog admission using the same hidden Settings roster as resolver pool assembly.</summary>
+    public static bool Contains(string? raceDefName, SqueakyRatkinSettings? settings)
     {
-        foreach (string allowed in AllowedRaceDefNames)
+        foreach (string allowed in AllowedRaceDefNamesFor(settings))
             if (string.Equals(allowed, raceDefName, StringComparison.Ordinal)) return true;
         return false;
     }
 
-    /// <summary>内核池过滤器投影：池装配（条目域 + 内置 tier 查表上下文）同样只能命中装配域。</summary>
-    public static DomainFilter ToKernelFilter()
+    /// <summary>Projects the selected roster into the Kernel without making Kernel depend on this product adapter.</summary>
+    public static DomainFilter KernelFilterFor(SqueakyRatkinSettings? settings)
     {
         HashSet<RaceKey> allowed = new();
-        foreach (string name in AllowedRaceDefNames) allowed.Add(new RaceKey(name));
+        foreach (string name in AllowedRaceDefNamesFor(settings)) allowed.Add(new RaceKey(name));
         return new DomainFilter(allowed);
+    }
+
+    private static IEnumerable<string> AllowedRaceDefNamesFor(SqueakyRatkinSettings? settings)
+    {
+        List<string>? configured = settings?.experimentalRaceAllowlist;
+        if (configured == null || configured.Count == 0) return DefaultRaceDefNames;
+        string[] replacement = configured.Where(name => !string.IsNullOrWhiteSpace(name)).Distinct(StringComparer.Ordinal).ToArray();
+        return replacement.Length == 0 ? DefaultRaceDefNames : replacement;
     }
 }

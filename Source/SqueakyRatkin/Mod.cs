@@ -57,7 +57,8 @@ public class SqueakyRatkinMod : Mod
             // ExecuteWhenFinished is the first Unity-main-thread operation in this startup path.
             // Bind before catalog/settings code can call any resolver mutator.
             SqueakRuntimeResolver.InitializeMainThread();
-            SqueakXenotypeCatalog.Refresh();
+            // Catalog admission and resolver pooling both read this hidden replacement roster.
+            SqueakXenotypeCatalog.Refresh(Settings);
             // 0.2.3 默认种子先于首次运行时发布,新装与旧配置统一入口。
             Settings.EnsureBuiltInRaceDefault();
             Settings.ApplyToRuntime();
@@ -123,7 +124,6 @@ public class SqueakyRatkinMod : Mod
                     // This instance is opened by SqueakyRatkin rather than the mod-list UI.
                     // Keep its native close affordances, but do not dismiss it on a stray click.
                     dialog.closeOnClickedOutside = false;
-                    dialog.closeOnCancel = true;
                     dialog.doCloseX = true;
                     settingsWindows.Add(dialog);
                     if (selectXenotypeTab)
@@ -151,10 +151,16 @@ public class SqueakyRatkinMod : Mod
     }
 
     /// <summary>Framework entry point. Persistence always reaches the base implementation directly, never this override recursively.</summary>
-    public override void WriteSettings() { SqueakRuntimeResolver.FlushPendingRuntimeChanges(true); FlushQueuedSettingsSave(true); }
+    public override void WriteSettings()
+    {
+        if (Settings.IsPersistenceBlockedByMigrationFailure) return;
+        SqueakRuntimeResolver.FlushPendingRuntimeChanges(true);
+        FlushQueuedSettingsSave(true);
+    }
 
     internal void QueueSettingsSave()
     {
+        if (Settings.IsPersistenceBlockedByMigrationFailure) return;
         SaveQueueRequestCount++;
         requestedSaveGeneration++;
         // A later business edit creates a new generation and is the supported automatic recovery path after failure.
@@ -201,6 +207,7 @@ public class SqueakyRatkinMod : Mod
 
     internal void FlushQueuedSettingsSave(bool force = false, bool allowFailedGenerationRetry = false)
     {
+        if (Settings.IsPersistenceBlockedByMigrationFailure) return;
         SqueakRuntimeResolver.FlushPendingRuntimeChanges(true);
         if (!saveQueued || requestedSaveGeneration <= persistedSaveGeneration) return;
         // A failed generation remains visibly dirty but is never retried by debounce or a following framework write.
@@ -234,6 +241,7 @@ public class SqueakyRatkinMod : Mod
 
     internal void PersistSettingsNow(bool applyRuntime = false)
     {
+        if (Settings.IsPersistenceBlockedByMigrationFailure) return;
         if (writeInProgress || requestedSaveGeneration <= persistedSaveGeneration) return;
         SqueakRuntimeResolver.FlushPendingRuntimeChanges(true);
         // Runtime flushing never queues persistence, so capture the write generation only after the forced boundary.
