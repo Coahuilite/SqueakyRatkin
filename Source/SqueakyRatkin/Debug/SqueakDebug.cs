@@ -24,8 +24,8 @@ public static class SqueakDebug
     }
 
     /// <summary>srdiag v2 tier vocabulary (0.3.1): xenotype_pack / race_pack / vanilla / "-" for none.
-    /// The adapter collapses ChainTier (incl. built-in fallback) into SqueakSoundSource before this point;
-    /// pack_fallback/built_in_fallback values are reserved for the 0.3.2 pack-fallback chain end.</summary>
+    /// The adapter collapses ChainTier into SqueakSoundSource before this point; PackFallback folds into
+    /// RacePack and BuiltInFallback into Vanilla (logging-protocol.md records the folded emission).</summary>
     private static string ProtocolTier(SqueakSoundSource source) => source switch
     {
         SqueakSoundSource.XenotypePack => "xenotype_pack",
