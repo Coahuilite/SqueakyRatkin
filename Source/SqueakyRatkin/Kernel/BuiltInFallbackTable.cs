@@ -4,6 +4,62 @@ using System.Collections.Generic;
 namespace SqueakyRatkin.Kernel;
 
 /// <summary>
+/// Field-presence fallback override. A listed action key is an explicit player override even when
+/// its value equals the source value; omitted keys continue to inherit the source profile.
+/// </summary>
+public sealed class FallbackDelta
+{
+    public readonly IReadOnlyDictionary<string, string> Overrides;
+
+    public FallbackDelta(IReadOnlyDictionary<string, string> overrides)
+    {
+        Overrides = overrides ?? throw new ArgumentNullException(nameof(overrides));
+        foreach (KeyValuePair<string, string> entry in Overrides)
+        {
+            if (!BuiltInActionKeys.Contains(entry.Key))
+                throw new ArgumentException("Fallback delta contains a non-built-in action key: " + entry.Key, nameof(overrides));
+            if (string.IsNullOrWhiteSpace(entry.Value))
+                throw new ArgumentException("Fallback delta contains an empty sound key for action: " + entry.Key, nameof(overrides));
+        }
+    }
+
+    public bool IsEmpty => Overrides.Count == 0;
+}
+
+public enum CopyDisposition
+{
+    KeepCopy,
+    RebuildFromSource,
+    MergeDelta,
+}
+
+/// <summary>Pure Config-copy lifecycle decisions. File absence is normalized by the store to corrupt=true.</summary>
+public static class FallbackProfileOperations
+{
+    /// <summary>
+    /// Corrupt or older copies are replaced from the current source. A version-current copy with
+    /// a field-presence delta is merged; a version-current copy without one is already the source.
+    /// </summary>
+    public static CopyDisposition DecideCopy(FallbackProfile source, FallbackDelta? delta, int copyVersion, bool copyCorrupt)
+    {
+        if (source == null) throw new ArgumentNullException(nameof(source));
+        if (copyCorrupt || copyVersion < source.Version) return CopyDisposition.RebuildFromSource;
+        return delta != null ? CopyDisposition.MergeDelta : CopyDisposition.KeepCopy;
+    }
+
+    /// <summary>Returns a new profile with the source's race/version and source keys overridden per present delta key.</summary>
+    public static FallbackProfile Merge(FallbackProfile source, FallbackDelta delta)
+    {
+        if (source == null) throw new ArgumentNullException(nameof(source));
+        if (delta == null) throw new ArgumentNullException(nameof(delta));
+        Dictionary<string, string> merged = new(StringComparer.Ordinal);
+        foreach (KeyValuePair<string, string> entry in source.SoundKeys) merged.Add(entry.Key, entry.Value);
+        foreach (KeyValuePair<string, string> entry in delta.Overrides) merged[entry.Key] = entry.Value;
+        return new FallbackProfile(source.Race, source.Version, merged);
+    }
+}
+
+/// <summary>
 /// 内置 fallback 单源表（§4.6，内核 C# 编译期冻结）。profile 的动作键始终是字符串，
 /// 并由 <see cref="BuiltInActionKeys"/> 封闭校验；0.3.1 的 Ratkin 种子仅镜像已有 15 个
 /// <c>SqueakActionDefinitions.AudioKey</c>，Crying/Giggling 保留键没有内置 SoundDef 映射。
@@ -23,6 +79,8 @@ public sealed class FallbackProfile
         {
             if (!BuiltInActionKeys.Contains(entry.Key))
                 throw new ArgumentException("Fallback profile contains a non-built-in action key: " + entry.Key, nameof(soundKeys));
+            if (string.IsNullOrWhiteSpace(entry.Value))
+                throw new ArgumentException("Fallback profile contains an empty sound key for action: " + entry.Key, nameof(soundKeys));
         }
     }
 
@@ -33,6 +91,38 @@ public sealed class FallbackProfile
         return BuiltInActionKeys.Contains(actionKey) && SoundKeys.TryGetValue(actionKey, out soundKey);
     }
 }
+/// <summary>
+/// Compile-time formal fallback data. It intentionally does not reference product action metadata:
+/// the 15 shipped mappings are explicit, while reserved Crying/Giggling have no built-in SoundDef.
+/// </summary>
+public static class BuiltInFallbackCatalog
+{
+    public const int RatkinProfileVersion = 1;
+
+    public static BuiltInFallbackTable Create(string ratkinRaceDefName)
+    {
+        Dictionary<string, string> keys = new(StringComparer.Ordinal)
+        {
+            ["Call"] = "SR_Call",
+            ["Eat"] = "SR_Eat",
+            ["Sleep"] = "SR_Sleep",
+            ["Wounded"] = "SR_Wounded",
+            ["Select"] = "SR_Select",
+            ["Move"] = "SR_Move",
+            ["Social"] = "SR_Social",
+            ["Joy"] = "SR_Joy",
+            ["Death"] = "SR_Death",
+            ["Draft"] = "SR_Draft",
+            ["Undraft"] = "SR_Undraft",
+            ["Attack"] = "SR_Attack",
+            ["Work"] = "SR_Work",
+            ["Equip"] = "SR_Equip",
+            ["MentalBreak"] = "SR_MentalBreak",
+        };
+        return new BuiltInFallbackTable(new[] { new FallbackProfile(new RaceKey(ratkinRaceDefName), RatkinProfileVersion, keys) });
+    }
+}
+
 
 public sealed class BuiltInFallbackTable
 {
@@ -50,6 +140,7 @@ public sealed class BuiltInFallbackTable
         }
         byRace = map;
     }
+    public IEnumerable<FallbackProfile> Profiles => byRace.Values;
 
     public FallbackProfile? For(RaceKey race) => byRace.TryGetValue(race, out FallbackProfile? profile) ? profile : null;
 

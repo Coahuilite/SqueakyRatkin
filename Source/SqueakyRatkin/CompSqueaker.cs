@@ -584,6 +584,15 @@ public class CompSqueaker : ThingComp
             return hash;
         }
     }
+    /// <summary>Projects the current LifeStageDef's data-owned voice axis; missing stage is identity.</summary>
+    private SqueakyRatkin.Kernel.ModulationAxis ResolveAgeModulation()
+    {
+        LifeStageDef? stage = Pawn.ageTracker?.CurLifeStage;
+        return stage == null
+            ? SqueakyRatkin.Kernel.ModulationAxis.Identity
+            : new SqueakyRatkin.Kernel.ModulationAxis(true, stage.voxPitch, true, stage.voxVolume, false, (1f, 1f));
+    }
+
 
     /// <summary>三层合并取心情调制:ModSettings.override > CompProperties.default > 内置默认。</summary>
     private SqueakMoodMod ResolveMoodMod(SqueakMood mood, ResolvedSqueakContext context)
@@ -608,6 +617,12 @@ public class CompSqueaker : ThingComp
             if (delta.HasPitchJitter) mod.pitchJitter = delta.PitchJitter;
         }
 
+        SqueakyRatkin.Kernel.ModulationAxis moodAxis = new(true, mod.pitchFactor, true, mod.volumeFactor, true,
+            (mod.pitchJitter.min, mod.pitchJitter.max));
+        SqueakyRatkin.Kernel.ModulationAxis composed = SqueakyRatkin.Kernel.Modulation.ComposeModulation(moodAxis, ResolveAgeModulation());
+        mod.pitchFactor = composed.Pitch;
+        mod.volumeFactor = composed.Volume;
+        mod.pitchJitter = new FloatRange(composed.Jitter.Min, composed.Jitter.Max);
         return mod;
     }
 

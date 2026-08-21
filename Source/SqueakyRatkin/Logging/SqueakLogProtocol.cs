@@ -9,7 +9,7 @@ namespace SqueakyRatkin;
 
 internal enum SqueakLogVisibility { Daily, DevOnly }
 internal enum SqueakLogLevel { Info, Warning, Error }
-internal enum SqueakLogEvent { ModStartIdentity, ModStartReady, LoggingModeEnabled, LoggingModeDisabled, LoggingModeAutoEnabled, LoggingModeAutoDisabled, SettingsOpenApiUnavailable, SettingsOpenFailed, CatalogRefreshFailed, PackRejected, ResolverRebuildFailed, TargetRejected, XenotypeDiscoveryUnavailable, XenotypeDiscoveryFailed, XenotypeDiscoveryCandidate, TriggerAttemptFailed, AudioNoSound, AudioDispatchFailed, AudioDispatchOk, TriggerOutcomeSummary, HookAttackUnavailable, HookAttackTargetSkipped, HookMentalBreakUnavailable, DiagnosticsHookUnavailable, DiagnosticsStartFailed, OverlayChanged, CameraChanged, WorkbenchOpenFailed, SettingsOrigin, AudioRouteSelected }
+internal enum SqueakLogEvent { ModStartIdentity, ModStartReady, LoggingModeEnabled, LoggingModeDisabled, LoggingModeAutoEnabled, LoggingModeAutoDisabled, SettingsOpenApiUnavailable, SettingsOpenFailed, CatalogRefreshFailed, PackRejected, ResolverRebuildFailed, TargetRejected, XenotypeDiscoveryUnavailable, XenotypeDiscoveryFailed, XenotypeDiscoveryCandidate, TriggerAttemptFailed, AudioNoSound, AudioDispatchFailed, AudioDispatchOk, TriggerOutcomeSummary, HookAttackUnavailable, HookAttackTargetSkipped, HookMentalBreakUnavailable, DiagnosticsHookUnavailable, DiagnosticsStartFailed, OverlayChanged, CameraChanged, WorkbenchOpenFailed, SettingsOrigin, AudioRouteSelected, FallbackProfileStoreFailed }
 
 internal readonly struct SqueakLogData
 {
@@ -73,6 +73,7 @@ internal static class SqueakLogRegistry
         SqueakLogEvent.WorkbenchOpenFailed => new(SqueakLogVisibility.Daily, SqueakLogLevel.Warning, "Animal Voice Workbench could not be opened."),
         SqueakLogEvent.SettingsOrigin => new(SqueakLogVisibility.Daily, SqueakLogLevel.Info, "Mod settings origin was recorded.", 2),
         SqueakLogEvent.AudioRouteSelected => new(SqueakLogVisibility.DevOnly, SqueakLogLevel.Info, "Squeak audio route was selected.", 2),
+        SqueakLogEvent.FallbackProfileStoreFailed => new(SqueakLogVisibility.DevOnly, SqueakLogLevel.Warning, "Fallback profile store operation failed.", 2),
         _ => throw new ArgumentOutOfRangeException(nameof(e))
     };
 
@@ -112,6 +113,7 @@ internal static class SqueakLogRegistry
         SqueakLogEvent.HookMentalBreakUnavailable => "hook.mental_break.unavailable",
         SqueakLogEvent.DiagnosticsHookUnavailable => "diagnostics.hook.unavailable",
         SqueakLogEvent.DiagnosticsStartFailed => "diagnostics.start.failed",
+        SqueakLogEvent.FallbackProfileStoreFailed => "fallback.profile.store_failed",
         SqueakLogEvent.OverlayChanged => "devtools.overlay.changed",
         SqueakLogEvent.CameraChanged => "devtools.camera_indicator.changed",
         SqueakLogEvent.WorkbenchOpenFailed => "devtools.workbench.open_failed",
@@ -195,6 +197,16 @@ internal static class SqueakLogFormatter
             case SqueakLogEvent.AudioRouteSelected:
                 Add(builder, "sound", data.Sound);
                 Add(builder, "tier", data.Tier);
+                break;
+            case SqueakLogEvent.FallbackProfileStoreFailed:
+                if (data.Exception != null)
+                {
+                    var site = data.Exception.TargetSite;
+                    Add(builder, "ex_type", data.Exception.GetType().FullName);
+                    Add(builder, "ex_inner", data.Exception.InnerException?.GetType().FullName);
+                    Add(builder, "ex_site", site == null ? null : site.DeclaringType?.FullName + "." + site.Name);
+                    Add(builder, "ex_msg", SqueakLogText.SanitizeExceptionMessage(data.Exception.Message));
+                }
                 break;
         }
 

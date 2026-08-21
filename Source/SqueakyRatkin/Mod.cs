@@ -62,6 +62,9 @@ public class SqueakyRatkinMod : Mod
             SqueakRuntimeResolver.InitializeMainThread();
             // Catalog admission and resolver pooling both read this hidden replacement roster.
             SqueakXenotypeCatalog.Refresh(Settings);
+            // Profile copies are independent Config artifacts; load/rebuild before the first resolver snapshot.
+            // BuildBuiltIn consumes the resolved table and remains outside the ModSettings debounce/write path.
+            SqueakFallbackProfileStore.LoadOrRebuild(SqueakKernelAdapter.BuildBuiltInSource(), SqueakProductDomainFilter.KernelFilterFor(Settings));
             // 0.2.3 默认种子先于首次运行时发布,新装与旧配置统一入口。
             Settings.EnsureBuiltInRaceDefault();
             Settings.ApplyToRuntime();

@@ -14,11 +14,13 @@ public static class UnitTests
         BuiltInTable(ref failures);
         FailurePathFallback(ref failures);
         PoolOrdering(ref failures);
+        DirectLifeStageContract(ref failures);
         SelectOff(ref failures);
         SelectFallbackChain(ref failures);
         SelectRemix(ref failures);
         DistributionBounds(ref failures);
         Determinism(ref failures);
+        FallbackCopyLifecycle(ref failures);
         SoundLevelFilter(ref failures);
         EntryLevelFilter(ref failures);
         DomainStatus(ref failures);
@@ -99,8 +101,51 @@ public static class UnitTests
         {
             rejected = true;
         }
+        BuiltInFallbackTable formal = BuiltInFallbackCatalog.Create("Ratkin");
+        FallbackProfile? formalProfile = formal.For(Scenarios.Ratkin);
+        Check(formalProfile != null && formalProfile.Version == BuiltInFallbackCatalog.RatkinProfileVersion
+            && formalProfile.SoundKeys.Count == 15 && formalProfile.SoundKeys["MentalBreak"] == "SR_MentalBreak"
+            && !formalProfile.SoundKeys.ContainsKey("Crying") && !formalProfile.SoundKeys.ContainsKey("Giggling"),
+            "formal built-in catalog has exactly the shipped 15 mappings", ref failures);
         Check(rejected, "FallbackProfile rejects non-built-in action keys", ref failures);
     }
+    private static void FallbackCopyLifecycle(ref int failures)
+    {
+        FallbackProfile source = new(Scenarios.Ratkin, 3, new Dictionary<string, string>
+        {
+            ["Call"] = "SR_Call_Source",
+            ["Eat"] = "SR_Eat_Source",
+        });
+        FallbackDelta delta = new(new Dictionary<string, string> { ["Call"] = "Core_Call_Override" });
+
+        Check(FallbackProfileOperations.DecideCopy(source, delta, 3, true) == CopyDisposition.RebuildFromSource,
+            "fallback corrupt copy rebuilds from source", ref failures);
+        Check(FallbackProfileOperations.DecideCopy(source, delta, 2, false) == CopyDisposition.RebuildFromSource,
+            "fallback older copy rebuilds from source", ref failures);
+        Check(FallbackProfileOperations.DecideCopy(source, delta, 3, false) == CopyDisposition.MergeDelta,
+            "fallback current copy with delta merges", ref failures);
+        Check(FallbackProfileOperations.DecideCopy(source, null, 3, false) == CopyDisposition.KeepCopy,
+            "fallback current copy without delta keeps copy", ref failures);
+        Check(FallbackProfileOperations.DecideCopy(source, new FallbackDelta(new Dictionary<string, string>()), 3, false) == CopyDisposition.MergeDelta,
+            "fallback current copy with explicit empty delta merges", ref failures);
+
+        FallbackProfile merged = FallbackProfileOperations.Merge(source, delta);
+        Check(merged.Race == source.Race && merged.Version == source.Version
+            && merged.SoundKeys["Call"] == "Core_Call_Override" && merged.SoundKeys["Eat"] == "SR_Eat_Source",
+            "fallback merge preserves source identity and untouched keys", ref failures);
+
+        bool rejected = false;
+        try
+        {
+            _ = new FallbackDelta(new Dictionary<string, string> { ["external.mod:Call"] = "Core_Call" });
+        }
+        catch (ArgumentException)
+        {
+            rejected = true;
+        }
+        Check(rejected, "fallback delta rejects external action key", ref failures);
+    }
+
 
     /// <summary>BuildFallback 形状（0.3.0 错误路径修复回归）：无池条目 + 种子内置表 + Off 仍放 SR_* 兜底；
     /// 空内置表（GlobalOnly 形状）才静音。锁 v0.2.4 重建失败快照语义。</summary>
@@ -113,6 +158,21 @@ public static class UnitTests
         ChainResult none = emptyTable.Select(Ctx(Scenarios.RaceDomain, SqueakyRatkin.SqueakAction.Call), SelectionMode.Off, SimGate.All, new LcgRandom(1));
         Check(none.IsNone, "empty built-in table resolves to silence", ref failures);
     }
+
+    private static void DirectLifeStageContract(ref int failures)
+    {
+        // The adapter maps RimWorld's DevelopmentalStage directly; this pure mirror locks the
+        // Contract-2 decision without linking Verse into the Kernel characterization project.
+        Check(DirectLifeStageBucket("Newborn") == AgeBucket.Baby && DirectLifeStageBucket("Baby") == AgeBucket.Baby,
+            "life-stage Newborn/Baby map to Baby", ref failures);
+        Check(DirectLifeStageBucket("Child") == AgeBucket.Child,
+            "life-stage Child maps to Child", ref failures);
+        Check(DirectLifeStageBucket("Adult") == AgeBucket.Adult && DirectLifeStageBucket("None") == AgeBucket.Adult,
+            "life-stage Adult and other states map to Adult", ref failures);
+    }
+
+    private static AgeBucket DirectLifeStageBucket(string stage) => stage == "Newborn" || stage == "Baby"
+        ? AgeBucket.Baby : stage == "Child" ? AgeBucket.Child : AgeBucket.Adult;
 
     private static void PoolOrdering(ref int failures)
     {

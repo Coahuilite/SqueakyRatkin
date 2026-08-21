@@ -60,18 +60,17 @@ internal static class SqueakKernelAdapter
         _ => SelectionMode.Off,
     };
 
-    /// <summary>内置表（0.3.0 种子 = SqueakActionDefinitions.AudioKey 单源投影，15 动作全列）。
-    /// 条目 race = ProductDomainFilter 数据单源（无散落 Ratkin 字面量）。</summary>
+    /// <summary>Creates the immutable formal kernel source table. The catalog is explicit data rather
+    /// than a projection of product action metadata, so table version/content evolves independently.</summary>
+    public static BuiltInFallbackTable BuildBuiltInSource()
+    {
+        return BuiltInFallbackCatalog.Create(SqueakProductDomainFilter.PrimaryRaceDefName);
+    }
+
+    /// <summary>Returns the store-resolved table after startup initialization, or a source table as a safe fallback.</summary>
     public static BuiltInFallbackTable BuildBuiltIn()
     {
-        Dictionary<string, string> keys = new(StringComparer.Ordinal);
-        for (int i = 0; i < SqueakActionDefinitions.Count; i++)
-        {
-            SqueakAction action = (SqueakAction)i;
-            string? actionKey = ActionKey.For(action);
-            if (actionKey != null) keys[actionKey] = SqueakActionDefinitions.Get(action).AudioKey;
-        }
-        return new BuiltInFallbackTable(new[] { new FallbackProfile(new RaceKey(SqueakProductDomainFilter.PrimaryRaceDefName), 1, keys) });
+        return SqueakFallbackProfileStore.Current ?? BuildBuiltInSource();
     }
 
     /// <summary>2b-2: AudioDomain 域键端到端。选择集按记录自身 (raceDefName, xenotypeDefName) 域键组织；

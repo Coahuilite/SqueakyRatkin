@@ -71,6 +71,7 @@ public static class SqueakLog
     public static void WorkbenchOpenFailed(Exception ex) => Emit(SqueakLogEvent.WorkbenchOpenFailed, new SqueakLogData(exception: ex), true);
     public static void SettingsOrigin(SqueakSettingsOrigin origin) => Emit(SqueakLogEvent.SettingsOrigin, new SqueakLogData(settingsOrigin: origin), true);
     public static void AudioRouteSelected(string actionKey, string race, string? xenotype, string target, string sound, string tier, string? pack = null) { if (!ShouldEmitDev) return; Emit(SqueakLogEvent.AudioRouteSelected, new SqueakLogData(action: actionKey, race: race, xenotype: xenotype, target: target, sound: sound, tier: tier, pack: pack), false); }
+    public static void FallbackProfileStoreFailed(string race, Exception ex) { if (!ShouldEmitDev) return; Emit(SqueakLogEvent.FallbackProfileStoreFailed, new SqueakLogData(race: race, exception: ex), true); }
 
     private static void Emit(SqueakLogEvent evt, SqueakLogData data, bool once)
     {
