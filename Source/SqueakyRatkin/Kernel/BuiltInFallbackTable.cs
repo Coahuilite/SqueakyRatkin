@@ -61,8 +61,9 @@ public static class FallbackProfileOperations
 
 /// <summary>
 /// 内置 fallback 单源表（§4.6，内核 C# 编译期冻结）。profile 的动作键始终是字符串，
-/// 并由 <see cref="BuiltInActionKeys"/> 封闭校验；0.3.1 的 Ratkin 种子仅镜像已有 15 个
-/// <c>SqueakActionDefinitions.AudioKey</c>，Crying/Giggling 保留键没有内置 SoundDef 映射。
+/// 并由 <see cref="BuiltInActionKeys"/> 封闭校验；0.3.1 的 Ratkin 种子镜像 15 个
+/// <c>SqueakActionDefinitions.AudioKey</c>，Crying/Giggling 无内置 SoundDef 映射（pack 声明才发声，
+/// 内置表不列条目，§4.7）。
 /// </summary>
 public sealed class FallbackProfile
 {
@@ -93,7 +94,7 @@ public sealed class FallbackProfile
 }
 /// <summary>
 /// Compile-time formal fallback data. It intentionally does not reference product action metadata:
-/// the 15 shipped mappings are explicit, while reserved Crying/Giggling have no built-in SoundDef.
+/// the 15 shipped mappings are explicit, while Crying/Giggling have no built-in SoundDef (default silence).
 /// </summary>
 public static class BuiltInFallbackCatalog
 {

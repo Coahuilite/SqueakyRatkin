@@ -183,7 +183,7 @@ internal static class Program
 
     private static IEnumerable<int> Range(int from, int count) { for (int i = from; i < from + count; i++) yield return i; }
 
-    private static string FindRepositoryRoot()
+    internal static string FindRepositoryRoot()
     {
         DirectoryInfo? dir = new DirectoryInfo(AppContext.BaseDirectory);
         while (dir != null)

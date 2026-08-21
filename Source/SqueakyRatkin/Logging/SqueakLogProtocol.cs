@@ -9,7 +9,7 @@ namespace SqueakyRatkin;
 
 internal enum SqueakLogVisibility { Daily, DevOnly }
 internal enum SqueakLogLevel { Info, Warning, Error }
-internal enum SqueakLogEvent { ModStartIdentity, ModStartReady, LoggingModeEnabled, LoggingModeDisabled, LoggingModeAutoEnabled, LoggingModeAutoDisabled, SettingsOpenApiUnavailable, SettingsOpenFailed, CatalogRefreshFailed, PackRejected, ResolverRebuildFailed, TargetRejected, XenotypeDiscoveryUnavailable, XenotypeDiscoveryFailed, XenotypeDiscoveryCandidate, TriggerAttemptFailed, AudioNoSound, AudioDispatchFailed, AudioDispatchOk, TriggerOutcomeSummary, HookAttackUnavailable, HookAttackTargetSkipped, HookMentalBreakUnavailable, DiagnosticsHookUnavailable, DiagnosticsStartFailed, OverlayChanged, CameraChanged, WorkbenchOpenFailed, SettingsOrigin, AudioRouteSelected, FallbackProfileStoreFailed }
+internal enum SqueakLogEvent { ModStartIdentity, ModStartReady, LoggingModeEnabled, LoggingModeDisabled, LoggingModeAutoEnabled, LoggingModeAutoDisabled, SettingsOpenApiUnavailable, SettingsOpenFailed, CatalogRefreshFailed, PackRejected, ResolverRebuildFailed, TargetRejected, XenotypeDiscoveryUnavailable, XenotypeDiscoveryFailed, XenotypeDiscoveryCandidate, TriggerAttemptFailed, AudioNoSound, AudioDispatchFailed, AudioDispatchOk, TriggerOutcomeSummary, HookAttackUnavailable, HookAttackTargetSkipped, HookMentalBreakUnavailable, HookMentalFitUnavailable, DiagnosticsHookUnavailable, DiagnosticsStartFailed, OverlayChanged, CameraChanged, WorkbenchOpenFailed, SettingsOrigin, AudioRouteSelected, FallbackProfileStoreFailed }
 
 internal readonly struct SqueakLogData
 {
@@ -66,6 +66,7 @@ internal static class SqueakLogRegistry
         SqueakLogEvent.HookAttackUnavailable => new(SqueakLogVisibility.Daily, SqueakLogLevel.Error, "Attack squeak hook is unavailable."),
         SqueakLogEvent.HookAttackTargetSkipped => new(SqueakLogVisibility.DevOnly, SqueakLogLevel.Warning, "An Attack hook target was skipped."),
         SqueakLogEvent.HookMentalBreakUnavailable => new(SqueakLogVisibility.Daily, SqueakLogLevel.Error, "Mental-break squeak hook is unavailable."),
+        SqueakLogEvent.HookMentalFitUnavailable => new(SqueakLogVisibility.Daily, SqueakLogLevel.Error, "Baby-fits squeak hook is unavailable.", 2),
         SqueakLogEvent.DiagnosticsHookUnavailable => new(SqueakLogVisibility.DevOnly, SqueakLogLevel.Warning, "Diagnostics overlay hook is unavailable."),
         SqueakLogEvent.DiagnosticsStartFailed => new(SqueakLogVisibility.Daily, SqueakLogLevel.Warning, "Diagnostics overlay could not start."),
         SqueakLogEvent.OverlayChanged => new(SqueakLogVisibility.DevOnly, SqueakLogLevel.Info, "Diagnostics overlay state changed."),
@@ -111,6 +112,7 @@ internal static class SqueakLogRegistry
         SqueakLogEvent.HookAttackUnavailable => "hook.attack.unavailable",
         SqueakLogEvent.HookAttackTargetSkipped => "hook.attack.target_skipped",
         SqueakLogEvent.HookMentalBreakUnavailable => "hook.mental_break.unavailable",
+        SqueakLogEvent.HookMentalFitUnavailable => "hook.mental_fit.unavailable",
         SqueakLogEvent.DiagnosticsHookUnavailable => "diagnostics.hook.unavailable",
         SqueakLogEvent.DiagnosticsStartFailed => "diagnostics.start.failed",
         SqueakLogEvent.FallbackProfileStoreFailed => "fallback.profile.store_failed",

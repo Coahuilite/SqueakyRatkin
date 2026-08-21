@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using SqueakyRatkin.Kernel;
 
 namespace SqueakyRatkin.KernelCharacterization;
@@ -11,6 +12,7 @@ public static class UnitTests
     {
         DomainKeys(ref failures);
         ActionKeyMapping(ref failures);
+        ActionFiveWaySync(ref failures);
         BuiltInTable(ref failures);
         FailurePathFallback(ref failures);
         PoolOrdering(ref failures);
@@ -55,9 +57,7 @@ public static class UnitTests
     private static void ActionKeyMapping(ref int failures)
     {
         string[] enumNames = Enum.GetNames(typeof(SqueakyRatkin.SqueakAction));
-        bool activePrefixMatches = enumNames.Length == ActionAudioKeyMirror.Count
-            && enumNames.Length < BuiltInActionKeys.All.Count;
-        bool allOk = activePrefixMatches;
+        bool allOk = enumNames.Length == BuiltInActionKeys.All.Count;
         for (int i = 0; i < enumNames.Length; i++)
         {
             SqueakyRatkin.SqueakAction action = (SqueakyRatkin.SqueakAction)i;
@@ -67,13 +67,60 @@ public static class UnitTests
                 allOk = false;
         }
         Check(BuiltInActionKeys.All.Count == 17 && BuiltInActionKeys.All[15] == "Crying" && BuiltInActionKeys.All[16] == "Giggling",
-            "BuiltInActionKeys reserves 17 ordered keys", ref failures);
-        Check(allOk, "ActionKey current 15-action prefix is bidirectional", ref failures);
+            "BuiltInActionKeys holds 17 ordered keys", ref failures);
+        Check(allOk, "ActionKey 17-action prefix is bidirectional", ref failures);
+        Check(enumNames.Length == 17 && enumNames[15] == "Crying" && enumNames[16] == "Giggling",
+            "SqueakAction append-only ordinals 15/16 = Crying/Giggling", ref failures);
         Check(ActionKey.For((SqueakyRatkin.SqueakAction)99) == null, "ActionKey.For unknown null", ref failures);
-        Check(BuiltInActionKeys.Contains("Crying") && !ActionKey.TryParseBuiltIn("Crying", out _),
-            "reserved Crying key is not yet enum-mappable", ref failures);
+        Check(BuiltInActionKeys.TryGetIndex("Crying", out int cryingIndex) && cryingIndex == 15
+            && ActionKey.TryParseBuiltIn("Crying", out SqueakyRatkin.SqueakAction crying) && crying == SqueakyRatkin.SqueakAction.Crying,
+            "Crying key is enum-mappable after wave 3c append", ref failures);
         Check(!ActionKey.TryParseBuiltIn("other.mod:SR_X", out _), "TryParseBuiltIn external key false", ref failures);
         Check(!ActionKey.TryParseBuiltIn("call", out _), "TryParseBuiltIn wrong case false", ref failures);
+    }
+
+    /// <summary>0.3.1 波 3c 五处同步离线断言（决策 §2.3：枚举/XML/SoundDef/本地化/统计 机械检查）：
+    /// ① 枚举名序 == BuiltInActionKeys 17 键序；② 内置表 15 项且不列 Crying/Giggling（SoundDef 面默认静默）；
+    /// ③ SoundDef XML 无 SR_Crying/SR_Giggling defName（缺席是有意同步）；④ 双语本地化含 SR.Action.Crying/Giggling；
+    /// ⑤ 语料范围守卫：镜像保持 15（0.3.2 扩 17 动作矩阵时随语料同变更重建）。</summary>
+    private static void ActionFiveWaySync(ref int failures)
+    {
+        string root = Program.FindRepositoryRoot();
+        string[] enumNames = Enum.GetNames(typeof(SqueakyRatkin.SqueakAction));
+        bool namesMatch = enumNames.Length == BuiltInActionKeys.All.Count;
+        for (int i = 0; i < enumNames.Length && namesMatch; i++) namesMatch = enumNames[i] == BuiltInActionKeys.All[i];
+        Check(namesMatch, "five-way sync: enum names/ordinals == BuiltInActionKeys (17)", ref failures);
+
+        FallbackProfile? profile = Scenarios.BuildBuiltIn().For(Scenarios.Ratkin);
+        bool builtInExcludes = profile != null && profile.SoundKeys.Count == ActionAudioKeyMirror.Count
+            && !profile.SoundKeys.ContainsKey("Crying") && !profile.SoundKeys.ContainsKey("Giggling");
+        Check(builtInExcludes, "five-way sync: built-in table 15 mappings without Crying/Giggling (default silence)", ref failures);
+
+        bool soundDefsAbsent = true;
+        string soundDefsDir = Path.Combine(root, "1.6", "Defs", "SoundDefs");
+        foreach (string file in Directory.GetFiles(soundDefsDir, "*.xml"))
+        {
+            string text = File.ReadAllText(file);
+            if (text.IndexOf("<defName>SR_Crying</defName>", StringComparison.Ordinal) >= 0
+                || text.IndexOf("<defName>SR_Giggling</defName>", StringComparison.Ordinal) >= 0)
+                soundDefsAbsent = false;
+        }
+        Check(soundDefsAbsent, "five-way sync: no SR_Crying/SR_Giggling SoundDef XML (absence deliberate)", ref failures);
+
+        bool localizationPresent = true;
+        foreach (string lang in new[] { "English", "ChineseSimplified" })
+        {
+            string file = Path.Combine(root, "1.6", "Languages", lang, "Keyed", "SqueakyRatkin.xml");
+            if (!File.Exists(file)) { localizationPresent = false; continue; }
+            string text = File.ReadAllText(file);
+            if (text.IndexOf("<SR.Action.Crying>", StringComparison.Ordinal) < 0
+                || text.IndexOf("<SR.Action.Giggling>", StringComparison.Ordinal) < 0)
+                localizationPresent = false;
+        }
+        Check(localizationPresent, "five-way sync: SR.Action.Crying/Giggling present in both languages", ref failures);
+
+        Check(ActionAudioKeyMirror.Count == 15,
+            "five-way sync: corpus scope stays 15-action (mirror moves only with the 0.3.2 17-action corpus)", ref failures);
     }
 
     private static void BuiltInTable(ref int failures)

@@ -19,6 +19,10 @@ public partial class SqueakyRatkinSettings
     // It is deliberately never rendered by Settings UI and is deleted together with ProductDomainFilter in 0.4.x.
     public List<string> experimentalRaceAllowlist = new();
 
+    // 0.3.1 波 3c 彩蛋开关（决策 §2.4）：默认关；开时 IsEgg 条目以加性池成员身份参与抽取，关时候选池只含普通条目。
+    // 0.3.1 为隐藏 Scribe 开关（UI 不渲染）；0.3.2 UI 专项正式化。false = 序列化省略（fixture 字节稳定）。
+    public bool allowEasterEggSounds;
+
     private bool distanceRangeWasLoaded;
     private bool scaleFrequencyWithTalkingWasLoaded;
     private bool settingsSchemaWasLoaded;
@@ -62,6 +66,7 @@ public partial class SqueakyRatkinSettings
         Scribe_Values.Look(ref distanceRange, "distanceRange", GetDistancePresetRange(SqueakDistancePreset.Balanced));
         // Hidden experimental roster; nonempty data replaces the default roster rather than extending it.
         Scribe_Collections.Look(ref experimentalRaceAllowlist, "experimentalRaceAllowlist", LookMode.Value);
+        Scribe_Values.Look(ref allowEasterEggSounds, "allowEasterEggSounds", false);
 
         if (Scribe.mode == LoadSaveMode.LoadingVars)
         {

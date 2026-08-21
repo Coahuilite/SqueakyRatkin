@@ -2,7 +2,7 @@
 
 ## Responsibility
 
-本目录是全部 Harmony 集成层：15 个 patch 把 RimWorld/Core 事件转译成 mod 自身的通知入口（主要是 `CompSqueaker.Notify_*`、`SqueakPeriodicPopulation`、`SqueakDiagnosticsOverlay`、`SqueakRuntimeResolver`）。Patch 本身不产生音效、不写设置、不渲染——只负责"在正确的时机、对正确的对象"调用下游服务。
+本目录是全部 Harmony 集成层：16 个 patch 把 RimWorld/Core 事件转译成 mod 自身的通知入口（主要是 `CompSqueaker.Notify_*`、`SqueakPeriodicPopulation`、`SqueakDiagnosticsOverlay`、`SqueakRuntimeResolver`）。Patch 本身不产生音效、不写设置、不渲染——只负责"在正确的时机、对正确的对象"调用下游服务。
 
 - 入口：`SqueakyRatkinMod`（`../Mod.cs`）构造函数执行 `Harmony.PatchAll()`（Harmony id = `coahuilite.squeakyratkin`）。
 - 全部文件单一 namespace `SqueakyRatkin`，无显式 patch id（顺序无依赖）。
@@ -20,7 +20,8 @@
 | `Patch_Selector_Select.cs` | `Selector.Select` 动态重载链 Postfix | 玩家选中 Pawn（第一参数为 `object`，位置注入 `__0`） | `Notify_Select()` |
 | `Patch_DraftGizmo_Toggle.cs` | `Pawn.GetGizmos` Postfix | 包装 vanilla Draft/Undraft `Command_Toggle`（`Command_ColonistDraft` hotKey + "Draft"/"Undraft" tutorTag 识别），在 toggleAction 内比对 `pawn.Drafted` 前后变化 | `Notify_Draft(bool)`；`ConditionalWeakTable` 防重复包装，只包玩家可见 gizmo，不碰 `Pawn_DraftController` |
 | `Patch_Pawn_EquipmentAdded.cs` | `Pawn_EquipmentTracker.Notify_EquipmentAdded` Postfix | 装备跟踪器通知（含 AI/加载/系统变更），再经 `IsCurrentEquipJobPlayerCommand()` 过滤为玩家主动 Equip 任务 | `Notify_Equip()` |
-| `Patch_MentalBreak.cs` | `Verse.AI.MentalStateHandler` 或 `RimWorld.MentalStateHandler` 的 `TryStartMentalState` Postfix | 精神崩溃成功开始且 pawn 在当前地图 | `Notify_MentalBreak()`；找不到目标时 `SqueakLog.HookMentalBreakUnavailable()` |
+| `Patch_MentalBreak.cs` | `MentalBreakWorker.TryStart` Postfix（`Verse.AI.MentalBreakWorker` 或 `RimWorld.MentalBreakWorker` 动态解析） | 精神崩溃成功开始（`__result`）且 pawn 在当前地图 | `Notify_MentalBreak()`；找不到目标时 `SqueakLog.HookMentalBreakUnavailable()`。0.2.4 起收窄至此（MentalBreakDef 驱动唯一通道），不误报 BabyFits |
+| `Patch_MentalFit.cs` | `Verse.AI.MentalStateHandler.TryStartMentalState` Postfix | 0.3.1 波 3c BabyFits 窄 hook：`__result` && `stateDef.defName` ∈ {Crying, Giggling} && 经 `MentalFitDef` 反向 map 验证（Biotech 关 → 空 map → 永不通知） | `Notify_MentalFit(Crying|Giggling)`；找不到目标时 `SqueakLog.HookMentalFitUnavailable()`。不扩大/替代 MentalBreak hook |
 
 **周期成员/生命周期（→ `SqueakPeriodicPopulation`，`../SqueakPeriodicPopulation.cs`）**
 | 文件 | patched symbol | 时机/触发 | 下游 |

@@ -386,6 +386,11 @@ public class CompSqueaker : ThingComp
     }
     public void Notify_MentalBreak() => NotifyExternal(SqueakAction.MentalBreak, SqueakTriggerOrigin.MentalBreak, SqueakInvocationSource.StateEvent);
 
+    /// <summary>0.3.1 波 3c：BabyFits 窄 hook 入口（Patch_MentalFit 已用 MentalFitDef 反向 map 验证状态）。</summary>
+    public void Notify_MentalFit(SqueakAction action) => NotifyExternal(action,
+        action == SqueakAction.Crying ? SqueakTriggerOrigin.Crying : SqueakTriggerOrigin.Giggling,
+        SqueakInvocationSource.StateEvent);
+
     private void NotifyExternal(SqueakAction action, SqueakTriggerOrigin origin, SqueakInvocationSource source)
     {
         SynchronizePeriodicMembership();

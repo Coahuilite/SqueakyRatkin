@@ -215,6 +215,19 @@ public partial class SqueakyRatkinSettings : ModSettings
         if (record == null) globalActionEnabled.Add(new GlobalActionEnabledRecord { action = action, enabled = scope != SqueakActionScope.Disabled, scope = scope, scopeWasLoaded = true });
         else { record.enabled = scope != SqueakActionScope.Disabled; record.scope = scope; record.scopeWasLoaded = true; }
     }
+
+    /// <summary>0.3.1 波 3c 彩蛋开关读取（决策 §2.4：默认关，路由输入随快照）。</summary>
+    public bool AllowEasterEggSounds => allowEasterEggSounds;
+
+    /// <summary>彩蛋开关离散 setter：切换走离散 resolver 重建（快照 AllowEggs 生效于返回前），并排队持久化。</summary>
+    internal void SetAllowEasterEggSounds(bool value)
+    {
+        if (allowEasterEggSounds == value) return;
+        allowEasterEggSounds = value;
+        QueuePersistence();
+        NotifyDiscreteResolverRuntimeChanged();
+    }
+
     /// <summary>Explicit future D2 refresh entry; intentionally does not evaluate notifications or normalize saved records.</summary>
     public void RefreshCatalogAndRuntime()
     {

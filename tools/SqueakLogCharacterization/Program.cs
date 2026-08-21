@@ -218,13 +218,15 @@ internal static class Program
         SqueakLog.AudioRouteSelected("coahuilite.squeakyratkin.external_action", "Ratkin", "Baseliner", "777", "SR_Baseliner_Select", "xenotype_pack", "coahuilite.squeakyratkin:SR_Baseliner");
         SqueakLog.AudioRouteSelected("Move", "Ratkin", null, "1", "SR_Move_1", "vanilla", null);
         SqueakLog.FallbackProfileStoreFailed("Ratkin", new Exception("profile write failed"));
+        SqueakLog.HookMentalFitUnavailable();
 
         AssertLines(nameof(VerifyV2Protocol) + " enabled",
             V2("info", "daily", "settings.origin", "Mod settings origin: FreshCreated.", trailing: " settings_origin=FreshCreated"),
             V2("info", "dev_only", "audio.route.selected", "Squeak audio route was selected.", action: "Select", target: "12345", pack: "coahuilite.squeakyratkin:SR_OfficialExample_Race", race: "Ratkin", trailing: " sound=SR_OfficialExample_Race_Select tier=race_pack"),
             V2("info", "dev_only", "audio.route.selected", "Squeak audio route was selected.", action: "coahuilite.squeakyratkin.external_action", target: "777", pack: "coahuilite.squeakyratkin:SR_Baseliner", race: "Ratkin", xenotype: "Baseliner", trailing: " sound=SR_Baseliner_Select tier=xenotype_pack"),
             V2("info", "dev_only", "audio.route.selected", "Squeak audio route was selected.", action: "Move", target: "1", pack: "-", race: "Ratkin", trailing: " sound=SR_Move_1 tier=vanilla"),
-            V2("warning", "dev_only", "fallback.profile.store_failed", "Fallback profile store operation failed.", race: "Ratkin", trailing: " ex_type=System.Exception ex_msg=profile%20write%20failed"));
+            V2("warning", "dev_only", "fallback.profile.store_failed", "Fallback profile store operation failed.", race: "Ratkin", trailing: " ex_type=System.Exception ex_msg=profile%20write%20failed"),
+            V2("error", "daily", "hook.mental_fit.unavailable", "Baby-fits squeak hook is unavailable."));
         // log-v2 once: the first settings.origin claim wins per session; ResetSession reopens the domain.
         Reset(SqueakDevLoggingMode.Enabled);
         SqueakLog.SettingsOrigin(SqueakSettingsOrigin.LoadedFromFile);

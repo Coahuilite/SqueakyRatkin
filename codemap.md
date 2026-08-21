@@ -18,9 +18,9 @@
 |---|---|---|
 | 游戏加载 | `About/About.xml` + 根 `LoadFolders.xml` | `ModLister` 读元数据 → 依赖校验/排序 → `InitLoadFolders` 无条件挂 `[1.6, /]`（1.6 优先）→ 载入 `1.6/` 的 Patches / Defs / Assemblies / Languages |
 | C# 装配点 | `Source/SqueakyRatkin/Mod.cs`（`SqueakyRatkinMod` ctor） | 唯一 Mod 入口：`Harmony.PatchAll()`（id `coahuilite.squeakyratkin`）→ `ExecuteWhenFinished` 启动链（resolver 主线程初始化、catalog 刷新、设置应用、迁移 flush） |
-| Harmony 事件转译 | `Source/SqueakyRatkin/Patches/` | 15 个 patch：伤害/攻击/死亡/选中/整编/装备/精神崩溃/周期成员/诊断生命周期/设置窗口关闭等 → `CompSqueaker.Notify_*` 等下游 |
+| Harmony 事件转译 | `Source/SqueakyRatkin/Patches/` | 16 个 patch：伤害/攻击/死亡/选中/整编/装备/精神崩溃/BabyFits（Crying/Giggling）/周期成员/诊断生命周期/设置窗口关闭等 → `CompSqueaker.Notify_*` 等下游 |
 | 调试入口 | `Debug/` + `[DebugAction]` 菜单 | overlay（单字符标记 + 可拖动诊断面板）、音频路径环形缓冲、触发漏斗统计、音频浏览工作台；四层门控（DevMode / `developerToolsEnabled` / `EffectiveDevLogging` / `AudioPathDiagnostics.Enabled`） |
-| 日志出口 | `Logging/SqueakLog.cs` + `Logging/SqueakLogProtocol.cs` | 唯一 closed typed facade（27 事件方法/30 EventId：28 v1 字节不变 + 2 v2 扩展）+ internal registry/once/formatter/sink + `srdiag fmt=1`/`fmt=2` → Verse `Log`；`tools/SqueakLogCharacterization` 锁协议 |
+| 日志出口 | `Logging/SqueakLog.cs` + `Logging/SqueakLogProtocol.cs` | 唯一 closed typed facade（28 事件方法/31 EventId：28 v1 字节不变 + 3 v2 扩展）+ internal registry/once/formatter/sink + `srdiag fmt=1`/`fmt=2` → Verse `Log`；`tools/SqueakLogCharacterization` 锁协议 |
 | 构建/打包 | `scripts/pack-*.ps1` + `.github/workflows/` | `dotnet build -p:SqueakyBuildFlavor=<F>` → `stage-package.ps1` → `dist/<flavor>/` |
 
 ## Architecture / Data Flow
@@ -33,7 +33,7 @@ flowchart LR
         MD["Defs/MoteDefs<br/>SR_Mote_TextBg"]
     end
     subgraph CS["运行时层 Source/SqueakyRatkin/"]
-        H["Patches/（Harmony ×15）"] -->|Notify_*| C["CompSqueaker<br/>TryTrigger 闸门链"]
+        H["Patches/（Harmony ×16）"] -->|Notify_*| C["CompSqueaker<br/>TryTrigger 闸门链"]
         C -->|选择查询| R["SqueakRuntimeResolver<br/>不可变快照 Vanilla/Race/Xenotype"]
         C -->|mood 调制 + PlayOneShot| A["音频"]
         C -->|RecordOutcome| D["Debug/ 统计/mote/overlay/浏览器"]
@@ -73,7 +73,7 @@ flowchart LR
 | `1.6/Patches/` | [1.6/Patches/codemap.md](1.6/Patches/codemap.md) | 加载期补丁：向 Ratkin.comps 注入 `CompProperties_Squeaker`（15 action 触发配置 + 4 moodMods + 3 distancePresets，全数据驱动） |
 | `Source/` | [Source/codemap.md](Source/codemap.md) | C# 运行时源码根：装配边界与入口；实质内容在 `Source/SqueakyRatkin/`（见下） |
 | `Source/SqueakyRatkin/` | [Source/SqueakyRatkin/codemap.md](Source/SqueakyRatkin/codemap.md) | 运行时核心与单一装配点：Mod 生命周期、`CompSqueaker` 触发/播放、resolver/catalog/policy 不可变快照发布、周期人口缩放、全部持久化数据模型 |
-| `Source/SqueakyRatkin/Patches/` | [Source/SqueakyRatkin/Patches/codemap.md](Source/SqueakyRatkin/Patches/codemap.md) | Harmony 集成层（15 patch）：RimWorld 事件 → `CompSqueaker.Notify_*` / 周期成员 / 诊断生命周期 / 设置窗口关闭；patch 薄、业务判断在 Comp |
+| `Source/SqueakyRatkin/Patches/` | [Source/SqueakyRatkin/Patches/codemap.md](Source/SqueakyRatkin/Patches/codemap.md) | Harmony 集成层（16 patch）：RimWorld 事件 → `CompSqueaker.Notify_*` / 周期成员 / 诊断生命周期 / 设置窗口关闭；patch 薄、业务判断在 Comp |
 | `Source/SqueakyRatkin/UI/` | [Source/SqueakyRatkin/UI/codemap.md](Source/SqueakyRatkin/UI/codemap.md) | 设置工作台 composition layer：四页 UI、局部编辑缓冲（draft）、诊断面板与音频浏览入口；不拥有业务写入与保存协调 |
 | `Source/SqueakyRatkin/Debug/` | [Source/SqueakyRatkin/Debug/codemap.md](Source/SqueakyRatkin/Debug/codemap.md) | 诊断与开发者工具：overlay、DebugAction 菜单、音频路径追踪、触发漏斗统计、mote、音频浏览工作台（四层门控） |
 | `Source/SqueakyRatkin/Logging/` | [Source/SqueakyRatkin/Logging/codemap.md](Source/SqueakyRatkin/Logging/codemap.md) | 唯一日志出口：public `SqueakLog` facade（27 事件方法/30 EventId）与 internal `SqueakLogProtocol`（registry/once/formatter/sink）；双 flavor characterization 锁 v1 字节 + v2 分支 |

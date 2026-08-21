@@ -19,10 +19,12 @@ public readonly struct SqueakActionDefinition
     { Action = action; DisplayKey = displayKey; AudioKey = audioKey; VocalGatePolicy = vocalGatePolicy; SupportedScopes = supportedScopes; DefaultScope = defaultScope; }
 }
 
-/// <summary>Single source for the shipped built-in actions and their SoundDef keys.</summary>
+/// <summary>Single source for the shipped built-in actions and their SoundDef keys.
+/// 0.3.1 波 3c：Crying/Giggling append（序数 15/16）；其 AudioKey 指向不存在的 SoundDef（GetNamedSilentFail
+/// → 静默），内置表不列条目，pack 声明才发声（决策 §4.7）。</summary>
 public static class SqueakActionDefinitions
 {
-    public const int Count = 15;
+    public const int Count = 17;
     private static readonly SqueakActionDefinition[] definitions =
     {
         new(SqueakAction.Call, "SR.Action.Call", "SR_Call", SqueakVocalGatePolicy.ApplyTalkingGate, SqueakActionScopeSupport.AnyOccurrence, SqueakActionScope.AnyOccurrence),
@@ -40,6 +42,8 @@ public static class SqueakActionDefinitions
         new(SqueakAction.Work, "SR.Action.Work", "SR_Work", SqueakVocalGatePolicy.ApplyTalkingGate, SqueakActionScopeSupport.AnyOccurrence | SqueakActionScopeSupport.ActiveCommand, SqueakActionScope.ActiveCommand),
         new(SqueakAction.Equip, "SR.Action.Equip", "SR_Equip", SqueakVocalGatePolicy.ApplyTalkingGate, SqueakActionScopeSupport.ActiveCommand, SqueakActionScope.ActiveCommand),
         new(SqueakAction.MentalBreak, "SR.Action.MentalBreak", "SR_MentalBreak", SqueakVocalGatePolicy.ApplyTalkingGate, SqueakActionScopeSupport.AnyOccurrence, SqueakActionScope.AnyOccurrence),
+        new(SqueakAction.Crying, "SR.Action.Crying", "SR_Crying", SqueakVocalGatePolicy.ApplyTalkingGate, SqueakActionScopeSupport.AnyOccurrence, SqueakActionScope.AnyOccurrence),
+        new(SqueakAction.Giggling, "SR.Action.Giggling", "SR_Giggling", SqueakVocalGatePolicy.ApplyTalkingGate, SqueakActionScopeSupport.AnyOccurrence, SqueakActionScope.AnyOccurrence),
     };
     public static SqueakActionDefinition Get(SqueakAction action) => definitions[(int)action];
     public static bool IsKnown(SqueakAction action) => (uint)action < Count;
@@ -68,7 +72,7 @@ public readonly struct SqueakActionPlan
     internal static SqueakActionPlan FromLegacy(SqueakActionConfig config) => new(SqueakActionDefinitions.Get(config.action), true, config.mode, config.minIntervalTicks, config.probabilityPerCheck, config.ignoreGlobalCooldown, config.cooldownClock);
 }
 
-public enum SqueakTriggerOrigin { Periodic, Wounded, Select, Death, Draft, Undraft, Attack, Equip, MentalBreak }
+public enum SqueakTriggerOrigin { Periodic, Wounded, Select, Death, Draft, Undraft, Attack, Equip, MentalBreak, Crying, Giggling }
 public enum SqueakInvocationSource { Periodic, StateEvent, PlayerSelection, ActiveCommand }
 
 /// <summary>Explicit trigger source; non-periodic hooks preserve legacy probability skipping.</summary>

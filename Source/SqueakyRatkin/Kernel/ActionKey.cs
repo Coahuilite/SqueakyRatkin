@@ -5,7 +5,7 @@ namespace SqueakyRatkin.Kernel;
 /// <summary>
 /// 内核动作键边界映射（§2.2/§5 波 1）：内置键以 <see cref="BuiltInActionKeys"/> 为唯一权威，
 /// 枚举仍保留在 <c>SqueakyRatkin</c> 命名空间以维持设置/存档的序列化 ABI。
-/// 当前枚举尚未 append Crying/Giggling 时，保留键仍是合法内置键，但无法解析为枚举值。
+/// 0.3.1 波 3c：枚举已 append Crying/Giggling，17 键全部可双向解析。
 /// </summary>
 public static class ActionKey
 {
