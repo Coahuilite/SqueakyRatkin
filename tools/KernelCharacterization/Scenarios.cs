@@ -132,12 +132,12 @@ public static class Scenarios
     /// <summary>pack 定义构造（fixture 无音频数据）：声音 key = packKey + "_" + AudioKey + "_" + s。</summary>
     private static VoicePackEntry EntryFor(string packKey, AudioDomain domain)
     {
-        Dictionary<string, ActionSoundSet> actions = new();
+        Dictionary<string, IReadOnlyList<ActionSoundSet>> actions = new();
         for (int i = 0; i < ActionAudioKeyMirror.Count; i++)
         {
             SqueakyRatkin.SqueakAction action = (SqueakyRatkin.SqueakAction)i;
             string audioKey = ActionAudioKeyMirror.For(action);
-            actions[ActionKeyFor(action)] = new ActionSoundSet(new[] { packKey + "_" + audioKey + "_0" }, null, 1f);
+            actions[ActionKeyFor(action)] = new[] { new ActionSoundSet(new[] { packKey + "_" + audioKey + "_0" }, null, 1f) };
         }
         return new VoicePackEntry(packKey, domain, 1f, actions);
     }
@@ -200,7 +200,7 @@ public static class Scenarios
 
     private static VoicePackEntry Entry(string packKey, AudioDomain domain, int soundCount, bool muteLast)
     {
-        Dictionary<string, ActionSoundSet> actions = new();
+        Dictionary<string, IReadOnlyList<ActionSoundSet>> actions = new();
         for (int i = 0; i < ActionAudioKeyMirror.Count; i++)
         {
             SqueakyRatkin.SqueakAction action = (SqueakyRatkin.SqueakAction)i;
@@ -212,7 +212,7 @@ public static class Scenarios
                 if (muteLast && s == soundCount - 1) key += "_Muted";
                 sounds.Add(key);
             }
-            actions[ActionKeyFor(action)] = new ActionSoundSet(sounds, null, 1f);
+            actions[ActionKeyFor(action)] = new[] { new ActionSoundSet(sounds, null, 1f) };
         }
         return new VoicePackEntry(packKey, domain, 1f, actions);
     }

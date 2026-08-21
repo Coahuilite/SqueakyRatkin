@@ -24,6 +24,10 @@ public static class UnitTests
         DomainStatus(ref failures);
         ModulationRules(ref failures);
         AgeDefault(ref failures);
+        AgePriority(ref failures);
+        PackFallbackTier(ref failures);
+        EggFiltering(ref failures);
+        PackWeight(ref failures);
     }
 
     private static void Check(bool condition, string name, ref int failures)
@@ -322,40 +326,178 @@ public static class UnitTests
     {
         // 0.3.0：AgeTag 全 null = 全年龄；Select 结果不受 ctx.Age 影响。
         SqueakPoolRegistry s2 = Scenarios.BuildRegistry("S2-builtin-seed");
-        ChainResult adult = s2.Select(new SelectionContext(Scenarios.RaceDomain, "Call", AgeBucket.Adult, true), SelectionMode.Fallback, SimGate.All, new LcgRandom(7));
-        ChainResult baby = s2.Select(new SelectionContext(Scenarios.RaceDomain, "Call", AgeBucket.Baby, true), SelectionMode.Fallback, SimGate.All, new LcgRandom(7));
+        ChainResult adult = s2.Select(new SelectionContext(Scenarios.RaceDomain, "Call", AgeBucket.Adult, true, false), SelectionMode.Fallback, SimGate.All, new LcgRandom(7));
+        ChainResult baby = s2.Select(new SelectionContext(Scenarios.RaceDomain, "Call", AgeBucket.Baby, true, false), SelectionMode.Fallback, SimGate.All, new LcgRandom(7));
         Check(adult.SoundKey == baby.SoundKey && adult.Tier == baby.Tier, "age-neutral in 0.3.0 (all-age default)", ref failures);
+    }
+
+    private static void AgePriority(ref int failures)
+    {
+        VoicePackEntry exactAndAll = Entry("age.mod:SR_Age", Scenarios.RaceDomain,
+            Variant("Call", "SR_All", null),
+            Variant("Call", "SR_Baby", AgeBucket.Baby));
+        SqueakPoolRegistry registry = new(new[] { exactAndAll }, BuiltInFallbackTable.Empty, DomainFilter.Everything);
+        ChainResult baby = registry.Select(Ctx(Scenarios.RaceDomain, SqueakyRatkin.SqueakAction.Call, AgeBucket.Baby), SelectionMode.Fallback, SimGate.All, new LcgRandom(1));
+        ChainResult child = registry.Select(Ctx(Scenarios.RaceDomain, SqueakyRatkin.SqueakAction.Call, AgeBucket.Child), SelectionMode.Fallback, SimGate.All, new LcgRandom(1));
+        Check(baby.SoundKey == "SR_Baby" && child.SoundKey == "SR_All", "age exact variant wins; missing exact falls to all-age", ref failures);
+
+        VoicePackEntry exactOnly = Entry("age.mod:SR_ExactOnly", Scenarios.RaceDomain, Variant("Call", "SR_BabyOnly", AgeBucket.Baby));
+        SqueakPoolRegistry noMatch = new(new[] { exactOnly }, BuiltInFallbackTable.Empty, DomainFilter.Everything);
+        ChainResult none = noMatch.Select(Ctx(Scenarios.RaceDomain, SqueakyRatkin.SqueakAction.Call, AgeBucket.Child), SelectionMode.Fallback, SimGate.All, new LcgRandom(1));
+        Check(none.IsNone, "age with neither exact nor all-age is not a candidate", ref failures);
+
+        VoicePackEntry mutedExact = Entry("age.mod:SR_MutedExact", Scenarios.RaceDomain,
+            Variant("Call", "SR_AllPlayable", null),
+            Variant("Call", "SR_Baby_Muted", AgeBucket.Baby));
+        SqueakPoolRegistry noCrossVariantFallback = new(new[] { mutedExact }, BuiltInFallbackTable.Empty, DomainFilter.Everything);
+        ChainResult muted = noCrossVariantFallback.Select(Ctx(Scenarios.RaceDomain, SqueakyRatkin.SqueakAction.Call, AgeBucket.Baby), SelectionMode.Fallback, SimGate.Partial, new LcgRandom(1));
+        Check(muted.IsNone, "muted exact age does not fall through to all-age", ref failures);
+    }
+
+    private static void PackFallbackTier(ref int failures)
+    {
+        VoicePackEntry raceFallback = Entry("fallback.mod:SR_Race", Scenarios.RaceDomain,
+            fallback: new Dictionary<string, string> { ["Call"] = "SR_PackFallback_Race" });
+        SqueakPoolRegistry raceRegistry = new(new[] { raceFallback }, Scenarios.BuildBuiltIn(), DomainFilter.Everything);
+        ChainResult race = raceRegistry.Select(Ctx(Scenarios.RaceDomain, SqueakyRatkin.SqueakAction.Call), SelectionMode.Fallback, SimGate.All, new LcgRandom(1));
+        Check(race.Tier == ChainTier.PackFallback && race.SoundKey == "SR_PackFallback_Race" && race.PoolStableKey == "fallback.mod:SR_Race", "pack fallback runs after empty race tier before built-in", ref failures);
+
+        VoicePackEntry xenoFallback = Entry("fallback.mod:SR_Xeno", Scenarios.XenoDomain,
+            fallback: new Dictionary<string, string> { ["Call"] = "SR_PackFallback_Xeno" });
+        VoicePackEntry otherRaceFallback = Entry("fallback.mod:SR_RaceOther", Scenarios.RaceDomain,
+            fallback: new Dictionary<string, string> { ["Call"] = "SR_PackFallback_RaceOther" });
+        SqueakPoolRegistry xenoRegistry = new(new[] { xenoFallback, otherRaceFallback }, Scenarios.BuildBuiltIn(), DomainFilter.Everything);
+        ChainResult xeno = xenoRegistry.Select(Ctx(Scenarios.XenoDomain, SqueakyRatkin.SqueakAction.Call), SelectionMode.Fallback, SimGate.All, new LcgRandom(1));
+        Check(xeno.Tier == ChainTier.PackFallback && xeno.SoundKey == "SR_PackFallback_Xeno", "xeno context reads only its exact pool fallback", ref failures);
+
+        SqueakPoolRegistry absent = new(Array.Empty<VoicePackEntry>(), Scenarios.BuildBuiltIn(), DomainFilter.Everything);
+        ChainResult builtin = absent.Select(Ctx(Scenarios.RaceDomain, SqueakyRatkin.SqueakAction.Call), SelectionMode.Fallback, SimGate.All, new LcgRandom(1));
+        Check(builtin.Tier == ChainTier.BuiltInFallback, "absent pack fallback leaves tier empty", ref failures);
+
+        HashSet<ChainTier?> tiers = new();
+        for (int seed = 1; seed <= 80; seed++)
+        {
+            ChainResult result = xenoRegistry.Select(Ctx(Scenarios.XenoDomain, SqueakyRatkin.SqueakAction.Call), SelectionMode.Remix, SimGate.All, new LcgRandom(seed));
+            tiers.Add(result.Tier);
+        }
+        Check(tiers.Contains(ChainTier.PackFallback) && tiers.Contains(ChainTier.BuiltInFallback), "remix includes pack fallback as a fourth tier", ref failures);
+    }
+
+    private static void EggFiltering(ref int failures)
+    {
+        VoicePackEntry egg = Entry("egg.mod:SR_Egg", Scenarios.RaceDomain, Variant("Call", "SR_EggOnly", null, true));
+        SqueakPoolRegistry onlyEgg = new(new[] { egg }, BuiltInFallbackTable.Empty, DomainFilter.Everything);
+        ChainResult disabled = onlyEgg.Select(Ctx(Scenarios.RaceDomain, SqueakyRatkin.SqueakAction.Call, AgeBucket.Adult, false), SelectionMode.Fallback, SimGate.All, new LcgRandom(1));
+        ChainResult enabled = onlyEgg.Select(Ctx(Scenarios.RaceDomain, SqueakyRatkin.SqueakAction.Call, AgeBucket.Adult, true), SelectionMode.Fallback, SimGate.All, new LcgRandom(1));
+        Check(disabled.IsNone && enabled.SoundKey == "SR_EggOnly", "egg variant is excluded while disabled and admitted while enabled", ref failures);
+        VoicePackEntry exactEggWithAllAge = Entry("egg.mod:SR_ExactEgg", Scenarios.RaceDomain,
+            Variant("Call", "SR_AllAgeNormal", null),
+            Variant("Call", "SR_BabyEgg", AgeBucket.Baby, true));
+        SqueakPoolRegistry noEggAgeFallback = new(new[] { exactEggWithAllAge }, BuiltInFallbackTable.Empty, DomainFilter.Everything);
+        ChainResult exactDisabled = noEggAgeFallback.Select(Ctx(Scenarios.RaceDomain, SqueakyRatkin.SqueakAction.Call, AgeBucket.Baby, false), SelectionMode.Fallback, SimGate.All, new LcgRandom(1));
+        Check(exactDisabled.IsNone, "disabled exact egg does not fall through to all-age", ref failures);
+
+        VoicePackEntry normal = Entry("egg.mod:SR_Normal", Scenarios.RaceDomain, Variant("Call", "SR_Normal", null));
+        SqueakPoolRegistry mixed = new(new[] { egg, normal }, BuiltInFallbackTable.Empty, DomainFilter.Everything);
+        int eggs = 0, normalCount = 0;
+        for (int seed = 1; seed <= 400; seed++)
+        {
+            ChainResult result = mixed.Select(Ctx(Scenarios.RaceDomain, SqueakyRatkin.SqueakAction.Call, AgeBucket.Adult, true), SelectionMode.Fallback, SimGate.All, new LcgRandom(seed));
+            if (result.SoundKey == "SR_EggOnly") eggs++;
+            else if (result.SoundKey == "SR_Normal") normalCount++;
+        }
+        double ratio = eggs / 400.0;
+        Check(normalCount > 0 && ratio > 0.3 && ratio < 0.7, "enabled egg is an equal additive pool member", ref failures);
+    }
+
+    private static void PackWeight(ref int failures)
+    {
+        VoicePackEntry light = Entry("weight.mod:SR_Light", Scenarios.RaceDomain, 1f, Variant("Call", "SR_Light", null));
+        VoicePackEntry heavy = Entry("weight.mod:SR_Heavy", Scenarios.RaceDomain, 3f, Variant("Call", "SR_Heavy", null));
+        SqueakPoolRegistry registry = new(new[] { light, heavy }, BuiltInFallbackTable.Empty, DomainFilter.Everything);
+        int heavyCount = 0;
+        for (int seed = 1; seed <= 800; seed++)
+        {
+            ChainResult result = registry.Select(Ctx(Scenarios.RaceDomain, SqueakyRatkin.SqueakAction.Call), SelectionMode.Fallback, SimGate.All, new LcgRandom(seed));
+            if (result.SoundKey == "SR_Heavy") heavyCount++;
+        }
+        double ratio = heavyCount / 800.0;
+        Check(ratio > 0.65 && ratio < 0.85, "pack weight uses cumulative weighted draw: " + ratio.ToString("0.000"), ref failures);
+
+        VoicePackEntry invalid = Entry("weight.mod:SR_Invalid", Scenarios.RaceDomain, 0f, Variant("Call", "SR_Invalid", null));
+        SqueakPoolRegistry rejectsInvalid = new(new[] { invalid }, BuiltInFallbackTable.Empty, DomainFilter.Everything);
+        ChainResult none = rejectsInvalid.Select(Ctx(Scenarios.RaceDomain, SqueakyRatkin.SqueakAction.Call), SelectionMode.Fallback, SimGate.All, new LcgRandom(1));
+        Check(none.IsNone, "nonpositive direct pack weight is rejected", ref failures);
     }
 
     // ---- helpers ----
 
-    private static SelectionContext Ctx(AudioDomain domain, SqueakyRatkin.SqueakAction action)
-        => new(domain, ActionKey.For(action)!, AgeBucket.Adult, false);
+    private static SelectionContext Ctx(AudioDomain domain, SqueakyRatkin.SqueakAction action, AgeBucket age = AgeBucket.Adult, bool allowEggs = false)
+        => new(domain, ActionKey.For(action)!, age, false, allowEggs);
 
     private static IEnumerable<int> Range(int from, int count) { for (int i = from; i < from + count; i++) yield return i; }
 
+    private readonly struct TestVariant
+    {
+        public readonly string ActionKey;
+        public readonly ActionSoundSet Set;
+
+        public TestVariant(string actionKey, ActionSoundSet set)
+        {
+            ActionKey = actionKey;
+            Set = set;
+        }
+    }
+
+    private static TestVariant Variant(string actionKey, string soundKey, AgeBucket? ageTag, bool isEgg = false)
+        => new(actionKey, new ActionSoundSet(new[] { soundKey }, ageTag, 1f, isEgg));
+
+    private static VoicePackEntry Entry(string packKey, AudioDomain domain, params TestVariant[] variants)
+        => Entry(packKey, domain, 1f, null, variants);
+
+    private static VoicePackEntry Entry(string packKey, AudioDomain domain, float weight, params TestVariant[] variants)
+        => Entry(packKey, domain, weight, null, variants);
+
+    private static VoicePackEntry Entry(string packKey, AudioDomain domain, IReadOnlyDictionary<string, string>? fallback = null, params TestVariant[] variants)
+        => Entry(packKey, domain, 1f, fallback, variants);
+
+    private static VoicePackEntry Entry(string packKey, AudioDomain domain, float weight, IReadOnlyDictionary<string, string>? fallback, params TestVariant[] variants)
+    {
+        Dictionary<string, IReadOnlyList<ActionSoundSet>> actions = new();
+        foreach (TestVariant variant in variants)
+        {
+            if (!actions.TryGetValue(variant.ActionKey, out IReadOnlyList<ActionSoundSet>? existing))
+            {
+                actions.Add(variant.ActionKey, new[] { variant.Set });
+                continue;
+            }
+            List<ActionSoundSet> merged = new(existing) { variant.Set };
+            actions[variant.ActionKey] = merged;
+        }
+        return new VoicePackEntry(packKey, domain, weight, actions, fallback);
+    }
     public static VoicePackEntry ScenariosEntry(string packKey, AudioDomain domain, int sounds = 2)
     {
-        Dictionary<string, ActionSoundSet> actions = new();
+        Dictionary<string, IReadOnlyList<ActionSoundSet>> actions = new();
         for (int i = 0; i < ActionAudioKeyMirror.Count; i++)
         {
             SqueakyRatkin.SqueakAction action = (SqueakyRatkin.SqueakAction)i;
             string audioKey = ActionAudioKeyMirror.For(action);
             List<string> keys = new(sounds);
             for (int s = 0; s < sounds; s++) keys.Add(packKey + "_" + audioKey + "_" + s);
-            actions[ActionKey.For(action)!] = new ActionSoundSet(keys, null, 1f);
+            actions[ActionKey.For(action)!] = new[] { new ActionSoundSet(keys, null, 1f) };
         }
         return new VoicePackEntry(packKey, domain, 1f, actions);
     }
 
     private static VoicePackEntry MutedEntry(string packKey, AudioDomain domain)
     {
-        Dictionary<string, ActionSoundSet> actions = new();
+        Dictionary<string, IReadOnlyList<ActionSoundSet>> actions = new();
         for (int i = 0; i < ActionAudioKeyMirror.Count; i++)
         {
             SqueakyRatkin.SqueakAction action = (SqueakyRatkin.SqueakAction)i;
             string audioKey = ActionAudioKeyMirror.For(action);
-            actions[ActionKey.For(action)!] = new ActionSoundSet(new[] { packKey + "_" + audioKey + "_Muted" }, null, 1f);
+            actions[ActionKey.For(action)!] = new[] { new ActionSoundSet(new[] { packKey + "_" + audioKey + "_Muted" }, null, 1f) };
         }
         return new VoicePackEntry(packKey, domain, 1f, actions);
     }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using SqueakyRatkin.Kernel;
 using Verse;
 using Verse.Sound;
 
@@ -13,6 +14,8 @@ public class SqueakVoicePackDef : Def
     /// 值 = 服务的 race 的精确、区分大小写 ThingDef.defName（如 Ratkin）；装配由 DomainFilter 白名单闸决定。</summary>
     public string raceDefName = "";
     public string targetDefName = "";
+    public float weight = 1f;
+    public List<SqueakVoicePackFallback> fallbacks = new();
     public List<SqueakVoicePackAction> actions = new();
 
     public bool TryGetPackKey(out string key)
@@ -34,7 +37,15 @@ public class SqueakVoicePackDef : Def
 public class SqueakVoicePackAction
 {
     public SqueakAction action = SqueakAction.Call;
+    public AgeBucket? ageTag = null;
+    public bool IsEgg = false;
     public List<SoundDef> sounds = new();
+}
+
+public class SqueakVoicePackFallback
+{
+    public SqueakAction action = SqueakAction.Call;
+    public SoundDef sound = null!;
 }
 
 /// <summary>Pure production-audio contract shared by Def validation and candidate admission.</summary>
@@ -55,14 +66,36 @@ internal static class SqueakVoicePackValidator
         if (pack.scope == SqueakVoicePackScope.Unspecified) yield return name + " has an unspecified scope.";
         if (pack.scope == SqueakVoicePackScope.Race && !string.IsNullOrEmpty(pack.targetDefName)) yield return name + " Race scope must not specify targetDefName.";
         if (pack.scope == SqueakVoicePackScope.Xenotype && string.IsNullOrWhiteSpace(pack.targetDefName)) yield return name + " Xenotype scope requires targetDefName.";
+        if (!IsPositiveFinite(pack.weight)) yield return name + " has an invalid weight; weight must be finite and greater than zero.";
+
+        HashSet<SqueakAction> fallbackActions = new();
+        foreach (SqueakVoicePackFallback fallback in pack.fallbacks ?? new List<SqueakVoicePackFallback>())
+        {
+            if (fallback == null) { yield return name + " contains a null fallback entry."; continue; }
+            if (!SqueakActionDefinitions.IsKnown(fallback.action)) yield return name + " fallback contains unknown action " + fallback.action + ".";
+            if (!fallbackActions.Add(fallback.action)) yield return name + " contains duplicate fallback action " + fallback.action + ".";
+            if (fallback.sound == null) { yield return name + " fallback " + fallback.action + " has a null SoundDef."; continue; }
+            if (string.IsNullOrWhiteSpace(fallback.sound.defName) || !fallback.sound.defName.StartsWith("SR_")) yield return name + " fallback " + fallback.action + " references a SoundDef without SR_ prefix.";
+        }
+
         if (pack.actions == null || pack.actions.Count == 0) { yield return name + " has no action sounds."; yield break; }
 
-        HashSet<SqueakAction> seen = new();
+        Dictionary<SqueakAction, HashSet<AgeBucket?>> seen = new();
         foreach (SqueakVoicePackAction entry in pack.actions)
         {
             if (entry == null) { yield return name + " contains a null action entry."; continue; }
             if (!SqueakActionDefinitions.IsKnown(entry.action)) yield return name + " contains unknown action " + entry.action + ".";
-            if (!seen.Add(entry.action)) yield return name + " contains duplicate action " + entry.action + ".";
+            if (entry.ageTag.HasValue && !Enum.IsDefined(typeof(AgeBucket), entry.ageTag.Value)) yield return name + " action " + entry.action + " has an unknown ageTag " + entry.ageTag.Value + ".";
+            if (!seen.TryGetValue(entry.action, out HashSet<AgeBucket?>? ages))
+            {
+                ages = new HashSet<AgeBucket?>();
+                seen.Add(entry.action, ages);
+            }
+            if (!ages.Add(entry.ageTag))
+            {
+                string ageName = entry.ageTag.HasValue ? entry.ageTag.Value.ToString() : "all-age";
+                yield return name + " contains duplicate action " + entry.action + " for ageTag " + ageName + ".";
+            }
             if (entry.sounds == null || entry.sounds.Count == 0) { yield return name + " action " + entry.action + " has no sounds."; continue; }
             foreach (SoundDef sound in entry.sounds)
             {
@@ -82,6 +115,8 @@ internal static class SqueakVoicePackValidator
             }
         }
     }
+
+    private static bool IsPositiveFinite(float value) => value > 0f && !float.IsNaN(value) && !float.IsInfinity(value);
 }
 
 /// <summary>Canonical, last-wins persisted selection for one exact Race or Xenotype domain.

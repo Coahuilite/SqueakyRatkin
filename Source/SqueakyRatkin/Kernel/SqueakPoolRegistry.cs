@@ -21,11 +21,11 @@ public sealed class DomainPool
 /// 不可变选择注册表（§4.1/§4.2）。0.3.0 语义规范 = 0.2.4 SqueakRuntimeSnapshot.Choose + ChoosePack
 /// （等价评审锚）：
 ///   Off       → 仅内置表（旧 vanilla 字典）
-///   Fallback  → XenotypePack → RacePack → BuiltInFallback 三级短路
-///   Remix     → 三级（非 None）等权折叠，固定序 [xeno, race, builtin]
-///   entry 级过滤 = 旧 pack 级 HasPlayable；sound 级过滤 = 旧 pack.Choose 内过滤；
+///   Fallback  → XenotypePack → RacePack → PackFallback → BuiltInFallback 四级短路
+///   Remix     → 四级（非 None）等权折叠，固定序 [xeno, race, pack fallback, builtin]
+///   entry 级过滤 = 年龄变体选定 → egg 资格 → gate；sound 级过滤 = 旧 pack.Choose 内过滤；
 ///   等权抽取 = 旧 Rand.Range(0, N) 的分布等价（rolls.Next01() * N 取整）。
-/// 0.3.x 带权 = entry.Weight 累计权重（0.3.0 全 1 = 等权）；年龄优先级 0.3.2 启用。
+/// 0.3.1 带权 = entry.Weight 累计权重；ageTag 未声明、egg 关闭、无 PackFallback 时严格保留 0.3.0 行为。
 /// </summary>
 public sealed class SqueakPoolRegistry
 {
@@ -44,7 +44,7 @@ public sealed class SqueakPoolRegistry
         {
             if (entry == null || entry.PackKey == null || entry.Actions == null) continue;
             if (!filter.Contains(entry.Domain.Race)) continue;
-            if (!(entry.Weight > 0f)) continue;
+            if (!IsPositiveFinite(entry.Weight)) continue;
             if (!grouped.TryGetValue(entry.Domain, out List<VoicePackEntry>? list))
             {
                 list = new List<VoicePackEntry>();
@@ -70,9 +70,48 @@ public sealed class SqueakPoolRegistry
             : ChainResult.None;
         ChainResult r = SelectTier(PoolFor(new AudioDomain(ctx.Domain.Race, null)), ChainTier.RacePack, ctx, gate, rolls);
 
-        if (mode == SelectionMode.Fallback) return x.IsNone ? (r.IsNone ? vanilla : r) : x;
+        if (mode == SelectionMode.Fallback)
+        {
+            if (!x.IsNone) return x;
+            if (!r.IsNone) return r;
+            ChainResult fallback = SelectPackFallback(PoolFor(ctx.Domain), ctx, gate, rolls);
+            return !fallback.IsNone ? fallback : vanilla;
+        }
 
-        // Remix：三级等权折叠，固定序 [xeno, race, builtin]（旧实现同序）。
+        // Preserve the frozen default-state draw stream only when this action has no declared fallback.
+        // A declared but currently gated fallback remains a fourth, non-playable tier and is skipped.
+        DomainPool? fallbackPool = PoolFor(ctx.Domain);
+        if (!HasPackFallback(fallbackPool, ctx.ActionKey)) return SelectRemixThree(x, r, vanilla, rolls);
+        ChainResult p = SelectPackFallback(fallbackPool, ctx, gate, rolls);
+        return SelectRemixFour(x, r, p, vanilla, rolls);
+    }
+
+    private static ChainResult SelectRemixFour(ChainResult x, ChainResult r, ChainResult p, ChainResult vanilla, IRollSource rolls)
+    {
+        ChainResult tier0 = x, tier1 = r, tier2 = p, tier3 = vanilla;
+        int count = 0;
+        if (!tier0.IsNone) count++;
+        if (!tier1.IsNone) count++;
+        if (!tier2.IsNone) count++;
+        if (!tier3.IsNone) count++;
+        if (count == 0) return ChainResult.None;
+        if (count == 1)
+        {
+            if (!tier0.IsNone) return tier0;
+            if (!tier1.IsNone) return tier1;
+            return !tier2.IsNone ? tier2 : tier3;
+        }
+        int index = RollIndex(count, rolls);
+        if (!tier0.IsNone && index-- == 0) return tier0;
+        if (!tier1.IsNone && index-- == 0) return tier1;
+        if (!tier2.IsNone && index-- == 0) return tier2;
+        return tier3;
+    }
+
+    public DomainPool? PoolFor(AudioDomain domain) => poolsByDomain.TryGetValue(domain, out DomainPool? pool) ? pool : null;
+
+    private static ChainResult SelectRemixThree(ChainResult x, ChainResult r, ChainResult vanilla, IRollSource rolls)
+    {
         ChainResult tier0 = x, tier1 = r, tier2 = vanilla;
         int count = 0;
         if (!tier0.IsNone) count++;
@@ -89,13 +128,20 @@ public sealed class SqueakPoolRegistry
         };
     }
 
-    public DomainPool? PoolFor(AudioDomain domain) => poolsByDomain.TryGetValue(domain, out DomainPool? pool) ? pool : null;
 
     /// <summary>诊断/编辑器枚举（§4.1 PoolsFor）。</summary>
     public IReadOnlyList<DomainPool> PoolsFor(AudioDomain domain)
     {
         DomainPool? pool = PoolFor(domain);
         return pool == null ? Array.Empty<DomainPool>() : new[] { pool };
+    }
+
+    private static bool HasPackFallback(DomainPool? pool, string actionKey)
+    {
+        if (pool == null) return false;
+        foreach (VoicePackEntry entry in pool.Entries)
+            if (entry.PackFallback != null && entry.PackFallback.ContainsKey(actionKey)) return true;
+        return false;
     }
 
     /// <summary>内置表 tier：TryParseBuiltIn（内置键 ↔ 枚举名一致性由 validator 双向锁）+ profile 键 + gate。</summary>
@@ -108,18 +154,49 @@ public sealed class SqueakPoolRegistry
     private static ChainResult SelectTier(DomainPool? pool, ChainTier tier, SelectionContext ctx, ISoundGate gate, IRollSource rolls)
     {
         if (pool == null || pool.Entries.Count == 0) return ChainResult.None;
-        // entry 级过滤（= 旧 pack 级 HasPlayable）：动作存在且至少一个 playable sound。
+        // 每个 pack 先按年龄选一个变体，再按 egg 资格与 playability 过滤；绝不跨变体回退。
         List<VoicePackEntry> valid = new(pool.Entries.Count);
+        Dictionary<VoicePackEntry, ActionSoundSet> selectedSets = new();
         foreach (VoicePackEntry entry in pool.Entries)
         {
-            if (!entry.TryGetAction(ctx.ActionKey, out ActionSoundSet? set) || !set.HasSounds) continue;
+            if (!entry.TryGetAction(ctx.ActionKey, out IReadOnlyList<ActionSoundSet>? variants)) continue;
+            ActionSoundSet? set = SelectVariant(variants, ctx);
+            if (set == null || !set.HasSounds || (set.IsEgg && !ctx.AllowEggs)) continue;
             if (!HasPlayableKey(set, ctx, gate)) continue;
             valid.Add(entry);
+            selectedSets.Add(entry, set);
         }
         if (valid.Count == 0) return ChainResult.None;
         VoicePackEntry chosen = DrawEntry(valid, rolls);
-        string? key = DrawSoundKey(chosen.Actions[ctx.ActionKey], ctx, gate, rolls);
+        string? key = DrawSoundKey(selectedSets[chosen], ctx, gate, rolls);
         return key == null ? ChainResult.None : new ChainResult(key, tier, chosen.PackKey);
+    }
+
+    /// <summary>PackFallback 始终求 ctx.Domain 的精确池；xeno ctx 不越域读取 race fallback。</summary>
+    private static ChainResult SelectPackFallback(DomainPool? pool, SelectionContext ctx, ISoundGate gate, IRollSource rolls)
+    {
+        if (pool == null || pool.Entries.Count == 0) return ChainResult.None;
+        List<VoicePackEntry> valid = new(pool.Entries.Count);
+        foreach (VoicePackEntry entry in pool.Entries)
+        {
+            if (entry.PackFallback == null || !entry.PackFallback.TryGetValue(ctx.ActionKey, out string? key) || key == null) continue;
+            if (gate.Playable(key, ctx)) valid.Add(entry);
+        }
+        if (valid.Count == 0) return ChainResult.None;
+        VoicePackEntry chosen = DrawEntry(valid, rolls);
+        string? fallbackKey = chosen.PackFallback![ctx.ActionKey];
+        return new ChainResult(fallbackKey, ChainTier.PackFallback, chosen.PackKey);
+    }
+
+    /// <summary>exact age 优先；exact 存在即使 egg 关闭或全 mute 也不退回 all-age。</summary>
+    private static ActionSoundSet? SelectVariant(IReadOnlyList<ActionSoundSet>? variants, SelectionContext ctx)
+    {
+        if (variants == null) return null;
+        foreach (ActionSoundSet set in variants)
+            if (set != null && set.AgeTag == ctx.Age) return set;
+        foreach (ActionSoundSet set in variants)
+            if (set != null && set.AgeTag == null) return set;
+        return null;
     }
 
     private static bool HasPlayableKey(ActionSoundSet set, SelectionContext ctx, ISoundGate gate)
@@ -134,7 +211,7 @@ public sealed class SqueakPoolRegistry
     private static VoicePackEntry DrawEntry(List<VoicePackEntry> valid, IRollSource rolls)
     {
         if (valid.Count == 1) return valid[0];
-        // 构造期已过滤 Weight <= 0（见 ctor），此处权重恒正。
+        // 构造期已过滤无效 Weight，此处权重恒为有限正数。
         double total = 0;
         foreach (VoicePackEntry entry in valid) total += entry.Weight;
         double roll = rolls.Next01() * total;
@@ -168,4 +245,6 @@ public sealed class SqueakPoolRegistry
         if (index >= count) index = count - 1;
         return index;
     }
+
+    private static bool IsPositiveFinite(float value) => value > 0f && !float.IsNaN(value) && !float.IsInfinity(value);
 }

@@ -12,7 +12,7 @@ namespace SqueakyRatkin;
 /// Verse.Rand 收敛为 IRollSource；catalog 域包投影为 VoicePackEntry[]。
 /// 2b-2：域身份端到端 = AudioDomain（记录自身 raceDefName/xenotypeDefName），无注入字面量域。
 /// 投影规则 = 旧 ResolvedAudioPack 构建规则（0.2.4）：非 null、去 _Preview 后缀、Distinct、
-/// defName Ordinal 排序；HasSounds 过滤；Weight = 1（等权）。
+/// defName Ordinal 排序；HasSounds 过滤；pack weight 由 XML 保留（默认 1 = 等权）。
 /// </summary>
 internal static class SqueakKernelAdapter
 {
@@ -136,18 +136,36 @@ internal static class SqueakKernelAdapter
 
     private static VoicePackEntry? BuildEntry(SqueakVoicePackDef pack, string key, AudioDomain domain)
     {
-        Dictionary<string, ActionSoundSet> actions = new();
+        Dictionary<string, List<ActionSoundSet>> variants = new();
         foreach (SqueakVoicePackAction entry in pack.actions ?? new List<SqueakVoicePackAction>())
         {
             if (entry == null) continue;
             string? actionKey = ActionKey.For(entry.action);
-            if (actionKey == null || actions.ContainsKey(actionKey)) continue;
+            if (actionKey == null) continue;
             List<string> sounds = ProjectSounds(entry);
             if (sounds.Count == 0) continue;
-            actions[actionKey] = new ActionSoundSet(sounds, null, 1f);
+            if (!variants.TryGetValue(actionKey, out List<ActionSoundSet>? sets))
+            {
+                sets = new List<ActionSoundSet>();
+                variants.Add(actionKey, sets);
+            }
+            sets.Add(new ActionSoundSet(sounds, entry.ageTag, 1f, entry.IsEgg));
         }
-        if (actions.Count == 0) return null;
-        return new VoicePackEntry(key, domain, 1f, actions);
+        if (variants.Count == 0) return null;
+        Dictionary<string, IReadOnlyList<ActionSoundSet>> actions = new();
+        foreach (KeyValuePair<string, List<ActionSoundSet>> pair in variants)
+            actions.Add(pair.Key, pair.Value.AsReadOnly());
+
+        Dictionary<string, string> fallback = new();
+        foreach (SqueakVoicePackFallback entry in pack.fallbacks ?? new List<SqueakVoicePackFallback>())
+        {
+            if (entry == null || entry.sound == null) continue;
+            string? actionKey = ActionKey.For(entry.action);
+            string? soundKey = entry.sound.defName;
+            if (actionKey == null || string.IsNullOrWhiteSpace(soundKey) || fallback.ContainsKey(actionKey)) continue;
+            fallback.Add(actionKey, soundKey);
+        }
+        return new VoicePackEntry(key, domain, pack.weight, actions, fallback.Count == 0 ? null : fallback);
     }
 
     private static List<string> ProjectSounds(SqueakVoicePackAction entry)
@@ -171,6 +189,12 @@ internal static class SqueakKernelAdapter
                 if (sound == null || sound.defName.EndsWith("_Preview", StringComparison.Ordinal) || result.Contains(sound)) continue;
                 result.Add(sound);
             }
+        }
+        foreach (SqueakVoicePackFallback entry in pack.fallbacks ?? new List<SqueakVoicePackFallback>())
+        {
+            SoundDef? sound = entry?.sound;
+            if (sound == null || sound.defName.EndsWith("_Preview", StringComparison.Ordinal) || result.Contains(sound)) continue;
+            result.Add(sound);
         }
         return result;
     }

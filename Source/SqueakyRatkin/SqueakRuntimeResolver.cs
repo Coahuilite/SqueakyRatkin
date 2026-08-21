@@ -260,7 +260,7 @@ public sealed class SqueakRuntimeSnapshot
         SqueakyRatkin.Kernel.AudioDomain domain = context.Xenotype != null
             ? new SqueakyRatkin.Kernel.AudioDomain(new SqueakyRatkin.Kernel.RaceKey(raceDefName), new SqueakyRatkin.Kernel.XenotypeKey(context.Xenotype.defName))
             : new SqueakyRatkin.Kernel.AudioDomain(new SqueakyRatkin.Kernel.RaceKey(raceDefName), null);
-        SqueakyRatkin.Kernel.SelectionContext ctx = new(domain, actionKey, SqueakyRatkin.Kernel.AgeBucket.Adult, production);
+        SqueakyRatkin.Kernel.SelectionContext ctx = new(domain, actionKey, SqueakyRatkin.Kernel.AgeBucket.Adult, production, false);
         SqueakyRatkin.Kernel.ChainResult result = Registry.Select(ctx, SqueakKernelAdapter.ToSelectionMode(VoicePackMode), SqueakKernelAdapter.GateFor(pawn, map, target), SqueakKernelAdapter.Rolls);
         return SqueakKernelAdapter.ToChoice(result);
     }
