@@ -228,8 +228,7 @@ public partial class SqueakyRatkinSettings : ModSettings
         if (scope != SqueakVoicePackScope.Race && scope != SqueakVoicePackScope.Xenotype) return;
         string target = scope == SqueakVoicePackScope.Race ? "" : targetDefName ?? "";
         if (scope == SqueakVoicePackScope.Xenotype && target.Length == 0) return;
-        string domain = VoicePackSelectionRecord.ComposeDomainKey(scope, target);
-        voicePackSelections.RemoveAll(x => x != null && x.DomainKey == domain);
+        voicePackSelections.RemoveAll(x => VoicePackSelectionRecord.SameDomain(x, scope, SqueakProductDomainFilter.PrimaryRaceDefName, target));
         List<string> keys = (enabledKeys ?? Array.Empty<string>()).Where(x => !string.IsNullOrWhiteSpace(x)).Distinct().ToList();
         if (keys.Count > 0) voicePackSelections.Add(new VoicePackSelectionRecord
         {
@@ -244,8 +243,8 @@ public partial class SqueakyRatkinSettings : ModSettings
 
     public void ForgetVoicePackSelection(SqueakVoicePackScope scope, string targetDefName)
     {
-        string domain = VoicePackSelectionRecord.ComposeDomainKey(scope, scope == SqueakVoicePackScope.Race ? "" : targetDefName ?? "");
-        voicePackSelections.RemoveAll(x => x != null && x.DomainKey == domain);
+        string target = scope == SqueakVoicePackScope.Race ? "" : targetDefName ?? "";
+        voicePackSelections.RemoveAll(x => VoicePackSelectionRecord.SameDomain(x, scope, SqueakProductDomainFilter.PrimaryRaceDefName, target));
         NotifyDiscreteResolverRuntimeChanged();
         QueuePersistence();
     }
@@ -254,8 +253,7 @@ public partial class SqueakyRatkinSettings : ModSettings
     {
         if (string.IsNullOrEmpty(targetDefName)) return;
         xenotypePresets.RemoveAll(x => x != null && string.Equals(x.xenotypeDefName, targetDefName, StringComparison.Ordinal));
-        string domain = VoicePackSelectionRecord.ComposeDomainKey(SqueakVoicePackScope.Xenotype, targetDefName);
-        voicePackSelections.RemoveAll(x => x != null && string.Equals(x.DomainKey, domain, StringComparison.Ordinal));
+        voicePackSelections.RemoveAll(x => VoicePackSelectionRecord.SameDomain(x, SqueakVoicePackScope.Xenotype, SqueakProductDomainFilter.PrimaryRaceDefName, targetDefName));
         NotifyDiscreteResolverRuntimeChanged();
         QueuePersistence();
     }
@@ -263,7 +261,7 @@ public partial class SqueakyRatkinSettings : ModSettings
     public SqueakVoicePackDomainStatus GetVoicePackSelectionStatus(SqueakVoicePackScope scope, string targetDefName)
     {
         string target = scope == SqueakVoicePackScope.Race ? "" : targetDefName ?? "";
-        VoicePackSelectionRecord? record = voicePackSelections.LastOrDefault(x => x != null && x.DomainKey == VoicePackSelectionRecord.ComposeDomainKey(scope, target));
+        VoicePackSelectionRecord? record = voicePackSelections.LastOrDefault(x => VoicePackSelectionRecord.SameDomain(x, scope, SqueakProductDomainFilter.PrimaryRaceDefName, target));
         List<string> keys = new(record?.enabledPackKeys ?? new List<string>());
         SqueakXenotypeCatalogSnapshot catalog = SqueakXenotypeCatalog.Current;
         if (scope == SqueakVoicePackScope.Xenotype && !ModsConfig.BiotechActive) return new SqueakVoicePackDomainStatus(SqueakVoicePackDomainState.Dormant, keys);

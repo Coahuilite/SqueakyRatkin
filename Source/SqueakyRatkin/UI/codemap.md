@@ -9,7 +9,7 @@
 - [SqueakyRatkinSettings.cs](../SqueakyRatkinSettings.cs)：顶层 `DrawSettings(Rect)`、`SettingsTab`、页面导航/footer、Basics 页，以及 `Apply*AndQueue` 写入桥接、`BeginSettingsSession`/`EndSettingsSession`、七击解锁计数。
 - [SqueakyRatkinSettings.SoundMoodUI.cs](SqueakyRatkinSettings.SoundMoodUI.cs)：`DrawSoundMoodSettings`、`CommitMoodEditorNow`、mood/action 选择、即时音色编辑与 material/final preview。
 - [SqueakyRatkinSettings.XenotypeUI.cs](SqueakyRatkinSettings.XenotypeUI.cs)：voice-pack mode、race/xenotype target list、catalog 状态、master/detail 与 narrow list/editor、Remix 双确认、orphan/unavailable 处理。
-- [XenotypePresetDraft.cs](XenotypePresetDraft.cs)：单个 `xenotypeDefName` 的 UI-only field-preserving draft；`Dirty`/`Revision` 由 `MarkChanged` 推进，`Commit` 重建该目标的 canonical preset。
+- [XenotypePresetDraft.cs](XenotypePresetDraft.cs)：单个 `(race,xenotype)` 预设域的 UI-only field-preserving draft（2b-2 race identity，UI 投影产品 race）；`Dirty`/`Revision` 由 `MarkChanged` 推进，`Commit` 重建该目标的 canonical preset。
 - [SqueakyRatkinSettings.DiagnosticsUI.cs](SqueakyRatkinSettings.DiagnosticsUI.cs)：解锁后的 `DrawDeveloperSettings`，action statistics、audio-path diagnostics、logging cards、audio browser 与 build identity。
 - [SqueakySettingsUI.cs](SqueakySettingsUI.cs)：共享 IMGUI primitives（`Button`、`Toggle`、`SelectableCard`、`SettingSelector`、`SearchField`、`FilterChip`、`HelpToggle`、`StatusPanel`、`EmptyState`）及 `Dialog_SqueakyCompactMessageBox`。
 - [../SqueakSettingsGameContext.cs](../SqueakSettingsGameContext.cs)：安全采样 `IsPlaying`、`HasPlayableMapUI`、`Map`、`SelectedPawn`；preview/diagnostics 只能通过设置拥有的 draw context 使用。

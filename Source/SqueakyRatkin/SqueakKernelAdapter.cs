@@ -9,7 +9,8 @@ namespace SqueakyRatkin;
 
 /// <summary>
 /// 内核↔适配层接缝（§4.1 边界）：SoundDef 收敛为 string key + ISoundGate 函子；
-/// Verse.Rand 收敛为 IRollSource；catalog 域包投影为 VoicePackEntry[]（0.3.0 注入 (Ratkin,*)）。
+/// Verse.Rand 收敛为 IRollSource；catalog 域包投影为 VoicePackEntry[]。
+/// 2b-2：域身份端到端 = AudioDomain（记录自身 raceDefName/xenotypeDefName），无注入字面量域。
 /// 投影规则 = 旧 ResolvedAudioPack 构建规则（0.2.4）：非 null、去 _Preview 后缀、Distinct、
 /// defName Ordinal 排序；HasSounds 过滤；Weight = 1（等权）。
 /// </summary>
@@ -59,7 +60,8 @@ internal static class SqueakKernelAdapter
         _ => SelectionMode.Off,
     };
 
-    /// <summary>内置表（0.3.0 种子 = SqueakActionDefinitions.AudioKey 单源投影，15 动作全列）。</summary>
+    /// <summary>内置表（0.3.0 种子 = SqueakActionDefinitions.AudioKey 单源投影，15 动作全列）。
+    /// 条目 race = ProductDomainFilter 数据单源（无散落 Ratkin 字面量）。</summary>
     public static BuiltInFallbackTable BuildBuiltIn()
     {
         Dictionary<string, string> keys = new(StringComparer.Ordinal);
@@ -69,18 +71,24 @@ internal static class SqueakKernelAdapter
             string? actionKey = ActionKey.For(action);
             if (actionKey != null) keys[actionKey] = SqueakActionDefinitions.Get(action).AudioKey;
         }
-        return new BuiltInFallbackTable(new[] { new FallbackProfile(new RaceKey("Ratkin"), 1, keys) });
+        return new BuiltInFallbackTable(new[] { new FallbackProfile(new RaceKey(SqueakProductDomainFilter.PrimaryRaceDefName), 1, keys) });
     }
 
-    /// <summary>2b-1 retains the legacy string-domain bridge; 2b-2 moves it to AudioDomain end-to-end.</summary>
-    public static List<VoicePackEntry> BuildEntries(SqueakXenotypeCatalogSnapshot catalog, IReadOnlyDictionary<string, HashSet<string>> selections)
+    /// <summary>2b-2: AudioDomain 域键端到端。选择集按记录自身 (raceDefName, xenotypeDefName) 域键组织；
+    /// 候选 pack 按声明的 raceDefName 精确匹配域（跨 race 池隔离），不再有注入字面量域。</summary>
+    public static List<VoicePackEntry> BuildEntries(SqueakXenotypeCatalogSnapshot catalog, IReadOnlyDictionary<AudioDomain, HashSet<string>> selections)
     {
         List<VoicePackEntry> entries = new();
-        AddDomain(entries, catalog.RacePacks, selections, SqueakVoicePackScope.Race, "");
-        if (ModsConfig.BiotechActive)
+        foreach (KeyValuePair<AudioDomain, HashSet<string>> pair in selections)
         {
-            foreach (KeyValuePair<string, IReadOnlyList<SqueakVoicePackDef>> group in catalog.XenotypePacksByDefName)
-                AddDomain(entries, group.Value, selections, SqueakVoicePackScope.Xenotype, group.Key);
+            AudioDomain domain = pair.Key;
+            if (pair.Value == null || pair.Value.Count == 0) continue;
+            IReadOnlyList<SqueakVoicePackDef>? candidates = null;
+            if (domain.Xenotype == null)
+                candidates = catalog.RacePacks;
+            else if (ModsConfig.BiotechActive && catalog.XenotypePacksByDefName.TryGetValue(domain.Xenotype.Value.DefName, out IReadOnlyList<SqueakVoicePackDef>? packs))
+                candidates = packs;
+            AddDomain(entries, candidates, pair.Value, domain);
         }
         return entries;
     }
@@ -113,14 +121,13 @@ internal static class SqueakKernelAdapter
         return new SqueakSoundChoice(sound, source, result.PoolStableKey);
     }
 
-    private static void AddDomain(List<VoicePackEntry> entries, IReadOnlyList<SqueakVoicePackDef> candidates, IReadOnlyDictionary<string, HashSet<string>> selections, SqueakVoicePackScope scope, string target)
+    private static void AddDomain(List<VoicePackEntry> entries, IReadOnlyList<SqueakVoicePackDef>? candidates, HashSet<string> keys, AudioDomain domain)
     {
-        if (!selections.TryGetValue(VoicePackSelectionRecord.ComposeDomainKey(scope, target), out HashSet<string>? keys)) return;
-        AudioDomain domain = scope == SqueakVoicePackScope.Race
-            ? new AudioDomain(new RaceKey("Ratkin"), null)
-            : new AudioDomain(new RaceKey("Ratkin"), new XenotypeKey(target));
+        if (candidates == null || keys == null || keys.Count == 0) return;
         foreach (SqueakVoicePackDef pack in candidates)
         {
+            // 域键精确匹配：pack 声明的 raceDefName 必须等于选择域的 race（跨 race 池隔离）。
+            if (!string.Equals(pack.raceDefName, domain.Race.DefName, StringComparison.Ordinal)) continue;
             if (!pack.TryGetPackKey(out string key) || !keys.Contains(key)) continue;
             VoicePackEntry? entry = BuildEntry(pack, key, domain);
             if (entry != null) entries.Add(entry);

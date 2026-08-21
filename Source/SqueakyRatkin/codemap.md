@@ -31,7 +31,7 @@
 - `SqueakSoundAvailability.cs` — 需求驱动、已加载资源只读检查：`SqueakSoundAvailabilityCache`（`Resolve`/`PeekState`/`TryGetCached`/`Clear`，按 SoundDef 缓存已加载 clip；不枚举文件不复制数据）、`GetNativePlayability`/`GetProductionPlayability`、`TryCreateProductionInfo`/`TryCreateNativeInfo`/`TryCreateNeutralInfo`（生产播放比原生预览更严）、`SqueakResolvedClip`/`SqueakSoundAvailability`、`SqueakSoundPlayability`/`SqueakSoundContextKind`/`SqueakSoundAvailabilityState`。
 
 **数据模型 / 杂项**
-- `SqueakVoicePackModels.cs` — `SqueakVoicePackDef`/validator 及 `VoicePackSelectionRecord`：v4 记录为 `(scope,raceDefName,xenotypeDefName,enabledPackKeys)`；旧 `targetDefName` 仅 LoadingVars Scribe 源，`ComposeDomainKey`/`DomainKey` 暂留至 2b-2。
+- `SqueakVoicePackModels.cs` — `SqueakVoicePackDef`/validator 及 `VoicePackSelectionRecord`：v4 记录为 `(scope,raceDefName,xenotypeDefName,enabledPackKeys)`；2b-2 起记录域身份 = 字段本身（`SameDomain` 匹配），旧字符串域键桥（`ComposeDomainKey`/`DomainKey`）已删；旧 `targetDefName` 仅 LoadingVars Scribe 源。
 - `SqueakXenotypePresetModels.cs` — 持久化行为/mood 覆盖：`XenotypePresetRecord` v4 identity = `(raceDefName,xenotypeDefName)`，其余字段仍是 field-presence deltas。
 - `SqueakAudioPoolNotificationService.cs` — 进程内一次性缺包通知（`Dialog_SqueakyCompactMessageBox` 传输，后端状态供未来 UI）。
 - `SqueakLabels.cs` — 本地化 helper（`SR.Action.*`/`SR.Mood.*`/`SR.SettingsCategory`）。

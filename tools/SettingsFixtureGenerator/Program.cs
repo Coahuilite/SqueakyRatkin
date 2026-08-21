@@ -180,16 +180,21 @@ internal static class Program
         return Scribe.saver.FinalizeSaving();
     }
 
-    /// <summary>Cheap publish proxy: it exercises the runtime's settings-owned global policy without UI/resolver stubs.</summary>
+    /// <summary>Cheap publish proxy: it exercises the runtime's settings-owned global policy without UI/resolver stubs.
+    /// 2b-2: the legacy string-domain bridge (ComposeDomainKey/DomainKey) is deleted; a migrated schema must carry
+    /// complete AudioDomain identity fields (raceDefName; Xenotype scope also xenotypeDefName).</summary>
     private static void Publish(SqueakyRatkinSettings settings)
     {
         SqueakGlobalActionPolicy.Publish(settings);
+        // Aborted transactions keep the legacy schema so the next startup can retry; only records in a migrated
+        // schema are required to project complete AudioDomain identity (mirrors AssertTransactionalSuccess).
+        if (settings.settingsSchemaVersion < 4 || settings.voicePackSchemaVersion < 2) return;
         foreach (VoicePackSelectionRecord record in settings.voicePackSelections ?? new List<VoicePackSelectionRecord>())
         {
             if (record == null || record.scope == SqueakVoicePackScope.Unspecified) continue;
-            string expectedDomain = VoicePackSelectionRecord.ComposeDomainKey(record.scope, record.xenotypeDefName);
-            if (!string.Equals(record.DomainKey, expectedDomain, StringComparison.Ordinal))
-                throw new InvalidOperationException("Migrated selection no longer projects through the legacy 2b-1 domain bridge.");
+            if (string.IsNullOrEmpty(record.raceDefName)) throw new InvalidOperationException("A migrated selection is missing its raceDefName AudioDomain identity.");
+            if (record.scope == SqueakVoicePackScope.Race && !string.IsNullOrEmpty(record.xenotypeDefName)) throw new InvalidOperationException("A migrated Race selection carries xenotypeDefName.");
+            if (record.scope == SqueakVoicePackScope.Xenotype && string.IsNullOrEmpty(record.xenotypeDefName)) throw new InvalidOperationException("A migrated Xenotype selection is missing xenotypeDefName.");
         }
     }
 

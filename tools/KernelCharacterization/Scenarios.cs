@@ -52,6 +52,7 @@ public static class Scenarios
     public const string OrphanPackKey = "coahuilite.squeakyratkin:SR_GonePack_9999";
 
     /// <summary>fixture 驱动注册表：解析 selection（last-wins，与 BuildSelections 同语义）→ 域池投影。
+    /// 2b-2：域键 = AudioDomain（场景种族 + 目标），不再镜像旧字符串域键桥。
     /// 未知 pack key（无 pack 定义）不构造条目 = orphan（域注入面由 catalog 决定，语料以选择域为准）。</summary>
     public static SqueakPoolRegistry BuildFixtureRegistry(string scenario, string fixturesRoot)
     {
@@ -60,7 +61,7 @@ public static class Scenarios
 
         System.Xml.XmlDocument doc = new();
         doc.Load(path);
-        Dictionary<string, HashSet<string>> selections = new(StringComparer.Ordinal);
+        Dictionary<AudioDomain, HashSet<string>> selections = new();
         System.Xml.XmlNodeList? nodes = doc.SelectNodes("//voicePackSelections/li");
         if (nodes != null)
         {
@@ -69,6 +70,7 @@ public static class Scenarios
                 System.Xml.XmlNode? scopeNode = li["scope"];
                 string scope = scopeNode?.InnerText ?? "";
                 if (scope != "Race" && scope != "Xenotype") continue;
+                // v1/v3 fixture 记录：targetDefName 是 load-only 迁移源；域身份 = (Ratkin, 目标)。
                 string target = scope == "Race" ? "" : (li["targetDefName"]?.InnerText ?? "");
                 if (scope == "Xenotype" && target.Length == 0) continue;
                 HashSet<string> keys = new(StringComparer.Ordinal);
@@ -80,20 +82,22 @@ public static class Scenarios
                         if (key.NodeType == System.Xml.XmlNodeType.Element && !string.IsNullOrEmpty(key.InnerText)) keys.Add(key.InnerText);
                     }
                 }
-                selections[ComposeDomainKey(scope, target)] = keys;
+                AudioDomain domain = scope == "Race"
+                    ? new AudioDomain(Ratkin, null)
+                    : new AudioDomain(Ratkin, new XenotypeKey(target));
+                selections[domain] = keys;
             }
         }
 
         List<VoicePackEntry> entries = new();
-        AddFixtureDomain(entries, selections, "Race", "");
+        AddFixtureDomain(entries, selections, RaceDomain);
         // Biotech 注入面：F07 = dormant（Biotech 关，xeno 域不注入 → 查询该域回退）；其余场景注入全部 xeno 选择域。
         if (scenario != "F07-inactive")
         {
-            foreach (KeyValuePair<string, HashSet<string>> pair in selections)
+            foreach (KeyValuePair<AudioDomain, HashSet<string>> pair in selections)
             {
-                if (!pair.Key.StartsWith("Xenotype:", StringComparison.Ordinal)) continue;
-                string target = pair.Key.Substring("Xenotype:".Length);
-                AddFixtureDomain(entries, selections, "Xenotype", target);
+                if (pair.Key.Xenotype == null) continue;
+                AddFixtureDomain(entries, selections, pair.Key);
             }
         }
         return new SqueakPoolRegistry(entries, BuildBuiltIn(), DomainFilter.Everything);
@@ -114,12 +118,9 @@ public static class Scenarios
         return domains.ToArray();
     }
 
-    private static void AddFixtureDomain(List<VoicePackEntry> entries, IReadOnlyDictionary<string, HashSet<string>> selections, string scope, string target)
+    private static void AddFixtureDomain(List<VoicePackEntry> entries, IReadOnlyDictionary<AudioDomain, HashSet<string>> selections, AudioDomain domain)
     {
-        if (!selections.TryGetValue(ComposeDomainKey(scope, target), out HashSet<string>? keys)) return;
-        AudioDomain domain = scope == "Race"
-            ? RaceDomain
-            : new AudioDomain(Ratkin, new XenotypeKey(target));
+        if (!selections.TryGetValue(domain, out HashSet<string>? keys)) return;
         foreach (string packKey in keys)
         {
             // orphan：pack 缺失（无 pack 定义）→ 不构造条目，域池保持空。
@@ -140,10 +141,6 @@ public static class Scenarios
         }
         return new VoicePackEntry(packKey, domain, 1f, actions);
     }
-
-    /// <summary>等价于真实 VoicePackSelectionRecord.ComposeDomainKey 的本地字符串镜像。</summary>
-    private static string ComposeDomainKey(string scope, string targetDefName)
-        => scope == "Race" ? "Race" : scope == "Xenotype" ? "Xenotype:" + (targetDefName ?? "") : "";
 
     /// <summary>场景 → 注册表（语料与回放共用同一构造）。</summary>
     public static SqueakPoolRegistry BuildRegistry(string scenario)

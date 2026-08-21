@@ -86,6 +86,8 @@ internal static class SqueakVoicePackValidator
 
 /// <summary>Canonical, last-wins persisted selection for one exact Race or Xenotype domain.
 /// raceDefName is required after v4 migration; Xenotype scope additionally requires xenotypeDefName.
+/// 2b-2: record domain identity is the (scope, raceDefName, xenotypeDefName) fields themselves —
+/// the legacy string domain bridge (ComposeDomainKey/DomainKey) is deleted.
 /// targetDefName is a v1 load-only Scribe source and is never serialized or used as record runtime state.</summary>
 public class VoicePackSelectionRecord : IExposable
 {
@@ -106,10 +108,13 @@ public class VoicePackSelectionRecord : IExposable
         if (Scribe.mode == LoadSaveMode.PostLoadInit && enabledPackKeys == null) enabledPackKeys = new List<string>();
     }
 
-    // Retained through 2b-1 so existing public settings APIs and string-domain consumers remain source-stable.
-    // 2b-2 removes this legacy string key in favor of AudioDomain.
-    public static string ComposeDomainKey(SqueakVoicePackScope scope, string targetDefName) => scope == SqueakVoicePackScope.Race ? "Race" : scope == SqueakVoicePackScope.Xenotype ? "Xenotype:" + (targetDefName ?? "") : "";
-    public string DomainKey => ComposeDomainKey(scope, xenotypeDefName);
+    /// <summary>2b-2: record domain identity (scope, raceDefName, xenotypeDefName) field match.
+    /// Consumers pass the exact race they are addressing (0.3.x = ProductDomainFilter primary race).</summary>
+    internal static bool SameDomain(VoicePackSelectionRecord? record, SqueakVoicePackScope scope, string raceDefName, string xenotypeDefName)
+        => record != null
+           && record.scope == scope
+           && string.Equals(record.raceDefName, raceDefName, StringComparison.Ordinal)
+           && string.Equals(record.xenotypeDefName, xenotypeDefName, StringComparison.Ordinal);
 }
 
 public enum SqueakVoicePackDomainState { Available, Dormant, TargetUnavailable, Orphan }
