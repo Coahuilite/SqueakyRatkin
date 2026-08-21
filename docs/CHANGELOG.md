@@ -36,6 +36,19 @@ Short release summary.
 - ...
 ```
 
+## Unreleased — 0.3.0
+
+Internal kernel refactor (maintenance update). Functions and settings should behave exactly like 0.2.4; please report any behavioral differences.
+
+### Changed
+- Replaced the audio-selection internals with a pure decision kernel; no player-facing behavior change.
+
+### Packaging
+- Packages now carry a version.txt identity label (version, build flavor, commit).
+
+### Notes
+- Roadmap teaser: the kernel will later be split into a separate prerequisite mod (name TBD); a separate announcement will precede that release.
+
 ## [2026-08-18 00:10 UTC+8] Version 0.2.4
 
 ### Fixed

@@ -34,10 +34,17 @@ dotnet build Source/SqueakyRatkin/SqueakyRatkin.csproj -c Release -p:SqueakyBuil
 pwsh scripts/pack-dev.ps1
 ```
 
-This stages `dist/dev/SqueakyRatkin/` for manual local testing. Packaging scripts stage existing builds and do not compile: Dev is for local testing, Steam is for Workshop staging, and GitHub release packages are produced by the tag/release CI path. Maintainer release rules are in [`AGENTS.md`](./AGENTS.md). Standard build verification is:
+This stages `dist/dev/SqueakyRatkin/` for manual local testing. Packaging scripts stage existing builds and do not compile: Dev is for local testing, Steam is for Workshop staging, and GitHub release packages are produced by the tag/release CI path. Maintainer release rules are in [`AGENTS.md`](./AGENTS.md). Standard verification is one command:
+
+```powershell
+pwsh scripts/verify-local.ps1
+```
+
+It runs the three characterization harnesses (kernel purity gate + 43 asserts + 3782-case corpus replay, settings fixtures byte-stable, log protocol v1 in both flavors), the fixtures zero-delta gate, and Dev + Steam flavor builds with warnings-as-errors; add `-PackDev` or `-PackSteam` to also stage the package (Steam requires a clean working tree). Bare build:
 
 ```text
 dotnet build Source/SqueakyRatkin/SqueakyRatkin.csproj
 ```
+
 
 Code is licensed under [MPL-2.0](./LICENSE). Vanilla assets are referenced only by Def/path and are never redistributed. Contributions: [`CONTRIBUTING.md`](./CONTRIBUTING.md).

@@ -5,21 +5,6 @@ using Verse.Sound;
 
 namespace SqueakyRatkin;
 
-public enum SqueakVoicePackScope
-{
-    Unspecified = 0,
-    Race = 1,
-    Xenotype = 2
-}
-
-/// <summary>Audio selection policy. It is intentionally versioned separately from retired remix settings.</summary>
-public enum SqueakVoicePackMode
-{
-    Off,
-    Fallback,
-    Remix
-}
-
 /// <summary>One Def is one selectable pack in one domain. It never carries behavior or mood data.</summary>
 public class SqueakVoicePackDef : Def
 {
