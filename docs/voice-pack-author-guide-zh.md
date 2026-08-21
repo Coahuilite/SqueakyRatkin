@@ -25,10 +25,11 @@
 
 | 范围 | 必需字段 | 运行时关系 |
 | --- | --- | --- |
-| `Race` | `<scope>Race</scope>`，**不写** `targetDefName` | Xenotype 未命中或不可用时的回退层 |
-| `Xenotype` | `<scope>Xenotype</scope>` 与一个 `targetDefName` | Biotech 启用时按目标精确匹配 |
+| `Race` | `<scope>Race</scope>`、`raceDefName`，**不写** `targetDefName` | Xenotype 未命中或不可用时的回退层 |
+| `Xenotype` | `<scope>Xenotype</scope>`、`raceDefName` 与一个 `targetDefName` | Biotech 启用时按目标精确匹配 |
 | 两者 | 同一发行包可含多个独立 Def | Xenotype 缺动作时可回退 Race |
 
+`raceDefName` 是每个 `SqueakVoicePackDef` 的必填路由声明（0.3.1 起 validator 硬要求，缺失则整个 Def 被拒绝）：值为该包所服务种族的精确、区分大小写 `ThingDef.defName`（鼠族为 `Ratkin`）。0.3.x 期间装配域白名单 = `{Ratkin}`，白名单外 `raceDefName` 的包不会装配发声（dev 日志 `voicepack.pack.rejected reason=domain_filtered`）。
 `targetDefName` 仅表示精确且区分大小写的 `XenotypeDef.defName`，例如 `RK_XenoType_Ratkin`；不要翻译、改大小写或写成 XML 强引用。显示名、图标和本地化不参与匹配或保存。缺少 Biotech 时 Xenotype 层不解析，Race 仍会回退 Vanilla。
 
 ## 2. 身份、目录与完整最小 XML 示例
@@ -96,6 +97,7 @@ Race 内容独立于 Biotech 加载；Xenotype 内容仅在 Biotech 启用时读
   <SqueakyRatkin.SqueakVoicePackDef>
     <defName>SR_MyStudio_Race</defName>
     <scope>Race</scope>
+    <raceDefName>Ratkin</raceDefName>
     <actions><li><action>Call</action><sounds><li>SR_MyStudio_Race_Call</li></sounds></li></actions>
   </SqueakyRatkin.SqueakVoicePackDef>
   <SoundDef>
@@ -117,6 +119,7 @@ Race 内容独立于 Biotech 加载；Xenotype 内容仅在 Biotech 启用时读
   <SqueakyRatkin.SqueakVoicePackDef>
     <defName>SR_MyStudio_DefaultRatkinXenotype</defName>
     <scope>Xenotype</scope>
+    <raceDefName>Ratkin</raceDefName>
     <targetDefName>RK_XenoType_Ratkin</targetDefName>
     <actions><li><action>Call</action><sounds><li>SR_MyStudio_Xenotype_DefaultRatkin_Call</li></sounds></li></actions>
   </SqueakyRatkin.SqueakVoicePackDef>
@@ -196,7 +199,7 @@ ffprobe -v error -show_entries stream=codec_name,sample_rate,channels -of defaul
 ## 6. 发布检查清单与许可
 
 - [ ] 使用自己的 `packageId`、名称、作者和包 token；每个 DefName 以 `SR_` 开头且全局唯一。
-- [ ] Race Def 不含 `targetDefName`；每个 Xenotype Def 只有一个 exact、case-sensitive 目标字符串，并由 Biotech 加载规则门控。
+- [ ] 每个 Def 都声明了 exact、case-sensitive 的 `raceDefName`（0.3.1 必填）；Race Def 不含 `targetDefName`；每个 Xenotype Def 只有一个 exact、case-sensitive 目标字符串，并由 Biotech 加载规则门控。
 - [ ] `clipFolderPath`、实际目录和 `<lowercase packageId>/<PackDef.defName>/<Action>/` 规则一致；已列 Action 都有可播放音频。
 - [ ] 每个生产 SoundDef 满足 `sustain=false`、`MapOnly`、带 grain 的 SubSound、无 camera/loop/状态维持播放等强制契约。
 - [ ] 已在 OFF、FALLBACK、REMIX 下检查选择与回退；Workbench 试听不代替实际触发测试。

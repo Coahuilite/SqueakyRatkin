@@ -10,7 +10,7 @@
 ## Key Files / Symbols
 
 - `SqueakyRatkin_SoundDefs.xml` —— 16 个 SoundDef：`SR_Call, SR_Eat, SR_Sleep, SR_Wounded, SR_Select, SR_Move, SR_Social, SR_Joy, SR_Death, SR_Draft, SR_Undraft, SR_Attack, SR_Work, SR_Equip, SR_MentalBreak`（全 `MapOnly`）+ `SR_Call_Preview`（无 context，含 `onCamera=True` 的 SubSound）。
-- `SqueakyRatkin_OfficialExample_Race.xml` —— `SqueakyRatkin.SqueakVoicePackDef` `SR_OfficialExample_Race`（`<scope>Race</scope>`，无 `targetDefName`）+ 当前 15 个对应 SoundDef（参考基准；`sustain=false`、`MapOnly`、grain 为 `AudioGrain_Folder` → `coahuilite.squeakyratkin/SR_OfficialExample_Race/<Action>`）。
+- `SqueakyRatkin_OfficialExample_Race.xml` —— `SqueakyRatkin.SqueakVoicePackDef` `SR_OfficialExample_Race`（`<scope>Race</scope>`、`<raceDefName>Ratkin</raceDefName>`（0.3.1 必填），无 `targetDefName`）+ 当前 15 个对应 SoundDef（参考基准；`sustain=false`、`MapOnly`、grain 为 `AudioGrain_Folder` → `coahuilite.squeakyratkin/SR_OfficialExample_Race/<Action>`）。
 - C# 连接（`Source/SqueakyRatkin/`）：
   - `SqueakActionDefinitions`（`SqueakActionModel.cs`）：`AudioKey = "SR_" + 动作名`，`SqueakRuntimeResolver.GetVanilla()` 用 `DefDatabase<SoundDef>.GetNamedSilentFail(AudioKey)` 构建 Vanilla tier —— **defName 契约的唯一权威来源**。
   - `SqueakVoicePackDef` / `SqueakVoicePackAction` / `SqueakVoicePackValidator`（`SqueakVoicePackModels.cs`）：`ConfigErrors()` 强制校验——pack defName 及所引 SoundDef 均须 `SR_` 前缀、`sustain=false`、`context=MapOnly`、有 SubSound。

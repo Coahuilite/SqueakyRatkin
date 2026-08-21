@@ -9,6 +9,9 @@ namespace SqueakyRatkin;
 public class SqueakVoicePackDef : Def
 {
     public SqueakVoicePackScope scope = SqueakVoicePackScope.Unspecified;
+    /// <summary>0.3.1 race-aware ABI：pack 唯一路由声明，必填（validator 硬要求），无缺省默认。
+    /// 值 = 服务的 race 的精确、区分大小写 ThingDef.defName（如 Ratkin）；装配由 DomainFilter 白名单闸决定。</summary>
+    public string raceDefName = "";
     public string targetDefName = "";
     public List<SqueakVoicePackAction> actions = new();
 
@@ -48,6 +51,7 @@ internal static class SqueakVoicePackValidator
         if (pack == null) { yield return "SqueakVoicePackDef is null."; yield break; }
         string name = string.IsNullOrWhiteSpace(pack.defName) ? "SqueakVoicePackDef" : pack.defName;
         if (string.IsNullOrWhiteSpace(pack.defName) || !pack.defName.StartsWith("SR_")) yield return name + " defName must begin with SR_.";
+        if (string.IsNullOrWhiteSpace(pack.raceDefName)) yield return name + " is missing raceDefName; every VoicePack must declare the exact race defName it serves (e.g. Ratkin).";
         if (pack.scope == SqueakVoicePackScope.Unspecified) yield return name + " has an unspecified scope.";
         if (pack.scope == SqueakVoicePackScope.Race && !string.IsNullOrEmpty(pack.targetDefName)) yield return name + " Race scope must not specify targetDefName.";
         if (pack.scope == SqueakVoicePackScope.Xenotype && string.IsNullOrWhiteSpace(pack.targetDefName)) yield return name + " Xenotype scope requires targetDefName.";
