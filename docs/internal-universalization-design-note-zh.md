@@ -57,7 +57,7 @@ XenotypeAudioDomain  = (RaceKey, XenotypeKey)
 - **标签形式**：`SqueakVoicePackAction` 增加可选年龄标签（field-presence，如 `Baby`/`Toddler`/`Child`/`Adult` 或 RimWorld 生命阶段 DefName）；**未声明 = 全年龄适用**，第三方存量包零改动、零迁移。选择时按 pawn 当前生命阶段过滤可用条目。
 - **年龄调制轴**：独立于 mood 的调制维度（pitch/volume/jitter 的年龄系数），XML 数据驱动（per-race 或全局默认），不得写 C# age switch；与 `SqueakMoodMod` 同构叠加。
 - **兼容边界**：`SqueakAction` 枚举不变（append-only）；年龄标签只扩展 `SqueakVoicePackAction` 与调制数据模型；srdiag 协议如需记录年龄身份，先设计新协议版本。
-- **实现窗口**：0.3.1（race-aware catalog/resolver）之后作为设计输入进入 0.3.2 冻结；不提前进入 0.2.x。
+- **实现窗口**：作为设计输入随 0.3.1 的 race-aware catalog/resolver 与 XML ABI 定型同批冻结；不提前进入 0.2.x。
 - **Crying/Giggling 动作兼容（0.2.4 排查产出）**：Biotech 婴幼儿的哭/笑是 `MentalFitDef` 驱动的 mental state（`MentalStates_BabyFits`，`stateEffecter: BabyCrying/BabyGiggling` 是原版专属音频）。0.3.x 年龄域设计时把它们作为 Baby 年龄标签动作纳入（VoicePack 可为哭/笑提供专属音频，与既有周期动作正交）。0.2.4 已修复其被误报为精神崩溃的问题（hook 收窄至 `MentalBreakWorker.TryStart`），此兼容不影响该修复。
 
 ## 日志协议候选（srdiag v2，规划输入）
@@ -92,7 +92,7 @@ XenotypeAudioDomain  = (RaceKey, XenotypeKey)
 3. **fallback 层**：选择链末端"无声"是机制；Ratkin 有 profile 自动启用是数据。
 4. **交付物防暴露审计（0.3.x 全窗口）**：页面文案不变（Ratkin 专属承诺）；作者指南不新增 profile schema 章节（US 拆分前不公开、标注未冻结）；README/changelog 不写"内部通用化"（只写玩家可见变化）；设置 UI 无新可见项；srdiag v1 冻结（race 身份等 v2）。
 5. **风险护栏**：玩家手改 XML 自加 profile 属自行 mod 范畴（不受支持、文档不教）；Kiiro 实验 adapter 不 merge；0.3.1 外来 race 池实证是内部测试证据，不进交付物。
-6. **阶段验证门补充**：0.3.0 装配表 = {Ratkin} + 行为等价基线 + 其他 race 零装配；0.3.1 外来 race per-race 池内部端到端实证（生产数据仍只 Ratkin）；0.3.2 无 profile race 默认静音实测 + Ratkin fallback 数据可验证。**UI 无泄漏断言**（0.3.0 起每阶段）：设置页/分配器渲染的 race 行 == {Ratkin}、xenotype 行 == Ratkin 限定集（快照对比 0.2.x 基线）；catalog 内非装配域条目数 == 0。
+6. **阶段验证门补充**：0.3.0 装配表 = {Ratkin} + 行为等价基线 + 其他 race 零装配；0.3.1 外来 race per-race 池内部端到端实证（生产数据仍只 Ratkin）、无 profile race 默认静音实测 + Ratkin fallback 数据可验证。**UI 无泄漏断言**（0.3.0 起每阶段）：设置页/分配器渲染的 race 行 == {Ratkin}、xenotype 行 == Ratkin 限定集（快照对比 0.2.x 基线）；catalog 内非装配域条目数 == 0。
 
 ## 内置 fallback profile 存储设计（已决议）
 
@@ -125,7 +125,7 @@ XenotypeAudioDomain  = (RaceKey, XenotypeKey)
 | 0.2.2（已启动） | 日志协议 characterization、`SqueakLog` 职责拆分、低风险去重/卫生 | 主模组 0 error；默认与 Dev flavor logging harness 通过 |
 | 0.3.0 | Ratkin 触发/路由 characterization；内部 `RaceKey`/域值对象；仅 Ratkin 走新内部模型 | Ratkin 在 No-DLC 和现有设置下的行为等价；无 Scribe/日志 ABI 变化 |
 | 0.3.1 | race-aware catalog/resolver：`(race,xenotype)` 与 race 池；旧 Ratkin selection 的显式、幂等迁移 | Kiiro 或另一外来 race 的**per-race**池端到端实证；不再共享 Ratkin/Example 池 |
-| 0.3.2 | 通用 profile 驱动装配、per-race fallback、设置 UI 候选与显式 opt-in | 无 profile race 默认静音；有 profile race 的 fallback 可验证；No-DLC 不访问 Xenotype 路径 |
+| 0.3.2 | 设置 UI 候选与显式 opt-in 结构（UI 专项；profile 驱动装配与 per-race fallback 已在 0.3.1 落地） | UI 不泄漏非装配域；No-DLC 不访问 Xenotype 路径 |
 | 拆分准备 | US/SR 设置、保存、Workshop 迁移演练 | 下列六项拆分门全部通过 |
 | 拆分发布（**0.4.x 首个版本**） | US 新 item 上线 + SR 同 item 收缩为 Example VoicePack 并依赖 US；移除 ProductDomainFilter（US 无限制域） | 六项拆分门逐条可重复证据；SR→US+SR 升级路径实机通过 |
 

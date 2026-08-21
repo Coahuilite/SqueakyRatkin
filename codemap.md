@@ -5,7 +5,7 @@
 
 ## Project Responsibility
 
-**鼠辈啁啾 / Squeaky Ratkin** 是 RimWorld 1.6 语音发声模组：为 HAR 体系的 Ratkin 种族（`AlienRace.ThingDef_AlienRace[defName="Ratkin"]`，def 由 NewRatkinPlus 提供）挂载每 pawn 的发声组件，按 15 个 `SqueakAction`（Eat / Call / Move / Sleep / Social / Joy / Work / Wounded / Select / Death / Draft / Undraft / Attack / Equip / MentalBreak）触发音效，支持心情调制（mood pitch/volume/jitter）、距离预设、VoicePack 分层选音（Vanilla 回退 / Race / Xenotype）、设置工作台、诊断工具与结构化日志。
+**鼠辈啁啾 / Squeaky Ratkin** 是 RimWorld 1.6 语音发声模组：为 HAR 体系的 Ratkin 种族（`AlienRace.ThingDef_AlienRace[defName="Ratkin"]`，def 由 NewRatkinPlus 提供）挂载每 pawn 的发声组件，按 17 个 `SqueakAction`（Eat / Call / Move / Sleep / Social / Joy / Work / Wounded / Select / Death / Draft / Undraft / Attack / Equip / MentalBreak / Crying / Giggling）触发音效；Crying/Giggling 为 append-only 15/16、无内置音频时静默。支持心情调制（mood pitch/volume/jitter）、距离预设、VoicePack 四层选音（Xenotype pack / Race pack / pack fallback / built-in fallback）、设置工作台、诊断工具与结构化日志。
 
 - **身份**：packageId `coahuilite.squeakyratkin`（大小写敏感，Extras 内嵌包依赖此 ID）；产品版本 `0.2.2`（dev 进行中，`0.2.1` 为最新已发布）；`supportedVersions` 仅 1.6。
 - **依赖分层**：Harmony（`brrainz.harmony`）与 HAR（`erdelf.HumanoidAlienRaces`）为硬依赖（`modDependencies`）；NewRatkinPlus（`Solaris.RatkinRaceMod`）运行时必需但元数据仅 `loadAfter` 软声明；`LoadFolders.xml` 无条件加载本体，发声注入按 XPath `defName="Ratkin"` 匹配（缺 def 时静默 no-op，兼容保留该 def 的 fork）；全部官方 DLC 与 HugsLib **零引用**（No-DLC 契约：Biotech 增强全部经 `ModsConfig.BiotechActive` 门控，HAR 交互全反射）。
@@ -53,9 +53,9 @@ flowchart LR
 
 跨层流要点（细节见各子图）：
 
-1. **XML/patch → Comp/runtime**：`1.6/Patches` 在加载期把 `CompProperties_Squeaker` 注入 Ratkin.comps；XML 与 C# 之间的兼容边界是 `SqueakAction` 枚举（15 值，append-only，序数稳定）与 `SR_` 前缀 defName 契约（`SqueakActionDefinitions.AudioKey` = `"SR_" + 动作名`）。新增动作必须三处同步：枚举 + `AudioKey` + `SR_<Action>` SoundDef，再补运行时 hook。
-2. **触发 → 选音 → 播放**：Harmony patch 转译为 `CompSqueaker.Notify_*` / `CompTick` → 闸门链（spawned + CurrentMap + 视口 + plan.Configured）→ 全局作用域 `SqueakGlobalActionPolicy` → 快照上下文 → 周期人口缩放 → 时序模型 → 概率/vocal 门 → `ChooseProductionSound`（Off=仅 Vanilla；Fallback/Remix=层内 `HasPlayable` 过滤后随机）→ mood 调制后 `PlayOneShot`。失败路径全部 `RecordOutcome` + 统计埋点。
-3. **设置 → 运行时**：UI 只表达意图，canonical 写入在 `SqueakyRatkinSettings`；经 `Notify*RuntimeChanged` 发布（cheap=静态字段、continuous=75/150 ms 防抖、discrete=立即），resolver 主线程单发布者发布不可变快照；磁盘写入只走 `base.WriteSettings()`（Mod 层 generation + 350 ms 防抖合并）。
+1. **XML/patch → Comp/runtime**：`1.6/Patches` 在加载期把 `CompProperties_Squeaker` 注入 Ratkin.comps；XML 与 C# 之间的兼容边界是 `SqueakAction` 枚举（17 值，append-only，序数稳定；Crying/Giggling = 15/16）与 `SR_` 前缀 defName 契约。`SR_<Action>` 内置 SoundDef 仅覆盖 0–14；Crying/Giggling 未由 VoicePack 声明时静默。新增动作必须同步枚举、动作元数据、相关 XML/本地化/统计与运行时 hook。
+2. **触发 → 选音 → 播放**：Harmony patch 转译为 `CompSqueaker.Notify_*` / `CompTick` → 闸门链（spawned + CurrentMap + 视口 + plan.Configured）→ 全局作用域 `SqueakGlobalActionPolicy` → 快照上下文 → 周期人口缩放 → 时序模型 → 概率/vocal 门 → `ChooseProductionSound`（Off=仅内置 fallback；Fallback=Xenotype pack→Race pack→pack fallback→built-in fallback→无声；Remix=可播放 tier 等权，未声明 fallback 时保留既有 Xenotype/Race/内置抽取）→ mood 调制后 `PlayOneShot`。失败路径全部 `RecordOutcome` + 统计埋点。
+3. **设置 → 运行时**：UI 只表达意图，canonical 写入在 `SqueakyRatkinSettings`；经 `Notify*RuntimeChanged` 发布（cheap=静态字段、continuous=75/150 ms 防抖、discrete=立即），resolver 主线程单发布者发布不可变快照；ModSettings 磁盘写入只走 `base.WriteSettings()`（Mod 层 generation + 350 ms 防抖合并），fallback profile Config 副本由独立单写者持有、不得经此通道。
 4. **诊断/日志**：`Debug/` 只观察不决策（revision + 不可变快照 + Layout/Repaint 分离）；所有失败/边界事件经 `Logging/SqueakLog` 枚举化出口（once 去重 + `srdiag fmt=1` 机器字段）。
 5. **build → stage → channel**：`SqueakyBuildFlavor` 决定 `SQUEAKY_DEV/GITHUB/STEAM` 常量（运行时 `BuildIdentity`、dev 日志默认、dev-only 设置项）；`stage-package.ps1` 是唯一 staging 引擎（断言 DLL 存在、Template→built-in 音频实际键集合与 SHA256 镜像、删除 `PublishedFileId.txt`/`*.pdb`/`*.gitkeep`）；csproj `<Version>` 是全部 flavor 的单一事实来源（release tag 基版本强制一致）。
 
@@ -68,9 +68,9 @@ flowchart LR
 | `About/` | [About/codemap.md](About/codemap.md) | mod 元数据与发布边界：`About.xml`（packageId、依赖分层、仅支持 1.6）、商店图标；本地图同时覆盖根 `LoadFolders.xml` 与 `.github/workflows/`（CI/Release 流水线） |
 | `1.6/` | [1.6/codemap.md](1.6/codemap.md) | 1.6 内容包：加载期 comp 注入 + 全部发声/浮字 Def + 随包 DLL + 本地化；无条件加载，发声注入按 XPath `defName="Ratkin"` 匹配 |
 | `1.6/Defs/` | [1.6/Defs/codemap.md](1.6/Defs/codemap.md) | 纯 XML Def 契约层（无 C# 编译依赖）：SoundDefs 与 MoteDefs 两个子域的入口 |
-| `1.6/Defs/SoundDefs/` | [1.6/Defs/SoundDefs/codemap.md](1.6/Defs/SoundDefs/codemap.md) | 两层音池：15 个 `SR_<Action>` Vanilla 回退 SoundDef + `SR_Call_Preview` 试听 transport + `SR_OfficialExample_Race` 官方 Example VoicePack（音频打包时注入） |
+| `1.6/Defs/SoundDefs/` | [1.6/Defs/SoundDefs/codemap.md](1.6/Defs/SoundDefs/codemap.md) | 两层内置音池：15 个 `SR_<Action>` built-in fallback SoundDef + `SR_Call_Preview` 试听 transport + `SR_OfficialExample_Race` 官方 Example VoicePack（Crying/Giggling 无内置条目，音频打包时注入） |
 | `1.6/Defs/MoteDefs/` | [1.6/Defs/MoteDefs/codemap.md](1.6/Defs/MoteDefs/codemap.md) | 唯一调试浮字 `SR_Mote_TextBg`（`MoteTextWithBackground` + `SqueakMoteOffset` 偏移），仅 Debug 子系统消费 |
-| `1.6/Patches/` | [1.6/Patches/codemap.md](1.6/Patches/codemap.md) | 加载期补丁：向 Ratkin.comps 注入 `CompProperties_Squeaker`（15 action 触发配置 + 4 moodMods + 3 distancePresets，全数据驱动） |
+| `1.6/Patches/` | [1.6/Patches/codemap.md](1.6/Patches/codemap.md) | 加载期补丁：向 Ratkin.comps 注入 `CompProperties_Squeaker`（15 个 XML 周期/事件触发配置 + 4 moodMods + 3 distancePresets；Crying/Giggling 由 BabyFits 窄 hook 触发） |
 | `Source/` | [Source/codemap.md](Source/codemap.md) | C# 运行时源码根：装配边界与入口；实质内容在 `Source/SqueakyRatkin/`（见下） |
 | `Source/SqueakyRatkin/` | [Source/SqueakyRatkin/codemap.md](Source/SqueakyRatkin/codemap.md) | 运行时核心与单一装配点：Mod 生命周期、`CompSqueaker` 触发/播放、resolver/catalog/policy 不可变快照发布、周期人口缩放、全部持久化数据模型 |
 | `Source/SqueakyRatkin/Patches/` | [Source/SqueakyRatkin/Patches/codemap.md](Source/SqueakyRatkin/Patches/codemap.md) | Harmony 集成层（16 patch）：RimWorld 事件 → `CompSqueaker.Notify_*` / 周期成员 / 诊断生命周期 / 设置窗口关闭；patch 薄、业务判断在 Comp |

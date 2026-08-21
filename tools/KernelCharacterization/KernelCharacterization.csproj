@@ -16,10 +16,13 @@
     <DefineConstants>$(DefineConstants);SQUEAKY_DEV</DefineConstants>
   </PropertyGroup>
 
-  <!-- 纯度门：迁移清单就是 Kernel/*.cs，零根文件链接。
-       Kernel 文件一旦引用 Verse/Unity/RimWorld，本工程编译失败 = 纯度违反（决策 §3.2）。 -->
+  <!-- 纯度门：内核编译集 = Kernel/*.cs（零根文件依赖，US 拆分迁移清单）。
+       另链接漏斗纯文件（执行层纯逻辑，SqueakActionPlan/SqueakTimingModel）：链接只为纯度门，
+       不属于内核编译集；任一引用 Verse/Unity/RimWorld 即编译失败（决策 §2.3/§3.2）。 -->
   <ItemGroup>
     <Compile Include="..\..\Source\SqueakyRatkin\Kernel\*.cs" Link="Kernel\%(Filename)%(Extension)" />
+    <Compile Include="..\..\Source\SqueakyRatkin\SqueakActionPlan.cs" Link="Linked\SqueakActionPlan.cs" />
+    <Compile Include="..\..\Source\SqueakyRatkin\SqueakTimingModel.cs" Link="Linked\SqueakTimingModel.cs" />
   </ItemGroup>
 
 </Project>

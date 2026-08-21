@@ -10,7 +10,7 @@
 4. 将音频放在 `<lowercase packageId>/<PackDef.defName>/Call/`；推荐 OGG Vorbis，不要仅改扩展名伪装转码。
 5. 建立一个 `scope=Race` 的 PackDef，列出 `Call`；其 SoundDef 必须以 `SR_` 开头、`sustain=false`、`MapOnly`，并至少含一个 grain。
 6. 启用 Squeaky Ratkin、NewRatkinPlus 和你的包；在设置中选 **FALLBACK**，启用 Race PackDef 后实测鼠族的 `Call`。
-7. 确认移除该 `Call` 后仍会按 Xenotype → Race → Vanilla 回退，而不是把未覆盖动作当作静音。
+7. 确认移除该 `Call` 后仍会按 Xenotype pack → Race pack → pack 自带 fallback → 内置 profile → 无声回退，而不是把未覆盖动作当作静音。
 8. 发布前改用自己的稳定身份，声明音频权利；不得打包 RimWorld 原版音频或其他无授权素材。
 
 **完成标准：** 包能被发现并手动启用，Race `Call` 在 FALLBACK 实际播放，目录、`clipFolderPath` 和 PackDef 身份一致，且发布物只含有权分发的音频。详细 XML、Xenotype、格式和发布要求见下文第 1–6 节。
@@ -19,9 +19,9 @@
 
 玩家需要同时启用 Squeaky Ratkin 和 NewRatkinPlus（`Solaris.RatkinRaceMod`）。Race 语音包不需要 Biotech；Xenotype 语音包是 Biotech 启用时的可选增强，应在自己的 `About.xml` 与加载规则中排序到 Biotech 和目标异种来源模组之后。不要把这些可选扩展依赖当成主模组依赖。
 
-主模组提供内置 Vanilla 回退层，其具体音池由各 `SR_<Action>` SoundDef 定义。自定义包只提供独立音频：不要修改主模组 SoundDef，不要把音频安装进主模组目录；原版资产只可按 Def/路径机制引用，不得重新分发。
+主模组提供内置 fallback profile（原版音底）；Ratkin 内置表只含 `Call` 到 `MentalBreak` 的 15 个 `SR_*` SoundDef 键，`Crying`/`Giggling` 没有内置音频、默认静默。自定义包只提供独立音频：不要修改主模组 SoundDef，不要把音频安装进主模组目录；原版资产只可按 Def/路径机制引用，不得重新分发。
 
-每个 `SqueakVoicePackDef` 都是一个独立选择项、权重单位和校验单位：只能是 Race，或只能对应一个 Xenotype。
+每个 `SqueakVoicePackDef` 都是一个独立选择项、权重单位和校验单位：只能是 Race，或只能对应一个 Xenotype。每个 Def 的 `raceDefName` 都是必填的精确、区分大小写 `ThingDef.defName`；缺失会使整个 Def 被 validator 拒绝。
 
 | 范围 | 必需字段 | 运行时关系 |
 | --- | --- | --- |
@@ -30,7 +30,7 @@
 | 两者 | 同一发行包可含多个独立 Def | Xenotype 缺动作时可回退 Race |
 
 `raceDefName` 是每个 `SqueakVoicePackDef` 的必填路由声明（0.3.1 起 validator 硬要求，缺失则整个 Def 被拒绝）：值为该包所服务种族的精确、区分大小写 `ThingDef.defName`（鼠族为 `Ratkin`）。0.3.x 期间装配域白名单 = `{Ratkin}`，白名单外 `raceDefName` 的包不会装配发声（dev 日志 `voicepack.pack.rejected reason=domain_filtered`）。
-`targetDefName` 仅表示精确且区分大小写的 `XenotypeDef.defName`，例如 `RK_XenoType_Ratkin`；不要翻译、改大小写或写成 XML 强引用。显示名、图标和本地化不参与匹配或保存。缺少 Biotech 时 Xenotype 层不解析，Race 仍会回退 Vanilla。
+`targetDefName` 仅表示精确且区分大小写的 `XenotypeDef.defName`，例如 `RK_XenoType_Ratkin`；不要翻译、改大小写或写成 XML 强引用。显示名、图标和本地化不参与匹配或保存。缺少 Biotech 时 Xenotype 层不解析，Race 仍会回退到 pack fallback、内置 profile 或无声。
 
 ## 2. 身份、目录与完整最小 XML 示例
 
@@ -136,9 +136,44 @@ Race 内容独立于 Biotech 加载；Xenotype 内容仅在 Biotech 启用时读
 
 `FloatRange` 使用 `~`，不要写成逗号或圆括号。每个 DefName 必须以 `SR_` 开头并带自己的包 token。
 
+### 0.3.1 XML ABI：可选路由字段
+
+以下字段均使用当前的 XML 节点名；不要把 `fallbacks` 写成单数 `fallback`，也不要把 `IsEgg` 改为小写。`raceDefName` 已在第 1 节说明为**必填**。
+
+```xml
+<SqueakyRatkin.SqueakVoicePackDef>
+  <defName>SR_MyStudio_Race</defName>
+  <scope>Race</scope>
+  <raceDefName>Ratkin</raceDefName>
+  <weight>0.75</weight>
+  <fallbacks>
+    <li><action>Call</action><sound>SR_MyStudio_Race_Call_Fallback</sound></li>
+  </fallbacks>
+  <actions>
+    <li>
+      <action>Call</action>
+      <ageTag>Baby</ageTag>
+      <sounds><li>SR_MyStudio_Race_Baby_Call</li></sounds>
+    </li>
+    <li>
+      <action>Joy</action>
+      <IsEgg>true</IsEgg>
+      <sounds><li>SR_MyStudio_Race_Egg_Joy</li></sounds>
+    </li>
+  </actions>
+</SqueakyRatkin.SqueakVoicePackDef>
+```
+
+- `<weight>` 是 PackDef 级正有限抽取权重，省略时为 `1`；它只影响同一 tier 内包的抽取，不改变单个 SoundDef 的行为。
+- `<fallbacks>` 是可选的 pack 级逐动作回退表；每项的 `<action>` 是内置动作名，`<sound>` 必须引用有效的 `SR_*` `SoundDef`。它只在该动作的 Xenotype/Race pack 都没有可播放条目后、内置 profile 之前参与 Fallback 链。
+- `<ageTag>` 是 action 条目级可选 `AgeBucket`：`Baby`、`Toddler`、`Child` 或 `Adult`。省略 = 全年龄；同一动作有 exact-age 与未标记条目时，exact-age 优先。RimWorld 1.6 原生不会产生 `Toddler`，但该桶为 ABI 保留。
+- `<IsEgg>true</IsEgg>` 将该 action 条目标为彩蛋。彩蛋不是独立 tier，也不替换普通声音；玩家的彩蛋开关默认关闭，关闭时该条目不进候选池，开启后才与同域普通条目同权参与。省略或 `false` = 普通条目。
+
+`Crying` 与 `Giggling` 可像其他 action 一样写入 `<actions>` 或 `<fallbacks>`；它们没有内置 profile 项，因此未由包声明时始终静默。
+
 ### 生产 SoundDef 强制契约
 
-固定的 15 个生产 Action 都是 **one-shot**。每个被 PackDef 引用的 SoundDef 必须有 `SR_` 前缀、`<sustain>false</sustain>`、`<context>MapOnly</context>`，至少一个 SubSound，且每个 SubSound 至少一个 grain；`onCamera` 必须省略或为 `false`。禁止 `sustain=true`、loop、camera/map context 混用和依赖状态维持的长音频。违反任一项时，整个 PackDef 会被拒绝，Race/Vanilla 仍可回退。
+固定的 17 个生产 Action 都是 **one-shot**；`Crying`/`Giggling` 同样如此，但没有内置音频、未声明时默认静默。每个被 PackDef 引用的 SoundDef 必须有 `SR_` 前缀、`<sustain>false</sustain>`、`<context>MapOnly</context>`，至少一个 SubSound，且每个 SubSound 至少一个 grain；`onCamera` 必须省略或为 `false`。禁止 `sustain=true`、loop、camera/map context 混用和依赖状态维持的长音频。违反任一项时，整个 PackDef 会被拒绝，Race/内置 fallback 仍可回退。
 
 一个 Action 目录可放多个真实文件，由 `AudioGrain_Folder` 收集并随机选择；通常不必为每个 clip 建 SoundDef。不要留下空文件、静音占位或不打算播放的素材。Workbench 单 clip 试听不证明生产 SoundDef 符合此契约。
 
@@ -161,8 +196,10 @@ Race 内容独立于 Biotech 加载；Xenotype 内容仅在 Biotech 启用时读
 | `Work` | 工作指令/工作状态反馈 |
 | `Equip` | 玩家主动装备武器或工具反馈 |
 | `MentalBreak` | 精神崩溃开始反应 |
+| `Crying` | Biotech 婴幼儿 BabyFits 哭闹 mental state；无内置 SoundDef/内置 fallback，未由 pack 声明时静默 |
+| `Giggling` | Biotech 婴幼儿 BabyFits 咯咯笑 mental state；无内置 SoundDef/内置 fallback，未由 pack 声明时静默 |
 
-允许部分覆盖：只提供 `Call` 也有效。未覆盖动作按模式回退：**FALLBACK** 为 Xenotype → Race → Vanilla；**REMIX** 在当前可播放的 Xenotype、Race、Vanilla 层间等权选择；**OFF** 仅用 Vanilla。语音包只能提供声音，不能改触发、心情、频率、距离或 Action 范围。
+允许部分覆盖：只提供 `Call` 也有效。未覆盖动作按模式回退：**FALLBACK** 为 Xenotype pack → Race pack → pack 自带 fallback → 内置 profile → 无声；**REMIX** 在当前可播放的 Xenotype、Race、已声明 pack fallback、内置 profile tier 间等权选择（没有声明 pack fallback 的动作保留 Xenotype/Race/内置抽取）；**OFF** 仅用内置 profile。语音包只能提供声音，不能改触发、心情、频率、距离或 Action 范围。
 
 ## 4. 音频处理与格式
 

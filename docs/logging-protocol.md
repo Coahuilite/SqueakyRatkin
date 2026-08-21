@@ -68,7 +68,7 @@ Event-specific fields:
 
 `settings.origin` is Daily Info, emitted once per session at startup, right after the settings object is read. **Origin detection:** `LoadedFromFile` = a settings file was successfully deserialized through Scribe (ExposeData reached LoadingVars); `FreshCreated` = no file, or an unreadable file — the framework discards the broken parse, warns, and returns a new field-defaults instance, which is reported as FreshCreated. The sentence is parameterized by the closed two-value origin set (precedent: `mod.start.identity` parameterizes by build/build_id).
 
-`audio.route.selected` is DevOnly Info and follows the same success-path volume control as `audio.dispatch.ok` (one record per action per five seconds, emitted alongside it). `tier` vocabulary in 0.3.1: `xenotype_pack`, `race_pack`, `vanilla`, `-` for none; `pack_fallback`/`built_in_fallback` are reserved for the 0.3.2 pack-fallback chain end.
+`audio.route.selected` is DevOnly Info and follows the same success-path volume control as `audio.dispatch.ok` (one record per action per five seconds, emitted alongside it). `tier` vocabulary in 0.3.1 is `xenotype_pack`, `race_pack`, `vanilla`, and `-` for none. `pack_fallback`/`built_in_fallback` remain reserved and are not emitted: the adapter currently folds `PackFallback` into `race_pack` and `BuiltInFallback` into `vanilla`.
 
 Once keys are namespaced per protocol version: fmt=1 records claim the `log-v1` domain and fmt=2 records the `log-v2` domain, so the two never collide.
 
