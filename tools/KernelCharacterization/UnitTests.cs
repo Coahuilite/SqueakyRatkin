@@ -616,29 +616,44 @@ public static class UnitTests
             "timing public GetGlobalCooldownTicks helper", ref failures);
     }
 
-    /// <summary>0.3.1 波 4a 漏斗纯逻辑提取：SqueakTriggerInvocation 语义（非周期跳过 RandomOneShot 概率）。</summary>
+    /// <summary>0.3.1 波 4a 漏斗纯逻辑提取：SqueakTriggerInvocation 语义（非周期跳过 RandomOneShot 概率）。
+    /// 0.3.2 身份门控扩展：PlayerSelection/ActiveCommand 派生 IsPlayerInitiated；PlayerSelection 派生 RequiresResponsivePawn。</summary>
     private static void TriggerInvocationRules(ref int failures)
     {
         SqueakTriggerInvocation periodic = new(SqueakTriggerOrigin.Periodic, SqueakInvocationSource.Periodic);
         Check(!periodic.SkipsRandomOneShotProbability && !periodic.IsExternal && !periodic.IsActiveCommand,
             "invocation periodic keeps probability and is not external", ref failures);
+        Check(!periodic.IsPlayerInitiated && !periodic.RequiresResponsivePawn,
+            "invocation periodic is not player initiated and requires no responsiveness", ref failures);
 
         SqueakTriggerInvocation wounded = new(SqueakTriggerOrigin.Wounded, SqueakInvocationSource.StateEvent);
         Check(wounded.SkipsRandomOneShotProbability && wounded.IsExternal && !wounded.IsActiveCommand,
             "invocation state event skips probability and is external", ref failures);
+        Check(!wounded.IsPlayerInitiated && !wounded.RequiresResponsivePawn,
+            "invocation state event is not player initiated", ref failures);
 
         SqueakTriggerInvocation draft = new(SqueakTriggerOrigin.Draft, SqueakInvocationSource.ActiveCommand);
         Check(draft.IsActiveCommand && draft.IsExternal && draft.SkipsRandomOneShotProbability,
             "invocation active command carries IsActiveCommand", ref failures);
+        Check(draft.IsPlayerInitiated && !draft.RequiresResponsivePawn,
+            "invocation active command is player initiated without responsiveness requirement", ref failures);
 
         SqueakTriggerInvocation select = new(SqueakTriggerOrigin.Select, SqueakInvocationSource.PlayerSelection);
         Check(select.IsExternal && !select.IsActiveCommand,
             "invocation player selection is external but not active command", ref failures);
+        Check(select.IsPlayerInitiated && select.RequiresResponsivePawn,
+            "invocation player selection is player initiated and requires a responsive pawn", ref failures);
 
         SqueakTriggerInvocation crying = new(SqueakTriggerOrigin.Crying, SqueakInvocationSource.StateEvent);
         SqueakTriggerInvocation giggling = new(SqueakTriggerOrigin.Giggling, SqueakInvocationSource.StateEvent);
         Check(crying.IsExternal && giggling.IsExternal,
             "invocation BabyFits origins are external", ref failures);
+        Check(!crying.IsPlayerInitiated && !giggling.IsPlayerInitiated,
+            "invocation BabyFits origins are not player initiated", ref failures);
+
+        SqueakTriggerInvocation equip = new(SqueakTriggerOrigin.Equip, SqueakInvocationSource.ActiveCommand);
+        Check(equip.IsPlayerInitiated && !equip.RequiresResponsivePawn,
+            "invocation equip active command is player initiated without responsiveness requirement", ref failures);
     }
 
     /// <summary>0.3.1 波 4a per-race 池隔离 harness（决策 §5：两 race 池互不串扰）：

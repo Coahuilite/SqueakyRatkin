@@ -352,7 +352,20 @@ public class CompSqueaker : ThingComp
         SqueakActionPlan plan = actionPlans[(int)action];
         if (!plan.Configured) return;
 
-        TryTrigger(plan, new SqueakTriggerInvocation(origin, source));
+        SqueakTriggerInvocation invocation = new(origin, source);
+        if (!IdentityGateAllows(invocation)) return; // fail-closed silent: no cooldowns, no outcome, no log.
+
+        TryTrigger(plan, invocation);
+    }
+
+    /// <summary>0.3.2 身份门控（Verse 采样，harness out-of-scope）：玩家发起来源（点选/主动指令）要求
+    /// 玩家可控 pawn（IsPlayerControlled 已含 Spawned、玩家派系、无精神崩溃、可控机甲/亚人语义）；
+    /// 点选另要求可响应 = !Downed && Awake()。任何不满足都静默丢弃，不进入 TryTrigger。</summary>
+    private bool IdentityGateAllows(SqueakTriggerInvocation invocation)
+    {
+        if (invocation.RequiresResponsivePawn && (Pawn.Downed || Pawn.health == null || !Pawn.Awake())) return false;
+        if (invocation.IsPlayerInitiated && !Pawn.IsPlayerControlled) return false;
+        return true;
     }
 
     private SqueakTriggerInvocation PeriodicInvocationFor(SqueakAction action)

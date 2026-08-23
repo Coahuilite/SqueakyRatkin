@@ -45,7 +45,9 @@ public readonly struct SqueakActionPlan
 public enum SqueakTriggerOrigin { Periodic, Wounded, Select, Death, Draft, Undraft, Attack, Equip, MentalBreak, Crying, Giggling }
 public enum SqueakInvocationSource { Periodic, StateEvent, PlayerSelection, ActiveCommand }
 
-/// <summary>Explicit trigger source; non-periodic hooks preserve legacy probability skipping.</summary>
+/// <summary>Explicit trigger source; non-periodic hooks preserve legacy probability skipping.
+/// 0.3.2 身份门控纯标志：PlayerSelection/ActiveCommand 派生 IsPlayerInitiated（需玩家可控 pawn），
+/// PlayerSelection 另派生 RequiresResponsivePawn（额外要求 !Downed && Awake）。Verse 采样留在适配层。</summary>
 public readonly struct SqueakTriggerInvocation
 {
     public readonly SqueakTriggerOrigin Origin;
@@ -53,6 +55,8 @@ public readonly struct SqueakTriggerInvocation
     public bool SkipsRandomOneShotProbability => Origin != SqueakTriggerOrigin.Periodic;
     public bool IsExternal => Origin != SqueakTriggerOrigin.Periodic;
     public bool IsActiveCommand => Source == SqueakInvocationSource.ActiveCommand;
+    public bool IsPlayerInitiated => Source == SqueakInvocationSource.PlayerSelection || Source == SqueakInvocationSource.ActiveCommand;
+    public bool RequiresResponsivePawn => Source == SqueakInvocationSource.PlayerSelection;
 
     public SqueakTriggerInvocation(SqueakTriggerOrigin origin, SqueakInvocationSource source) { Origin = origin; Source = source; }
 }
