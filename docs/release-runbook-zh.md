@@ -13,7 +13,7 @@
 3. **隐私审查**：工作树全扫描（凭据/API key/token/本地路径/`PublishedFileId`）。
 4. **构建 + 打包核验**：
    - Dev / GitHub flavor 构建 0 errors；
-   - pack 后**包内容逐项核验**：文件数、排除项（`*.pdb`/`*.gitkeep`/`codemap.md`）、关键文件内容（`LoadFolders.xml` 无门控、DLL 版本/flavor/身份）。
+   - pack 后**包内容逐项核验**：文件数（含 `version.txt`）、排除项（`*.pdb`/`*.gitkeep`/`codemap.md`）、关键文件内容（`LoadFolders.xml` 无门控、DLL 版本/flavor/身份）、**包内 `version.txt` 三行与预期一致**（`SqueakyRatkin <版本>`/`build=<flavor>`/`commit=<sha>`）。
 
 ## 阶段 1 · PR 与 merge
 
@@ -36,7 +36,7 @@
 12. Steam flavor 构建 + pack-steam → 包内容核验（同阶段 0 清单）。
 13. 维护者：复制 stage 到本地上传副本 → 把既有 item ID **只写入副本** `About/PublishedFileId.txt` → 以同一作者 Update（后续版本绝不用 `Initial Workshop Upload`）。
 14. 维护者：粘贴中英文案 → Steam 编辑器 + 实际页面双预览。
-15. **页面核对（可自动化）**：`read` 页面 URL 观察——同一 item URL/ID、描述版本、Updated、visibility、preview、文件大小、change notes 数，写入观察记录。
+15. **页面核对（可自动化，玩家视角只读）**：`read` filedetails 页面 URL 观察——同一 item URL/ID、描述版本、Updated、visibility、preview、文件大小、change notes 数，写入观察记录。**绝不尝试登录态或编辑界面**（Steam 编辑 = 维护者人工操作；自动化只读 filedetails 玩家可见视图）。
 
 ## 阶段 4 · 收尾
 
@@ -65,11 +65,11 @@
 | CI | Release workflow run <id> success |
 | 资产 | <zip 名>（<字节数> B） |
 | DLL SHA256 | <hash> |
-| 包内容 | 文件数；0 PDB；0 PublishedFileId.txt；0 codemap.md；关键文件内容核验；OGG 镜像校验 |
+| 包内容 | 文件数；0 PDB；0 PublishedFileId.txt；0 codemap.md；关键文件内容核验；OGG 镜像校验；包内 version.txt（版本/flavor/commit） |
 | 隐私审计 | 完整树扫描 0 命中；dev↔main 树一致 |
 
 ## Steam staging / 发布观察
-- staging 包：文件数、排除项、DLL FileVersion、PublishedFileId=0。
+- staging 包：文件数、排除项、DLL FileVersion、PublishedFileId=0、包内 version.txt（版本/flavor/commit 与预期一致）。
 - 页面观察：同一 item URL/ID、描述版本、Updated、visibility、preview、文件大小、change notes。
 - 二进制下载级验证边界如实记录（页面级核验 ≠ 玩家下载内容已验证）。
 

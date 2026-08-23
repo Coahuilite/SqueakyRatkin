@@ -9,6 +9,13 @@
 - Permanent `packageId`: `coahuilite.squeakyratkin`.
 - C# namespace: `SqueakyRatkin`.
 - Permanent brands are **`鼠辈啁啾`** and **`Squeaky Ratkin`**; never translate, normalize, or copy-edit them. In ordinary Simplified Chinese prose, call the Ratkin race `鼠族`; identifiers, paths, logs, and proper names are exempt.
+- Product version source: `Source/SqueakyRatkin/SqueakyRatkin.csproj` `<Version>` is primary; `About/About.xml` `<modVersion>` must follow it; Assembly/File versions derive from the csproj version.
+
+## Project philosophy
+
+- Routing is neutral: a VoicePack's `raceDefName` declaration is the only routing entry — no built-in race special-casing; HAR races, vanilla Human, and any other race route identically.
+- Dependency access is reflective, never compiled: HAR is touched only via reflection as a discovery enhancement; missing dependencies must degrade silently, never crash.
+- **Uninstall safety is a hard rule: removing the mod must never affect a saved game.** No permanent data is written into saves (defs are injected at runtime via XPath; settings and profile overrides live in the Config folder). After uninstall the save loads and plays normally — squeaks simply stop; leftover Config files are harmless and removable.
 
 ## Memory protocol
 
@@ -21,6 +28,7 @@ At every non-trivial session:
 Maintain these boundaries:
 
 - Update `MEMORY.md` only when durable facts or the open action surface changes; keep it compact.
+- Compact by default: settled release/implementation details live in `docs/release_review/` (Claim Packs, process review) and runbook; MEMORY keeps only pointers. Do not grow MEMORY with finished work.
 - Update `TODO.md` only when its current task surface changes.
 - Do not store session narratives, transient artifacts, raw logs, completed test matrices, commit chains, or release checklists in either active memory file.
 - Documentation edits alone are not memory events; external-state summaries never override their authoritative source.

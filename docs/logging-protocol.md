@@ -1,6 +1,6 @@
 # Logging Protocol
 
-> **Status — 2026-07-21:** This document records the implemented `SqueakLog` v1 contract from source review of `Logging/SqueakLog.cs`, `SqueakyRatkinSettings.cs`, and `Debug/SqueakDebug.cs`. It is a compatibility and machine-parsing contract, not evidence of a live RimWorld-session test.
+> **Status — 2026-08-22:** This document records the implemented `SqueakLog` v1+v2 contract from source review of `Logging/SqueakLog.cs`, `Logging/SqueakLogProtocol.cs`, `SqueakyRatkinSettings.cs`, and `Debug/SqueakDebug.cs`. It is a compatibility and machine-parsing contract, not evidence of a live RimWorld-session test. 0.3.2 extends `audio.route.selected` fields and its human sentence; v1 remains byte-immutable.
 
 ## Closed Typed Facade
 
@@ -45,11 +45,40 @@ Values use invariant-culture formatting. Missing values and the literal `N/A` ar
 
 Do not put localized text, pawn labels, filesystem paths, or raw `Exception.ToString()` into the protocol. Exception information is suffix-only: type, inner type, target site, and sanitized message. Sanitization first replaces CR/LF and removes remaining control characters, replaces DOS drive paths, UNC paths, device paths, `file:` URIs, Unix absolute paths, and relative `./` or `../` paths with `<path>`, then truncates to 256 characters. Percent encoding occurs after this sanitization.
 
+## `srdiag` v2 Machine Contract (0.3.1)
+
+The v1 contract above is unchanged and remains the emission format of the original 28-event registry. v2 is a versioned extension of the same one-line suffix: records that carry v2-only facts (settings origin, race/xenotype identity, route tier) begin `srdiag fmt=2` and use the fixed v2 field order below. v1 parsers keep accepting fmt=1 records; **no v1 event ever gains v2 fields** (the closed typed facade cannot express them — v2 fields are not stuffed into fmt=1 records).
+
+The v2 mandatory core fields appear once, in this exact order:
+
+```
+fmt lvl vis evt action target pack race [xenotype] build build_id
+```
+
+- `action` is the string action key (0.3.1 定型, §2.2 of the architecture decision): built-in = enum name (byte-identical to the v1 action value), external = `packageId.defName`. The percent-encoding whitelist already includes `.`, so external keys are written verbatim.
+- `race` is the exact, case-sensitive `ThingDef.defName` of the routing domain; missing is `-`. `xenotype` is present only when the domain has one and is the exact `XenotypeDef.defName`. Only DefNames are written — never labels, HAR package names, or player-mutable text.
+- `settings_origin`, `sound`, and `tier` are event-specific fields appended after the core in the fixed per-event order below. Encoding, sanitization, truncation, exception metadata, and DevOnly gating are identical to v1.
+
+Event-specific fields:
+
+| Event | Fields (fixed order) |
+| --- | --- |
+| `settings.origin` | `settings_origin=FreshCreated\|LoadedFromFile` |
+| `audio.route.selected` | `sound=<SoundDef.defName>` `tier=<tier>` `egg=true\|false` `suppressed_detail=<int>` `pawn=<label>` `pawn_id=<ThingID>` `pawn_faction=<FactionDef.defName\|->` `pawn_ctrl=player\|nonplayer` |
+| `hook.mental_fit.unavailable` | (none) |
+| `fallback.profile.store_failed` | `ex_type=<type>` `ex_inner=<type>` `ex_site=<site>` `ex_msg=<sanitized>` |
+
+`settings.origin` is Daily Info, emitted once per session at startup, right after the settings object is read. **Origin detection:** `LoadedFromFile` = a settings file was successfully deserialized through Scribe (ExposeData reached LoadingVars); `FreshCreated` = no file, or an unreadable file — the framework discards the broken parse, warns, and returns a new field-defaults instance, which is reported as FreshCreated. The sentence is parameterized by the closed two-value origin set (precedent: `mod.start.identity` parameterizes by build/build_id).
+
+`audio.route.selected` is DevOnly Info. Since 0.3.2 it is the single success-path detail record: the dispatch assembler emits one consolidated fmt=2 line per action per five seconds instead of the former `audio.dispatch.ok` + `audio.route.selected` pair; `audio.dispatch.ok` remains a locked v1 registry record and characterization surface but is no longer emitted by the runtime assembler. `egg=true` marks a dispatch from an `IsEgg` entry (always emitted as `true`/`false` so the field is deterministic); `suppressed_detail` counts dispatches absorbed since the previous detail line; `pawn`/`pawn_id` carry the same identity facts the retired assembler call previously put on `audio.dispatch.ok`; `pawn_faction` carries the exact `FactionDef.defName` (`-` when factionless) and `pawn_ctrl` carries the two-value `Pawn.IsPlayerControlled` sample (`player`/`nonplayer`), so identity-gate matrix runs can be read directly from the log. The human sentence is parameterized for direct reading: `Audio route: <action> -> <sound> (<tier>[, egg][, nonplayer]).` `tier` vocabulary in 0.3.1 is `xenotype_pack`, `race_pack`, `vanilla`, and `-` for none. `pack_fallback`/`built_in_fallback` remain reserved and are not emitted: the adapter currently folds `PackFallback` into `race_pack` and `BuiltInFallback` into `vanilla`.
+
+Once keys are namespaced per protocol version: fmt=1 records claim the `log-v1` domain and fmt=2 records the `log-v2` domain, so the two never collide.
+
 ## Once and Success-Path Volume Control
 
-The registry's exact-once key comprises the event plus action, target, pack, reason, and exception type. It is claimed under a lock, making duplicate suppression thread-safe. The session retains at most 1024 keys; when a new claim reaches that limit, the registry clears and accepts the new key. A logging-session reset also clears it.
+The registry's exact-once key comprises the event plus action, target, pack, reason, and exception type, namespaced per protocol version (`log-v1` for fmt=1 records, `log-v2` for fmt=2 records). It is claimed under a lock, making duplicate suppression thread-safe. The session retains at most 1024 keys; when a new claim reaches that limit, the registry clears and accepts the new key. A logging-session reset also clears it.
 
-When detailed logging is effective, successful audio dispatches emit `audio.dispatch.ok` immediately for the first success of each action. Further detail for that action is limited to one record per five seconds; suppressed detail is counted. `trigger.outcome.summary` aggregates dispatched and suppressed-detail counts at most once per 60 seconds. This rate control does not alter operational warning/error visibility or severity.
+When detailed logging is effective, successful audio dispatches emit one consolidated `audio.route.selected` v2 detail record immediately for the first success of each action. Further detail for that action is limited to one record per five seconds; suppressed detail is counted. `trigger.outcome.summary` aggregates dispatched and suppressed-detail counts at most once per 60 seconds. This rate control does not alter operational warning/error visibility or severity. The v1 `audio.dispatch.ok` registry record is retained (byte-locked) but the runtime assembler no longer emits it in parallel.
 
 ## Stable Event Registry
 
@@ -80,10 +109,18 @@ The table below is the actual closed registry. The human-sentence column reprodu
 | `hook.attack.unavailable` | Daily | Error | `Attack squeak hook is unavailable.` |
 | `hook.attack.target_skipped` | DevOnly | Warning | `An Attack hook target was skipped.` |
 | `hook.mental_break.unavailable` | Daily | Error | `Mental-break squeak hook is unavailable.` |
+| `hook.mental_fit.unavailable` | Daily | Error | `Baby-fits squeak hook is unavailable.` |
 | `diagnostics.hook.unavailable` | DevOnly | Warning | `Diagnostics overlay hook is unavailable.` |
 | `diagnostics.start.failed` | Daily | Warning | `Diagnostics overlay could not start.` |
 | `devtools.overlay.changed` | DevOnly | Info | `Diagnostics overlay state changed.` |
 | `devtools.camera_indicator.changed` | DevOnly | Info | `Camera indicator state changed.` |
 | `devtools.workbench.open_failed` | Daily | Warning | `Animal Voice Workbench could not be opened.` |
+| `settings.origin` | Daily | Info | `Mod settings origin: <FreshCreated\|LoadedFromFile>.` |
+| `audio.route.selected` | DevOnly | Info | `Audio route: <action> -> <sound> (<tier>[, egg][, nonplayer]).` |
+| `fallback.profile.store_failed` | DevOnly | Warning | `Fallback profile store operation failed.` |
 
-`xenotype.discovery.candidate` uses the exact Xenotype `defName` as `target`. `reason` and `source` carry the same deterministic `+`-joined candidate-source set (`declared_pack`, `selection`, `preset`, `har_hint`, and `har_official_hint`), with `enabled=true` for a visible candidate. An official HAR-only target that is suppressed emits `reason=har_official_filtered`, `source=har_official_filtered`, and `enabled=false`. Mirroring the source into `reason` is intentional because the v1 once key includes `reason`; the same target can therefore emit one record for each materially different source set without changing the once-key contract.
+The last four rows are the 0.3.1 v2 extension records (fmt=2); the 28 rows above them are the locked v1 surface (fmt=1) and remain byte-immutable.
+
+`voicepack.pack.rejected` uses the pack key as `pack`. `reason` carries `duplicate_key` (default, same key loaded more than once) or `domain_filtered` (0.3.1 race-aware: `raceDefName` outside the product domain whitelist), with `count` = the number of duplicate instances for the former.
+
+`xenotype.discovery.candidate` uses the exact Xenotype `defName` as `target`. Since 0.3.1 the target union is an assembled-only projection: visible candidates carry the deterministic `+`-joined source set of (`declared_pack`, `selection`, `preset`) with `enabled=true`; HAR discovery is dev diagnostics only and never projects rows, so a HAR-only target that is not retained emits `reason=har_hint_filtered` or `reason=har_official_filtered` (mirrored into `source`) with `enabled=false`. Mirroring the source into `reason` is intentional because the v1 once key includes `reason`; the same target can therefore emit one record for each materially different source set without changing the once-key contract.

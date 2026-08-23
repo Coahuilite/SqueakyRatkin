@@ -510,6 +510,8 @@ packageId：{7}
   <SR.Action.Work>工作</SR.Action.Work>
   <SR.Action.Equip>装备</SR.Action.Equip>
   <SR.Action.MentalBreak>精神崩溃</SR.Action.MentalBreak>
+  <SR.Action.Crying>哭泣</SR.Action.Crying>
+  <SR.Action.Giggling>咯咯笑</SR.Action.Giggling>
 
   <SR.Mood.Good>愉快</SR.Mood.Good>
   <SR.Mood.Neutral>平静</SR.Mood.Neutral>

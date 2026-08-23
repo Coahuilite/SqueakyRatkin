@@ -6,9 +6,9 @@ RimWorld 1.6 版本内容包：把发声组件挂到 Ratkin 种族（加载期 p
 
 ## Key Files / Symbols
 
-- `Patches/` —— `Ratkin_AddSqueakComp.xml`：向 `AlienRace.ThingDef_AlienRace[defName="Ratkin"]` 注入 `SqueakyRatkin.CompProperties_Squeaker`（15 动作触发配置 + 4 moodMods + 3 distancePresets，全部数据驱动）。详见 [Patches/codemap.md](Patches/codemap.md)。
+- `Patches/` —— `Ratkin_AddSqueakComp.xml`：向 `AlienRace.ThingDef_AlienRace[defName="Ratkin"]` 注入 `SqueakyRatkin.CompProperties_Squeaker`（15 个 XML 周期/事件触发配置 + 4 moodMods + 3 distancePresets；Crying/Giggling 由 BabyFits 窄 hook 触发，不在此表中，全部数据驱动）。详见 [Patches/codemap.md](Patches/codemap.md)。
 - `Defs/` —— 纯数据契约中间图（SoundDefs / MoteDefs 子图入口）。详见 [Defs/codemap.md](Defs/codemap.md)。
-- `Defs/SoundDefs/` —— Vanilla 回退音池（15 × `SR_<Action>` + `SR_Call_Preview`）+ 官方 Example Race VoicePack（`SR_OfficialExample_Race` + 15 SoundDef，当前参考基准）。详见 [Defs/SoundDefs/codemap.md](Defs/SoundDefs/codemap.md)。
+- `Defs/SoundDefs/` —— 内置 fallback 音池（15 × `SR_<Action>` + `SR_Call_Preview`，Crying/Giggling 无内置条目）+ 官方 Example Race VoicePack（`SR_OfficialExample_Race` + 15 SoundDef，当前参考基准）。详见 [Defs/SoundDefs/codemap.md](Defs/SoundDefs/codemap.md)。
 - `Defs/MoteDefs/` —— 调试浮字 `SR_Mote_TextBg`（`MoteTextWithBackground` + `SqueakMoteOffset`）。详见 [Defs/MoteDefs/codemap.md](Defs/MoteDefs/codemap.md)。
 - `Assemblies/SqueakyRatkin.dll`（+ `.pdb`）—— 编译产物，由 `../Source/SqueakyRatkin/` 构建；XML 与 DLL 版本必须匹配。
 - `Languages/` —— 英/中 Keyed 本地化（本图不展开）。
@@ -16,9 +16,9 @@ RimWorld 1.6 版本内容包：把发声组件挂到 Ratkin 种族（加载期 p
 
 ## Design
 
-- 分层职责：`Patches/` = 加载期组件注入；`Defs/` = 纯数据契约（无 C# 编译依赖）；`Assemblies/` = 运行时逻辑；`Languages/` = 展示文本。XML 与 C# 通过 `SqueakAction` 枚举（15 值，append-only）与 `SR_` 前缀 defName 契约连接，无 XML cross-ref 强引用。
+- 分层职责：`Patches/` = 加载期组件注入；`Defs/` = 纯数据契约（无 C# 编译依赖）；`Assemblies/` = 运行时逻辑；`Languages/` = 展示文本。XML 与 C# 通过 `SqueakAction` 枚举（17 值，append-only；Crying/Giggling=15/16）与 `SR_` 前缀 defName 契约连接；内置 `SR_<Action>` SoundDef 只覆盖前 15 项，无 XML cross-ref 强引用。
 - 配置三层：CompProperties(XML 默认) ← ModSettings(玩家 override) ← 运行时（resolver 快照）；本目录是默认层。
-- **No-DLC 边界**：强制基线 = Core + Harmony + HAR/NewRatkinPlus + Squeaky Ratkin、官方 DLC 全禁用——Race VoicePack、Vanilla 回退、15 动作、心情调制、设置全部可用；Biotech 仅为精确 `XenotypeDef.defName` 提供可选增强，且所有 Biotech 路径在 C# 侧以 `ModsConfig.BiotechActive` 门控，No-DLC 运行时绝不触碰 Xenotype DefDatabase 或 pawn genes。DLC 不在 About.xml 依赖中。
+- **No-DLC 边界**：强制基线 = Core + Harmony + HAR/NewRatkinPlus + Squeaky Ratkin、官方 DLC 全禁用——Race VoicePack、内置 fallback、15 个有内置音频的动作、心情调制、设置全部可用；17 动作 ABI 中 Crying/Giggling 无包声明时静默。Biotech 仅为精确 `XenotypeDef.defName` 提供可选增强，且所有 Biotech 路径在 C# 侧以 `ModsConfig.BiotechActive` 门控，No-DLC 运行时绝不触碰 Xenotype DefDatabase 或 pawn genes。DLC 不在 About.xml 依赖中。
 
 ## Data & Control Flow
 
@@ -33,7 +33,7 @@ RimWorld 1.6 启动 → LoadFolders v1.6（无条件）
 ## Integration
 
 - 上游依赖：`brrainz.harmony`、`erdelf.HumanoidAlienRaces`（modDependencies），`Solaris.RatkinRaceMod`（def 来源，loadAfter 声明）。
-- 下游消费方：`Source/SqueakyRatkin/` 的 `CompSqueaker`、`SqueakRuntimeResolver`、`SqueakVoicePackModels`、`Debug/SqueakMoteMaker`、UI 试听适配器；第三方 VoicePack 以独立模组形式按 `docs/voice-pack-author-guide-zh.md` 契约接入（`SR_` 前缀 + `<lowercase packageId>/<PackDef.defName>/<Action>/` 音频根）。
+- 下游消费方：`Source/SqueakyRatkin/` 的 `CompSqueaker`、`SqueakRuntimeResolver`、`SqueakVoicePackModels`、`Debug/SqueakMoteMaker`、UI 试听适配器；第三方 VoicePack 以独立模组形式按 `.github/skills/squeaky-voicepack-authoring/SKILL.md`（作者指南，兼作 agent skill）契约接入（`SR_` 前缀 + `<lowercase packageId>/<PackDef.defName>/<Action>/` 音频根）。
 - 打包：`../scripts/stage-package.ps1` 从 `../Extras/SqueakyRatkinExampleVoices` 镜像 Template 的 OGG（当前参考基准 41 个，数量可变）进 `1.6/Sounds/coahuilite.squeakyratkin/SR_OfficialExample_Race/`（工作树中不存在该音频目录）。
 
 ## Change Guidance

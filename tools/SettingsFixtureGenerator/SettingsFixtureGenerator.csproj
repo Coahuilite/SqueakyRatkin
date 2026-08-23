@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net472</TargetFramework>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <AssemblyName>SqueakySettingsFixtureGenerator</AssemblyName>
+    <RootNamespace>SqueakyRatkin.FixtureGenerator</RootNamespace>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <InformationalVersion>0.0.0+fixture</InformationalVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Production persisted record types and the production transaction itself. -->
+    <Compile Include="..\..\Source\SqueakyRatkin\SqueakVoicePackModels.cs" Link="Linked\SqueakVoicePackModels.cs" />
+    <Compile Include="..\..\Source\SqueakyRatkin\Kernel\Pool.cs" Link="Linked\Pool.cs" />
+    <Compile Include="..\..\Source\SqueakyRatkin\Kernel\Domain.cs" Link="Linked\Domain.cs" />
+    <Compile Include="..\..\Source\SqueakyRatkin\SqueakVoicePackDomain.cs" Link="Linked\SqueakVoicePackDomain.cs" />
+    <Compile Include="..\..\Source\SqueakyRatkin\Kernel\SqueakActionDomain.cs" Link="Linked\SqueakActionDomain.cs" />
+    <Compile Include="..\..\Source\SqueakyRatkin\SqueakActionPlan.cs" Link="Linked\SqueakActionPlan.cs" />
+    <Compile Include="..\..\Source\SqueakyRatkin\SqueakXenotypePresetModels.cs" Link="Linked\SqueakXenotypePresetModels.cs" />
+    <Compile Include="..\..\Source\SqueakyRatkin\SqueakSettingsMigration.cs" Link="Linked\SqueakSettingsMigration.cs" />
+    <Compile Include="..\..\Source\SqueakyRatkin\SqueakyRatkinSettings.ExposeData.cs" Link="Linked\SqueakyRatkinSettings.ExposeData.cs" />
+    <Compile Include="..\..\Source\SqueakyRatkin\SqueakGlobalActionPolicy.cs" Link="Linked\SqueakGlobalActionPolicy.cs" />
+    <Compile Include="..\..\Source\SqueakyRatkin\SqueakActionModel.cs" Link="Linked\SqueakActionModel.cs" />
+    <Compile Include="..\..\Source\SqueakyRatkin\Logging\SqueakLog.cs" Link="Linked\SqueakLog.cs" />
+    <Compile Include="..\..\Source\SqueakyRatkin\Logging\SqueakLogProtocol.cs" Link="Linked\SqueakLogProtocol.cs" />
+  </ItemGroup>
+
+</Project>

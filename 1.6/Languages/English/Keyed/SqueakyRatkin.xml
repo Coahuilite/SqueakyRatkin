@@ -510,6 +510,8 @@ Actual clip: unavailable. This recorder observes the production choice after a s
   <SR.Action.Work>Work</SR.Action.Work>
   <SR.Action.Equip>Equip</SR.Action.Equip>
   <SR.Action.MentalBreak>Mental break</SR.Action.MentalBreak>
+  <SR.Action.Crying>Crying</SR.Action.Crying>
+  <SR.Action.Giggling>Giggling</SR.Action.Giggling>
 
   <SR.Mood.Good>Good</SR.Mood.Good>
   <SR.Mood.Neutral>Neutral</SR.Mood.Neutral>

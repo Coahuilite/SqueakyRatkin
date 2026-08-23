@@ -51,7 +51,7 @@ $dirtySuffix = if ($statusOutput.Count -gt 0) { "-dirty" } else { "" }
 if (Test-Path -LiteralPath $devDir -PathType Container) {
     Get-ChildItem -LiteralPath $devDir -File -Filter "SqueakyRatkin-dev-v*.txt" | Remove-Item -Force
 }
-& (Join-Path $PSScriptRoot "stage-package.ps1") -ProjectRoot $root -StageDir $stageDir
+& (Join-Path $PSScriptRoot "stage-package.ps1") -ProjectRoot $root -StageDir $stageDir -VersionLabel $version -BuildFlavor dev -CommitLabel "$shortCommit$dirtySuffix" -CreateZip
 
 $fileCount = (Get-ChildItem -LiteralPath $stageDir -Recurse -File | Measure-Object).Count
 Write-Host "[pack-dev] Staged $fileCount files to $stageDir"

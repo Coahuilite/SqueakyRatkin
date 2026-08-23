@@ -71,6 +71,7 @@ public class GlobalActionEnabledRecord : IExposable
 /// <summary>Persisted behavioral and mood overrides; audio-pool selection remains in a separate record.</summary>
 public class XenotypePresetRecord : IExposable
 {
+    public string raceDefName = "";
     public string xenotypeDefName = "";
     public bool hasOverallIntervalMultiplier;
     public float overallIntervalMultiplier = 1f;
@@ -79,6 +80,7 @@ public class XenotypePresetRecord : IExposable
 
     public void ExposeData()
     {
+        Scribe_Values.Look(ref raceDefName, "raceDefName", "");
         Scribe_Values.Look(ref xenotypeDefName, "xenotypeDefName", "");
         Scribe_Values.Look(ref hasOverallIntervalMultiplier, "hasOverallIntervalMultiplier", false);
         Scribe_Values.Look(ref overallIntervalMultiplier, "overallIntervalMultiplier", 1f);
@@ -87,20 +89,14 @@ public class XenotypePresetRecord : IExposable
 
         if (Scribe.mode == LoadSaveMode.PostLoadInit)
         {
-            if (moodOverrides == null)
-            {
-                moodOverrides = new List<XenotypeMoodOverride>();
-            }
-
-            if (actionOverrides == null)
-            {
-                actionOverrides = new List<XenotypeActionBehaviorOverride>();
-            }
+            if (moodOverrides == null) moodOverrides = new List<XenotypeMoodOverride>();
+            if (actionOverrides == null) actionOverrides = new List<XenotypeActionBehaviorOverride>();
         }
     }
 
     internal static XenotypePresetRecord Clone(XenotypePresetRecord value) => new()
     {
+        raceDefName = value.raceDefName,
         xenotypeDefName = value.xenotypeDefName,
         hasOverallIntervalMultiplier = value.hasOverallIntervalMultiplier,
         overallIntervalMultiplier = value.overallIntervalMultiplier,

@@ -14,8 +14,9 @@ public static class SqueakXenotypeCatalog
     private static SqueakXenotypeCatalogSnapshot current = SqueakXenotypeCatalogSnapshot.Empty;
     public static SqueakXenotypeCatalogSnapshot Current => Volatile.Read(ref current);
 
-    public static void Refresh()
+    public static void Refresh(SqueakyRatkinSettings? settings = null)
     {
+        settings ??= SqueakyRatkinMod.Settings;
         try
         {
             Dictionary<string, List<SqueakVoicePackDef>> groups = new(StringComparer.Ordinal);
@@ -23,6 +24,12 @@ public static class SqueakXenotypeCatalog
             {
                 if (!SqueakVoicePackValidator.IsValid(pack)) continue;
                 if (pack.scope != SqueakVoicePackScope.Race && pack.scope != SqueakVoicePackScope.Xenotype) continue;
+                // Catalog admission and resolver pool assembly consume the same hidden replacement roster.
+                if (!SqueakProductDomainFilter.Contains(pack.raceDefName, settings))
+                {
+                    if (pack.TryGetPackKey(out string filteredKey)) SqueakLog.PackRejected(filteredKey, 1, "domain_filtered");
+                    continue;
+                }
                 if (!pack.TryGetPackKey(out string key)) continue;
                 if (!groups.TryGetValue(key, out List<SqueakVoicePackDef>? entries)) { entries = new List<SqueakVoicePackDef>(); groups.Add(key, entries); }
                 entries.Add(pack);
@@ -39,7 +46,16 @@ public static class SqueakXenotypeCatalog
             }
 
             // The Race domain is published before and independently from every optional DLC step.
-            // Pack eligibility is strictly the declared, case-sensitive target string: HAR is UI-only.
+            // Pack eligibility is strictly the declared, case-sensitive raceDefName/target strings;
+            // HAR discovery is dev diagnostics only (0.3.1 assembled-only).
+            Dictionary<string, List<SqueakVoicePackDef>> xenotypePacks = new(StringComparer.Ordinal);
+            foreach (SqueakVoicePackDef pack in packsByKey.Values)
+            {
+                if (pack.scope != SqueakVoicePackScope.Xenotype || string.IsNullOrWhiteSpace(pack.targetDefName)) continue;
+                if (!xenotypePacks.TryGetValue(pack.targetDefName, out List<SqueakVoicePackDef>? target)) { target = new List<SqueakVoicePackDef>(); xenotypePacks.Add(pack.targetDefName, target); }
+                target.Add(pack);
+            }
+
             Dictionary<string, XenotypeDef> canonical = new(StringComparer.Ordinal);
             HashSet<string> ambiguousCanonicalNames = new(StringComparer.Ordinal);
             HashSet<string> harHints = new(StringComparer.Ordinal);
@@ -49,16 +65,6 @@ public static class SqueakXenotypeCatalog
             {
                 try
                 {
-                    foreach (XenotypeDef xenotype in DefDatabase<XenotypeDef>.AllDefs)
-                    {
-                        if (string.IsNullOrEmpty(xenotype.defName)) continue;
-                        if (canonical.ContainsKey(xenotype.defName))
-                        {
-                            canonical.Remove(xenotype.defName);
-                            ambiguousCanonicalNames.Add(xenotype.defName);
-                        }
-                        else if (!ambiguousCanonicalNames.Contains(xenotype.defName)) canonical.Add(xenotype.defName, xenotype);
-                    }
                     HarRatkinXenotypeDiscoveryResult discovery = HarRatkinXenotypeDiscovery.Discover();
                     discoveryAvailable = discovery.available;
                     if (discovery.available)
@@ -69,16 +75,25 @@ public static class SqueakXenotypeCatalog
                             if (officialOnly) officialHarHints.Add(found.defName);
                             else harHints.Add(found.defName);
                         }
+                    // 0.3.1 catalog = 装配域，不是发现域：canonical 只登记装配域异种 =
+                    // HAR Ratkin 限定集（0.2.x 现状机制）∪ 声明了 pack 的目标；非装配域
+                    // XenotypeDef（他族/原版人类等）不注册，杜绝 canonical 泄漏。
+                    HashSet<string> assembledXenotypes = new(StringComparer.Ordinal);
+                    foreach (string name in harHints) assembledXenotypes.Add(name);
+                    foreach (string name in officialHarHints) assembledXenotypes.Add(name);
+                    foreach (string name in xenotypePacks.Keys) assembledXenotypes.Add(name);
+                    foreach (XenotypeDef xenotype in DefDatabase<XenotypeDef>.AllDefs)
+                    {
+                        if (string.IsNullOrEmpty(xenotype.defName) || !assembledXenotypes.Contains(xenotype.defName)) continue;
+                        if (canonical.ContainsKey(xenotype.defName))
+                        {
+                            canonical.Remove(xenotype.defName);
+                            ambiguousCanonicalNames.Add(xenotype.defName);
+                        }
+                        else if (!ambiguousCanonicalNames.Contains(xenotype.defName)) canonical.Add(xenotype.defName, xenotype);
+                    }
                 }
                 catch (Exception ex) { if (SqueakLog.ShouldEmitDev) SqueakLog.XenotypeDiscoveryFailed(ex); discoveryAvailable = false; }
-            }
-
-            Dictionary<string, List<SqueakVoicePackDef>> xenotypePacks = new(StringComparer.Ordinal);
-            foreach (SqueakVoicePackDef pack in packsByKey.Values)
-            {
-                if (pack.scope != SqueakVoicePackScope.Xenotype || string.IsNullOrWhiteSpace(pack.targetDefName)) continue;
-                if (!xenotypePacks.TryGetValue(pack.targetDefName, out List<SqueakVoicePackDef>? target)) { target = new List<SqueakVoicePackDef>(); xenotypePacks.Add(pack.targetDefName, target); }
-                target.Add(pack);
             }
             Volatile.Write(ref current, new SqueakXenotypeCatalogSnapshot(discoveryAvailable, canonical, ambiguousCanonicalNames, harHints, officialHarHints, packsByKey, racePacks, xenotypePacks));
         }
@@ -103,9 +118,10 @@ public sealed class SqueakXenotypeCatalogSnapshot
     public readonly IReadOnlyDictionary<string, XenotypeDef> XenotypeByDefName;
     /// <summary>Names with multiple loaded Def instances. Runtime must fail closed for these.</summary>
     public readonly IReadOnlyCollection<string> AmbiguousCanonicalDefNames;
-    /// <summary>HAR discovery hints for UI ordering/filtering only; never a VoicePack eligibility gate.</summary>
+    /// <summary>HAR discovery hints for dev diagnostics only (0.3.1 assembled-only projection);
+    /// never projected as candidate rows, never a VoicePack eligibility gate.</summary>
     public readonly IReadOnlyCollection<string> HarHintDefNames;
-    /// <summary>Official HAR-only hints suppressed from the UI unless another explicit source retains the target.</summary>
+    /// <summary>Official HAR-only hints; dev diagnostics only, never projected as candidate rows.</summary>
     public readonly IReadOnlyCollection<string> OfficialHarHintDefNames;
     public readonly IReadOnlyDictionary<string, SqueakVoicePackDef> PackByKey;
     public readonly IReadOnlyList<SqueakVoicePackDef> RacePacks;
@@ -131,7 +147,9 @@ public sealed class SqueakXenotypeCatalogSnapshot
         XenotypePacksByDefName = new ReadOnlyDictionary<string, IReadOnlyList<SqueakVoicePackDef>>(copy);
     }
 
-    /// <summary>UI-facing target union. DefName remains the sole identity; Canonical is presentation-only.</summary>
+    /// <summary>UI-facing assembled-only target union (0.3.1 decision B). Projects only assembled
+    /// content (declared packs) plus explicit references (selections/presets keep orphan/dormant rows);
+    /// HAR discovery is dev diagnostics only and never projects rows (canonical/har-hint leak fix).</summary>
     public IReadOnlyList<SqueakXenotypeTargetCandidate> GetTargetCandidates(IEnumerable<VoicePackSelectionRecord> selections, IEnumerable<XenotypePresetRecord> presets)
     {
         Dictionary<string, HashSet<string>> sources = new(StringComparer.Ordinal);
@@ -143,16 +161,16 @@ public sealed class SqueakXenotypeCatalogSnapshot
         }
         foreach (string name in XenotypePacksByDefName.Keys) AddSource(name, "declared_pack");
         foreach (VoicePackSelectionRecord selection in selections ?? Array.Empty<VoicePackSelectionRecord>())
-            if (selection != null && selection.scope == SqueakVoicePackScope.Xenotype) AddSource(selection.targetDefName, "selection");
+            if (selection != null && selection.scope == SqueakVoicePackScope.Xenotype) AddSource(selection.xenotypeDefName, "selection");
         foreach (XenotypePresetRecord preset in presets ?? Array.Empty<XenotypePresetRecord>())
             if (preset != null) AddSource(preset.xenotypeDefName, "preset");
-        foreach (string hint in HarHintDefNames) AddSource(hint, "har_hint");
-        foreach (string officialHint in OfficialHarHintDefNames)
-            if (sources.ContainsKey(officialHint)) AddSource(officialHint, "har_official_hint");
         if (SqueakLog.ShouldEmitDev)
         {
             foreach (KeyValuePair<string, HashSet<string>> entry in sources.OrderBy(x => x.Key, StringComparer.Ordinal))
                 SqueakLog.XenotypeDiscoveryCandidate(entry.Key, string.Join("+", entry.Value.OrderBy(x => x, StringComparer.Ordinal)), true);
+            // 0.3.1：HAR 发现不再投影为 UI 行；仅 dev 诊断记录被过滤的候选（enabled=false）。
+            foreach (string hint in HarHintDefNames.OrderBy(x => x, StringComparer.Ordinal))
+                if (!sources.ContainsKey(hint)) SqueakLog.XenotypeDiscoveryCandidate(hint, "har_hint_filtered", false);
             foreach (string officialHint in OfficialHarHintDefNames.OrderBy(x => x, StringComparer.Ordinal))
                 if (!sources.ContainsKey(officialHint)) SqueakLog.XenotypeDiscoveryCandidate(officialHint, "har_official_filtered", false);
         }

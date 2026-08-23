@@ -36,6 +36,64 @@ Short release summary.
 - ...
 ```
 
+## Unreleased — 0.3.2
+
+Race-declared, age-aware VoicePacks; player-triggered voices are limited to controllable, responsive pawns; the author XML contract is frozen and ships with a scaffold + self-contained guide.
+
+### Added
+- VoicePacks now declare the exact race they serve and only play for that race.
+- Per-age voice variants (`Baby`/`Toddler`/`Child`/`Adult`) and per-action pack fallbacks.
+- `Crying`/`Giggling` voice entries for Biotech babies (silent unless a pack provides clips).
+- Author tooling: `new-voicepack.ps1` scaffold and a self-contained author guide (also usable as an AI skill).
+
+### Changed
+- Selecting a pawn only triggers the select squeak for player-controlled, awake, non-downed pawns; sleeping, mentally broken, hostile, or wild pawns stay silent.
+- VoicePack XML is now a public stable contract: fields are add-only, the 17 action keys are append-only, and invalid packs fail closed; `IsEgg` is part of that contract.
+
+### Notes
+- The 0.3.1 development snapshot was not released; its race routing, age/fallback, egg-entry, and baby-fits work ships together with 0.3.2.
+- Diagnostic logging now writes one consolidated route line per action window with sound tier, egg flag, pawn faction, and player-control flag.
+
+## [2026-08-21 09:35 UTC+8] Version 0.3.0
+
+Internal kernel refactor (maintenance update). Functions and settings should behave exactly like 0.2.4; please report any behavioral differences.
+
+### Changed
+- Replaced the audio-selection internals with a pure decision kernel; no player-facing behavior change.
+
+### Packaging
+- Packages now carry a version.txt identity label (version, build flavor, commit).
+
+### Notes
+- Roadmap teaser: the kernel will later be split into a separate prerequisite mod (name TBD); a separate announcement will precede that release.
+
+## [2026-08-18 00:10 UTC+8] Version 0.2.4
+
+### Fixed
+- Fixed baby giggling/crying (Biotech BabyFits mental states) being misreported as a mental-break voice: the mental-break hook now targets the game's actual mental-break entry (`MentalBreakWorker.TryStart`), so non-break mental states no longer trigger the break sound. The fix is generic across races and all non-break states.
+
+## [2026-08-17 22:12 UTC+8] Version 0.2.3
+
+Default voice-source policy change (enhancement): fresh installs and configs that never set a voice-source policy now default to the built-in Race Example instead of the pure Vanilla fallback.
+
+### Changed
+- Fresh installs enable the built-in Race Example (a 15-action Ratkin voice pack) by default; pristine-default old configs migrate once. Explicit modes and existing pack selections are never overwritten, and the pack can be disabled or switched at any time in settings.
+
+### Fixed
+- Fixed baby and toddler Ratkin sounding like guinea pigs under default settings: the default state previously fell through to the Vanilla fallback tier, whose actions (Select/Wounded/Death/Call and others) are mostly built from guinea pig clips — exactly the actions young Ratkin can trigger.
+
+## [2026-08-16 23:17 UTC+8] Version 0.2.2
+
+Internal code-hygiene and readability release; no player-facing behavior changes.
+
+### Changed
+- Refactored the internal logging module into a public facade and internal protocol modules; log output, event IDs, and field order are unchanged.
+- Deduplicated periodic startup phase math and centralized the social-job marker list in the squeak component.
+- Removed an unused internal helper.
+
+### Packaging
+- Added `About.xml` `<modVersion>` metadata kept in sync with the csproj version.
+
 ## [2026-08-16 01:54 UTC+8] Version 0.2.1
 
 Bug-fix release: NewRatkinPlus fork compatibility, a settings cleanup fix, and the reworked draggable diagnostics panel.
