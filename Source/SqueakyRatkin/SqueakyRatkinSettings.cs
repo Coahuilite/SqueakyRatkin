@@ -38,18 +38,16 @@ public enum SqueakDistancePreset { Conservative, Balanced, Strong, Custom }
 /// </summary>
 public partial class SqueakyRatkinSettings : ModSettings
 {
-    // v3 (0.2.3): pristine-default configs migrate to Fallback with the built-in Race Example enabled.
-    private const int CurrentSettingsSchemaVersion = 3;
     private static readonly FloatRange FallbackBalancedDistanceRange = new(15f, 50f);
 
     // 0.2.3 产品决策:默认音源策略为 Fallback(内置 Race Example 开启)。Scribe 省略等于默认值的节点,
     // 因此"从未显式选择"的配置(无 voicePackMode 节点)天然落到 Fallback;显式 Off 仍写入节点并保留。
     public SqueakVoicePackMode voicePackMode = SqueakVoicePackMode.Fallback;
-    public int voicePackSchemaVersion = 1;
+    public int voicePackSchemaVersion = CurrentVoicePackSchemaVersion;
     // 0.2.3:内置 Race Example 默认种子标记。true 表示已尝试过一次默认种子(无论是否成功),避免玩家
     // 日后清空选择后再次被种子;无文件的新装与旧配置(节点缺失)都经启动链 EnsureBuiltInRaceDefault 处理。
     public bool voicePackDefaultSeeded;
-    // v2 folds the old temporary 1.2 cooldown baseline into shipped XML intervals and restores multiplier 1.0.
+    // v4 owns the race-aware selection/preset record identity migration.
     public int settingsSchemaVersion = CurrentSettingsSchemaVersion;
     public bool scaleCooldownWithTimeSpeed = true;
     public bool scaleFrequencyWithTalking = true;
@@ -91,11 +89,6 @@ public partial class SqueakyRatkinSettings : ModSettings
     private SqueakAction selectedAction = SqueakAction.Call;
     private Vector2 scrollPos;
     private readonly Dictionary<string, string> numericBuffers = new();
-    private bool distanceRangeWasLoaded;
-    private bool scaleFrequencyWithTalkingWasLoaded;
-    private bool settingsSchemaWasLoaded;
-    private bool voicePackModeWasLoaded;
-    private bool migrationPersistencePending;
     private bool xenotypeTabRequested;
     private SettingsTab activeTab;
     private int versionClickCount;
@@ -111,98 +104,6 @@ public partial class SqueakyRatkinSettings : ModSettings
     private SqueakMood? bufferForMood;
     private bool editBufferOverrideEnabled;
 
-    public override void ExposeData()
-    {
-        base.ExposeData();
-        // ExposeData is called for multiple Scribe modes. Reset presence only at the beginning of LoadingVars,
-        // so its result survives through PostLoadInit.
-        if (Scribe.mode == LoadSaveMode.LoadingVars)
-        {
-            settingsSchemaWasLoaded = false;
-            distanceRangeWasLoaded = false;
-            scaleFrequencyWithTalkingWasLoaded = false;
-            voicePackModeWasLoaded = false;
-        }
-        Scribe_Values.Look(ref voicePackMode, "voicePackMode", SqueakVoicePackMode.Fallback);
-        Scribe_Values.Look(ref voicePackSchemaVersion, "voicePackSchemaVersion", 1);
-        Scribe_Values.Look(ref voicePackDefaultSeeded, "voicePackDefaultSeeded", false);
-        // The marker must survive even at its default v2 value; otherwise a future explicit 1.2 is indistinguishable
-        // from an unmarked pre-v2 test profile on the next load.
-        Scribe_Values.Look(ref settingsSchemaVersion, "settingsSchemaVersion", CurrentSettingsSchemaVersion, forceSave: true);
-        Scribe_Values.Look(ref scaleCooldownWithTimeSpeed, "scaleCooldownWithTimeSpeed", true);
-        Scribe_Values.Look(ref scaleFrequencyWithTalking, "scaleFrequencyWithTalking", GetDefaultScaleFrequencyWithTalking());
-        Scribe_Values.Look(ref scalePeriodicWithAudiblePopulation, "scalePeriodicWithAudiblePopulation", true);
-        Scribe_Values.Look(ref localizeDebugActions, "localizeDebugActions", false);
-        Scribe_Values.Look(ref developerToolsEnabled, "developerToolsEnabled", false);
-        Scribe_Values.Look(ref devLoggingMode, "devLoggingMode", SqueakDevLoggingMode.Auto);
-        Scribe_Values.Look(ref globalCooldownMultiplier, "globalCooldownMultiplier", 1f);
-        Scribe_Values.Look(ref distancePreset, "distancePreset", SqueakDistancePreset.Balanced);
-        Scribe_Values.Look(ref distanceRange, "distanceRange", GetDistancePresetRange(SqueakDistancePreset.Balanced));
-        if (Scribe.mode == LoadSaveMode.LoadingVars)
-        {
-            scaleFrequencyWithTalkingWasLoaded = Scribe.loader?.curXmlParent?["scaleFrequencyWithTalking"] != null;
-            distanceRangeWasLoaded = Scribe.loader?.curXmlParent?["distanceRange"] != null;
-            settingsSchemaWasLoaded = Scribe.loader?.curXmlParent?["settingsSchemaVersion"] != null;
-            // Scribe omits fields whose value equals the default, so an absent voicePackMode node
-            // means the player never touched the voice source policy (pristine default state).
-            voicePackModeWasLoaded = Scribe.loader?.curXmlParent?["voicePackMode"] != null;
-        }
-        Scribe_Collections.Look(ref moodOverrides, "moodOverrides", LookMode.Value, LookMode.Deep);
-        Scribe_Collections.Look(ref voicePackSelections, "voicePackSelections", LookMode.Deep);
-        Scribe_Collections.Look(ref xenotypePresets, "xenotypePresets", LookMode.Deep);
-        Scribe_Collections.Look(ref globalActionEnabled, "globalActionEnabled", LookMode.Deep);
-        if (Scribe.mode == LoadSaveMode.LoadingVars && moodOverrides == null)
-        {
-            moodOverrides = new Dictionary<SqueakMood, SqueakMoodMod>();
-        }
-
-        if (Scribe.mode == LoadSaveMode.PostLoadInit)
-        {
-            if (!Enum.IsDefined(typeof(SqueakVoicePackMode), voicePackMode))
-            {
-                voicePackMode = SqueakVoicePackMode.Off;
-            }
-            if (!Enum.IsDefined(typeof(SqueakDevLoggingMode), devLoggingMode)) devLoggingMode = SqueakDevLoggingMode.Auto;
-            SqueakLog.Configure(devLoggingMode);
-            voicePackSchemaVersion = 1;
-            // Every missing or pre-v2 marker is made durable once. Only the historical 1.2 baseline
-            // changes value; all other explicit multipliers survive the schema marker writeback.
-            bool schemaUpgradeNeeded = !settingsSchemaWasLoaded || settingsSchemaVersion < CurrentSettingsSchemaVersion;
-            if (schemaUpgradeNeeded)
-            {
-                if (Mathf.Abs(globalCooldownMultiplier - 1.2f) <= .0001f) globalCooldownMultiplier = 1f;
-                settingsSchemaVersion = CurrentSettingsSchemaVersion;
-                migrationPersistencePending = true;
-            }
-            globalCooldownMultiplier = Mathf.Clamp(globalCooldownMultiplier, 0f, 3f);
-            if (!scaleFrequencyWithTalkingWasLoaded)
-            {
-                scaleFrequencyWithTalking = GetDefaultScaleFrequencyWithTalking();
-            }
-            if (!distanceRangeWasLoaded)
-            {
-                distanceRange = GetDistancePresetRange(SqueakDistancePreset.Balanced);
-            }
-            distanceRange = ClampDistanceRange(distanceRange);
-            if (voicePackSelections == null) voicePackSelections = new List<VoicePackSelectionRecord>();
-            // 0.2.3 默认种子在启动链 EnsureBuiltInRaceDefault() 统一执行:无文件的新装不经过 ExposeData,
-            // 因此 PostLoadInit 不是可靠入口;显式模式(节点存在)与新装都靠 voicePackModeWasLoaded 区分。
-
-            if (xenotypePresets == null)
-            {
-                xenotypePresets = new List<XenotypePresetRecord>();
-            }
-            if (globalActionEnabled == null) globalActionEnabled = new List<GlobalActionEnabledRecord>();
-            foreach (GlobalActionEnabledRecord record in globalActionEnabled)
-            {
-                if (record == null || !SqueakActionDefinitions.IsKnown(record.action)) continue;
-                record.scope = record.scopeWasLoaded
-                    ? SqueakActionDefinitions.NormalizeScope(record.action, record.scope)
-                    : record.enabled ? SqueakActionDefinitions.Get(record.action).DefaultScope : SqueakActionScope.Disabled;
-                record.enabled = record.scope != SqueakActionScope.Disabled;
-            }
-        }
-    }
 
     public void ApplyToRuntime()
     {
@@ -252,6 +153,8 @@ public partial class SqueakyRatkinSettings : ModSettings
     /// 必须在主线程启动链、ApplyToRuntime 之前调用,使首次发布的快照即含内置包。</summary>
     internal void EnsureBuiltInRaceDefault()
     {
+        // A failed v3/v1 transaction must remain untouched until its next startup retry.
+        if (settingsSchemaVersion < CurrentSettingsSchemaVersion || voicePackSchemaVersion < CurrentVoicePackSchemaVersion) return;
         if (voicePackDefaultSeeded || voicePackModeWasLoaded) return;
         voicePackDefaultSeeded = true;
         bool hasRaceSelection = voicePackSelections != null && voicePackSelections.Any(x => x != null && x.scope == SqueakVoicePackScope.Race);
@@ -262,6 +165,7 @@ public partial class SqueakyRatkinSettings : ModSettings
             voicePackSelections.Add(new VoicePackSelectionRecord
             {
                 scope = SqueakVoicePackScope.Race,
+                raceDefName = SqueakProductDomainFilter.PrimaryRaceDefName,
                 enabledPackKeys = new List<string> { builtInKey }
             });
             migrationPersistencePending = true;
@@ -312,10 +216,22 @@ public partial class SqueakyRatkinSettings : ModSettings
         else { record.enabled = scope != SqueakActionScope.Disabled; record.scope = scope; record.scopeWasLoaded = true; }
     }
 
+    /// <summary>0.3.1 波 3c 彩蛋开关读取（决策 §2.4：默认关，路由输入随快照）。</summary>
+    public bool AllowEasterEggSounds => allowEasterEggSounds;
+
+    /// <summary>彩蛋开关离散 setter：切换走离散 resolver 重建（快照 AllowEggs 生效于返回前），并排队持久化。</summary>
+    internal void SetAllowEasterEggSounds(bool value)
+    {
+        if (allowEasterEggSounds == value) return;
+        allowEasterEggSounds = value;
+        QueuePersistence();
+        NotifyDiscreteResolverRuntimeChanged();
+    }
+
     /// <summary>Explicit future D2 refresh entry; intentionally does not evaluate notifications or normalize saved records.</summary>
     public void RefreshCatalogAndRuntime()
     {
-        SqueakXenotypeCatalog.Refresh();
+        SqueakXenotypeCatalog.Refresh(this);
         NotifyDiscreteResolverRuntimeChanged();
     }
 
@@ -325,18 +241,23 @@ public partial class SqueakyRatkinSettings : ModSettings
         if (scope != SqueakVoicePackScope.Race && scope != SqueakVoicePackScope.Xenotype) return;
         string target = scope == SqueakVoicePackScope.Race ? "" : targetDefName ?? "";
         if (scope == SqueakVoicePackScope.Xenotype && target.Length == 0) return;
-        string domain = VoicePackSelectionRecord.ComposeDomainKey(scope, target);
-        voicePackSelections.RemoveAll(x => x != null && x.DomainKey == domain);
+        voicePackSelections.RemoveAll(x => VoicePackSelectionRecord.SameDomain(x, scope, SqueakProductDomainFilter.PrimaryRaceDefName, target));
         List<string> keys = (enabledKeys ?? Array.Empty<string>()).Where(x => !string.IsNullOrWhiteSpace(x)).Distinct().ToList();
-        if (keys.Count > 0) voicePackSelections.Add(new VoicePackSelectionRecord { scope = scope, targetDefName = target, enabledPackKeys = keys });
+        if (keys.Count > 0) voicePackSelections.Add(new VoicePackSelectionRecord
+        {
+            scope = scope,
+            raceDefName = SqueakProductDomainFilter.PrimaryRaceDefName,
+            xenotypeDefName = target,
+            enabledPackKeys = keys
+        });
         NotifyDiscreteResolverRuntimeChanged();
         QueuePersistence();
     }
 
     public void ForgetVoicePackSelection(SqueakVoicePackScope scope, string targetDefName)
     {
-        string domain = VoicePackSelectionRecord.ComposeDomainKey(scope, scope == SqueakVoicePackScope.Race ? "" : targetDefName ?? "");
-        voicePackSelections.RemoveAll(x => x != null && x.DomainKey == domain);
+        string target = scope == SqueakVoicePackScope.Race ? "" : targetDefName ?? "";
+        voicePackSelections.RemoveAll(x => VoicePackSelectionRecord.SameDomain(x, scope, SqueakProductDomainFilter.PrimaryRaceDefName, target));
         NotifyDiscreteResolverRuntimeChanged();
         QueuePersistence();
     }
@@ -345,8 +266,7 @@ public partial class SqueakyRatkinSettings : ModSettings
     {
         if (string.IsNullOrEmpty(targetDefName)) return;
         xenotypePresets.RemoveAll(x => x != null && string.Equals(x.xenotypeDefName, targetDefName, StringComparison.Ordinal));
-        string domain = VoicePackSelectionRecord.ComposeDomainKey(SqueakVoicePackScope.Xenotype, targetDefName);
-        voicePackSelections.RemoveAll(x => x != null && string.Equals(x.DomainKey, domain, StringComparison.Ordinal));
+        voicePackSelections.RemoveAll(x => VoicePackSelectionRecord.SameDomain(x, SqueakVoicePackScope.Xenotype, SqueakProductDomainFilter.PrimaryRaceDefName, targetDefName));
         NotifyDiscreteResolverRuntimeChanged();
         QueuePersistence();
     }
@@ -354,7 +274,7 @@ public partial class SqueakyRatkinSettings : ModSettings
     public SqueakVoicePackDomainStatus GetVoicePackSelectionStatus(SqueakVoicePackScope scope, string targetDefName)
     {
         string target = scope == SqueakVoicePackScope.Race ? "" : targetDefName ?? "";
-        VoicePackSelectionRecord? record = voicePackSelections.LastOrDefault(x => x != null && x.DomainKey == VoicePackSelectionRecord.ComposeDomainKey(scope, target));
+        VoicePackSelectionRecord? record = voicePackSelections.LastOrDefault(x => VoicePackSelectionRecord.SameDomain(x, scope, SqueakProductDomainFilter.PrimaryRaceDefName, target));
         List<string> keys = new(record?.enabledPackKeys ?? new List<string>());
         SqueakXenotypeCatalogSnapshot catalog = SqueakXenotypeCatalog.Current;
         if (scope == SqueakVoicePackScope.Xenotype && !ModsConfig.BiotechActive) return new SqueakVoicePackDomainStatus(SqueakVoicePackDomainState.Dormant, keys);

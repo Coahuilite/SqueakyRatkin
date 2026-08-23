@@ -35,6 +35,6 @@ LoadFolders.xml v1.6（无条件）→ 加载 1.6/Defs/**
 
 ## Change Guidance
 
-- 新增/改名/删除任何 defName 前，先核对 `SR_` 前缀规则与 `SqueakActionDefinitions`（15 动作固定、枚举 append-only）。
+- 新增/改名/删除任何 defName 前，先核对 `SR_` 前缀规则与 `SqueakActionDefinitions`（17 动作固定、枚举 append-only；Crying/Giggling 为 15/16 且无内置 SoundDef，默认静默）。
 - 改音频池/Example 见 SoundDefs 子图（注意 Example 音频由打包脚本从 Extras 镜像注入，工作树中不存在）；改浮字位置/生命周期见 MoteDefs 子图。
-- 校验入口：加载时 `ConfigErrors()`（pack 契约）与打包时 `stage-package.ps1`（Template→built-in 镜像断言：实际键集合 + SHA-256；当前参考 41 OGG/15 动作，数量可变）。
+- 校验入口：加载时 `ConfigErrors()`（pack 契约）与打包时 `stage-package.ps1`（Template→built-in 镜像断言：实际键集合 + SHA-256；当前参考 41 OGG/15 个有音频的动作，数量可变）。

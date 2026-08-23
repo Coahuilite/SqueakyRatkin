@@ -18,7 +18,7 @@ public static class HarRatkinXenotypeDiscovery
             return HarRatkinXenotypeDiscoveryResult.Unavailable;
         }
 
-        ThingDef? ratkin = DefDatabase<ThingDef>.GetNamedSilentFail("Ratkin");
+        ThingDef? ratkin = DefDatabase<ThingDef>.GetNamedSilentFail(SqueakProductDomainFilter.PrimaryRaceDefName);
         if (ratkin == null)
         {
             return HarRatkinXenotypeDiscoveryResult.Unavailable;

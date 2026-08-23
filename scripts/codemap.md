@@ -20,7 +20,10 @@
 | `pack-steam.ps1` | 要求 csproj **恰好一个**非空 `<Version>`；**干净工作树硬门**（Steam = 最终发布步，脏树直接 throw）；产出未压缩目录 `dist/steam/SqueakyRatkin`（上传人工，非 SteamCMD） |
 | `build-dev.ps1` | 一步 Dev 包：`dotnet build`（默认 Dev flavor）→ `pack-dev`；flavor 由构造保证，pack 永远吃到同 flavor DLL |
 | `build-steam.ps1` | 一步 Steam 包：`dotnet build -p:SqueakyBuildFlavor=Steam` → `pack-steam`（含干净树硬门 + 版本断言） |
-| `verify-local.ps1` | 一次输入本地自动校验：三 harness + `fixtures/` 零 delta 门 + Dev/Steam 双 flavor 0 warning 构建（fail-fast + 单检查重跑命令）；`-PackDev`/`-PackSteam` 追加打包（Steam 走干净树硬门） |
+| `verify-local.ps1` | 一次输入本地自动校验（11 项）：四 harness + `fixtures/` 零 delta 门 + Dev/Steam 双 flavor 0 warning 构建 + ConfigCopy store 生命周期 + VoicePack XML ABI 一致性锁 + VoicePack 脚手架自检（fail-fast + 单检查重跑命令）；`-PackDev`/`-PackSteam` 追加打包（Steam 走干净树硬门）；`-NoRestore` 供离线缓存环境（默认仍常规 restore） |
+| `verify-voicepack-xml-abi.ps1` | 0.3.2 第 10 项：示例 XML × validator × 作者指南三向对照；C# `SqueakActionDefinitions` 17 键顺序为源，校验两份提交态 XML（官方内置/Extras 模板）的结构、SR_ 前缀、SoundDef 契约与交叉引用；`dist/SqueakyRatkinEggTestVoices/` 存在时并入校验 `IsEgg`；「作者指南」标记源 = `.github/skills/squeaky-voicepack-authoring/SKILL.md` |
+| `verify-voicepack-scaffold.ps1` | 0.3.2 第 11 项：临时目录运行 `new-voicepack.ps1` 生成 Call,Select 最小包，校验目录/XML 结构后清理；只写系统临时目录 |
+| `new-voicepack.ps1` | 0.3.2 作者脚手架（SKILL 配套）：`-PackageId -PackDefName [-Actions Call,Select] [-RaceDefName Ratkin] [-OutDir]` 生成 Race-only 包骨架（About/LoadFolders/最小 PackDef+SoundDef XML/音频占位目录/README）；校验 17 内置键与 SR_/小写 packageId 规则；目标已存在拒绝覆盖 |
 | `Source/SqueakyRatkin/SqueakyRatkin.csproj` | `<Version>`（identity 唯一来源）、`<SqueakyBuildFlavor>`（默认 `Dev` → `SQUEAKY_<FLAVOR>` DefineConstants）、`<SqueakyInformationalVersion>`（覆盖运行时 informational）、`<OutputPath>..\..\1.6\Assemblies</OutputPath>`、Release 下 `DebugType=none` |
 | `LoadFolders.xml`（根） | 主 mod 挂载：无条件加载 `/` 与 `1.6`；发声内容是否命中由 XML Patch 的 `defName="Ratkin"` XPath 决定 |
 | `Extras/SqueakyRatkinExampleVoices/LoadFolders.xml` | Extras 独立 mod：`v1.6` 下挂 `1.6/Race` |
@@ -39,7 +42,7 @@
 
 ### 统一 staging（`stage-package.ps1`）
 
-输入（仓库只读侧）：`About/`、根 `LoadFolders.xml`、`1.6/`（含编译好的 DLL、Defs、Languages、Patches）、`Extras/SqueakyRatkinExampleVoices/`（Template 音频、Extras About、README、AUDIO_PROVENANCE/RIGHTS）。输出：`<StageDir>`（三个 packer 分别传 `dist/{dev,github,steam}/SqueakyRatkin`）。
+输入（仓库只读侧）：`About/`、根 `LoadFolders.xml`、`1.6/`（含编译好的 DLL、Defs、Languages、Patches）、`Extras/SqueakyRatkinExampleVoices/`（Template 音频、Extras About、README、AUDIO_PROVENANCE/RIGHTS）。输出：`<StageDir>`（三个 packer 分别传 `dist/{dev,github,steam}/SqueakyRatkin`）。彩蛋测试产物 `dist/SqueakyRatkinEggTestVoices/`（0.3.2，gitignored）不在 staging 输入内，按构造永不进任何发布包。
 
 staging 顺序与卫生规则：
 
@@ -109,5 +112,5 @@ dist/dev/SqueakyRatkin/            dist/github/SqueakyRatkin/          dist/stea
 - **加 flavor**：csproj 默认值 + `DefineConstants` 已通配；需在 `Mod.cs`/`SqueakLog.cs`/`Settings.cs` 加 `#if` 分支、新增 pack 包装脚本（复用 stage-package）、如需 CI 则在 workflow 加构建步骤。
 - **禁止**：往 `1.6/Sounds/` 或 `dist/` 提交文件（gitignored 生成物）；在 `About/` 提交 `PublishedFileId.txt`；绕过 stage-package 自建 staging 逻辑；把非 OGG 文件放进 Template 音频目录。
 - **Steam 打包纪律（2026-08-20）**：Steam 是最终发布步——必须干净树（`pack-steam` 硬门）+ Steam 发布态（用 `build-steam.ps1` 一步入口，flavor 由构造保证）；三渠道 `stage-package` 统一断言 `About.xml <modVersion>` == csproj `<Version>`，失配即 throw。
-- **本地一键校验（2026-08-20）**：`pwsh scripts/verify-local.ps1` 是手动纪律的自动入口——任何 Kernel/协议/设置改动后先跑它再谈提交；输出每检查一行，红即停。
+- **本地一键校验（2026-08-23 扩至 11 项）**：`pwsh scripts/verify-local.ps1` 是手动纪律的自动入口——任何 Kernel/协议/设置/XML ABI/脚手架改动后先跑它再谈提交；输出每检查一行，红即停。离线缓存环境可加 `-NoRestore`。
 - 脚本为无参数/单参数 CLI，幂等（先清后建）；本地调试用 `pwsh -File scripts/pack-dev.ps1`（需先 `dotnet build`）。

@@ -3,7 +3,7 @@
   Squeaky Ratkin(鼠辈啁啾) SoundDef —— 每动作 1 个(中性基准),心情靠运行时 pitchFactor/volumeFactor 调制(见 CompSqueaker + moodMods)。
   SR_<Action> 是 Vanilla fallback：AudioGrain_Folder 展开整个原版 clip 文件夹，AudioGrain_Clip 只引用已确认的原版 clipPath；不复制原版资产。
   可选语音由独立 SqueakVoicePackDef 提供；内置官方 Example 也遵循普通 VoicePack 的选择与权重规则，不享有运行时优先级。
-  第三方 VoicePack 契约见 docs/voice-pack-author-guide-zh.md；可复制的 Race-only Template 见 Extras/SqueakyRatkinExampleVoices/README.md。
+  第三方 VoicePack 契约见 .github/skills/squeaky-voicepack-authoring/SKILL.md；可复制的 Race-only Template 见 Extras/SqueakyRatkinExampleVoices/README.md。
   pitchRange 用中性0.95~1.05, 容许 SoundDef 层基础随机; 心情调制由运行时 pitchFactor 叠加。
 -->
 <Defs>

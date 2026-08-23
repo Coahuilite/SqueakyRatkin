@@ -29,8 +29,11 @@ internal sealed class XenotypePresetDraft
         foreach (SqueakAction action in actions) draft.Actions[action] = new XenotypeActionBehaviorOverride { action = action };
         foreach (SqueakMood mood in moods) draft.Moods[mood] = new XenotypeMoodOverride { mood = mood };
 
-        // Runtime merge semantics: records and duplicate fields are consumed in list order, last field wins.
-        foreach (XenotypePresetRecord record in presets.Where(x => x != null && x.xenotypeDefName == defName))
+        // 2b-2: draft identity is the (race, xenotype) preset domain — UI projects the product race
+        // (ProductDomainFilter primary), matching Commit's canonical raceDefName.
+        foreach (XenotypePresetRecord record in presets.Where(x => x != null
+                   && string.Equals(x.raceDefName, SqueakProductDomainFilter.PrimaryRaceDefName, StringComparison.Ordinal)
+                   && x.xenotypeDefName == defName))
         {
             if (record.hasOverallIntervalMultiplier) { draft.HasOverall = true; draft.Overall = Safe(record.overallIntervalMultiplier, 1f); }
             foreach (XenotypeActionBehaviorOverride source in record.actionOverrides ?? new())
@@ -64,14 +67,15 @@ internal sealed class XenotypePresetDraft
     internal void Commit(List<XenotypePresetRecord> presets)
     {
         Normalize();
-        presets.RemoveAll(x => x != null && x.xenotypeDefName == XenotypeDefName);
-        XenotypePresetRecord canonical = new() { xenotypeDefName = XenotypeDefName, hasOverallIntervalMultiplier = HasOverall, overallIntervalMultiplier = Overall };
+        presets.RemoveAll(x => x != null
+            && string.Equals(x.raceDefName, SqueakProductDomainFilter.PrimaryRaceDefName, StringComparison.Ordinal)
+            && x.xenotypeDefName == XenotypeDefName);
+        XenotypePresetRecord canonical = new() { raceDefName = SqueakProductDomainFilter.PrimaryRaceDefName, xenotypeDefName = XenotypeDefName, hasOverallIntervalMultiplier = HasOverall, overallIntervalMultiplier = Overall };
         canonical.actionOverrides.AddRange(Actions.Values.Where(HasDelta).Select(Clone));
         canonical.moodOverrides.AddRange(Moods.Values.Where(HasDelta).Select(Clone));
         if (HasOverall || canonical.actionOverrides.Count > 0 || canonical.moodOverrides.Count > 0) presets.Add(canonical);
         committedRevision = revision;
     }
-
     internal void Normalize()
     {
         Overall = Clamp(Overall, 0f, 5f, 1f);

@@ -5,7 +5,8 @@ namespace SqueakyRatkin;
 
 // ---- 0.2.4 副本（无法真实链接的类型）----
 // SqueakAction/SqueakMood/SqueakCooldownClock/SqueakTriggerMode 现由真实链接的
-// SqueakActionDomain.cs 提供；SqueakVoicePackMode/Scope 由 SqueakVoicePackDomain.cs 提供。
+// Kernel/SqueakActionDomain.cs 提供（namespace 仍为 SqueakyRatkin）；
+// SqueakVoicePackMode/Scope 由 SqueakVoicePackDomain.cs 提供。
 // 以下类型仍定义于不可链接文件（CompSqueaker.cs / SqueakyRatkinSettings.cs），此处按 v0.2.4 tag 复制。
 
 public enum SqueakTriggerOutcome { NotAttempted, Success, Cooldown, ProbabilitySkipped, VocalBlocked, Silent }
