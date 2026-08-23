@@ -24,7 +24,7 @@
 | `verify-voicepack-xml-abi.ps1` | 0.3.2 第 10 项：示例 XML × validator × 作者指南三向对照；C# `SqueakActionDefinitions` 17 键顺序为源，校验两份提交态 XML（官方内置/Extras 模板）的结构、SR_ 前缀、SoundDef 契约与交叉引用；`dist/SqueakyRatkinEggTestVoices/` 存在时并入校验 `IsEgg`；「作者指南」标记源 = `.github/skills/squeaky-voicepack-authoring/SKILL.md` |
 | `verify-voicepack-scaffold.ps1` | 0.3.2 第 11 项：临时目录运行 `new-voicepack.ps1` 生成 Call,Select 最小包，校验目录/XML 结构后清理；只写系统临时目录 |
 | `new-voicepack.ps1` | 0.3.2 作者脚手架（SKILL 配套）：`-PackageId -PackDefName [-Actions Call,Select] [-RaceDefName Ratkin] [-OutDir]` 生成 Race-only 包骨架（About/LoadFolders/最小 PackDef+SoundDef XML/音频占位目录/README）；校验 17 内置键与 SR_/小写 packageId 规则；目标已存在拒绝覆盖 |
-| `Source/SqueakyRatkin/SqueakyRatkin.csproj` | `<Version>`（identity 唯一来源）、`<SqueakyBuildFlavor>`（默认 `Dev` → `SQUEAKY_<FLAVOR>` DefineConstants；Dev 另加 `SQUEAKY_EXPERIMENTAL` 编译门）、`<SqueakyInformationalVersion>`（覆盖运行时 informational；EXP 分支默认 `$(Version)-EXP`）、`<OutputPath>..\..\1.6\Assemblies</OutputPath>`、Release 下 `DebugType=none` |
+| `Source/SqueakyRatkin/SqueakyRatkin.csproj` | `<Version>`（identity 唯一来源）、`<SqueakyBuildFlavor>`（默认 `Dev` → `SQUEAKY_<FLAVOR>` DefineConstants；Dev 另加 `SQUEAKY_EXPERIMENTAL` 编译门）、`<SqueakyInformationalVersion>`（覆盖运行时 informational；EXP 分支仅 Dev flavor 默认 `$(Version)-EXP`）、`<OutputPath>..\..\1.6\Assemblies</OutputPath>`、Release 下 `DebugType=none` |
 | `LoadFolders.xml`（根） | 主 mod 挂载：无条件加载 `/` 与 `1.6`；发声内容是否命中由 XML Patch 的 `defName="Ratkin"` XPath 决定 |
 | `Extras/SqueakyRatkinExampleVoices/LoadFolders.xml` | Extras 独立 mod：`v1.6` 下挂 `1.6/Race` |
 | `.github/workflows/ci.yml` | Dev flavor 构建 + dev snapshot 打包 + artifact 上传 |
