@@ -36,7 +36,7 @@ public static class SqueakAudioPoolNotificationService
 
     private static bool HasEnabledKnownPack(SqueakyRatkinSettings settings, SqueakXenotypeCatalogSnapshot catalog, SqueakVoicePackScope scope, string target)
     {
-        VoicePackSelectionRecord? record = settings.voicePackSelections.LastOrDefault(x => x != null && x.DomainKey == VoicePackSelectionRecord.ComposeDomainKey(scope, target));
+        VoicePackSelectionRecord? record = settings.voicePackSelections.LastOrDefault(x => VoicePackSelectionRecord.SameDomain(x, scope, SqueakProductDomainFilter.PrimaryRaceDefName, target));
         if (record == null) return false;
         HashSet<string> enabledKeys = new(record.enabledPackKeys ?? new List<string>(), StringComparer.Ordinal);
         return catalog.GetVoicePackDomainPacks(scope, target).Any(pack => pack.TryGetPackKey(out string key) && enabledKeys.Contains(key));

@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net472</TargetFramework>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <AssemblyName>SqueakyConfigCopyCharacterization</AssemblyName>
+    <RootNamespace>SqueakyRatkin.ConfigCopyCharacterization</RootNamespace>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <InformationalVersion>0.0.0+config</InformationalVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- 生产 Config 副本生命周期（适配层单写者）+ 纯 fallback 内核（Decision §4.6/§5 Config 三场景 harness）。
+         SqueakFallbackProfileStore 是 internal static，链接进本程序集后直接可测。 -->
+    <Compile Include="..\..\Source\SqueakyRatkin\SqueakFallbackProfileStore.cs" Link="Linked\SqueakFallbackProfileStore.cs" />
+    <Compile Include="..\..\Source\SqueakyRatkin\Kernel\*.cs" Link="Kernel\%(Filename)%(Extension)" />
+  </ItemGroup>
+
+</Project>

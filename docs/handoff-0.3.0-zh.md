@@ -20,7 +20,7 @@
   - `Pool.cs`：`VoicePackEntry`/`ActionSoundSet`/`ChainTier`/`ChainResult`/`SelectionContext`/`IRollSource`/`ISoundGate`
   - `SqueakPoolRegistry.cs`：`Build`（域分组 + PackKey 序数排序）/`Select`（Off→内置表；Fallback→Xeno→Race→内置三级短路；Remix→三级等权折叠）/`PoolsFor`
   - `BuiltInFallbackTable.cs`：内置表种子 = `SqueakActionDefinitions.AudioKey` 单源投影（15 动作全列）；`DomainFilter`（0.4.x 删）
-  - `Modulation.cs`：调制合成纯逻辑（0.3.2 接线，0.3.0 未启用）
+  - `Modulation.cs`：调制合成纯逻辑（0.3.1 接线，0.3.0 未启用）
 - `Source/SqueakyRatkin/SqueakKernelAdapter.cs`：唯一接缝——catalog 域包投影（注入 `(Ratkin,*)`，投影规则 = 旧 `ResolvedAudioPack`：去 `_Preview`/Distinct/defName Ordinal 排序）、gate/rolls 实例化（包 `SqueakSoundAvailabilityCache` / `Verse.Rand`）、`ChainResult`→`SqueakSoundChoice`、`KnownMapSoundDefs` 收集（catalog 全量含未选择）
 - `SqueakRuntimeResolver.cs`：`BuildSnapshot` 经内核构建 + `Choose` 走 `registry.Select`；旧 `ChoosePack`/vanilla 字典/`Or`/`ResolvedAudioPack` 已同变更删除（无 shim）
 
@@ -62,7 +62,7 @@
 
 ## 7. 红线（下会话不得违反）
 
-- `SqueakAction` append-only 序数稳定（0.3.2 在末尾 append Crying/Giggling）；srdiag v1 协议冻结；`SR_` 前缀 defName 契约；存档零写入；`base.WriteSettings()` 单通道；HAR 反射非依赖（缺失静默降级）；No-DLC 基线
+- `SqueakAction` append-only 序数稳定（0.3.1 在末尾 append Crying/Giggling）；srdiag v1 协议冻结；`SR_` 前缀 defName 契约；存档零写入；`base.WriteSettings()` 单通道；HAR 反射非依赖（缺失静默降级）；No-DLC 基线
 - 已发布功能 = 玩家必用 → 设置全项验证（唯一豁免：dev 隐藏功能/七次点击解锁面）
 - 语料场景构造冻结（`Scenarios.cs`）；任何 Kernel 改动必须过 KernelCharacterization 全绿；fixture 生成器链接的 0.2.4 文件移动时同步更新 csproj 链接
 - 提交/推送/发布需显式授权；推送前隐私审查完整可达范围

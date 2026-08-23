@@ -1,0 +1,2 @@
+# KernelCharacterization compares this frozen fixture as raw UTF-8 bytes.
+fixtures/corpus/corpus-0.3.0.txt text eol=lf

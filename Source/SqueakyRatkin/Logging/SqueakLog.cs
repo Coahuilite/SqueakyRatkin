@@ -5,6 +5,11 @@ namespace SqueakyRatkin;
 
 public enum SqueakDevLoggingMode { Auto = 0, Enabled = 1, Disabled = 2 }
 
+/// <summary>Session settings-source fact (srdiag v2, 0.3.1): FreshCreated = no settings file was
+/// successfully deserialized (missing or unreadable file, framework returned field defaults);
+/// LoadedFromFile = disk deserialization completed through Scribe.</summary>
+public enum SqueakSettingsOrigin { FreshCreated, LoadedFromFile }
+
 /// <summary>Closed logging facade. Event schema, human text, and protocol emission are not writable by business code.</summary>
 public static class SqueakLog
 {
@@ -45,7 +50,7 @@ public static class SqueakLog
     public static void SettingsOpenApiUnavailable() => Emit(SqueakLogEvent.SettingsOpenApiUnavailable, default, false);
     public static void SettingsOpenFailed(Exception ex) => Emit(SqueakLogEvent.SettingsOpenFailed, new SqueakLogData(exception: ex), true);
     public static void CatalogRefreshFailed(Exception ex) => Emit(SqueakLogEvent.CatalogRefreshFailed, new SqueakLogData(exception: ex), true);
-    public static void PackRejected(string pack, int count) => Emit(SqueakLogEvent.PackRejected, new SqueakLogData(pack: pack, reason: "duplicate_key", count: count), true);
+    public static void PackRejected(string pack, int count, string reason = "duplicate_key") => Emit(SqueakLogEvent.PackRejected, new SqueakLogData(pack: pack, reason: reason, count: count), true);
     public static void ResolverRebuildFailed(Exception ex) => Emit(SqueakLogEvent.ResolverRebuildFailed, new SqueakLogData(exception: ex), true);
     public static void TargetRejected(string target, string reason) => Emit(SqueakLogEvent.TargetRejected, new SqueakLogData(target: target, reason: reason), true);
     public static void XenotypeDiscoveryUnavailable(string reason) { if (!ShouldEmitDev) return; Emit(SqueakLogEvent.XenotypeDiscoveryUnavailable, new SqueakLogData(reason: reason), true); }
@@ -59,11 +64,15 @@ public static class SqueakLog
     public static void HookAttackUnavailable() => Emit(SqueakLogEvent.HookAttackUnavailable, default, true);
     public static void HookAttackTargetSkipped(string target, string reason) { if (!ShouldEmitDev) return; Emit(SqueakLogEvent.HookAttackTargetSkipped, new SqueakLogData(target: target, reason: reason), true); }
     public static void HookMentalBreakUnavailable() => Emit(SqueakLogEvent.HookMentalBreakUnavailable, default, true);
+    public static void HookMentalFitUnavailable() => Emit(SqueakLogEvent.HookMentalFitUnavailable, default, true);
     public static void DiagnosticsHookUnavailable() { if (!ShouldEmitDev) return; Emit(SqueakLogEvent.DiagnosticsHookUnavailable, default, true); }
     public static void DiagnosticsStartFailed() => Emit(SqueakLogEvent.DiagnosticsStartFailed, default, true);
     public static void OverlayChanged(bool enabled) { if (!ShouldEmitDev) return; Emit(SqueakLogEvent.OverlayChanged, new SqueakLogData(enabled: enabled), false); }
     public static void CameraChanged(bool enabled) { if (!ShouldEmitDev) return; Emit(SqueakLogEvent.CameraChanged, new SqueakLogData(enabled: enabled), false); }
     public static void WorkbenchOpenFailed(Exception ex) => Emit(SqueakLogEvent.WorkbenchOpenFailed, new SqueakLogData(exception: ex), true);
+    public static void SettingsOrigin(SqueakSettingsOrigin origin) => Emit(SqueakLogEvent.SettingsOrigin, new SqueakLogData(settingsOrigin: origin), true);
+    public static void AudioRouteSelected(string actionKey, string race, string? xenotype, string target, string sound, string tier, string? pack = null, bool isEgg = false, int suppressed = 0, string? pawnName = null, string? pawnId = null, bool? pawnControlled = null, string? pawnFaction = null) { if (!ShouldEmitDev) return; Emit(SqueakLogEvent.AudioRouteSelected, new SqueakLogData(action: actionKey, race: race, xenotype: xenotype, target: target, sound: sound, tier: tier, pack: pack, egg: isEgg, suppressedDetail: suppressed, pawnName: pawnName, pawnId: pawnId, pawnControlled: pawnControlled, pawnFaction: pawnFaction), false); }
+    public static void FallbackProfileStoreFailed(string race, Exception ex) { if (!ShouldEmitDev) return; Emit(SqueakLogEvent.FallbackProfileStoreFailed, new SqueakLogData(race: race, exception: ex), true); }
 
     private static void Emit(SqueakLogEvent evt, SqueakLogData data, bool once)
     {
@@ -71,9 +80,9 @@ public static class SqueakLog
         {
             SqueakLogDefinition definition = SqueakLogRegistry.Definition(evt, build, buildId);
             if (definition.Visibility == SqueakLogVisibility.DevOnly && !EffectiveDevLogging) return;
-            if (once && !SqueakLogOnce.Claim(evt, data)) return;
+            if (once && !SqueakLogOnce.Claim(evt, data, definition.Version)) return;
 
-            string text = Prefix + definition.Human + (EffectiveDevLogging ? " || " + SqueakLogFormatter.Suffix(evt, definition, data, build, buildId) : "");
+            string text = Prefix + SqueakLogRegistry.HumanSentence(evt, definition, data) + (EffectiveDevLogging ? " || " + SqueakLogFormatter.Suffix(evt, definition, data, build, buildId) : "");
             SqueakLogSink.Emit(definition.Level, text);
         }
         catch

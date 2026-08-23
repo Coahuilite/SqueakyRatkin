@@ -29,7 +29,7 @@
 ### 四层门控（不可混淆）
 1. **DevMode**（`Prefs.DevMode`，RimWorld 自身开发者模式）：DebugAction 菜单可见性由 LudeonTK 属性决定；overlay `SetMode(Selected/Visible)`、相机指示器绘制、`Patch_GlobalControlsUtility_CameraIndicator` 均要求它为 true。这是游戏级门。
 2. **developerToolsEnabled**（`SqueakyRatkinSettings` 持久化字段，设置页版本标签连点 7 次解锁）：打开 Developer 标签；统计/音频路径相关的 DebugAction 全部要求它为 true 才执行。相机指示器与 overlay 诊断的 DebugAction 反而**不**检查它（只依赖 DevMode）——改动作时注意这一不一致。
-3. **详细日志**（`SqueakLog.EffectiveDevLogging`，`devLoggingMode = Auto/Enabled/Disabled`）：只控制 `SqueakLog` 事件是否发出（`AudioDispatchOk`、`TriggerOutcomeSummary`、`OverlayChanged`、`CameraChanged` 等 DevOnly 事件）以及 `SqueakDebug.NotifyAudioDispatched` 的限频采样。**不影响 mote**。
+3. **详细日志**（`SqueakLog.EffectiveDevLogging`，`devLoggingMode = Auto/Enabled/Disabled`）：只控制 `SqueakLog` 事件是否发出（0.3.2 起成功明细 = `AudioRouteSelected`(v2 单行，含 egg/pawn/pawn_faction/pawn_ctrl/suppressed)、`TriggerOutcomeSummary`、`OverlayChanged`、`CameraChanged` 等 DevOnly 事件）以及 `SqueakDebug.NotifyAudioDispatched` 的限频采样。**不影响 mote**。
 4. **音频路径诊断开关**（`SqueakAudioPathDiagnostics.Enabled`）：同时控制环形缓冲记录（`RecordDispatched` 内部早退）与派发 mote（`SqueakDebug.NotifySqueak` 中 `AudioPathDiagnosticsEnabled && pawn?.Map != null`）。与详细日志相互独立（`SqueakDebug.NotifySqueak` 注释明确此边界）。
 
 ### 性能契约
@@ -53,7 +53,7 @@ flowchart LR
         F -->|PlayOneShot 成功| N["SqueakDebug.NotifySqueak"]
         R["RecordOutcome"] -->|SqueakRecentOutcome| D["CompSqueaker.DiagnosticsEnabled"]
     end
-    N -->|限频采样| L["SqueakLog.AudioDispatchOk / TriggerOutcomeSummary"]
+    N -->|限频采样| L["SqueakLog.AudioRouteSelected(v2, egg+faction+ctrl aware) / TriggerOutcomeSummary"]
     N -->|Enabled 才记录| P["SqueakAudioPathDiagnostics 环形缓冲"]
     N -->|Enabled && Map| M["SqueakMoteMaker.ThrowSqueakText"]
     D -->|GetDiagnosticSnapshot| O["SqueakDiagnosticsOverlay 缓存"]

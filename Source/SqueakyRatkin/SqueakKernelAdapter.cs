@@ -9,14 +9,13 @@ namespace SqueakyRatkin;
 
 /// <summary>
 /// 内核↔适配层接缝（§4.1 边界）：SoundDef 收敛为 string key + ISoundGate 函子；
-/// Verse.Rand 收敛为 IRollSource；catalog 域包投影为 VoicePackEntry[]（0.3.0 注入 (Ratkin,*)）。
+/// Verse.Rand 收敛为 IRollSource；catalog 域包投影为 VoicePackEntry[]。
+/// 2b-2：域身份端到端 = AudioDomain（记录自身 raceDefName/xenotypeDefName），无注入字面量域。
 /// 投影规则 = 旧 ResolvedAudioPack 构建规则（0.2.4）：非 null、去 _Preview 后缀、Distinct、
-/// defName Ordinal 排序；HasSounds 过滤；Weight = 1（等权）。
+/// defName Ordinal 排序；HasSounds 过滤；pack weight 由 XML 保留（默认 1 = 等权）。
 /// </summary>
 internal static class SqueakKernelAdapter
 {
-    private static readonly AudioDomain RatkinRaceDomain = new(new RaceKey("Ratkin"), null);
-
     /// <summary>playability 函子：携带旧 Playable 的 pawn/map/target 上下文；production 语义统一取 ctx.Production
     /// （与调用方同源，避免 gate 捕获标志与 SelectionContext 错配）。</summary>
     private sealed class KernelGate : ISoundGate
@@ -53,29 +52,42 @@ internal static class SqueakKernelAdapter
 
     public static IRollSource Rolls => new RandRollSource();
 
-    /// <summary>内置表（0.3.0 种子 = SqueakActionDefinitions.AudioKey 单源投影，15 动作全列）。</summary>
-    public static BuiltInFallbackTable BuildBuiltIn()
+    /// <summary>产品设置枚举到内核选择枚举的唯一映射点。</summary>
+    public static SelectionMode ToSelectionMode(SqueakVoicePackMode mode) => mode switch
     {
-        Dictionary<SqueakAction, string> keys = new();
-        for (int i = 0; i < SqueakActionDefinitions.Count; i++)
-        {
-            SqueakAction action = (SqueakAction)i;
-            keys[action] = SqueakActionDefinitions.Get(action).AudioKey;
-        }
-        return new BuiltInFallbackTable(new[] { new FallbackProfile(new RaceKey("Ratkin"), 1, keys) });
+        SqueakVoicePackMode.Fallback => SelectionMode.Fallback,
+        SqueakVoicePackMode.Remix => SelectionMode.Remix,
+        _ => SelectionMode.Off,
+    };
+
+    /// <summary>Creates the immutable formal kernel source table. The catalog is explicit data rather
+    /// than a projection of product action metadata, so table version/content evolves independently.</summary>
+    public static BuiltInFallbackTable BuildBuiltInSource()
+    {
+        return BuiltInFallbackCatalog.Create(SqueakProductDomainFilter.PrimaryRaceDefName);
     }
 
-    /// <summary>选择面投影：Race 域 (Ratkin,null) + Xenotype 域 (Ratkin,target)（Biotech 由调用方决定注入面）。</summary>
-    public static List<VoicePackEntry> BuildEntries(SqueakXenotypeCatalogSnapshot catalog, IReadOnlyDictionary<string, HashSet<string>> selections)
+    /// <summary>Returns the store-resolved table after startup initialization, or a source table as a safe fallback.</summary>
+    public static BuiltInFallbackTable BuildBuiltIn()
+    {
+        return SqueakFallbackProfileStore.Current ?? BuildBuiltInSource();
+    }
+
+    /// <summary>2b-2: AudioDomain 域键端到端。选择集按记录自身 (raceDefName, xenotypeDefName) 域键组织；
+    /// 候选 pack 按声明的 raceDefName 精确匹配域（跨 race 池隔离），不再有注入字面量域。</summary>
+    public static List<VoicePackEntry> BuildEntries(SqueakXenotypeCatalogSnapshot catalog, IReadOnlyDictionary<AudioDomain, HashSet<string>> selections)
     {
         List<VoicePackEntry> entries = new();
-        AddDomain(entries, catalog.RacePacks, selections, SqueakVoicePackScope.Race, "");
-        if (ModsConfig.BiotechActive)
+        foreach (KeyValuePair<AudioDomain, HashSet<string>> pair in selections)
         {
-            foreach (KeyValuePair<string, IReadOnlyList<SqueakVoicePackDef>> group in catalog.XenotypePacksByDefName)
-            {
-                AddDomain(entries, group.Value, selections, SqueakVoicePackScope.Xenotype, group.Key);
-            }
+            AudioDomain domain = pair.Key;
+            if (pair.Value == null || pair.Value.Count == 0) continue;
+            IReadOnlyList<SqueakVoicePackDef>? candidates = null;
+            if (domain.Xenotype == null)
+                candidates = catalog.RacePacks;
+            else if (ModsConfig.BiotechActive && catalog.XenotypePacksByDefName.TryGetValue(domain.Xenotype.Value.DefName, out IReadOnlyList<SqueakVoicePackDef>? packs))
+                candidates = packs;
+            AddDomain(entries, candidates, pair.Value, domain);
         }
         return entries;
     }
@@ -105,17 +117,16 @@ internal static class SqueakKernelAdapter
             ChainTier.PackFallback => SqueakSoundSource.RacePack,
             _ => SqueakSoundSource.Vanilla,
         };
-        return new SqueakSoundChoice(sound, source, result.PoolStableKey);
+        return new SqueakSoundChoice(sound, source, result.PoolStableKey, result.IsEgg);
     }
 
-    private static void AddDomain(List<VoicePackEntry> entries, IReadOnlyList<SqueakVoicePackDef> candidates, IReadOnlyDictionary<string, HashSet<string>> selections, SqueakVoicePackScope scope, string target)
+    private static void AddDomain(List<VoicePackEntry> entries, IReadOnlyList<SqueakVoicePackDef>? candidates, HashSet<string> keys, AudioDomain domain)
     {
-        if (!selections.TryGetValue(VoicePackSelectionRecord.ComposeDomainKey(scope, target), out HashSet<string>? keys)) return;
-        AudioDomain domain = scope == SqueakVoicePackScope.Race
-            ? RatkinRaceDomain
-            : new AudioDomain(new RaceKey("Ratkin"), new XenotypeKey(target));
+        if (candidates == null || keys == null || keys.Count == 0) return;
         foreach (SqueakVoicePackDef pack in candidates)
         {
+            // 域键精确匹配：pack 声明的 raceDefName 必须等于选择域的 race（跨 race 池隔离）。
+            if (!string.Equals(pack.raceDefName, domain.Race.DefName, StringComparison.Ordinal)) continue;
             if (!pack.TryGetPackKey(out string key) || !keys.Contains(key)) continue;
             VoicePackEntry? entry = BuildEntry(pack, key, domain);
             if (entry != null) entries.Add(entry);
@@ -124,18 +135,36 @@ internal static class SqueakKernelAdapter
 
     private static VoicePackEntry? BuildEntry(SqueakVoicePackDef pack, string key, AudioDomain domain)
     {
-        Dictionary<string, ActionSoundSet> actions = new();
+        Dictionary<string, List<ActionSoundSet>> variants = new();
         foreach (SqueakVoicePackAction entry in pack.actions ?? new List<SqueakVoicePackAction>())
         {
             if (entry == null) continue;
             string? actionKey = ActionKey.For(entry.action);
-            if (actionKey == null || actions.ContainsKey(actionKey)) continue;
+            if (actionKey == null) continue;
             List<string> sounds = ProjectSounds(entry);
             if (sounds.Count == 0) continue;
-            actions[actionKey] = new ActionSoundSet(sounds, null, 1f);
+            if (!variants.TryGetValue(actionKey, out List<ActionSoundSet>? sets))
+            {
+                sets = new List<ActionSoundSet>();
+                variants.Add(actionKey, sets);
+            }
+            sets.Add(new ActionSoundSet(sounds, entry.ageTag, 1f, entry.IsEgg));
         }
-        if (actions.Count == 0) return null;
-        return new VoicePackEntry(key, domain, 1f, actions);
+        if (variants.Count == 0) return null;
+        Dictionary<string, IReadOnlyList<ActionSoundSet>> actions = new();
+        foreach (KeyValuePair<string, List<ActionSoundSet>> pair in variants)
+            actions.Add(pair.Key, pair.Value.AsReadOnly());
+
+        Dictionary<string, string> fallback = new();
+        foreach (SqueakVoicePackFallback entry in pack.fallbacks ?? new List<SqueakVoicePackFallback>())
+        {
+            if (entry == null || entry.sound == null) continue;
+            string? actionKey = ActionKey.For(entry.action);
+            string? soundKey = entry.sound.defName;
+            if (actionKey == null || string.IsNullOrWhiteSpace(soundKey) || fallback.ContainsKey(actionKey)) continue;
+            fallback.Add(actionKey, soundKey);
+        }
+        return new VoicePackEntry(key, domain, pack.weight, actions, fallback.Count == 0 ? null : fallback);
     }
 
     private static List<string> ProjectSounds(SqueakVoicePackAction entry)
@@ -159,6 +188,12 @@ internal static class SqueakKernelAdapter
                 if (sound == null || sound.defName.EndsWith("_Preview", StringComparison.Ordinal) || result.Contains(sound)) continue;
                 result.Add(sound);
             }
+        }
+        foreach (SqueakVoicePackFallback entry in pack.fallbacks ?? new List<SqueakVoicePackFallback>())
+        {
+            SoundDef? sound = entry?.sound;
+            if (sound == null || sound.defName.EndsWith("_Preview", StringComparison.Ordinal) || result.Contains(sound)) continue;
+            result.Add(sound);
         }
         return result;
     }
