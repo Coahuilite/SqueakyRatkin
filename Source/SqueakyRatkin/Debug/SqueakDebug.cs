@@ -48,7 +48,11 @@ public static class SqueakDebug
         }
     }
 
-    /// <summary>Detailed logging is independent; successful-dispatch motes are controlled by the audio-path diagnostics switch above.</summary>
+    /// <summary>Detailed logging is independent; successful-dispatch motes are controlled by the audio-path diagnostics switch above.
+    /// 0.3.2 重排简化：成功路径不再逐次并列发射 audio.dispatch.ok(v1) + audio.route.selected(v2) 两条，
+    /// 而只发射一条带 egg/pawn/pawn_faction/pawn_ctrl/suppressed 的 v2 路由记录（v1 audio.dispatch.ok
+    /// 仍保留在协议与 characterization 中，业务装配器不再重复调用）。每动作 5 秒窗口内首条明细、
+    /// 其余计入 suppressed；60 秒汇总仍走 trigger.outcome.summary。</summary>
     private static void NotifyAudioDispatched(Pawn pawn, SqueakAction action, SqueakSoundChoice choice)
     {
         if (!SqueakLog.EffectiveDevLogging) return;
@@ -59,10 +63,6 @@ public static class SqueakDebug
         sample.dispatched++;
         if (now >= sample.nextDetail)
         {
-            SqueakLog.AudioDispatchOk(action.ToString(), pawn.thingIDNumber.ToString(), def.defName, sample.suppressed, pawn.LabelShort, pawn.ThingID);
-            // srdiag v2 route record shares the same success-path rate control as audio.dispatch.ok.
-            // action carries the string action key (built-in = enum name, byte-identical to v1);
-            // race/xenotype carry exact DefNames; tier uses the protocol vocabulary.
             SqueakLog.AudioRouteSelected(
                 SqueakyRatkin.Kernel.ActionKey.For(action) ?? action.ToString(),
                 pawn.def?.defName ?? SqueakProductDomainFilter.PrimaryRaceDefName,
@@ -70,7 +70,13 @@ public static class SqueakDebug
                 pawn.thingIDNumber.ToString(),
                 def.defName,
                 ProtocolTier(choice.Source),
-                choice.PoolStableKey);
+                choice.PoolStableKey,
+                choice.IsEgg,
+                sample.suppressed,
+                pawn.LabelShort,
+                pawn.ThingID,
+                pawn.IsPlayerControlled,
+                pawn.Faction?.def?.defName ?? "-");
             sample.suppressed = 0;
             sample.nextDetail = now + 5f;
         }

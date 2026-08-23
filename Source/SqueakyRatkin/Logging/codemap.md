@@ -2,16 +2,16 @@
 
 ## Responsibility
 
-模组唯一的日志出口。对外提供 **closed typed facade**（`SqueakLog` 的 27 个事件方法 + `Configure`/`ResetSession` + 3 个只读属性），把业务代码的强类型调用翻译为固定的英文 human sentence + 可选的 `srdiag fmt=1`/`fmt=2` 机器字段，并路由到 Verse `Log`。事件 ID、可见性、级别、human 文案、payload 字段顺序全部由本目录内部注册表锁定，业务代码无法自定义；`docs/logging-protocol.md`（`../../../docs/logging-protocol.md`）是 v1+v2 合同的规范性记录。0.3.1 wave 2c：v1 28 事件字节零改动；v2 扩展事件（`settings.origin`、`audio.route.selected`）走 `fmt=2` 与 `log-v2` once 域。
+模组唯一的日志出口。对外提供 **closed typed facade**（`SqueakLog` 的 29 个事件方法 + `Configure`/`ResetSession` + 3 个只读属性），把业务代码的强类型调用翻译为固定的英文 human sentence + 可选的 `srdiag fmt=1`/`fmt=2` 机器字段，并路由到 Verse `Log`。事件 ID、可见性、级别、human 文案、payload 字段顺序全部由本目录内部注册表锁定，业务代码无法自定义；`docs/logging-protocol.md`（`../../../docs/logging-protocol.md`）是 v1+v2 合同的规范性记录。0.3.1：v1 28 事件字节零改动；4 个 v2 扩展事件（`settings.origin`、`audio.route.selected`、`hook.mental_fit.unavailable`、`fallback.profile.store_failed`）走 `fmt=2` 与 `log-v2` once 域。0.3.2：`audio.route.selected` 扩展 `egg/suppressed_detail/pawn/pawn_id/pawn_faction/pawn_ctrl` 且 human 句参数化（发配日志重排简化 + 身份门控可读矩阵，v1 仍不动）。
 
 本目录含 `SqueakLog.cs`（唯一 public facade）、`SqueakLogProtocol.cs`（internal protocol modules）与本图。整个模块没有 Harmony patch、没有实例状态、没有业务 I/O；唯一外部副作用仍是 Verse `Log`。
 
 ## Key Files/Symbols
 
-- `SqueakLog.cs` — 唯一 public 边界：`SqueakDevLoggingMode`/`SqueakSettingsOrigin` 与 closed typed facade（27 个事件方法、`Configure`/`ResetSession`、3 个只读属性）；保存模式/build 会话状态与唯一 `Emit` 编排，但不再拥有协议实现。
+- `SqueakLog.cs` — 唯一 public 边界：`SqueakDevLoggingMode`/`SqueakSettingsOrigin` 与 closed typed facade（29 个事件方法、`Configure`/`ResetSession`、3 个只读属性）；保存模式/build 会话状态与唯一 `Emit` 编排，但不再拥有协议实现。
 - `SqueakLogProtocol.cs` — internal protocol modules：
-  - `SqueakLogVisibility` / `SqueakLogLevel` / `SqueakLogEvent`（30 成员）与 `SqueakLogData`（15 个可空 payload 字段，含 v2 的 race/xenotype/tier/settingsOrigin）；
-  - `SqueakLogRegistry`（event → visibility/level/human/协议版本 与 EventId 两张固定表；`HumanSentence` 参数化 settings.origin）；
+  - `SqueakLogVisibility` / `SqueakLogLevel` / `SqueakLogEvent`（32 成员：28 v1 + 4 v2）与 `SqueakLogData`（17 个可空 payload 字段，含 v2 的 race/xenotype/tier/settingsOrigin 与 0.3.2 的 egg/pawnControlled/pawnFaction）；
+  - `SqueakLogRegistry`（event → visibility/level/human/协议版本 与 EventId 两张固定表；`HumanSentence` 参数化 settings.origin 与 audio.route.selected）；
   - `SqueakLogOnce`（Ordinal HashSet、锁、1024 clear-and-accept；once 域按协议版本分 `log-v1`/`log-v2`）；
   - `SqueakLogFormatter` / `SqueakLogText`（`srdiag fmt=1` 记录字节不变 + `fmt=2` 扩展记录、值编码、异常路径脱敏）；
   - `SqueakLogSink`（按 level 路由 Verse `Log`）。
@@ -19,20 +19,20 @@
 
 ## Design
 
-**Closed typed facade（对外契约）。** 业务代码只能调用 `SqueakLog` 的 27 个事件方法；方法签名决定 payload schema（例如 `PackRejected(string pack, int count)` 固定 `reason="duplicate_key"`）。public 面保持不变：`EffectiveDevLogging`、`ShouldEmitDev`、`Mode` 三个属性；`Configure`、`ResetSession` 与 27 个事件方法。`SqueakLog` 只拥有 mode/build/buildId 会话状态和 `Emit` 编排。v2 事件（`SettingsOrigin`、`AudioRouteSelected`）的 race/xenotype/tier 均为字符串参数——facade 不引用内核类型，链 tier 由调用方（`SqueakDebug.ProtocolTier`）映射为协议词表。
+**Closed typed facade（对外契约）。** 业务代码只能调用 `SqueakLog` 的 29 个事件方法；方法签名决定 payload schema（例如 `PackRejected(string pack, int count)` 固定 `reason="duplicate_key"`）。public 面保持不变：`EffectiveDevLogging`、`ShouldEmitDev`、`Mode` 三个属性；`Configure`、`ResetSession` 与 29 个事件方法。`SqueakLog` 只拥有 mode/build/buildId 会话状态和 `Emit` 编排。v2 事件（`SettingsOrigin`、`AudioRouteSelected`）的 race/xenotype/tier 均为字符串参数——facade 不引用内核类型，链 tier 由调用方（`SqueakDebug.ProtocolTier`）映射为协议词表；0.3.2 起 `AudioRouteSelected` 另收 `isEgg/suppressed/pawnName/pawnId/pawnControlled/pawnFaction` 供单行明细与身份矩阵。
 
 **内部协议实现。** `SqueakLogProtocol.cs` 将不对外的职责按稳定边界拆开：
 
 | 模块 | 职责 |
 | --- | --- |
-| `SqueakLogRegistry` | 30 个 event（28 v1 + 2 v2）的 visibility/level/human/协议版本定义与 EventId 映射；`HumanSentence` 参数化 settings.origin |
+| `SqueakLogRegistry` | 32 个 event（28 v1 + 4 v2）的 visibility/level/human/协议版本定义与 EventId 映射；`HumanSentence` 参数化 settings.origin 与 audio.route.selected |
 | `SqueakLogOnce` | once key、Ordinal HashSet、锁、1024 clear-and-accept、`ResetSession`；前缀 `log-v{版本}` |
 | `SqueakLogFormatter` / `SqueakLogText` | `srdiag fmt=1` 字段顺序（字节不变）与 `fmt=2` 固定核心序、值编码、异常路径脱敏 |
 | `SqueakLogSink` | 按 level 路由 Verse `Log` |
 
-`SqueakLogVisibility`、`SqueakLogLevel`、`SqueakLogEvent`（30 成员）和 `SqueakLogData` 也留在 protocol 文件；它们均为 internal。新增事件仍须在 event enum → `SqueakLogRegistry.Definition` → `SqueakLogRegistry.EventId` → facade 四处锁步扩展，并同步 characterization 与协议文档。
+`SqueakLogVisibility`、`SqueakLogLevel`、`SqueakLogEvent`（32 成员：28 v1 + 4 v2）和 `SqueakLogData` 也留在 protocol 文件；它们均为 internal。新增事件仍须在 event enum → `SqueakLogRegistry.Definition` → `SqueakLogRegistry.EventId` → facade 四处锁步扩展，并同步 characterization 与协议文档。
 
-**内部事件注册表。** human 文案为固定英文、不本地化；`mod.start.identity` 在运行时嵌入 build/buildId，`settings.origin` 嵌入 closed 双值 origin。以下 28 个 v1 EventId 是兼容面，字节不得改：
+**内部事件注册表。** human 文案为固定英文、不本地化；`mod.start.identity` 在运行时嵌入 build/buildId，`settings.origin` 嵌入 closed 双值 origin，0.3.2 起 `audio.route.selected` 参数化为 `Audio route: <action> -> <sound> (<tier>[, egg]).`。以下 28 个 v1 EventId 是兼容面，字节不得改：
 
 ```
 mod.start.identity            mod.start.ready
@@ -51,7 +51,7 @@ diagnostics.start.failed      devtools.overlay.changed
 devtools.camera_indicator.changed devtools.workbench.open_failed
 ```
 
-0.3.1 wave 2c 新增两个 v2 EventId（fmt=2，`settings.origin` Daily once、`audio.route.selected` DevOnly 随 5 秒节流）：
+0.3.1 新增四个 v2 EventId（fmt=2）：`settings.origin`（Daily once）、`audio.route.selected`（DevOnly 随 5 秒节流）、`hook.mental_fit.unavailable`（Daily）、`fallback.profile.store_failed`（DevOnly）。0.3.2 起 `audio.route.selected` 是成功路径唯一明细（装配器不再并列发 v1 `audio.dispatch.ok`；该 v1 记录仍保留在 registry 与 characterization）：
 
 ```
 settings.origin               audio.route.selected
@@ -76,7 +76,7 @@ ex_type ex_inner ex_site ex_msg
 fmt lvl vis evt action target pack race [xenotype] build build_id
 ```
 
-`action` 为字符串动作键（内置=枚举名与 v1 字节一致，外部=packageId.defName 免编码）；`race` 恒出现（缺失 `-`），`xenotype` 仅在有异种时出现；只写 DefName。事件字段按事件固定：`settings.origin` → `settings_origin=`；`audio.route.selected` → `sound= tier=`。
+`action` 为字符串动作键（内置=枚举名与 v1 字节一致，外部=packageId.defName 免编码）；`race` 恒出现（缺失 `-`），`xenotype` 仅在有异种时出现；只写 DefName。事件字段按事件固定：`settings.origin` → `settings_origin=`；`audio.route.selected` → `sound= tier= egg= suppressed_detail= pawn= pawn_id= pawn_faction= pawn_ctrl=`（egg/suppressed_detail 恒出现，pawn*/faction/ctrl 按装配器输入出现；pawn_ctrl = `player|nonplayer` 二值）；`hook.mental_fit.unavailable` → 无事件字段；`fallback.profile.store_failed` → `ex_type= ex_inner= ex_site= ex_msg=`。
 
 缺失/字面 `N/A` → `-`；bool → 小写；`IFormattable` 用 invariant culture；异常文本清理 CR/LF/控制字符、路径替换为 `<path>`、截断 256，再 UTF-8 百分号编码（v2 沿用同一套）。
 
@@ -106,7 +106,7 @@ key 用枚举成员名（不是 EventId）；重复 key 丢弃；count 达 1024 
 - **启动**：`../Mod.cs` 构造函数 `SettingsOrigin(...)`（紧接 `GetSettings` 之后；LoadedFromFile = ExposeData 到达 LoadingVars，否则 FreshCreated）→ `StartupIdentity()`（`Harmony.PatchAll` 之前）→ `LongEventHandler.ExecuteWhenFinished` 中 `StartupReady(Harmony.GetPatchedMethods().Count())`。
 - **配置入口**：`../SqueakyRatkinSettings.cs` 是唯一调用 `Configure` 的地方（`ApplySettings` 与 `SetDevLoggingMode`）；生效状态翻转时调 `SqueakDebug.ResetLoggingSession()` → `SqueakLog.ResetSession()`，后者委托 `SqueakLogOnce.Reset()`。
 - **DevOnly 双重门控契约**：facade 内 9 个 DevOnly 方法先查 `ShouldEmitDev`；调用方也先查，避免详细日志关闭时构造诊断 payload。
-- **速率控制边界**：5 秒/60 秒节流状态不在 Logging，而在 `../Debug/SqueakDebug.cs`；`AudioDispatchOk`/`TriggerOutcomeSummary` 只是节流后的发射点。
+- **速率控制边界**：5 秒/60 秒节流状态不在 Logging，而在 `../Debug/SqueakDebug.cs`；0.3.2 起装配器只把节流后的成功明细交给 `AudioRouteSelected`（v2 单行），`TriggerOutcomeSummary` 仍是 60 秒汇总发射点。
 - **数据特例**：`XenotypeDiscoveryCandidate` 将 source 同时写入 reason/source（once key 语义）；`PackRejected` 固定 `reason="duplicate_key"`。
 
 ## Integration

@@ -219,17 +219,20 @@ internal static class Program
     {
         Reset(SqueakDevLoggingMode.Enabled);
         SqueakLog.SettingsOrigin(SqueakSettingsOrigin.FreshCreated);
-        SqueakLog.AudioRouteSelected("Select", "Ratkin", null, "12345", "SR_OfficialExample_Race_Select", "race_pack", "coahuilite.squeakyratkin:SR_OfficialExample_Race");
-        SqueakLog.AudioRouteSelected("coahuilite.squeakyratkin.external_action", "Ratkin", "Baseliner", "777", "SR_Baseliner_Select", "xenotype_pack", "coahuilite.squeakyratkin:SR_Baseliner");
-        SqueakLog.AudioRouteSelected("Move", "Ratkin", null, "1", "SR_Move_1", "vanilla", null);
+        SqueakLog.AudioRouteSelected("Select", "Ratkin", null, "12345", "SR_OfficialExample_Race_Select", "race_pack", "coahuilite.squeakyratkin:SR_OfficialExample_Race", pawnControlled: true, pawnFaction: "PlayerColony");
+        SqueakLog.AudioRouteSelected("coahuilite.squeakyratkin.external_action", "Ratkin", "Baseliner", "777", "SR_Baseliner_Select", "xenotype_pack", "coahuilite.squeakyratkin:SR_Baseliner", pawnControlled: false, pawnFaction: "Pirate");
+        SqueakLog.AudioRouteSelected("Move", "Ratkin", null, "1", "SR_Move_1", "vanilla", null, pawnControlled: true, pawnFaction: "PlayerColony");
+        // 0.3.2 egg/log 重排：audio.route.selected 承载 egg/pawn/suppressed/faction/pawn_ctrl 完整明细。
+        SqueakLog.AudioRouteSelected("Joy", "Ratkin", null, "888", "SR_EggTest_Select_Joy", "race_pack", "coahuilite.squeakyratkin.eggtest:SR_EggTest_Select", true, 3, "Mousy", "Thing_Ratkin888", false, "Pirate");
         SqueakLog.FallbackProfileStoreFailed("Ratkin", new Exception("profile write failed"));
         SqueakLog.HookMentalFitUnavailable();
 
         AssertLines(nameof(VerifyV2Protocol) + " enabled",
             V2("info", "daily", "settings.origin", "Mod settings origin: FreshCreated.", trailing: " settings_origin=FreshCreated"),
-            V2("info", "dev_only", "audio.route.selected", "Squeak audio route was selected.", action: "Select", target: "12345", pack: "coahuilite.squeakyratkin:SR_OfficialExample_Race", race: "Ratkin", trailing: " sound=SR_OfficialExample_Race_Select tier=race_pack"),
-            V2("info", "dev_only", "audio.route.selected", "Squeak audio route was selected.", action: "coahuilite.squeakyratkin.external_action", target: "777", pack: "coahuilite.squeakyratkin:SR_Baseliner", race: "Ratkin", xenotype: "Baseliner", trailing: " sound=SR_Baseliner_Select tier=xenotype_pack"),
-            V2("info", "dev_only", "audio.route.selected", "Squeak audio route was selected.", action: "Move", target: "1", pack: "-", race: "Ratkin", trailing: " sound=SR_Move_1 tier=vanilla"),
+            V2("info", "dev_only", "audio.route.selected", "Audio route: Select -> SR_OfficialExample_Race_Select (race_pack).", action: "Select", target: "12345", pack: "coahuilite.squeakyratkin:SR_OfficialExample_Race", race: "Ratkin", trailing: " sound=SR_OfficialExample_Race_Select tier=race_pack egg=false suppressed_detail=0 pawn_faction=PlayerColony pawn_ctrl=player"),
+            V2("info", "dev_only", "audio.route.selected", "Audio route: coahuilite.squeakyratkin.external_action -> SR_Baseliner_Select (xenotype_pack, nonplayer).", action: "coahuilite.squeakyratkin.external_action", target: "777", pack: "coahuilite.squeakyratkin:SR_Baseliner", race: "Ratkin", xenotype: "Baseliner", trailing: " sound=SR_Baseliner_Select tier=xenotype_pack egg=false suppressed_detail=0 pawn_faction=Pirate pawn_ctrl=nonplayer"),
+            V2("info", "dev_only", "audio.route.selected", "Audio route: Move -> SR_Move_1 (vanilla).", action: "Move", target: "1", pack: "-", race: "Ratkin", trailing: " sound=SR_Move_1 tier=vanilla egg=false suppressed_detail=0 pawn_faction=PlayerColony pawn_ctrl=player"),
+            V2("info", "dev_only", "audio.route.selected", "Audio route: Joy -> SR_EggTest_Select_Joy (race_pack, egg, nonplayer).", action: "Joy", target: "888", pack: "coahuilite.squeakyratkin.eggtest:SR_EggTest_Select", race: "Ratkin", trailing: " sound=SR_EggTest_Select_Joy tier=race_pack egg=true suppressed_detail=3 pawn=Mousy pawn_id=Thing_Ratkin888 pawn_faction=Pirate pawn_ctrl=nonplayer"),
             V2("warning", "dev_only", "fallback.profile.store_failed", "Fallback profile store operation failed.", race: "Ratkin", trailing: " ex_type=System.Exception ex_msg=profile%20write%20failed"),
             V2("error", "daily", "hook.mental_fit.unavailable", "Baby-fits squeak hook is unavailable."));
         CaptureV2Coverage();
@@ -258,11 +261,11 @@ internal static class Program
             D("warning", "daily", "voicepack.pack.rejected", "A VoicePack was rejected.", pack: "p1", trailing: " reason=duplicate_key count=1"));
         CaptureV2Coverage();
 
-        // v2 values flow through the same percent-encoding/sanitization rules as v1.
+        // v2 values flow through the same percent-encoding/sanitization rules as v1; human text stays raw.
         Reset(SqueakDevLoggingMode.Enabled);
         SqueakLog.AudioRouteSelected("some package.action", "Ra tin", null, "t 1", "SR_1", "race_pack", null);
         AssertLines(nameof(VerifyV2Protocol) + " encoding",
-            V2("info", "dev_only", "audio.route.selected", "Squeak audio route was selected.", action: "some%20package.action", target: "t%201", race: "Ra%20tin", trailing: " sound=SR_1 tier=race_pack"));
+            V2("info", "dev_only", "audio.route.selected", "Audio route: some package.action -> SR_1 (race_pack).", action: "some%20package.action", target: "t%201", race: "Ra%20tin", trailing: " sound=SR_1 tier=race_pack egg=false suppressed_detail=0"));
         CaptureV2Coverage();
 
         // Gating: v2 Daily keeps the human-only shape while detailed logging is ineffective; v2 DevOnly is silent.

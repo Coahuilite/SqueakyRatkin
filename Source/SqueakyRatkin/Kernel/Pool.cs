@@ -49,7 +49,8 @@ public sealed class VoicePackEntry
 
 public enum ChainTier { XenotypePack, RacePack, PackFallback, BuiltInFallback }
 
-/// <summary>选择结果；SoundKey/Tier/PoolStableKey 全 null = 无声。</summary>
+/// <summary>选择结果；SoundKey/Tier/PoolStableKey 全 null = 无声。IsEgg 标记所选条目的彩蛋身份
+/// （0.3.2 日志装配适配；BuiltIn/PackFallback 恒 false，普通条目 false）。</summary>
 public readonly struct ChainResult
 {
     public static readonly ChainResult None = default;
@@ -57,14 +58,16 @@ public readonly struct ChainResult
     public readonly string? SoundKey;
     public readonly ChainTier? Tier;
     public readonly string? PoolStableKey;
+    public readonly bool IsEgg;
 
     public bool IsNone => SoundKey == null;
 
-    public ChainResult(string? soundKey, ChainTier? tier, string? poolStableKey)
+    public ChainResult(string? soundKey, ChainTier? tier, string? poolStableKey, bool isEgg = false)
     {
         SoundKey = soundKey;
         Tier = tier;
         PoolStableKey = poolStableKey;
+        IsEgg = isEgg;
     }
 }
 

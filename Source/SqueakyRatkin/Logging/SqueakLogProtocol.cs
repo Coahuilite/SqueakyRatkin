@@ -13,12 +13,12 @@ internal enum SqueakLogEvent { ModStartIdentity, ModStartReady, LoggingModeEnabl
 
 internal readonly struct SqueakLogData
 {
-    internal readonly string? Action, Target, Pack, Reason, Sound, Source, PawnName, PawnId; internal readonly int? Count, Dispatched, SuppressedDetail; internal readonly bool? Enabled; internal readonly Exception? Exception;
+    internal readonly string? Action, Target, Pack, Reason, Sound, Source, PawnName, PawnId, PawnFaction; internal readonly int? Count, Dispatched, SuppressedDetail; internal readonly bool? Enabled, Egg, PawnControlled; internal readonly Exception? Exception;
     // v2-only identity/route facts (0.3.1 wave 2c). Race/Xenotype carry exact DefNames; Tier carries the
     // protocol tier vocabulary; SettingsOrigin carries the session settings-source fact.
     internal readonly string? Race, Xenotype, Tier; internal readonly SqueakSettingsOrigin? SettingsOrigin;
-    internal SqueakLogData(string? action = null, string? target = null, string? pack = null, string? reason = null, string? sound = null, string? source = null, int? count = null, int? dispatched = null, int? suppressedDetail = null, bool? enabled = null, Exception? exception = null, string? pawnName = null, string? pawnId = null, string? race = null, string? xenotype = null, string? tier = null, SqueakSettingsOrigin? settingsOrigin = null)
-    { Action = action; Target = target; Pack = pack; Reason = reason; Sound = sound; Source = source; Count = count; Dispatched = dispatched; SuppressedDetail = suppressedDetail; Enabled = enabled; Exception = exception; PawnName = pawnName; PawnId = pawnId; Race = race; Xenotype = xenotype; Tier = tier; SettingsOrigin = settingsOrigin; }
+    internal SqueakLogData(string? action = null, string? target = null, string? pack = null, string? reason = null, string? sound = null, string? source = null, int? count = null, int? dispatched = null, int? suppressedDetail = null, bool? enabled = null, Exception? exception = null, string? pawnName = null, string? pawnId = null, string? race = null, string? xenotype = null, string? tier = null, SqueakSettingsOrigin? settingsOrigin = null, bool? egg = null, bool? pawnControlled = null, string? pawnFaction = null)
+    { Action = action; Target = target; Pack = pack; Reason = reason; Sound = sound; Source = source; Count = count; Dispatched = dispatched; SuppressedDetail = suppressedDetail; Enabled = enabled; Exception = exception; PawnName = pawnName; PawnId = pawnId; Race = race; Xenotype = xenotype; Tier = tier; SettingsOrigin = settingsOrigin; Egg = egg; PawnControlled = pawnControlled; PawnFaction = pawnFaction; }
 }
 
 internal readonly struct SqueakLogDefinition
@@ -73,17 +73,26 @@ internal static class SqueakLogRegistry
         SqueakLogEvent.CameraChanged => new(SqueakLogVisibility.DevOnly, SqueakLogLevel.Info, "Camera indicator state changed."),
         SqueakLogEvent.WorkbenchOpenFailed => new(SqueakLogVisibility.Daily, SqueakLogLevel.Warning, "Animal Voice Workbench could not be opened."),
         SqueakLogEvent.SettingsOrigin => new(SqueakLogVisibility.Daily, SqueakLogLevel.Info, "Mod settings origin was recorded.", 2),
-        SqueakLogEvent.AudioRouteSelected => new(SqueakLogVisibility.DevOnly, SqueakLogLevel.Info, "Squeak audio route was selected.", 2),
+        SqueakLogEvent.AudioRouteSelected => new(SqueakLogVisibility.DevOnly, SqueakLogLevel.Info, "Audio route: <action> -> <sound> (<tier>[, egg]).", 2),
         SqueakLogEvent.FallbackProfileStoreFailed => new(SqueakLogVisibility.DevOnly, SqueakLogLevel.Warning, "Fallback profile store operation failed.", 2),
         _ => throw new ArgumentOutOfRangeException(nameof(e))
     };
 
     /// <summary>Human sentence for a record. settings.origin's sentence is parameterized by the closed
-    /// two-value origin set (precedent: mod.start.identity parameterizes by runtime build/build_id).</summary>
+    /// two-value origin set (precedent: mod.start.identity parameterizes by runtime build/build_id).
+    /// 0.3.2: audio.route.selected reads as a one-line dispatch summary for humans (action -> sound (tier) [egg]).</summary>
     internal static string HumanSentence(SqueakLogEvent e, SqueakLogDefinition definition, SqueakLogData data)
     {
         if (e == SqueakLogEvent.SettingsOrigin)
             return "Mod settings origin: " + (data.SettingsOrigin == SqueakSettingsOrigin.LoadedFromFile ? "LoadedFromFile" : "FreshCreated") + ".";
+        if (e == SqueakLogEvent.AudioRouteSelected)
+        {
+            string actionText = string.IsNullOrEmpty(data.Action) ? "-" : data.Action!;
+            string soundText = string.IsNullOrEmpty(data.Sound) ? "-" : data.Sound!;
+            string tierText = string.IsNullOrEmpty(data.Tier) ? "-" : data.Tier!;
+            string marker = (data.Egg == true ? ", egg" : "") + (data.PawnControlled == false ? ", nonplayer" : "");
+            return "Audio route: " + actionText + " -> " + soundText + " (" + tierText + marker + ").";
+        }
         return definition.Human;
     }
 
@@ -199,6 +208,12 @@ internal static class SqueakLogFormatter
             case SqueakLogEvent.AudioRouteSelected:
                 Add(builder, "sound", data.Sound);
                 Add(builder, "tier", data.Tier);
+                Add(builder, "egg", data.Egg);
+                Add(builder, "suppressed_detail", data.SuppressedDetail);
+                Add(builder, "pawn", data.PawnName);
+                Add(builder, "pawn_id", data.PawnId);
+                Add(builder, "pawn_faction", data.PawnFaction);
+                Add(builder, "pawn_ctrl", data.PawnControlled == null ? null : (data.PawnControlled.Value ? "player" : "nonplayer"));
                 break;
             case SqueakLogEvent.FallbackProfileStoreFailed:
                 if (data.Exception != null)

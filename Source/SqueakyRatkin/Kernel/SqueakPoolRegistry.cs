@@ -168,8 +168,9 @@ public sealed class SqueakPoolRegistry
         }
         if (valid.Count == 0) return ChainResult.None;
         VoicePackEntry chosen = DrawEntry(valid, rolls);
-        string? key = DrawSoundKey(selectedSets[chosen], ctx, gate, rolls);
-        return key == null ? ChainResult.None : new ChainResult(key, tier, chosen.PackKey);
+        ActionSoundSet chosenSet = selectedSets[chosen];
+        string? key = DrawSoundKey(chosenSet, ctx, gate, rolls);
+        return key == null ? ChainResult.None : new ChainResult(key, tier, chosen.PackKey, chosenSet.IsEgg);
     }
 
     /// <summary>PackFallback 始终求 ctx.Domain 的精确池；xeno ctx 不越域读取 race fallback。</summary>

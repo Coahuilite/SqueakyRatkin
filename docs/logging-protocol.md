@@ -1,6 +1,6 @@
 # Logging Protocol
 
-> **Status — 2026-07-21:** This document records the implemented `SqueakLog` v1 contract from source review of `Logging/SqueakLog.cs`, `SqueakyRatkinSettings.cs`, and `Debug/SqueakDebug.cs`. It is a compatibility and machine-parsing contract, not evidence of a live RimWorld-session test.
+> **Status — 2026-08-22:** This document records the implemented `SqueakLog` v1+v2 contract from source review of `Logging/SqueakLog.cs`, `Logging/SqueakLogProtocol.cs`, `SqueakyRatkinSettings.cs`, and `Debug/SqueakDebug.cs`. It is a compatibility and machine-parsing contract, not evidence of a live RimWorld-session test. 0.3.2 extends `audio.route.selected` fields and its human sentence; v1 remains byte-immutable.
 
 ## Closed Typed Facade
 
@@ -64,11 +64,13 @@ Event-specific fields:
 | Event | Fields (fixed order) |
 | --- | --- |
 | `settings.origin` | `settings_origin=FreshCreated\|LoadedFromFile` |
-| `audio.route.selected` | `sound=<SoundDef.defName>` `tier=<tier>` |
+| `audio.route.selected` | `sound=<SoundDef.defName>` `tier=<tier>` `egg=true\|false` `suppressed_detail=<int>` `pawn=<label>` `pawn_id=<ThingID>` `pawn_faction=<FactionDef.defName\|->` `pawn_ctrl=player\|nonplayer` |
+| `hook.mental_fit.unavailable` | (none) |
+| `fallback.profile.store_failed` | `ex_type=<type>` `ex_inner=<type>` `ex_site=<site>` `ex_msg=<sanitized>` |
 
 `settings.origin` is Daily Info, emitted once per session at startup, right after the settings object is read. **Origin detection:** `LoadedFromFile` = a settings file was successfully deserialized through Scribe (ExposeData reached LoadingVars); `FreshCreated` = no file, or an unreadable file — the framework discards the broken parse, warns, and returns a new field-defaults instance, which is reported as FreshCreated. The sentence is parameterized by the closed two-value origin set (precedent: `mod.start.identity` parameterizes by build/build_id).
 
-`audio.route.selected` is DevOnly Info and follows the same success-path volume control as `audio.dispatch.ok` (one record per action per five seconds, emitted alongside it). `tier` vocabulary in 0.3.1 is `xenotype_pack`, `race_pack`, `vanilla`, and `-` for none. `pack_fallback`/`built_in_fallback` remain reserved and are not emitted: the adapter currently folds `PackFallback` into `race_pack` and `BuiltInFallback` into `vanilla`.
+`audio.route.selected` is DevOnly Info. Since 0.3.2 it is the single success-path detail record: the dispatch assembler emits one consolidated fmt=2 line per action per five seconds instead of the former `audio.dispatch.ok` + `audio.route.selected` pair; `audio.dispatch.ok` remains a locked v1 registry record and characterization surface but is no longer emitted by the runtime assembler. `egg=true` marks a dispatch from an `IsEgg` entry (always emitted as `true`/`false` so the field is deterministic); `suppressed_detail` counts dispatches absorbed since the previous detail line; `pawn`/`pawn_id` carry the same identity facts the retired assembler call previously put on `audio.dispatch.ok`; `pawn_faction` carries the exact `FactionDef.defName` (`-` when factionless) and `pawn_ctrl` carries the two-value `Pawn.IsPlayerControlled` sample (`player`/`nonplayer`), so identity-gate matrix runs can be read directly from the log. The human sentence is parameterized for direct reading: `Audio route: <action> -> <sound> (<tier>[, egg][, nonplayer]).` `tier` vocabulary in 0.3.1 is `xenotype_pack`, `race_pack`, `vanilla`, and `-` for none. `pack_fallback`/`built_in_fallback` remain reserved and are not emitted: the adapter currently folds `PackFallback` into `race_pack` and `BuiltInFallback` into `vanilla`.
 
 Once keys are namespaced per protocol version: fmt=1 records claim the `log-v1` domain and fmt=2 records the `log-v2` domain, so the two never collide.
 
@@ -76,7 +78,7 @@ Once keys are namespaced per protocol version: fmt=1 records claim the `log-v1` 
 
 The registry's exact-once key comprises the event plus action, target, pack, reason, and exception type, namespaced per protocol version (`log-v1` for fmt=1 records, `log-v2` for fmt=2 records). It is claimed under a lock, making duplicate suppression thread-safe. The session retains at most 1024 keys; when a new claim reaches that limit, the registry clears and accepts the new key. A logging-session reset also clears it.
 
-When detailed logging is effective, successful audio dispatches emit `audio.dispatch.ok` immediately for the first success of each action. Further detail for that action is limited to one record per five seconds; suppressed detail is counted. `trigger.outcome.summary` aggregates dispatched and suppressed-detail counts at most once per 60 seconds. This rate control does not alter operational warning/error visibility or severity.
+When detailed logging is effective, successful audio dispatches emit one consolidated `audio.route.selected` v2 detail record immediately for the first success of each action. Further detail for that action is limited to one record per five seconds; suppressed detail is counted. `trigger.outcome.summary` aggregates dispatched and suppressed-detail counts at most once per 60 seconds. This rate control does not alter operational warning/error visibility or severity. The v1 `audio.dispatch.ok` registry record is retained (byte-locked) but the runtime assembler no longer emits it in parallel.
 
 ## Stable Event Registry
 
@@ -107,15 +109,17 @@ The table below is the actual closed registry. The human-sentence column reprodu
 | `hook.attack.unavailable` | Daily | Error | `Attack squeak hook is unavailable.` |
 | `hook.attack.target_skipped` | DevOnly | Warning | `An Attack hook target was skipped.` |
 | `hook.mental_break.unavailable` | Daily | Error | `Mental-break squeak hook is unavailable.` |
+| `hook.mental_fit.unavailable` | Daily | Error | `Baby-fits squeak hook is unavailable.` |
 | `diagnostics.hook.unavailable` | DevOnly | Warning | `Diagnostics overlay hook is unavailable.` |
 | `diagnostics.start.failed` | Daily | Warning | `Diagnostics overlay could not start.` |
 | `devtools.overlay.changed` | DevOnly | Info | `Diagnostics overlay state changed.` |
 | `devtools.camera_indicator.changed` | DevOnly | Info | `Camera indicator state changed.` |
 | `devtools.workbench.open_failed` | Daily | Warning | `Animal Voice Workbench could not be opened.` |
 | `settings.origin` | Daily | Info | `Mod settings origin: <FreshCreated\|LoadedFromFile>.` |
-| `audio.route.selected` | DevOnly | Info | `Squeak audio route was selected.` |
+| `audio.route.selected` | DevOnly | Info | `Audio route: <action> -> <sound> (<tier>[, egg][, nonplayer]).` |
+| `fallback.profile.store_failed` | DevOnly | Warning | `Fallback profile store operation failed.` |
 
-The last two rows are the 0.3.1 v2 extension records (fmt=2); the 28 rows above them are the locked v1 surface (fmt=1) and remain byte-immutable.
+The last four rows are the 0.3.1 v2 extension records (fmt=2); the 28 rows above them are the locked v1 surface (fmt=1) and remain byte-immutable.
 
 `voicepack.pack.rejected` uses the pack key as `pack`. `reason` carries `duplicate_key` (default, same key loaded more than once) or `domain_filtered` (0.3.1 race-aware: `raceDefName` outside the product domain whitelist), with `count` = the number of duplicate instances for the former.
 

@@ -117,7 +117,7 @@ internal static class SqueakKernelAdapter
             ChainTier.PackFallback => SqueakSoundSource.RacePack,
             _ => SqueakSoundSource.Vanilla,
         };
-        return new SqueakSoundChoice(sound, source, result.PoolStableKey);
+        return new SqueakSoundChoice(sound, source, result.PoolStableKey, result.IsEgg);
     }
 
     private static void AddDomain(List<VoicePackEntry> entries, IReadOnlyList<SqueakVoicePackDef>? candidates, HashSet<string> keys, AudioDomain domain)
