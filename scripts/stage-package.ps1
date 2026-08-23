@@ -59,8 +59,10 @@ if (-not [string]::IsNullOrWhiteSpace($VersionLabel)) {
     if ($null -eq $modVersionNode -or [string]::IsNullOrWhiteSpace($modVersionNode.InnerText)) {
         throw "About.xml is missing <modVersion>; product version source must stay in sync."
     }
-    if ($modVersionNode.InnerText.Trim() -ne $VersionLabel) {
-        throw "About.xml <modVersion> ($($modVersionNode.InnerText.Trim())) does not match package version ($VersionLabel). Update About.xml or the csproj <Version>."
+    # Prerelease labels (0.3.2-pre1) carry the base product version in About/csproj; the label keeps the suffix.
+    $labelBase = ($VersionLabel -replace '-.*$', '')
+    if ($modVersionNode.InnerText.Trim() -ne $labelBase) {
+        throw "About.xml <modVersion> ($($modVersionNode.InnerText.Trim())) does not match package base version ($labelBase) from label ($VersionLabel). Update About.xml or the csproj <Version>."
     }
 }
 if (-not (Test-Path -LiteralPath $assemblyPath -PathType Leaf)) { throw "Missing built assembly: $assemblyPath. Build the desired flavor before staging." }

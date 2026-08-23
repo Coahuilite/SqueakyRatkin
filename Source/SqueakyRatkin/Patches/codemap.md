@@ -17,7 +17,7 @@
 | `Patch_Pawn_PostApplyDamage.cs` | `Pawn.PostApplyDamage` Postfix | 任何伤害结算后 | `CompSqueaker.Notify_Wounded()` |
 | `Patch_Verb_Attack.cs` | 动态扫描 Core + RimWorld 程序集内所有 `Verb` 子类声明的 `TryCastShot()` Postfix | 攻击成功（`__result == true`）、caster 是 spawned 且位于当前地图的 Pawn | `Notify_Attack()`（来源按 `IsCurrentJobPlayerCommand()` 区分 ActiveCommand/StateEvent） |
 | `Patch_Pawn_Kill.cs` | `Pawn.Kill` Prefix | 击杀/流血死亡统一入口，位于 DeSpawnOrDeselect/SetDead 之前，此时 pawn 仍 spawned、位置有效 | `Notify_Death()` |
-| `Patch_Selector_Select.cs` | `Selector.Select` 动态重载链 Postfix | 玩家选中 Pawn（第一参数为 `object`，位置注入 `__0`） | `Notify_Select()` |
+| `Patch_Selector_Select.cs` | `Selector.Select` 动态重载链 Postfix | 玩家交互式选中 Pawn（位置注入 `__0` 取 object、`__1` 取 playSound；0.3.2 起 `playSound=false` 程序性选择过滤） | `Notify_Select()`（身份/可响应闸在 Comp 内） |
 | `Patch_DraftGizmo_Toggle.cs` | `Pawn.GetGizmos` Postfix | 包装 vanilla Draft/Undraft `Command_Toggle`（`Command_ColonistDraft` hotKey + "Draft"/"Undraft" tutorTag 识别），在 toggleAction 内比对 `pawn.Drafted` 前后变化 | `Notify_Draft(bool)`；`ConditionalWeakTable` 防重复包装，只包玩家可见 gizmo，不碰 `Pawn_DraftController` |
 | `Patch_Pawn_EquipmentAdded.cs` | `Pawn_EquipmentTracker.Notify_EquipmentAdded` Postfix | 装备跟踪器通知（含 AI/加载/系统变更），再经 `IsCurrentEquipJobPlayerCommand()` 过滤为玩家主动 Equip 任务 | `Notify_Equip()` |
 | `Patch_MentalBreak.cs` | `MentalBreakWorker.TryStart` Postfix（`Verse.AI.MentalBreakWorker` 或 `RimWorld.MentalBreakWorker` 动态解析） | 精神崩溃成功开始（`__result`）且 pawn 在当前地图 | `Notify_MentalBreak()`；找不到目标时 `SqueakLog.HookMentalBreakUnavailable()`。0.2.4 起收窄至此（MentalBreakDef 驱动唯一通道），不误报 BabyFits |
@@ -46,9 +46,9 @@
 
 ## Design
 
-- **事件转译模式**：所有事件 patch 都只做"过滤 + 转调"，业务判断集中在 `CompSqueaker.NotifyExternal`（spawned、`MapHeld == Find.CurrentMap`、当前视口 `ExpandedBy(10)` 三闸门）。patch 层保持薄。
+- **事件转译模式**：所有事件 patch 都只做"过滤 + 转调"，业务判断集中在 `CompSqueaker.NotifyExternal`（spawned、`MapHeld == Find.CurrentMap`、当前视口 `ExpandedBy(10)`、plan.Configured + 0.3.2 身份闸五道门）。patch 层保持薄。
 - **跨版本防御**：三个 patch 用动态目标解析（`TargetMethod(s)`/`Prepare`）应对 Core API 漂移：
-  - `Patch_Selector_Select`：`Select(object,bool,bool)` → `(object,bool)` → `(object)` fallback 链，并用 `__0` 位置参数规避参数名耦合。
+  - `Patch_Selector_Select`：`Select(object,bool,bool)` → `(object,bool)` → `(object)` fallback 链，并用 `__0`/`__1` 位置参数取 pawn 与 playSound（0.3.2 过滤程序性选择）。
   - `Patch_MentalBreak`：`Verse.AI` → `RimWorld` 命名空间 fallback；失败仅记录 dev 日志不炸 PatchAll。
   - `Patch_MapInterface_DiagnosticsOverlay`：`Prepare()` 提前解析类型+方法并缓存，不兼容则 `HookAvailable=false`、整体跳过（可选功能安全降级）。
 - **`Patch_Verb_Attack` 扫描式 hook**：反射枚举 Core 与 RimWorld 程序集的全部 `Verb` 子类，收集具体声明（非 static/abstract、无泛型、返回 bool、有方法体）的 `TryCastShot`；显式排除名称含 "Ability" 的类型与 DLC 程序集。目标为空时 `SqueakLog.HookAttackUnavailable()`；跳过目标最多警告 8 次（`MaxSkippedTargetWarnings`）。
