@@ -125,12 +125,12 @@ Referenced SoundDefs: {2}</SR.AudioBrowser.GroupTip>
   <SR.DevTools.Logging.Mode.Tooltip.Auto>Uses the build channel default: enabled for Dev builds and disabled for GitHub and Steam builds. The effective state is shown above.</SR.DevTools.Logging.Mode.Tooltip.Auto>
   <SR.DevTools.Logging.Mode.Tooltip.Enabled>Always include detailed srdiag fields for supported log events. This can increase log volume but does not enable RimWorld Dev Mode or the other diagnostic tools.</SR.DevTools.Logging.Mode.Tooltip.Enabled>
   <SR.DevTools.Logging.Mode.Tooltip.Disabled>Suppress detailed srdiag fields even when the build default would enable them. Normal human-readable warnings and errors remain available.</SR.DevTools.Logging.Mode.Tooltip.Disabled>
-  <SR.KiiroCompat.Header>Experimental race compatibility (Kiiro)</SR.KiiroCompat.Header>
-  <SR.KiiroCompat.Short>Internal experiment: attaches the shared squeak component to the Kiiro race. Takes effect after restart. Not an official compatibility claim.</SR.KiiroCompat.Short>
-  <SR.KiiroCompat.Enable>Attach shared squeak component to Kiiro_Race</SR.KiiroCompat.Enable>
-  <SR.KiiroCompat.Enable.Tooltip>Dev builds only. When enabled and Kiiro Race is loaded, startup attaches the same CompSqueaker configuration used by Ratkin. Existing VoicePack domains (Race pool and Xenotype presets) then apply to Kiiro pawns. Turning this off and restarting restores default behavior.</SR.KiiroCompat.Enable.Tooltip>
-  <SR.KiiroCompat.Status.Attached>Attached this session</SR.KiiroCompat.Status.Attached>
-  <SR.KiiroCompat.Status.Pending>Switch is on — restart to attach</SR.KiiroCompat.Status.Pending>
+  <SR.KiiroCompat.Header>Experiment — Kiiro as Ratkin</SR.KiiroCompat.Header>
+  <SR.KiiroCompat.Short>EXP experiment: attaches the shared squeak component to the Kiiro race and routes its audio domain through Ratkin voices. Takes effect after restart. Not an official compatibility claim.</SR.KiiroCompat.Short>
+  <SR.KiiroCompat.Enable>Kiiro uses Ratkin voices (指猫为鼠)</SR.KiiroCompat.Enable>
+  <SR.KiiroCompat.Enable.Tooltip>Dev/EXP builds only. When enabled and Kiiro Race is loaded, startup attaches the same CompSqueaker configuration used by Ratkin, and this build maps Kiiro_Race onto the Ratkin product domain so Ratkin voice pools and built-in fallback apply to Kiiro pawns. Turning this off and restarting restores default behavior.</SR.KiiroCompat.Enable.Tooltip>
+  <SR.KiiroCompat.Status.Attached>Active this session — Kiiro uses Ratkin voices</SR.KiiroCompat.Status.Attached>
+  <SR.KiiroCompat.Status.Pending>Switch is on — restart to take effect</SR.KiiroCompat.Status.Pending>
   <SR.KiiroCompat.Status.Off>Switch is off — default behavior</SR.KiiroCompat.Status.Off>
   <SR.KiiroCompat.Status.Missing>Kiiro Race mod is not loaded</SR.KiiroCompat.Status.Missing>
   <SR.Tab.Basics>Voice Rules</SR.Tab.Basics>

@@ -24,6 +24,9 @@ if ($null -eq $versionNode -or [string]::IsNullOrWhiteSpace($versionNode.InnerTe
 
 $version = $versionNode.InnerText.Trim()
 
+# EXP 实验分支：dev 包标签与文件名带 -EXP 尾缀；About.xml/csproj 基准版本仍为 0.3.2（stage-package 按基准校验）。
+$versionLabel = "$version-EXP"
+
 try {
     $null = Get-Command -Name git -CommandType Application -ErrorAction Stop
 }
@@ -51,11 +54,11 @@ $dirtySuffix = if ($statusOutput.Count -gt 0) { "-dirty" } else { "" }
 if (Test-Path -LiteralPath $devDir -PathType Container) {
     Get-ChildItem -LiteralPath $devDir -File -Filter "SqueakyRatkin-dev-v*.txt" | Remove-Item -Force
 }
-& (Join-Path $PSScriptRoot "stage-package.ps1") -ProjectRoot $root -StageDir $stageDir -VersionLabel $version -BuildFlavor dev -CommitLabel "$shortCommit$dirtySuffix" -CreateZip
+& (Join-Path $PSScriptRoot "stage-package.ps1") -ProjectRoot $root -StageDir $stageDir -VersionLabel $versionLabel -BuildFlavor dev -CommitLabel "$shortCommit$dirtySuffix" -CreateZip
 
 $fileCount = (Get-ChildItem -LiteralPath $stageDir -Recurse -File | Measure-Object).Count
 Write-Host "[pack-dev] Staged $fileCount files to $stageDir"
 
-$labelPath = Join-Path $devDir "SqueakyRatkin-dev-v$version-$shortCommit$dirtySuffix.txt"
+$labelPath = Join-Path $devDir "SqueakyRatkin-dev-v$versionLabel-$shortCommit$dirtySuffix.txt"
 $null = New-Item -ItemType File -Path $labelPath -Force
 Write-Host "[pack-dev] Created dev package label $labelPath"

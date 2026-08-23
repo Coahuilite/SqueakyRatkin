@@ -778,7 +778,11 @@ public partial class SqueakyRatkinSettings : ModSettings
             height += Mathf.Max(28f, Text.CalcHeight("SR.ActionEnable.Short".Translate(), width - 24f)) + 6f;
             height += MeasureActionGroupHeight(width, 5, true) + MeasureActionGroupHeight(width, 10, false);
         }
-        height += 20f + 34f + 34f + 8f;
+        height += 20f + 34f + 34f;
+#if SQUEAKY_EXPERIMENTAL
+        height += MeasureKiiroCompatSettingsHeight(width);
+#endif
+        height += 8f;
         return height + 24f;
     }
 
@@ -973,8 +977,44 @@ public partial class SqueakyRatkinSettings : ModSettings
             Patch_DebugTabMenu_Actions.SetEnabled(localizeDebugActions);
             QueuePersistence();
         }
+#if SQUEAKY_EXPERIMENTAL
+        DrawKiiroCompatSettings(list);
+#endif
         list.Gap(8f);
     }
+
+#if SQUEAKY_EXPERIMENTAL
+    /// <summary>EXP「指猫为鼠」试验开关（仅 Dev/EXP 构建可见）。装配与域映射都在启动时生效，切换需重启。</summary>
+    private void DrawKiiroCompatSettings(Listing_Standard list)
+    {
+        list.Gap(8f); list.GapLine();
+        DrawSectionHeader(list, "SR.KiiroCompat.Header".Translate());
+        list.Label("SR.KiiroCompat.Short".Translate());
+        bool value = experimentalKiiroCompat;
+        if (SqueakySettingsUI.Toggle(list.GetRect(34f), "SR.KiiroCompat.Enable".Translate(), ref value,
+                tooltip: "SR.KiiroCompat.Enable.Tooltip".Translate()))
+        {
+            experimentalKiiroCompat = value;
+            QueuePersistence();
+        }
+        string status = KiiroCompatStatusText();
+        SqueakySettingsUI.StatusPanel(list.GetRect(MeasureCompactStatusHeight(status, list.ColumnWidth)), status,
+            SqueakKiiroCompatAdapter.AttachedThisSession ? SqueakySurfaceKind.Emphasized : SqueakySurfaceKind.Base);
+    }
+
+    private string KiiroCompatStatusText()
+    {
+        if (SqueakKiiroCompatAdapter.AttachedThisSession) return "SR.KiiroCompat.Status.Attached".Translate();
+        if (!ModsConfig.IsActive(SqueakKiiroCompatAdapter.KiiroPackageId)) return "SR.KiiroCompat.Status.Missing".Translate();
+        return experimentalKiiroCompat ? "SR.KiiroCompat.Status.Pending".Translate() : "SR.KiiroCompat.Status.Off".Translate();
+    }
+
+    private float MeasureKiiroCompatSettingsHeight(float width)
+    {
+        float height = 20f + 34f + Text.CalcHeight("SR.KiiroCompat.Short".Translate(), width) + 2f + 34f;
+        return height + MeasureCompactStatusHeight(KiiroCompatStatusText(), width);
+    }
+#endif
 
     private void DrawDevLoggingModeCards(Rect rect)
     {

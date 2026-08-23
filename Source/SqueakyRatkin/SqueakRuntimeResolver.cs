@@ -146,7 +146,17 @@ public static class SqueakRuntimeResolver
             SoundDef? sound = DefDatabase<SoundDef>.GetNamedSilentFail(SqueakActionDefinitions.Get(action).AudioKey);
             if (sound != null) known.Add(sound);
         }
-        return new SqueakRuntimeSnapshot(contexts, registry, known, NormalizeMode(settings.voicePackMode), globalActions, catalog.AmbiguousCanonicalDefNames, productRace, settings.AllowEasterEggSounds);
+        return new SqueakRuntimeSnapshot(contexts, registry, known, NormalizeMode(settings.voicePackMode), globalActions, catalog.AmbiguousCanonicalDefNames, productRace, settings.AllowEasterEggSounds, ReadExperimentalKiiroAsRatkin(settings));
+    }
+
+    /// <summary>EXP 路由输入随快照发布（与彩蛋开关同纪律）；非 EXP 构建恒为 false。</summary>
+    private static bool ReadExperimentalKiiroAsRatkin(SqueakyRatkinSettings settings)
+    {
+#if SQUEAKY_EXPERIMENTAL
+        return settings.experimentalKiiroCompat;
+#else
+        return false;
+#endif
     }
 
     private static Dictionary<string, RuntimeBuilder> BuildBehavior(SqueakyRatkinSettings settings)
@@ -208,7 +218,7 @@ public static class SqueakRuntimeResolver
                 Array.Empty<SqueakyRatkin.Kernel.VoicePackEntry>(),
                 SqueakKernelAdapter.BuildBuiltIn(),
                 SqueakProductDomainFilter.KernelFilterFor(settings));
-            return new SqueakRuntimeSnapshot(new Dictionary<string, ResolvedSqueakContext>(), registry, known, SqueakVoicePackMode.Off, actions, null, new SqueakyRatkin.Kernel.RaceKey(SqueakProductDomainFilter.PrimaryRaceDefName), settings.AllowEasterEggSounds);
+            return new SqueakRuntimeSnapshot(new Dictionary<string, ResolvedSqueakContext>(), registry, known, SqueakVoicePackMode.Off, actions, null, new SqueakyRatkin.Kernel.RaceKey(SqueakProductDomainFilter.PrimaryRaceDefName), settings.AllowEasterEggSounds, ReadExperimentalKiiroAsRatkin(settings));
         }
         catch { return SqueakRuntimeSnapshot.GlobalOnly; }
     }
@@ -230,8 +240,10 @@ public sealed class SqueakRuntimeSnapshot
     public readonly SqueakyRatkin.Kernel.RaceKey ProductRace;
     /// <summary>0.3.1 波 3c 彩蛋路由输入（决策 §2.4）：随快照离散重建；关 = IsEgg 条目不进候选池。</summary>
     public readonly bool AllowEggs;
+    /// <summary>EXP「指猫为鼠」路由输入：开 = Kiiro_Race 域映射为产品域 Ratkin；仅 Dev/EXP 构建可能为 true。</summary>
+    public readonly bool KiiroAsRatkin;
     private readonly IReadOnlyCollection<string> ambiguousCanonicalNames;
-    internal SqueakRuntimeSnapshot(Dictionary<string, ResolvedSqueakContext> contexts, SqueakyRatkin.Kernel.SqueakPoolRegistry registry, HashSet<SoundDef> known, SqueakVoicePackMode mode, Dictionary<SqueakAction, RuntimeActionDelta>? globals, IEnumerable<string>? ambiguousNames, SqueakyRatkin.Kernel.RaceKey productRace, bool allowEggs) { this.contexts = new ReadOnlyDictionary<string, ResolvedSqueakContext>(contexts); this.Registry = registry; globalActions = new ReadOnlyDictionary<SqueakAction, RuntimeActionDelta>(globals ?? new Dictionary<SqueakAction, RuntimeActionDelta>()); globalContext = new ResolvedSqueakContext(null, 1f, globals, null, productRace); ProductRace = productRace; VoicePackMode = mode; AllowEggs = allowEggs; KnownMapSoundDefs = new ReadOnlyCollection<SoundDef>(known.ToList()); ambiguousCanonicalNames = new ReadOnlyCollection<string>((ambiguousNames ?? Array.Empty<string>()).ToList()); }
+    internal SqueakRuntimeSnapshot(Dictionary<string, ResolvedSqueakContext> contexts, SqueakyRatkin.Kernel.SqueakPoolRegistry registry, HashSet<SoundDef> known, SqueakVoicePackMode mode, Dictionary<SqueakAction, RuntimeActionDelta>? globals, IEnumerable<string>? ambiguousNames, SqueakyRatkin.Kernel.RaceKey productRace, bool allowEggs, bool kiiroAsRatkin = false) { this.contexts = new ReadOnlyDictionary<string, ResolvedSqueakContext>(contexts); this.Registry = registry; globalActions = new ReadOnlyDictionary<SqueakAction, RuntimeActionDelta>(globals ?? new Dictionary<SqueakAction, RuntimeActionDelta>()); globalContext = new ResolvedSqueakContext(null, 1f, globals, null, productRace); ProductRace = productRace; VoicePackMode = mode; AllowEggs = allowEggs; KiiroAsRatkin = kiiroAsRatkin; KnownMapSoundDefs = new ReadOnlyCollection<SoundDef>(known.ToList()); ambiguousCanonicalNames = new ReadOnlyCollection<string>((ambiguousNames ?? Array.Empty<string>()).ToList()); }
     public ResolvedSqueakContext ResolveContext(Pawn pawn)
     {
         if (!ModsConfig.BiotechActive) return globalContext;
@@ -258,6 +270,11 @@ public sealed class SqueakRuntimeSnapshot
         // 域身份 = pawn 真实 race（race-aware 路由：外来 race pawn 命中自身域，池空/无内置 profile = 无声，
         // 绝不串扰进产品域）；race 不可得时防御回退 context.Race。xenotype 维度沿用 canonical 校验过的 context.Xenotype。
         string? pawnRace = pawn?.def?.defName;
+#if SQUEAKY_EXPERIMENTAL
+        // EXP「指猫为鼠」：开关开时 Kiiro_Race 显式走产品域 Ratkin，使鼠族音池/回退对 Kiiro Pawn 生效。
+        if (KiiroAsRatkin && string.Equals(pawnRace, SqueakKiiroCompatAdapter.KiiroRaceDefName, StringComparison.Ordinal))
+            pawnRace = SqueakProductDomainFilter.PrimaryRaceDefName;
+#endif
         string raceDefName = string.IsNullOrEmpty(pawnRace) ? context.Race.DefName : pawnRace!;
         SqueakyRatkin.Kernel.AudioDomain domain = context.Xenotype != null
             ? new SqueakyRatkin.Kernel.AudioDomain(new SqueakyRatkin.Kernel.RaceKey(raceDefName), new SqueakyRatkin.Kernel.XenotypeKey(context.Xenotype.defName))

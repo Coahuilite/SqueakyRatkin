@@ -85,7 +85,7 @@ flowchart LR
 
 **权威状态**：[`TODO.md`](TODO.md) 与 [`MEMORY.md`](MEMORY.md)（当前目标、开放行动、阻塞与明确延后）。本图只做结构导航；0.3.x 实施细节以 [`docs/0.3x-refactor-architecture-decision-zh.md`](docs/0.3x-refactor-architecture-decision-zh.md) 与对应目录 codemap 为准。
 
-明确延后：仅 `TicksAbs` 再现时调查归因。Kiiro 实验仍在 `kiiro-experiment` 分支，不 merge；D（Biotech 异种域）、通用化后再议的 merge、实验完整复盘均挂起。任何内容契约改动（音频数量/版本/依赖）必须同步 `scripts/stage-package.ps1` 校验表。
+明确延后：仅 `TicksAbs` 再现时调查归因。Kiiro 实验仍在 `kiiro-experiment` 分支，不并入发布线；2026-08-23 已单向同步 dev(0.3.2) 并产出本地 EXP dev 包（`0.3.2-EXP`，未推送）；D（Biotech 异种域）、实验完整复盘仍挂起。任何内容契约改动（音频数量/版本/依赖）必须同步 `scripts/stage-package.ps1` 校验表。
 
 ## Navigation Rules
 

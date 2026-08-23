@@ -18,9 +18,10 @@
 - [x] 分支策略：从 dev 开 `kiiro-experiment`（起点 `88cbe1c`）；实验分支不发布、当前不 merge。
 - [x] 薄装配 adapter（`a0c1708`）：隐藏实验开关 + `SQUEAKY_EXPERIMENTAL` 编译门（仅 Dev flavor）；启动深克隆 Ratkin 的 `CompProperties_Squeaker` 挂入 `Kiiro_Race.comps`；开关 OFF 启动=不装配=默认行为。
 - [x] 实机验证 A/B/C/E + 受控 DLC 全关基线：开/关/静默/池路由均按预期，经 Player.log 交叉核验。
+- [x] **0.3.2 EXP 本地特版（2026-08-23，仅本地，未推送/不发布）**：dev(0.3.2) 合并进 `kiiro-experiment`（merge commit `b86333e`），按 0.3.2 race-aware 架构重做「指猫为鼠」——① 启动装配器深克隆 Ratkin 的 `CompProperties_Squeaker` 挂入 `Kiiro_Race`（`SQUEAKY_EXPERIMENTAL` 编译门，仅 Dev）；② `SqueakRuntimeSnapshot.KiiroAsRatkin` 把 `Kiiro_Race` 域映射为产品域 Ratkin（鼠族音池/PackFallback/内置回退对 Kiiro Pawn 生效）；③ 可用开关 `experimentalKiiroCompat`（Scribe 默认 false 不写盘，UI 位于「发声规则」辅助区，重启生效）；④ 构建身份与 dev 包标签 `0.3.2-EXP`（csproj/About 基准仍 0.3.2，遵守 stage-package 预发布尾缀纪律）。**verify-local 11 项全绿 + `dist/dev/SqueakyRatkin-dev-v0.3.2-EXP-*.zip` 本地产出**。
 - [ ] D 暂缓：Biotech + Kiiro Baseliner 异种域验证。
 - [ ] 日志覆盖缺口（用户指出，暂不实现）：装配/探针阶段无显式记录；先保留为后续通用化 characterization 设计输入。
-- [ ] merge 回 dev：待内部通用化设计落地、以通用形态重新实现后再议（当前不 merge）。
+- [ ] merge 回 dev：仍不执行（实验分支不并入发布线；本次只做了 dev → kiiro-experiment 的单向同步）。
 
 ## 发布卫生（0.2.1 复盘产生）
 - [x] 建立版本无关的 release runbook（`docs/release-runbook-zh.md`：阶段 0-4 流程、main/dev 分叉 merge 核验、`merge -s ours` 适用条件、tag 重发步骤、stage 包内容核验、Workshop 页面核对、隐私审查门禁）。

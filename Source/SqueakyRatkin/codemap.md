@@ -35,7 +35,7 @@
 - `SqueakXenotypePresetModels.cs` — 持久化行为/mood 覆盖：`XenotypePresetRecord` v4 identity = `(raceDefName,xenotypeDefName)`，其余字段仍是 field-presence deltas。
 - `SqueakAudioPoolNotificationService.cs` — 进程内一次性缺包通知（`Dialog_SqueakyCompactMessageBox` 传输，后端状态供未来 UI）。
 - `SqueakLabels.cs` — 本地化 helper（`SR.Action.*`/`SR.Mood.*`/`SR.SettingsCategory`）。
-- `SqueakyRatkin.csproj` — net472/x64、`Krafs.Rimworld.Ref 1.6.*`、`Lib.Harmony 2.4.*`（ExcludeAssets=runtime）、输出 `..\..\1.6\Assemblies`、`SQUEAKY_$(BuildFlavor)` 常量（Dev/Steam/Github，控制 `BuildIdentity`/日志细节）。
+- `SqueakyRatkin.csproj` — net472/x64、`Krafs.Rimworld.Ref 1.6.*`、`Lib.Harmony 2.4.*`（ExcludeAssets=runtime）、输出 `..\..\1.6\Assemblies`、`SQUEAKY_$(BuildFlavor)` 常量（Dev/Steam/Github，控制 `BuildIdentity`/日志细节）；Dev flavor 另定义 `SQUEAKY_EXPERIMENTAL`（EXP「指猫为鼠」编译门）。
 
 ## Design
 

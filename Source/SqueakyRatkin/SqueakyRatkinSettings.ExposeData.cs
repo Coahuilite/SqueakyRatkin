@@ -22,6 +22,14 @@ public partial class SqueakyRatkinSettings
     // 0.3.1 波 3c 彩蛋开关（决策 §2.4）：默认关；开时 IsEgg 条目以加性池成员身份参与抽取，关时候选池只含普通条目。
     // 0.3.1 为隐藏 Scribe 开关（UI 不渲染）；0.3.2 UI 专项正式化。false = 序列化省略（fixture 字节稳定）。
     public bool allowEasterEggSounds;
+#if SQUEAKY_EXPERIMENTAL
+    /// <summary>
+    /// 「指猫为鼠」实验开关（仅 Dev/EXP 构建编译，默认关，重启生效）。
+    /// 开时启动装配器把 Ratkin 的 CompProperties_Squeaker 深克隆挂到 Kiiro_Race，
+    /// 路由快照同时把 Kiiro_Race 域映射为产品域 Ratkin，使 Kiiro Pawn 走鼠族音池/内置回退。
+    /// </summary>
+    public bool experimentalKiiroCompat;
+#endif
 
     private bool distanceRangeWasLoaded;
     private bool scaleFrequencyWithTalkingWasLoaded;
@@ -67,6 +75,9 @@ public partial class SqueakyRatkinSettings
         // Hidden experimental roster; nonempty data replaces the default roster rather than extending it.
         Scribe_Collections.Look(ref experimentalRaceAllowlist, "experimentalRaceAllowlist", LookMode.Value);
         Scribe_Values.Look(ref allowEasterEggSounds, "allowEasterEggSounds", false);
+#if SQUEAKY_EXPERIMENTAL
+        Scribe_Values.Look(ref experimentalKiiroCompat, "experimentalKiiroCompat", false);
+#endif
 
         if (Scribe.mode == LoadSaveMode.LoadingVars)
         {

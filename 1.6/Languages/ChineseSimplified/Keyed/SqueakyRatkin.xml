@@ -125,12 +125,12 @@
   <SR.DevTools.Logging.Mode.Tooltip.Auto>使用构建渠道默认值：Dev 构建开启，GitHub 与 Steam 构建关闭。上方会显示当前实际状态。</SR.DevTools.Logging.Mode.Tooltip.Auto>
   <SR.DevTools.Logging.Mode.Tooltip.Enabled>始终为支持的日志事件附加详细 srdiag 字段。日志量可能增加，但不会开启 RimWorld 开发者模式或其他诊断工具。</SR.DevTools.Logging.Mode.Tooltip.Enabled>
   <SR.DevTools.Logging.Mode.Tooltip.Disabled>即使构建默认会开启，也屏蔽详细 srdiag 字段。正常、便于阅读的警告与错误仍会保留。</SR.DevTools.Logging.Mode.Tooltip.Disabled>
-  <SR.KiiroCompat.Header>实验性种族兼容（Kiiro）</SR.KiiroCompat.Header>
-  <SR.KiiroCompat.Short>内部实验：向 Kiiro 种族装配共享发声组件。重启后生效。不构成正式兼容声明。</SR.KiiroCompat.Short>
-  <SR.KiiroCompat.Enable>向 Kiiro_Race 装配共享发声组件</SR.KiiroCompat.Enable>
-  <SR.KiiroCompat.Enable.Tooltip>仅 Dev 构建。启用且已加载 Kiiro Race 时，启动会将鼠族使用的同一 CompSqueaker 配置装配到 Kiiro_Race；既有语音包域（Race 音池与异种预设）随之对 Kiiro Pawn 生效。关闭并重启后恢复默认行为。</SR.KiiroCompat.Enable.Tooltip>
-  <SR.KiiroCompat.Status.Attached>本会话已装配</SR.KiiroCompat.Status.Attached>
-  <SR.KiiroCompat.Status.Pending>开关已开启——重启后装配</SR.KiiroCompat.Status.Pending>
+  <SR.KiiroCompat.Header>实验 — 指猫为鼠（Kiiro）</SR.KiiroCompat.Header>
+  <SR.KiiroCompat.Short>EXP 实验：向 Kiiro 种族装配共享发声组件，并把其音频域路由到鼠族音源。重启后生效。不构成正式兼容声明。</SR.KiiroCompat.Short>
+  <SR.KiiroCompat.Enable>Kiiro 使用鼠族发声（指猫为鼠）</SR.KiiroCompat.Enable>
+  <SR.KiiroCompat.Enable.Tooltip>仅 Dev/EXP 构建。启用且已加载 Kiiro Race 时，启动会把鼠族使用的同一 CompSqueaker 配置装配到 Kiiro_Race，本构建同时把 Kiiro_Race 域映射为鼠族产品域，使鼠族音池与内置回退对 Kiiro Pawn 生效。关闭并重启后恢复默认行为。</SR.KiiroCompat.Enable.Tooltip>
+  <SR.KiiroCompat.Status.Attached>本会话已生效——Kiiro 使用鼠族发声</SR.KiiroCompat.Status.Attached>
+  <SR.KiiroCompat.Status.Pending>开关已开启——重启后生效</SR.KiiroCompat.Status.Pending>
   <SR.KiiroCompat.Status.Off>开关已关闭——默认行为</SR.KiiroCompat.Status.Off>
   <SR.KiiroCompat.Status.Missing>未加载 Kiiro Race 模组</SR.KiiroCompat.Status.Missing>
   <SR.Tab.Basics>发声规则</SR.Tab.Basics>

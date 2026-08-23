@@ -8,17 +8,20 @@ using Verse;
 namespace SqueakyRatkin;
 
 /// <summary>
-/// 「指猫为鼠」实验装配器(仅 Dev 构建编译)。
+/// 「指猫为鼠」实验装配器(仅 Dev/EXP 构建编译)。
 /// 启动时,当实验开关开启且 Kiiro Race 已加载:把 Ratkin def 上的 CompProperties_Squeaker
-/// 配置深克隆后挂到标准 HAR def Kiiro_Race。只引用第三方 defName 标识符,不复制资源或代码;
-/// 不新增 resolver/settings/logging。开关关闭时完全不装配,与 SR 默认行为一致。
+/// 配置深克隆后挂到标准 HAR def Kiiro_Race,使 Kiiro Pawn 生成时带上发声组件。
+/// 0.3.2 race-aware 路由下,单独挂组件会命中 Kiiro_Race 空域(静默),因此路由快照
+/// (SqueakRuntimeSnapshot.KiiroAsRatkin)同时把 Kiiro_Race 域映射为产品域 Ratkin:
+/// 鼠族音池、PackFallback 与内置回退都对 Kiiro Pawn 生效。
+/// 只引用第三方 defName 标识符,不复制资源或代码。开关关闭时完全不装配,与 SR 默认行为一致。
 /// def 级装配在会话内不可撤销,开关切换需重启生效。
 /// </summary>
 [StaticConstructorOnStartup]
 internal static class SqueakKiiroCompatAdapter
 {
     internal const string KiiroPackageId = "Ancot.KiiroRace";
-    private const string KiiroRaceDefName = "Kiiro_Race";
+    internal const string KiiroRaceDefName = "Kiiro_Race";
     private const string RatkinRaceDefName = "Ratkin";
 
     /// <summary>本会话启动时是否已实际装配。开发者页状态行读取。</summary>

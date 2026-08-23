@@ -16,6 +16,8 @@
     <SqueakyBuildFlavor Condition="'$(SqueakyBuildFlavor)' == ''">Dev</SqueakyBuildFlavor>
     <DefineConstants>$(DefineConstants);SQUEAKY_$(SqueakyBuildFlavor.ToUpper())</DefineConstants>
     <DefineConstants Condition="'$(SqueakyBuildFlavor)' == 'Dev'">$(DefineConstants);SQUEAKY_EXPERIMENTAL</DefineConstants>
+    <!-- EXP 本地实验构建标识：产品版本仍为 0.3.2（About.xml/AssemblyVersion 基准），构建身份带 -EXP 尾缀。 -->
+    <InformationalVersion Condition="'$(SqueakyInformationalVersion)' == ''">$(Version)-EXP</InformationalVersion>
     <InformationalVersion Condition="'$(SqueakyInformationalVersion)' != ''">$(SqueakyInformationalVersion)</InformationalVersion>
   </PropertyGroup>
 
