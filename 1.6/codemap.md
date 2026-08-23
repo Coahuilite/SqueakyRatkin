@@ -33,7 +33,7 @@ RimWorld 1.6 启动 → LoadFolders v1.6（无条件）
 ## Integration
 
 - 上游依赖：`brrainz.harmony`、`erdelf.HumanoidAlienRaces`（modDependencies），`Solaris.RatkinRaceMod`（def 来源，loadAfter 声明）。
-- 下游消费方：`Source/SqueakyRatkin/` 的 `CompSqueaker`、`SqueakRuntimeResolver`、`SqueakVoicePackModels`、`Debug/SqueakMoteMaker`、UI 试听适配器；第三方 VoicePack 以独立模组形式按 `docs/voice-pack-author-guide-zh.md` 契约接入（`SR_` 前缀 + `<lowercase packageId>/<PackDef.defName>/<Action>/` 音频根）。
+- 下游消费方：`Source/SqueakyRatkin/` 的 `CompSqueaker`、`SqueakRuntimeResolver`、`SqueakVoicePackModels`、`Debug/SqueakMoteMaker`、UI 试听适配器；第三方 VoicePack 以独立模组形式按 `.github/skills/squeaky-voicepack-authoring/SKILL.md`（作者指南，兼作 agent skill）契约接入（`SR_` 前缀 + `<lowercase packageId>/<PackDef.defName>/<Action>/` 音频根）。
 - 打包：`../scripts/stage-package.ps1` 从 `../Extras/SqueakyRatkinExampleVoices` 镜像 Template 的 OGG（当前参考基准 41 个，数量可变）进 `1.6/Sounds/coahuilite.squeakyratkin/SR_OfficialExample_Race/`（工作树中不存在该音频目录）。
 
 ## Change Guidance

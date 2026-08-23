@@ -125,9 +125,11 @@ XenotypeAudioDomain  = (RaceKey, XenotypeKey)
 | 0.2.2（已启动） | 日志协议 characterization、`SqueakLog` 职责拆分、低风险去重/卫生 | 主模组 0 error；默认与 Dev flavor logging harness 通过 |
 | 0.3.0 | Ratkin 触发/路由 characterization；内部 `RaceKey`/域值对象；仅 Ratkin 走新内部模型 | Ratkin 在 No-DLC 和现有设置下的行为等价；无 Scribe/日志 ABI 变化 |
 | 0.3.1 | race-aware catalog/resolver：`(race,xenotype)` 与 race 池；旧 Ratkin selection 的显式、幂等迁移 | Kiiro 或另一外来 race 的**per-race**池端到端实证；不再共享 Ratkin/Example 池 |
-| 0.3.2 | 设置 UI 候选与显式 opt-in 结构（UI 专项；profile 驱动装配与 per-race fallback 已在 0.3.1 落地） | UI 不泄漏非装配域；No-DLC 不访问 Xenotype 路径 |
+| 0.3.2 | 设置 UI 候选与显式 opt-in 结构（原 UI 专项） | UI 不泄漏非装配域；No-DLC 不访问 Xenotype 路径 |
 | 拆分准备 | US/SR 设置、保存、Workshop 迁移演练 | 下列六项拆分门全部通过 |
 | 拆分发布（**0.4.x 首个版本**） | US 新 item 上线 + SR 同 item 收缩为 Example VoicePack 并依赖 US；移除 ProductDomainFilter（US 无限制域） | 六项拆分门逐条可重复证据；SR→US+SR 升级路径实机通过 |
+
+> **2026-08-22 路线修订（以决策文档 §5 为准）**：0.3.x SR **UI 保持不变**，原 UI 专项全部转入新开 US 仓库开发面；内核升级为 US 通用状态并与 US 仓库 0.3.x 并行开发；**0.4 = US 与 SR 双仓同步上架**（US 暂不作为 SR 依赖，SR 0.4 只做 bugfix 并同步反馈 US）；**SR 1.0.0 才收缩为纯音频包并依赖 US**。本表 0.3.2 原 UI 专项行废止，拆分准备/拆分发布两行按新路线重读。
 
 每个阶段只引入一条活运行时路径。旧路径应在迁移完成的同一变更中删除，不能用长期 shim 掩盖双实现漂移。
 

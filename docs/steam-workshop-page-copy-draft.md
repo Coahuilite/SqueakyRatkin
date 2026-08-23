@@ -90,7 +90,7 @@ VoicePack 可以只覆盖其中一部分动作。某个动作没有合适的自�
 
 [list]
 [*][url=https://github.com/Coahuilite/SqueakyRatkin/releases/tag/v0.3.0]GitHub Release v0.3.0[/url]
-[*][url=https://github.com/Coahuilite/SqueakyRatkin/blob/main/docs/voice-pack-author-guide-zh.md]VoicePack 作者指南（中文）[/url]
+[*][url=https://github.com/Coahuilite/SqueakyRatkin/blob/main/.github/skills/squeaky-voicepack-authoring/SKILL.md]VoicePack 作者指南（中文）[/url]
 [*][url=https://github.com/Coahuilite/SqueakyRatkin/issues]GitHub Issues：问题反馈[/url]
 [/list]
 
@@ -168,7 +168,7 @@ The Example clips are public-domain material. They can be used for listening or 
 
 [list]
 [*][url=https://github.com/Coahuilite/SqueakyRatkin/releases/tag/v0.3.0]GitHub Release v0.3.0[/url]
-[*][url=https://github.com/Coahuilite/SqueakyRatkin/blob/main/docs/voice-pack-author-guide-zh.md]VoicePack Author Guide (Chinese)[/url]
+[*][url=https://github.com/Coahuilite/SqueakyRatkin/blob/main/.github/skills/squeaky-voicepack-authoring/SKILL.md]VoicePack Author Guide (Chinese)[/url]
 [*][url=https://github.com/Coahuilite/SqueakyRatkin/issues]GitHub Issues[/url]
 [/list]
 

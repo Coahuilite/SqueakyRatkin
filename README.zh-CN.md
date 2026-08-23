@@ -19,7 +19,7 @@
 
 主包内置普通 Race-only `SR_OfficialExample_Race`：作为当前参考基准，现有 15 个 SoundDef、41 个 OGG，分布为 Attack 3、Call 4、Death 2、Draft 3、Eat 2、Equip 2、Joy 3、MentalBreak 1、Move 3、Select 3、Sleep 3、Social 3、Undraft 3、Work 3、Wounded 3。这是有随包 Example 音频的 15 个动作，不是 17 动作运行时 ABI：`Crying`/`Giggling` 有意没有内置音频。这些数量只是当前 Example 参考基准而非固定合同，未来版本允许变化。它 No-DLC 可用；0.2.3 起新装默认启用（从未调整过音源策略的旧配置自动迁移一次），与第三方 VoicePack 同权重规则，可随时在设置中关闭。`Extras/SqueakyRatkinExampleVoices/` 是可直接启用的独立 Race-only Template，拥有自己的 package ID、PackDef、Catalog 身份和资源根。Template 是 Example 音频的唯一维护源，staging 将其镜像到内置 Example。
 
-Example 音频是 MPL-2.0 代码许可证之外的公共领域素材。项目与贡献者不对其主张版权或相关权利；可使用、复制、修改和再分发。权利状态及有限的来源/法域免责声明见 [`AUDIO_RIGHTS.txt`](./Extras/SqueakyRatkinExampleVoices/AUDIO_RIGHTS.txt)。请从 [`docs/voice-pack-author-guide-zh.md`](./docs/voice-pack-author-guide-zh.md) 和 [`Extras/SqueakyRatkinExampleVoices/README.md`](./Extras/SqueakyRatkinExampleVoices/README.md) 开始；自定义音频必须是独立 VoicePack，绝不安装进主模目录。
+Example 音频是 MPL-2.0 代码许可证之外的公共领域素材。项目与贡献者不对其主张版权或相关权利；可使用、复制、修改和再分发。权利状态及有限的来源/法域免责声明见 [`AUDIO_RIGHTS.txt`](./Extras/SqueakyRatkinExampleVoices/AUDIO_RIGHTS.txt)。请从 [`.github/skills/squeaky-voicepack-authoring/SKILL.md`](./.github/skills/squeaky-voicepack-authoring/SKILL.md) 和 [`Extras/SqueakyRatkinExampleVoices/README.md`](./Extras/SqueakyRatkinExampleVoices/README.md) 开始；自定义音频必须是独立 VoicePack，绝不安装进主模目录。
 
 ## 设置与诊断
 

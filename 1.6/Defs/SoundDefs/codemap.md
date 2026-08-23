@@ -40,7 +40,7 @@ Defs 加载（LoadFolders v1.6，无条件）
 ## Integration
 
 - 上游消费者：`CompSqueaker`（生产触发）、`SqueakAudioBrowser`/`SqueakOnCameraPreviewAdapter`（试听）、`SqueakSoundAvailability`（可播放性门控）、`CompSqueaker.ApplyDistanceRange`（写回 `distRange`）。
-- 第三方 VoicePack 契约：`docs/voice-pack-author-guide-zh.md` —— 音频根 `<lowercase packageId>/<PackDef.defName>/<Action>/`；独立模组发布；不得修改主模组 SoundDef、不得把音频装入主模组目录。
+- 第三方 VoicePack 契约：`.github/skills/squeaky-voicepack-authoring/SKILL.md` —— 音频根 `<lowercase packageId>/<PackDef.defName>/<Action>/`；独立模组发布；不得修改主模组 SoundDef、不得把音频装入主模组目录。
 - 与 `Patches/Ratkin_AddSqueakComp.xml` 的关系：patch 里 15 个 `<action>` 名决定本目录前 15 个 `SR_<Action>` 必须存在；Crying/Giggling 由 BabyFits hook 触发且无内置 SoundDef。两者由 `SqueakAction` 枚举值隐式连接（非 XML cross-ref）。
 
 ## Change Guidance

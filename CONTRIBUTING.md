@@ -1,6 +1,6 @@
 # 贡献指南 · Contributing
 
-This project accepts code and audio contributions. Current contracts are [`docs/project-architecture-contract.md`](./docs/project-architecture-contract.md), [`docs/settings-ui-product-contract-zh.md`](./docs/settings-ui-product-contract-zh.md), and [`docs/voice-pack-author-guide-zh.md`](./docs/voice-pack-author-guide-zh.md).
+This project accepts code and audio contributions. Current contracts are [`docs/project-architecture-contract.md`](./docs/project-architecture-contract.md), [`docs/settings-ui-product-contract-zh.md`](./docs/settings-ui-product-contract-zh.md), and the author guide [`.github/skills/squeaky-voicepack-authoring/SKILL.md`](./.github/skills/squeaky-voicepack-authoring/SKILL.md).
 
 ## Audio / 音频
 
