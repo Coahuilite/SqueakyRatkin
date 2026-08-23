@@ -1,3 +1,4 @@
-# KernelCharacterization compares frozen fixtures as raw UTF-8 bytes.
-# Force LF checkout for all fixture inputs/corpora so byte-stable harnesses never see CRLF.
-fixtures/** text eol=lf
+# KernelCharacterization compares frozen corpora as raw UTF-8 bytes: force LF only for them.
+# Other fixtures (input/expected XML) intentionally follow the host checkout (Windows CRLF) because
+# SettingsFixtureGenerator emits Environment.NewLine and compares bytes on Windows.
+fixtures/corpus/*.txt text eol=lf
