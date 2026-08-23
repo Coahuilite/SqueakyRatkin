@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net472</TargetFramework>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <AssemblyName>SqueakyLegacyBridgeHarness</AssemblyName>
+    <RootNamespace>SqueakyRatkin.LegacyBridgeHarness</RootNamespace>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <InformationalVersion>0.0.0+legacybridge</InformationalVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- 与编译期原型共享同一份桥逻辑源文件；仅 Verse 类型由本 harness 的纯桩提供。 -->
+    <Compile Include="..\LegacyBridgePrototype\LegacyVoicePackBridge.cs" Link="Shared\LegacyVoicePackBridge.cs" />
+    <Compile Include="..\LegacyBridgePrototype\LegacyVoicePackSource.cs" Link="Shared\LegacyVoicePackSource.cs" />
+  </ItemGroup>
+
+</Project>
