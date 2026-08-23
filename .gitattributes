@@ -1,2 +1,3 @@
-# KernelCharacterization compares this frozen fixture as raw UTF-8 bytes.
-fixtures/corpus/corpus-0.3.0.txt text eol=lf
+# KernelCharacterization compares frozen fixtures as raw UTF-8 bytes.
+# Force LF checkout for all fixture inputs/corpora so byte-stable harnesses never see CRLF.
+fixtures/** text eol=lf
