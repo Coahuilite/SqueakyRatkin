@@ -28,4 +28,5 @@ packages/
 *.orig
 *.log
 /debug/
-.slim/deepwork/
+# oh-my-opencode-slim 本地工具目录（整目录排除；历史清理见维护者决定）
+.slim/
