@@ -52,6 +52,13 @@ public partial class SqueakyRatkinSettings : ModSettings
     public bool scaleCooldownWithTimeSpeed = true;
     public bool scaleFrequencyWithTalking = true;
     public bool scalePeriodicWithAudiblePopulation = true;
+    // Eat 触发粒度两级开关（2026-08-23 维护者决定）：父关 = 整个 Ingest job 都算 Eat（出厂手感，含端食物赶路）；
+    // 父开子关 = 只在 vanilla「正在摄入营养」时算；父开子开 = 按咀嚼/点燃 toil 判定（成瘾品也算，toil 名未确认时
+    // 回落完整 job 级）。默认值单一来源 = SqueakEatOccurrence.*Default，Scribe 默认值与 fixture host 镜像
+    // （tools/SettingsFixtureGenerator/Contract/SettingsContract.cs）必须一致，由 KernelCharacterization 断言 +
+    // fixtures 零 delta 门共同锁定。**父关时子项必须保持 false**（UI 禁用 + 关闭父项即清零 + PostLoadInit 归一）。
+    public bool eatOnlyDuringChewing = SqueakEatOccurrence.ChewingOnlyDefault;
+    public bool eatIncludeDrugs = SqueakEatOccurrence.IncludeDrugsDefault;
     public bool localizeDebugActions = false;
     public bool developerToolsEnabled = false;
     public SqueakDevLoggingMode devLoggingMode = SqueakDevLoggingMode.Auto;
@@ -114,6 +121,8 @@ public partial class SqueakyRatkinSettings : ModSettings
         CompSqueaker.ScaleCooldownWithTimeSpeed = scaleCooldownWithTimeSpeed;
         CompSqueaker.ScaleFrequencyWithTalking = scaleFrequencyWithTalking;
         CompSqueaker.ScalePeriodicWithAudiblePopulation = scalePeriodicWithAudiblePopulation;
+        CompSqueaker.EatOnlyDuringChewing = eatOnlyDuringChewing;
+        CompSqueaker.EatIncludeDrugs = eatOnlyDuringChewing && eatIncludeDrugs;
         CompSqueaker.GlobalCooldownMultiplier = Mathf.Clamp(globalCooldownMultiplier, 0f, 3f);
         CompSqueaker.ApplyDistanceRange(ClampDistanceRange(distanceRange));
     }
@@ -134,6 +143,8 @@ public partial class SqueakyRatkinSettings : ModSettings
         CompSqueaker.ScaleCooldownWithTimeSpeed = scaleCooldownWithTimeSpeed;
         CompSqueaker.ScaleFrequencyWithTalking = scaleFrequencyWithTalking;
         CompSqueaker.ScalePeriodicWithAudiblePopulation = scalePeriodicWithAudiblePopulation;
+        CompSqueaker.EatOnlyDuringChewing = eatOnlyDuringChewing;
+        CompSqueaker.EatIncludeDrugs = eatOnlyDuringChewing && eatIncludeDrugs;
         CompSqueaker.GlobalCooldownMultiplier = Mathf.Clamp(globalCooldownMultiplier, 0f, 3f);
     }
 
@@ -709,6 +720,8 @@ public partial class SqueakyRatkinSettings : ModSettings
         bool scaleCooldownWithTimeSpeed = this.scaleCooldownWithTimeSpeed;
         bool scaleFrequencyWithTalking = this.scaleFrequencyWithTalking;
         bool scalePeriodicWithAudiblePopulation = this.scalePeriodicWithAudiblePopulation;
+        bool eatOnlyDuringChewing = this.eatOnlyDuringChewing;
+        bool eatIncludeDrugs = this.eatIncludeDrugs;
         float globalCooldownMultiplier = this.globalCooldownMultiplier;
         if (SqueakySettingsUI.Toggle(list.GetRect(34f), "SR.ScaleCooldownWithTimeSpeed.Label".Translate(), ref scaleCooldownWithTimeSpeed,
                 tooltip: "SR.ScaleCooldownWithTimeSpeed.Tooltip".Translate()))
@@ -731,6 +744,25 @@ public partial class SqueakyRatkinSettings : ModSettings
         Color oldTalkingDesc = GUI.color; GUI.color = Color.gray; Text.Font = GameFont.Tiny;
         list.Label("SR.ScaleFrequencyWithTalking.Short".Translate());
         Text.Font = GameFont.Small; GUI.color = oldTalkingDesc;
+        if (SqueakySettingsUI.Toggle(list.GetRect(34f), "SR.EatOnlyDuringChewing.Label".Translate(), ref eatOnlyDuringChewing,
+            tooltip: "SR.EatOnlyDuringChewing.Tooltip".Translate()))
+        {
+            this.eatOnlyDuringChewing = eatOnlyDuringChewing;
+            // 父项关闭必须让子项保持 false（不落盘 true、运行时也不生效）。
+            if (!this.eatOnlyDuringChewing) this.eatIncludeDrugs = false;
+            ApplyCheapAndQueue();
+        }
+        Color oldEatDesc = GUI.color; GUI.color = Color.gray; Text.Font = GameFont.Tiny;
+        list.Label("SR.EatOnlyDuringChewing.Short".Translate());
+        Text.Font = GameFont.Small; GUI.color = oldEatDesc;
+        if (SqueakySettingsUI.Toggle(list.GetRect(34f), "SR.EatIncludeDrugs.Label".Translate(), ref eatIncludeDrugs,
+            enabled: this.eatOnlyDuringChewing,
+            disabledReason: "SR.EatIncludeDrugs.ParentOff".Translate(),
+            tooltip: "SR.EatIncludeDrugs.Tooltip".Translate()))
+        {
+            this.eatIncludeDrugs = eatIncludeDrugs;
+            ApplyCheapAndQueue();
+        }
         SqueakySettingsUI.LabelWithHelp(list.GetRect(28f), "SR.GlobalCooldownMultiplier.Label".Translate(globalCooldownMultiplier.ToString("0.0#")),
             "SR.GlobalCooldownMultiplier.Tooltip".Translate());
         globalCooldownMultiplier = list.Slider(globalCooldownMultiplier, 0f, 3f);
@@ -765,6 +797,8 @@ public partial class SqueakyRatkinSettings : ModSettings
     {
         float height = MeasureCompactPageIntroHeight("SR.Rules.Header".Translate(), "SR.Rules.PageDesc".Translate(), width) + 34f;
         height += 34f + 34f + 34f + Text.CalcHeight("SR.ScaleFrequencyWithTalking.Short".Translate(), width);
+        height += 34f + Text.CalcHeight("SR.EatOnlyDuringChewing.Short".Translate(), width);
+        height += 34f + 34f;
         height += 28f + 30f + Text.CalcHeight("SR.GlobalCooldownMultiplier.Short".Translate(), width) + 20f;
         height += 34f;
         if (distanceSectionOpen)

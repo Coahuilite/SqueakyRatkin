@@ -26,6 +26,8 @@ Biotech 激活时，每个精确 `XenotypeDef.defName` 对应一个 preset；空
 
 不借 UI 改动改变动作资格、resolver、音频回退、Scribe schema 或 DLC 产品语义；不加入跨模组 UI 框架、共享 DLL、router/store/command bus、布局 DSL；不 patch RimWorld/其他模组 UI；不把 tooltip 当作关键知识唯一载体。
 
+唯一例外（2026-08-23 维护者决定，承接 Steam 评论反馈）：**发声规则·频率**组新增一对 Eat 触发粒度控件——父开关「仅在真正进食（正在摄入营养）时触发 Eat 叫声」与其下的依赖子项「使用成瘾品」。父关 = 整个 Ingest job（含端食物赶路，出厂默认）；父开 = 只在正在摄入营养时；父开 + 子开 = 按 vanilla 咀嚼/点燃 toil 判定（零营养成瘾品也算，toil 名无法识别时回落完整 job 级）。**子项在父项关闭时禁用且必须保持 `false`**（关闭父项即清零，PostLoadInit 归一）。它们不改变动作资格/作用域、resolver、音频回退或动作 ABI；Scribe 面只 add-only 增加两个默认 `false` 的字段（默认值省略，settings schema 不 bump）。
+
 实现位于 `Source/SqueakyRatkin/SqueakyRatkinSettings.cs` 及其设置 UI 相关 partial/helper；游戏上下文由 `SqueakSettingsGameContext` 管理，保存协调器负责 immediate、coalesced save 与 close flush。helper 只处理局部 Rect/绘制/意图，不承担设置写入、Catalog、resolver 或保存。
 
 ## 最小验收矩阵

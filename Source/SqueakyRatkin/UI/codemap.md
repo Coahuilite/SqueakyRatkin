@@ -36,7 +36,7 @@
 
 ### Page 1 — Basics / 发声规则
 
-`DrawSettingsContents` 以一个主 `scrollPos` 绘制 frequency toggles（time-speed/talking/audible-population）、global cooldown slider、可折叠 distance preset/range/chart、global action scope rows（包括 Draft/Undraft pair 与 Player/System groups）及 auxiliary `localizeDebugActions`。toggle/slider 采用临时局部值，接受后立即写正式字段：cheap values → `ApplyCheapAndQueue`；距离 → `ApplyDistanceAndQueue`；action menu → `SetActionGlobalScope` → `ApplyActionScopeAndQueue`（`SqueakGlobalActionPolicy.Publish` + discrete resolver notify + persistence）。
+`DrawSettingsContents` 以一个主 `scrollPos` 绘制 frequency toggles（time-speed/talking/audible-population/eat-only-during-chewing/eat-include-drugs，其中子项在父项关闭时禁用并显示原因）、global cooldown slider、可折叠 distance preset/range/chart、global action scope rows（包括 Draft/Undraft pair 与 Player/System groups）及 auxiliary `localizeDebugActions`。toggle/slider 采用临时局部值，接受后立即写正式字段：cheap values → `ApplyCheapAndQueue`；距离 → `ApplyDistanceAndQueue`；action menu → `SetActionGlobalScope` → `ApplyActionScopeAndQueue`（`SqueakGlobalActionPolicy.Publish` + discrete resolver notify + persistence）。
 
 ### Page 2 — SoundMood / 心情音色
 

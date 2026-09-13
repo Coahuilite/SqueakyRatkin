@@ -36,22 +36,24 @@ Short release summary.
 - ...
 ```
 
-## Unreleased — 0.3.2
+## Unreleased — 0.3.3
 
-Race-declared, age-aware VoicePacks; player-triggered voices are limited to controllable, responsive pawns; the author XML contract is frozen and ships with a scaffold + self-contained guide.
+Race-declared, age-aware VoicePacks; player-triggered voices are limited to controllable, responsive pawns; the author XML contract is frozen and ships with a scaffold + self-contained guide; eating and drug squeaks gain two-level granularity controls.
 
 ### Added
 - VoicePacks now declare the exact race they serve and only play for that race.
 - Per-age voice variants (`Baby`/`Toddler`/`Child`/`Adult`) and per-action pack fallbacks.
 - `Crying`/`Giggling` voice entries for Biotech babies (silent unless a pack provides clips).
 - Author tooling: `new-voicepack.ps1` scaffold and a self-contained author guide (also usable as an AI skill).
+- New setting "Only squeak while actually eating (gaining nutrition)", off by default: the whole eat trip still counts as `Eat` unless the player narrows it to moments of gaining nutrition (zero-nutrition drugs such as smokeleaf joints are excluded).
+- New dependent option "Drug use", off by default and only available while the setting above is on: zero-nutrition drugs such as smokeleaf joints and flake then count as `Eat` too, judged at the vanilla chewing/igniting stage and falling back to the whole eat job if that stage cannot be identified.
 
 ### Changed
 - Selecting a pawn only triggers the select squeak for player-controlled, awake, non-downed pawns; sleeping, mentally broken, hostile, or wild pawns stay silent.
 - VoicePack XML is now a public stable contract: fields are add-only, the 17 action keys are append-only, and invalid packs fail closed; `IsEgg` is part of that contract.
 
 ### Notes
-- The 0.3.1 development snapshot was not released; its race routing, age/fallback, egg-entry, and baby-fits work ships together with 0.3.2.
+- The 0.3.1 snapshot and the 0.3.2 work were never released as a stable version; 0.3.2 shipped only as the GitHub prerelease `v0.3.2-pre1`, and its race routing, age/fallback, egg-entry, baby-fits, identity-gating, and XML-ABI work ships together with 0.3.3.
 - Diagnostic logging now writes one consolidated route line per action window with sound tier, egg flag, pawn faction, and player-control flag.
 
 ## [2026-08-21 09:35 UTC+8] Version 0.3.0
