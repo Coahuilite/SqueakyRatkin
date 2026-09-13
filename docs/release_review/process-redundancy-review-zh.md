@@ -83,13 +83,13 @@ SR 与 US 的差异是产品面的（SR 有内置音频/Extras/三渠道、Steam
 3. **`dist/` 里有 3 个陈旧暂存包**（dev `0.3.2-EXP`、steam `0.3.0`、github `0.3.2-pre1`）。新增的读时门会把它们标为 `[note] stale artifact, do not upload it`——这正是「人工清单会漏、脚本不会漏」的实例。
 4. 本地 DLL 身份：`FileVersion=0.3.3.0`、`ProductVersion=0.3.3+<40 位 sha>`；release 通道由 CI 显式注入 `v<tag>+<sha12>`。二者形状不同，读时门只断言 `FileVersion` 全等 + `ProductVersion` 含产品版本。
 
-## 7. 待维护者裁决
+## 7. 裁决记录（2026-09-13 定案）
 
-| 编号 | 事项 | 现状 | 影响 |
+| 编号 | 事项 | 裁决 | 落地 |
 |---|---|---|---|
-| V1 | 追认「本地 commit 无需逐次授权」（US 口径） | 本会话按该口径推进 0.3.3 的本地提交，等待追认 | 不追认则需回退为「每次本地提交单独授权」的旧仪式 |
-| V2 | 是否授权历史/tag 重写（force-push + tag 重建） | 门以 `[known-debt]` 呈现 5 个文件；未写操作 | 不授权则债务长期存在；授权则按隐私事件流程单独执行 |
-| V3 | CI 增加门与 SDK 对齐（8.0.x → 10.0.x）是否接受 | 已写入 workflow，推送后才生效 | 不接受则保留旧 CI，本地门继续人工跑 |
+| V1 | 本地 commit 是否免逐次授权（US 口径） | **追认**：本地 commit 免授权；远端 push/PR/tag/Release/Workshop 仍逐次授权 | `AGENTS.md`「External-state boundaries」保留 |
+| V2 | 历史/tag 重写 | **先出专项方案，不动 git 历史**：当前维持方案 A（不重写 + 纪律固化）；方案 B 执行计划与不可逆点已备 | 专项方案 [`privacy-history-rewrite-plan-zh.md`](./privacy-history-rewrite-plan-zh.md)（5 文件 × 1 处；漂移 ≈229/230；10 tag；仓内 54 处 hash 引用；跨仓 1 处） |
+| V3 | CI 加门 + SDK 对齐 10.0.x | **接受**：CI 跑 11 项门 + 隐私门；runner SDK 与本地证据基线同 major | 已写入 `ci.yml`/`release.yml`；推送后首跑即真验 |
 
 ## 8. 风险与反例（这次简化可能错在哪）
 
