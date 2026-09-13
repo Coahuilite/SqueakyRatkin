@@ -7,7 +7,7 @@
 
 **鼠辈啁啾 / Squeaky Ratkin** 是 RimWorld 1.6 语音发声模组：为 HAR 体系的 Ratkin 种族（`AlienRace.ThingDef_AlienRace[defName="Ratkin"]`，def 由 NewRatkinPlus 提供）挂载每 pawn 的发声组件，按 17 个 `SqueakAction`（Eat / Call / Move / Sleep / Social / Joy / Work / Wounded / Select / Death / Draft / Undraft / Attack / Equip / MentalBreak / Crying / Giggling）触发音效；Crying/Giggling 为 append-only 15/16、无内置音频时静默。支持心情调制（mood pitch/volume/jitter）、距离预设、VoicePack 四层选音（Xenotype pack / Race pack / pack fallback / built-in fallback）、设置工作台、诊断工具与结构化日志。
 
-- **身份**：packageId `coahuilite.squeakyratkin`（大小写敏感，Extras 内嵌包依赖此 ID）；产品版本 `0.3.2`（开发收口/prerelease，`0.3.0` 为最新已发布）；`supportedVersions` 仅 1.6。
+- **身份**：packageId `coahuilite.squeakyratkin`（大小写敏感，Extras 内嵌包依赖此 ID）；产品版本 `0.3.3`（进行中；最新正式发布 `0.3.0`，`0.3.2-pre1` 为 GitHub prerelease）；`supportedVersions` 仅 1.6。版本唯一主源是 csproj `<Version>`，本行只是快照。
 - **依赖分层**：Harmony（`brrainz.harmony`）与 HAR（`erdelf.HumanoidAlienRaces`）为硬依赖（`modDependencies`）；NewRatkinPlus（`Solaris.RatkinRaceMod`）运行时必需但元数据仅 `loadAfter` 软声明；`LoadFolders.xml` 无条件加载本体，发声注入按 XPath `defName="Ratkin"` 匹配（缺 def 时静默 no-op，兼容保留该 def 的 fork）；全部官方 DLC 与 HugsLib **零引用**（No-DLC 契约：Biotech 增强全部经 `ModsConfig.BiotechActive` 门控，HAR 交互全反射）。
 - **配置三层**：XML 默认（`1.6/Patches`）← 玩家 ModSettings override（`SqueakyRatkinSettings`）← 运行时发布（resolver/policy 不可变快照）。
 - **发布形态**：Dev / GitHub / Steam 三种 build flavor 的 mod 包，统一由 `scripts/stage-package.ps1` 组装。

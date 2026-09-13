@@ -9,6 +9,7 @@
   - pack = 本目录 PowerShell 脚本，**前提是 DLL 已存在**；`stage-package.ps1` 在缺 DLL 时直接 throw（"Build the desired flavor before staging."），保证 pack 永远吃到先编译的 flavor。
 - 四个脚本分工：`stage-package.ps1` 是唯一 staging 引擎；`pack-dev.ps1` / `pack-github.ps1` / `pack-steam.ps1` 是薄包装，各自只负责 flavor 专属的 identity 与输出形态。
 - 守护内容契约：Example 音频只能使用已知运行时 action 目录、非空且 OGG key 唯一；Template 与 built-in 镜像必须逐 key SHA256 相同；音频总数和每动作数量仅为当前参考值，不是门禁。GitHub/Dev 包里**不得出现** Steam `PublishedFileId.txt`。
+- **发布面与隐私面是另外两个门（2026-09-13，对齐 UniversalSqueaker）**：`check-pack-readiness.ps1` = 发布前读时复核（版本轴 / 仓库红线 / 暂存包 / DLL 身份 / `[claim]` 快照，默认组合 `verify-local`）；`privacy-audit.ps1` = 隐私三向量 + 身份门（CI 跑默认模式，push 前 `-FullHistory -PrePush`）。三命令分工与最小发布仪式见 [`../docs/release-runbook-zh.md`](../docs/release-runbook-zh.md)。
 
 ## Key Files & Symbols
 
@@ -24,11 +25,13 @@
 | `verify-voicepack-xml-abi.ps1` | 0.3.2 第 10 项：示例 XML × validator × 作者指南三向对照；C# `SqueakActionDefinitions` 17 键顺序为源，校验两份提交态 XML（官方内置/Extras 模板）的结构、SR_ 前缀、SoundDef 契约与交叉引用；`dist/SqueakyRatkinEggTestVoices/` 存在时并入校验 `IsEgg`；「作者指南」标记源 = `.github/skills/squeaky-voicepack-authoring/SKILL.md` |
 | `verify-voicepack-scaffold.ps1` | 0.3.2 第 11 项：临时目录运行 `new-voicepack.ps1` 生成 Call,Select 最小包，校验目录/XML 结构后清理；只写系统临时目录 |
 | `new-voicepack.ps1` | 0.3.2 作者脚手架（SKILL 配套）：`-PackageId -PackDefName [-Actions Call,Select] [-RaceDefName Ratkin] [-OutDir]` 生成 Race-only 包骨架（About/LoadFolders/最小 PackDef+SoundDef XML/音频占位目录/README）；校验 17 内置键与 SR_/小写 packageId 规则；目标已存在拒绝覆盖 |
+| `check-pack-readiness.ps1` | 发布面读时门：csproj↔About 版本轴、packageId、LICENSE、`LoadFolders.xml` 无 `IfModActive`、Template 音频非空且 OGG-only、无 built-in 源、无 `About/PublishedFileId.txt`、DLL `FileVersion`/`ProductVersion`、暂存包排除项（pdb/gitkeep/codemap/PublishedFileId）+ `version.txt` 三行与内部一致；`-SkipVerify` 跳过 verify-local，`-RequireReleaseMetadata` 加发布口径（无后缀版本 + 非占位描述）；通过后打印 `[claim]` 快照（只用仓内相对路径） |
+| `privacy-audit.ps1` | 隐私门（三向量独立扫、结论不得互推）：工作树 / 提交信息 / 历史 blob（`-FullHistory`，先量后扫 227 revision）+ 身份面（author/committer 必须全为 GitHub noreply）；`$knownHistoryDebt` 台账把已知债务列为 `[known-debt]`（不判失败，历史重写另行授权）；`-PrePush` 追加机械自检（干净树、`main` 存在、待推送提交清单、tag 集合确认） |
 | `Source/SqueakyRatkin/SqueakyRatkin.csproj` | `<Version>`（identity 唯一来源）、`<SqueakyBuildFlavor>`（默认 `Dev` → `SQUEAKY_<FLAVOR>` DefineConstants）、`<SqueakyInformationalVersion>`（覆盖运行时 informational）、`<OutputPath>..\..\1.6\Assemblies</OutputPath>`、Release 下 `DebugType=none` |
 | `LoadFolders.xml`（根） | 主 mod 挂载：无条件加载 `/` 与 `1.6`；发声内容是否命中由 XML Patch 的 `defName="Ratkin"` XPath 决定 |
 | `Extras/SqueakyRatkinExampleVoices/LoadFolders.xml` | Extras 独立 mod：`v1.6` 下挂 `1.6/Race` |
-| `.github/workflows/ci.yml` | Dev flavor 构建 + dev snapshot 打包 + artifact 上传 |
-| `.github/workflows/release.yml` | tag 校验 → GitHub flavor 构建 → `pack-github.ps1` → GitHub Release |
+| `.github/workflows/ci.yml` | restore（glob）→ `verify-local.ps1 -NoRestore`（11 项）→ `privacy-audit.ps1`（默认模式）→ Dev flavor 构建 + dev snapshot 打包 + artifact 上传 |
+| `.github/workflows/release.yml` | tag 校验 → restore → 11 项门 → `check-pack-readiness.ps1 -SkipVerify -RequireReleaseMetadata` → GitHub flavor 构建 → `pack-github.ps1` → GitHub Release |
 
 ## Design
 
@@ -99,8 +102,8 @@ dist/dev/SqueakyRatkin/            dist/github/SqueakyRatkin/          dist/stea
 
 ## Integration
 
-- **CI**：[`.github/workflows/ci.yml`](../.github/workflows/ci.yml) —— push（main/master/dev）与 PR 触发；`setup-dotnet 8.0.x` → Dev flavor Release 构建 → push 时调 `pack-dev.ps1` 并 `Compress-Archive dist/dev/SqueakyRatkin` 为 `dist/dev/SqueakyRatkin-dev-<sha>.zip` → `actions/upload-artifact@v4`（14 天保留）。PR 只构建不打包。
-- **Release**：[`.github/workflows/release.yml`](../.github/workflows/release.yml) —— `v*` tag 触发（`fetch-depth: 0`）；先验 tag 格式/版本一致/main 祖先，再以 `SqueakyInformationalVersion=v<tag>+<sha12>` 构建 **GitHub flavor**，调 `pack-github.ps1 -Version $tag`，`softprops/action-gh-release@v2` 上传 zip（`generate_release_notes`；tag 含 `-` 自动标记 prerelease）。
+- **CI**：[`.github/workflows/ci.yml`](../.github/workflows/ci.yml) —— push（main/master/dev）与 PR 触发（同分支新 push 取消旧 run，`timeout-minutes: 15`）；`setup-dotnet 10.0.x`（与本地证据基线同 SDK major）→ restore（`Source,tools` glob）→ `verify-local.ps1 -NoRestore`（11 项）→ `privacy-audit.ps1`（工作树 + 提交信息 + 身份）→ Dev flavor Release 构建 → push 时调 `pack-dev.ps1` 并 `Compress-Archive dist/dev/SqueakyRatkin` 为 `dist/dev/SqueakyRatkin-dev-<sha>.zip` → `actions/upload-artifact@v4`（14 天保留）。PR 只构建不打包。
+- **Release**：[`.github/workflows/release.yml`](../.github/workflows/release.yml) —— `v*` tag 触发（`fetch-depth: 0`）；先验 tag 格式/版本一致/main 祖先，再跑 restore → `verify-local.ps1 -NoRestore`（11 项）→ `check-pack-readiness.ps1 -SkipVerify -RequireReleaseMetadata`（版本轴 + 红线 + DLL 身份），然后以 `SqueakyInformationalVersion=v<tag>+<sha12>` 构建 **GitHub flavor**，调 `pack-github.ps1 -Version $tag`，`softprops/action-gh-release@v2` 上传 zip（`generate_release_notes`；tag 含 `-` 自动标记 prerelease）。
 - **Steam**：无 CI 发布环节（上传人工）；本地 `build-steam.ps1`（Steam flavor 构建 + `pack-steam` 干净树硬门 + About==csproj 版本断言）产出 `dist/steam/SqueakyRatkin`，`PublishedFileId.txt` 在 `About/` 现场生成（见安全不变式 1）。
 - **内容契约对接**：[`../1.6/Defs/SoundDefs/`](../1.6/Defs/SoundDefs/) 的 `SR_OfficialExample_Race` 与 `Extras/` 的 `SR_ExampleTemplate_Race` 的 `AudioGrain_Folder` 路径使用固定运行时 action 名称；`stage-package.ps1` 校验 Template 音频只使用这些已知目录，并镜像实际 key 集合与 SHA256（见 Change Guidance）。
 - **运行时身份消费**：[`../Source/SqueakyRatkin/codemap.md`](../Source/SqueakyRatkin/codemap.md)（`Mod.cs`/`SqueakLog.cs`/`Settings.cs` 的 `SQUEAKY_*` 分支）；发行物布局见 [`../About/codemap.md`](../About/codemap.md) 与 [`../1.6/codemap.md`](../1.6/codemap.md)（注意：staged 的 `1.6/` 比仓库多出 `Sounds/` 镜像与真实 DLL）。
@@ -113,4 +116,5 @@ dist/dev/SqueakyRatkin/            dist/github/SqueakyRatkin/          dist/stea
 - **禁止**：往 `1.6/Sounds/` 或 `dist/` 提交文件（gitignored 生成物）；在 `About/` 提交 `PublishedFileId.txt`；绕过 stage-package 自建 staging 逻辑；把非 OGG 文件放进 Template 音频目录。
 - **Steam 打包纪律（2026-08-20）**：Steam 是最终发布步——必须干净树（`pack-steam` 硬门）+ Steam 发布态（用 `build-steam.ps1` 一步入口，flavor 由构造保证）；三渠道 `stage-package` 统一断言 `About.xml <modVersion>` == csproj `<Version>`，失配即 throw。
 - **本地一键校验（2026-08-23 扩至 11 项）**：`pwsh scripts/verify-local.ps1` 是手动纪律的自动入口——任何 Kernel/协议/设置/XML ABI/脚手架改动后先跑它再谈提交；输出每检查一行，红即停。离线缓存环境可加 `-NoRestore`。
+- **三命令入口契约（2026-09-13）**：日常 = `verify-local.ps1`；发布面 = `check-pack-readiness.ps1 -RequireReleaseMetadata`（默认组合 verify-local）；push 前隐私 = `privacy-audit.ps1 -FullHistory -PrePush`。包内容/版本一致性不再手工逐项核验——新检查先落脚本，再写进 runbook。
 - 脚本为无参数/单参数 CLI，幂等（先清后建）；本地调试用 `pwsh -File scripts/pack-dev.ps1`（需先 `dotnet build`）。

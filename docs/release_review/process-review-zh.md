@@ -1,6 +1,8 @@
 # 发布流程复盘（0.2.x 跨版本）
 
 > 汇总 0.2.1–0.2.4 各版本 Claim Pack 与发布实践中暴露的流程不足；每条含根因与已落地的优化措施。措施以「已实现 / 待实现」标注。
+>
+> **台账截止**：2026-09-13 起的流程裁决不再追加到本文——新裁决进 [`../release-runbook-zh.md`](../release-runbook-zh.md) 与 [`process-redundancy-review-zh.md`](./process-redundancy-review-zh.md)（冗余评估与最小仪式）。本文保留为 0.2.x 历史台账。
 
 ## 已记录的三项（0.2.4 Claim Pack）
 

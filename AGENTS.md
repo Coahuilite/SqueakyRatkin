@@ -37,7 +37,13 @@ Maintain these boundaries:
 
 - Default scope is the repository root. Reading outside it requires authorization for the exact path, is read-only, and must not broaden to parents, siblings, Steam-wide roots, or global search. The named RimWorld `Player.log` troubleshooting directory is the standing read-only exception; do not broaden it without authorization.
 - Never place personal local state, expanded local paths, diagnostic-log excerpts, credentials, API keys, tokens, private keys, or `PublishedFileId.txt` in Git, documentation, generated artifacts, staging, or reachable history.
-- Every push — release or temporary staging — is preceded by a privacy review of the complete reachable range, not just HEAD. Write documentation privacy-free from the start: no personal local state, expanded paths, log excerpts, credentials, or `PublishedFileId.txt` values.
+- Every push — release or temporary staging — is preceded by a privacy review of the complete reachable range, not just HEAD. The check is `pwsh scripts/privacy-audit.ps1 -FullHistory` (three independent vectors: working tree / commit messages / historical blobs, plus the identity face); CI runs its default mode on every push and PR. Write documentation privacy-free from the start: no personal local state, expanded paths, log excerpts, credentials, or `PublishedFileId.txt` values.
 - If a real secret enters reachable history, stop first; revoke or rotate it, then perform incident-specific history cleanup. Do not claim cleanup alone resolves the secret.
-- Commit, push, PR, merge, tag, release, Workshop publication, and other externally effective operations require explicit authorization.
 - Repository evidence, stage output, CI output, or one publication channel cannot prove another channel's external state. Treat unknown manual or external state as unverified.
+
+## External-state boundaries
+
+- **Local commits are permitted** without a separate authorization step: they are reversible, never leave the machine, and are how a release is assembled. The release pipeline in `docs/release-runbook-zh.md` is local up to the first push.
+- **Remote-facing operations require explicit maintainer authorization**: `git remote` changes, push (including temporary staging branches), PR, merge, tag, GitHub Release, and any Workshop/Steam publication or edit.
+- **Pre-push ceremony is deliberately minimal (maintainer ruling 2026-09-13, mirroring UniversalSqueaker's 2026-09-06 ruling)**: the only human-run gate before a push is `pwsh scripts/privacy-audit.ps1 -FullHistory -PrePush` (privacy three-vector scan + identity + mechanical self-check: clean tree, `main` present, ahead-commit list, tag set confirmation), plus the release-facing `pwsh scripts/check-pack-readiness.ps1 -RequireReleaseMetadata` when the push is a release.
+- Everything else is already automated by `scripts/verify-local.ps1`, `scripts/check-pack-readiness.ps1`, `scripts/privacy-audit.ps1`, and the workflows: **do not re-add manual ritual** (hand-checked version equality, package-content item-by-item lists, repeated privacy scans). A new check is added as a script first, and only then referenced from the runbook.
