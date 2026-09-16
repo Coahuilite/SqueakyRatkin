@@ -37,15 +37,12 @@ push 前人工只有三件事：
 3. **门**：`check-pack-readiness`（含 verify-local）+ `privacy-audit`（默认模式）。
 4. **打包**（需要 dev 试用或 Steam 时）：`build-dev.ps1` / `build-steam.ps1`（Steam 一步入口，含干净树硬门）；包内容不再人工逐项核验，改由 `check-pack-readiness` 复核暂存包并输出文件数/版本。
 
-## 阶段 1 · PR 与 merge
+## 阶段 1 · 大版本分支 → main
 
-5. 原子 commit（本地，无需授权）→ **授权后** push dev → dev CI 通过（CI 已含 verify-local + privacy-audit）。
-6. **授权后** PR dev→main。
-7. **main/dev 分叉处理**：
-   - 若 main 的 squash tree 与 dev 的 merge tree 相同 → `git merge -s ours origin/main`（dev 纯增量，避免重复三方冲突）；
-   - 否则三方 merge → 注意 **auto-merged 文件不受 `git checkout --ours` 控制**（base 与 ours 相同时三方合并会采纳 theirs）；
-   - merge 后必须 **`git diff <修复commit> <mergecommit>` 全面核验**（重点关键行为文件：`LoadFolders.xml`/csproj/`About.xml`）→ 授权后 push。
-8. PR CI 通过 → **授权后** squash merge。
+5. 原子 commit（本地，无需授权）→ **授权后** push 对应大版本分支（如 `0.3.x`）与 `dev`；CI 通过（CI 已含 verify-local + privacy-audit）。
+6. **发布路径 = 大版本分支 → `main`**（例：`0.3.x` → `main`）。`main` 受保护时开 PR，**源分支仍是大版本分支**；`dev` 只做集成，不作为发布合并源。
+7. merge 后核验：`git diff --stat <大版本分支> main` 为 0 行（tree 相等）；关键行为文件（`LoadFolders.xml`/csproj/`About.xml`）抽查；受保护则 PR squash，非受保护时 ff/merge 均可。
+8. `archive/` 分支**只在最终版本定稿时建立**（例如 1.0.0 归档上一代发布线）；中间版本不建 archive 分支。历史 `merge -s ours` 分叉处理只在出现真实分叉时才用。
 
 ## 阶段 2 · GitHub 发布
 

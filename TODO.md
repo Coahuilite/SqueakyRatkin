@@ -1,6 +1,6 @@
 # TODO
 
-> **0.3.3 会话交接**：[`docs/handoff-0.3.3-zh.md`](docs/handoff-0.3.3-zh.md) —— 未提交状态清单、已定案、发布分派（发布会话）、US 兼容（U1–U4）与迁移裁决（Q1–Q10）。更新与发布流程在后续会话推进。
+> **当前状态（2026-09-13 之后）**：0.3.3 本地就绪（本地提交领先 `origin/dev`，**未推送**）；dev 包已产出 `dist/dev/SqueakyRatkin-dev-v0.3.3-92be4d6.zip`，**待维护者实机测试**（结果决定进入修复循环还是发布流程）；`kiiro-experiment` 分支已删（本地 + 远端）；文档收敛已外派：根目录任务书 `TASK-docs-consolidation-zh.md`（**不新增检查门**）；发布流程入口 `docs/release-runbook-zh.md`（发布路径已简化为「大版本分支 → main」）。
 
 ## 0.2.1 — 已知问题修复
 - [x] 悬浮诊断重构：pawn 头上改为单字符标记（绿=就绪/金=受阻），详情移入可拖动诊断面板窗口（`SqueakDiagnosticsPanel`，不暂停游戏、不吸收输入、revision 缓存）；面板头部与每行显式显示 Pawn 种族 defName。仅诊断展示，不参与资格、路由或播放决策。
@@ -15,9 +15,9 @@
 - [x] `CompSqueaker` 相位计算去重：`MaterializePeriodicStartupPhase` 与诊断路径共用 `CalculatePeriodicStartupReadyTick`；主模组与双 flavor logging harness 构建/运行通过。
 - [x] 字面量外置（本轮低风险项）：`CompSqueaker.IsSocializing` 的五个 job marker 已集中为 `SocialJobMarkers`；Ratkin 适配字面量与浏览器语义数组仍保留在各自数据/适配边界，待 Universal 阶段统一。
 - [x] 清理无调用方 internal helper：删除 `SqueakPeriodicPopulation.GetScale`（全树零调用）；public zero-call APIs 未删，需 ABI 决策。
-## Kiiro 实验（`kiiro-experiment` 分支独立进行，不属于 0.2.2）
-
-- [x] 分支策略：从 dev 开 `kiiro-experiment`（起点 `88cbe1c`）；实验分支不发布、当前不 merge。
+## Kiiro 实验（历史；分支已删除）
+- [x] **分支已于 2026-09-13 之后删除（本地 + 远端）**：`kiiro-experiment` 不再存在；本节其余条目仅存历史，待文档收敛时归档。
+- [x] 分支策略：从 dev 开 `kiiro-experiment`（起点 `88cbe1c`）；实验分支不发布、不 merge。
 - [x] 薄装配 adapter（`a0c1708`）：隐藏实验开关 + `SQUEAKY_EXPERIMENTAL` 编译门（仅 Dev flavor）；启动深克隆 Ratkin 的 `CompProperties_Squeaker` 挂入 `Kiiro_Race.comps`；开关 OFF 启动=不装配=默认行为。
 - [x] 实机验证 A/B/C/E + 受控 DLC 全关基线：开/关/静默/池路由均按预期，经 Player.log 交叉核验。
 - [ ] D 暂缓：Biotech + Kiiro Baseliner 异种域验证。
@@ -63,7 +63,8 @@
   - [x] **`.slim` 工具残留排除（2026-08-23 维护者）**：`.gitignore` 整目录忽略；`main`/`dev`/`0.3.x`/`kiiro-experiment`/`0.2.4-FINAL` 分支 tip 已删除 `.slim/codemap.json`（main 经 PR #25）。
   - [ ] 历史/tag 清理（**待维护者授权**）：发布 tags `v0.2.1`–`v0.3.2-pre1` 与历史提交仍可达 `.slim/codemap.json`（含本地绝对路径）；清理需重写全部受影响 refs/tags 并 force-push，按隐私事件流程单独执行。
   - [x] **0.3.3 本地推进完成（2026-09-13，停在远端推送前）**：流程冗余评估 + 最小仪式落地（新增 `scripts/privacy-audit.ps1` / `scripts/check-pack-readiness.ps1`；runbook 重写；`AGENTS.md` 增 External-state boundaries；`ci.yml`/`release.yml` 接线；评估 [`docs/release_review/process-redundancy-review-zh.md`](docs/release_review/process-redundancy-review-zh.md)）；Eat 两级开关 + 文档/记忆本地提交（未推送）；dev 包 `dist/dev/SqueakyRatkin` 已出；证据 = verify-local 11/11、readiness 全绿、`privacy-audit -FullHistory` 0 未接受命中（5 条 known-debt）。
-  - [ ] **0.3.3 远端发布（需授权；入口 [`docs/handoff-0.3.3-zh.md`](docs/handoff-0.3.3-zh.md) §10）**：push dev → PR dev→main → merge → tag `v0.3.3` → release CI（已含 11 项 + 发布面门）→ 资产核验 → 双语 CHANGELOG `未发布 — 0.3.3` 换时间 → 完整 Claim Pack `docs/release_review/release-0.3.3-review-zh.md`（字段取 `[claim]` 快照 + CI 输出）→ 渠道核验。**Steam 仍阻断**；解除时另需同步 `docs/steam-workshop-page-copy-draft.md` 的版本号/下载链接/字符数（0.3.2 未上 Steam，页面仍是 0.3.0 口径）。
+  - [ ] **0.3.3 远端发布（需授权；流程入口 [`docs/release-runbook-zh.md`](docs/release-runbook-zh.md)）**：**前置 = 维护者实机测试 dev 包**（`dist/dev/SqueakyRatkin-dev-v0.3.3-92be4d6.zip`；结果决定修复循环或发布）。发布路径（2026-09-13 简化）：push `0.3.x` + `dev` → **`0.3.x` merge 到 `main`** → tag `v0.3.3` → release CI（11 项 + 发布面门）→ 资产核验 → 双语 CHANGELOG `未发布 — 0.3.3` 换时间 → 完整 Claim Pack `docs/release_review/release-0.3.3-review-zh.md`；`archive/` 分支仅在最终版本建立。**Steam 仍阻断**；解除时另需同步 `docs/steam-workshop-page-copy-draft.md`（页面仍是 0.3.0 口径）。
+  - [ ] **文档收敛（已外派外部 agent，任务书 `TASK-docs-consolidation-zh.md`）**：全 docs 进临时 `archive/` 只读研判 → 生成收敛文档 → 提交 → 删除 archive；记忆压缩进 `OBLIVIONIS.md`；**不新增检查门**；`AGENTS.md` 驱动条目已于 2026-09-13 恢复。执行完成后本项关闭。
   - [x] **流程简化裁决 V1–V3（2026-09-13 定案）**：V1 追认本地 commit 免授权；V3 接受 CI 加门 + SDK 对齐 10.0.x；V2 先出专项方案不动 git——[`docs/release_review/privacy-history-rewrite-plan-zh.md`](docs/release_review/privacy-history-rewrite-plan-zh.md)（方案 B 执行需单独授权；Q1–Q5 待裁决）。
   - [x] **Eat 触发粒度两级开关（2026-08-23 维护者决定并实施，承接 Steam 评论反馈）**：默认保留 job 级派发（整个 Ingest job 含端食物赶路）；父 `eatOnlyDuringChewing`（默认关）→「正在摄入营养」（零营养成瘾品不算；啤酒 0.08/仙馔 0.2 等带营养成瘾品已算）；子 `eatIncludeDrugs`（显示名「使用成瘾品」，默认关、父关时禁用且强制 false）→ vanilla `ChewIngestible` toil（零营养成瘾品也算，toil 名本进程未确认时回落完整 job 级 fail-open）。纯规则 `SqueakEatOccurrence`（三模式 + 两默认值 + toil 名常量）+ harness 单测；设置 ×2/Scribe/fixture host 镜像/双语 Keyed/合同 §3/SKILL §7/settings-ui 合同/双语 CHANGELOG/Source + UI codemap 已同步（详情见 MEMORY）。独立对抗复核（fresh context）3 项应修 + 2 项 nit 已处理。
   - [ ] Eat 开关实机验证（维护者，dev 包）：三态 × 场景（meal 端食物赶路 / 烟卷 / 薄片 / 啤酒 / 仙馔 / 营养膏 / 背包吃 / 动物 / 尸体）；重点：父关与旧实现一致、父开+子开时食物行为与「父开子关」一致、关父项后子项灰显且归 false、切换即时生效与重启保留。

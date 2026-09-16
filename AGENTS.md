@@ -29,6 +29,7 @@ Maintain these boundaries:
 
 - Update `MEMORY.md` only when durable facts or the open action surface changes; keep it compact.
 - Compact by default: settled release/implementation details live in `docs/release_review/` (Claim Packs, process review) and runbook; MEMORY keeps only pointers. Do not grow MEMORY with finished work.
+- Compacted memory lands in `OBLIVIONIS.md`: completed or no-longer-guiding entries from `MEMORY.md` / `TODO.md` move there as dated sections in its existing `date + reason + status` format; if such an entry becomes relevant again, re-summarize it into `MEMORY.md` with `source: OBLIVIONIS.md`. Released-version implementation details still go to `docs/release_review/` (previous bullet) — do not mix the two destinations.
 - Update `TODO.md` only when its current task surface changes.
 - Do not store session narratives, transient artifacts, raw logs, completed test matrices, commit chains, or release checklists in either active memory file.
 - Documentation edits alone are not memory events; external-state summaries never override their authoritative source.
