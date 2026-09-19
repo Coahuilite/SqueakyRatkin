@@ -1,6 +1,6 @@
 # Workshop 页面文案维护源
 
-> **目标：0.3.3。GitHub 正式 Release `v0.3.3` 已发布（2026-09-19）；Steam 待维护者上传**，线上页面仍是 0.3.0 口径（未核验）。发布时须让版本、下载入口与批准产物一致。当前状态与已知问题见 [维护状态](maintenance-status-zh.md)，流程见 [runbook](release-runbook-zh.md)。
+> **目标：0.3.3。GitHub `v0.3.3` 首发当日因 R6 Remix 缺陷撤回，同日同版本重发（main `cd90a9e`，2026-09-19）；Steam 待维护者上传**，线上页面仍是 0.3.0 口径（未核验）。发布时须让版本、下载入口与批准产物一致。当前状态与已知问题见 [维护状态](maintenance-status-zh.md)，流程见 [runbook](release-runbook-zh.md)。
 
 本文是中英描述唯一维护源，不是 change note 或发布记录。页面编辑、双预览由维护者执行；agent 仅公开页面只读核验。下载使用 releases 总入口，因此不依赖具体 tag 文案。
 
