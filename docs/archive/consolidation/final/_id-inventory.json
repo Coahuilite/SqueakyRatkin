@@ -1,0 +1,68 @@
+{
+  "PKG-1": {
+    "counts": {
+      "ANCH": 10
+    },
+    "n": 10,
+    "ids": [
+      "ANCH-1",
+      "ANCH-2",
+      "ANCH-3",
+      "ANCH-4",
+      "ANCH-5",
+      "ANCH-6",
+      "ANCH-7",
+      "ANCH-8",
+      "ANCH-9",
+      "ANCH-10"
+    ]
+  },
+  "PKG-2": {
+    "counts": {},
+    "n": 0,
+    "ids": []
+  },
+  "PKG-3": {
+    "counts": {
+      "ANCH": 7
+    },
+    "n": 7,
+    "ids": [
+      "ANCH-1",
+      "ANCH-2",
+      "ANCH-3",
+      "ANCH-4",
+      "ANCH-5",
+      "ANCH-6",
+      "ANCH-7"
+    ]
+  },
+  "PKG-4": {
+    "counts": {},
+    "n": 0,
+    "ids": []
+  },
+  "PKG-5": {
+    "counts": {
+      "ANCH": 3,
+      "CNF": 1,
+      "OQ": 1,
+      "GAP": 2
+    },
+    "n": 7,
+    "ids": [
+      "ANCH-1",
+      "ANCH-2",
+      "ANCH-3",
+      "CNF-2",
+      "OQ-1",
+      "GAP-1",
+      "GAP-11"
+    ]
+  },
+  "PKG-6": {
+    "counts": {},
+    "n": 0,
+    "ids": []
+  }
+}

@@ -1,0 +1,51 @@
+# SR 维护状态与待裁决
+
+> 2026-09-19 本地审查，HEAD `547e2f2`。这里提供维护入口；完整判断、分歧和原编号见 [终审报告](archive/consolidation/final/handoff-package-final.md)，具体行动跟踪见 [TODO](../TODO.md)。本轮仅整理文档，未修运行时、未发布。
+
+## 状态与证据
+
+| 面 | 已知 | 不能据此推出 |
+| --- | --- | --- |
+| 本地版本 | csproj/About 为 0.3.3；CHANGELOG 已换 2026-09-17 时间；dev 对本地 origin/dev 缓存领先 6 提交 | 0.3.3 已上线或已获发布许可 |
+| 发布记录 | [0.3.0](archive/release_review/release-0.3.0-review-zh.md) 记录 GitHub 完整、Workshop 页面级；[0.3.2-pre1](archive/release_review/release-0.3.2-pre1-review-zh.md) 为 GitHub prerelease | 旧 CI/页面证明当前版本；本次未查远端 |
+| 0.3.3 | 已有本地实现与旧验证记录，待维护者实机及发布推进；未找到该版 Claim Pack | 当前所有行为已通过实机 |
+| 发布分支 | 规则已改为大版本分支 → main；本地 0.3.x 仍在 `b19d68a`，0.3.3 工作在 dev | 大版本分支已承载候选；后续须先准备发布源 |
+| Steam | 最后记录仍为阻断；新草稿面向 0.3.3，未上传 | 页面现状、旧公告已删或二进制已验证 |
+
+0.3.1 无独立正式发布记录；0.3.2 正式版按并入 0.3.3 的工作口径推进，具体渠道裁决仍由发布会话确认。两个 CHANGELOG 按本轮要求原样保留，其中“旧前新后”规则与正文倒序、时间行与发布证据的差异仍存在，不据其自行改写发布史。
+
+## 优先处理
+
+| 项 | 结论与下一步 |
+| --- | --- |
+| **R6 Remix 实现偏差** | 当前三层路径在无 Xenotype 层、有 Race + BuiltIn 时可能选空层。已用公开 Select 入口编译执行复现；适配/播放源码没有兜底。另行修复并处理冻结 corpus 的取舍，补实际游戏验证。本次未修 |
+| **R4/R5 日志** | 文档已补 v1 `pawn pawn_id` 并纠正 28/4 事件分组；实际 label 输出与旧隐私禁令冲突仍开。普通字段仅编码、非通用脱敏。处理字段须先确定兼容政策 |
+| **R3 作者 ABI** | add-only/17 键 append-only/fail-closed 承诺继续有效；“首个携带 0.3.1 ABI 的发行版本”尚未精确到 tag。pre1 是有证据候选，不擅自排除 prerelease |
+| 实机与发布 | Eat 三态、身份门余项、低频回归沿用现有 TODO；取得结果后决定修复或按 [runbook](release-runbook-zh.md) 发布。旧“V1–V3 都待定”不再成立：V1 追认、V3 接受、V2 仅出方案 |
+| 可观测性 | tier 折叠已记录，是否细分待裁决；Eat 不新增日志事件，替代 Dev 面板尚未实施 |
+
+## 迁移与退役
+
+08-23 的 [兼容审查](archive/us-sr-compatibility-check-zh.md) / [迁移方案](archive/us-sr-migration-plan-zh.md) 是旧 US 快照的报告；“暂不建仓”已被后续审查对象所取代，但本次没有读取 US 当前仓库。“双开安全”仅适用于当时无 US 型 Ratkin 包、无桥的条件；双 comp/双响是条件风险，不能写成已发生事故或已修复。
+
+仍需保持的先后关系：**U1 跨程序集检测/让位 → US 型 Ratkin 包或 legacy 桥启用 → SR 内容化退役 DLL**。SR 维持装配/comp 全名与卸载安全；US 让位机制、服务域、桥的类型名所有权和双开矩阵必须有回执。两 DLL 同时定义 `SqueakyRatkin.SqueakVoicePackDef` 的风险不能靠“已批准桥”自动消除。原 0.4/1.0 时间表是规划，不是达成证据。
+
+| 需确认的面 | 未闭合内容 |
+| --- | --- |
+| compat Q1–Q4、U1–U4 | US 是否服务 Ratkin；检测方式；桥重叠期/类型所有权；装配之外是否需 domain 级让位；实施与实机结果 |
+| migration Q1–Q6 | 过渡版、legacy 渠道、设置导入、公告窗口、US 依赖声明、跨游戏版本维护预算 |
+| migration Q7–Q10 | packageId 归属、是否接受选择重置、legacy 分发/互斥、新内容包使用何种 Def 类型 |
+
+**保留 packageId/defName 只能降低身份漂移，不保证 US 消费 SR 配置。** B（主线继承旧 id、legacy 新 id）仍是条件性推荐；C（仅 GitHub legacy）也是可选项，未获本轮裁决。包键、配置读取/导入、订阅路径、schema、第三方门须分别证明；不得宣传“设置零损失”。缺依赖/卸载安全的旧论证也不代替目标组合实测。
+
+旧六项拆分门（纯内核、外来 race 端到端、Ratkin 回归、设置迁移、存档兼容、渠道过渡）无完整通过记录。既有双开验收应覆盖：无/有 US 型 Ratkin 包、旧包桥、事件/周期单响、双向卸载。未验证条件不能因为文档归档而关闭。Kiiro 实验分支已删除；未经作者许可不得发布/宣传相关兼容内容的约束不变。
+
+## 历史隐私债务
+
+09-13 裁决维持 A（不重写 + known-debt 纪律），B 仅备方案；[原专项方案](archive/release_review/privacy-history-rewrite-plan-zh.md) 保留。债务报告覆盖 5 个文件；10/9 tag、227/230 revision、约 54 处 hash 引用均为历史口径，执行前须重新盘点，不能照旧数字 force-push。
+
+B 仍需确认执行授权、mirror/refs 备份、工具、替换边界、tag/commit-map、协调窗口与跨仓通知；不可回收的 fork/缓存及旧 SHA 可访问风险未消失。当前默认扫描只覆盖跟踪树及配置的模式，known-debt 以模式/路径匹配；扫描绿不代表全部信息无隐私风险。本轮不执行历史重写、不扩大例外台账。
+
+## 阅读纪律
+
+合同陈述应有行为；源码回查陈述实际实现；旧 Claim Pack 是当时渠道证据；终审是带边界的判断。已解决的时间层留在 archive，尚未裁决的内容不能因“精简”升格。全量 51 CNF / 96 OQ / 51 GAP 的原陈述与编号保存在终审附录，那里不是当前待办清单。

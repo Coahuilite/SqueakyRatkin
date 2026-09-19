@@ -1,201 +1,141 @@
-# Steam Workshop 页面文案维护源
+# Workshop 页面文案维护源
 
-## 用途、来源与维护规则
+> **目标：0.3.3，待发布草稿；本次未上传，线上状态未核验。** 发布时须让版本、下载入口与批准产物一致。当前阻塞及 Remix 问题见 [维护状态](maintenance-status-zh.md)，流程见 [runbook](release-runbook-zh.md)。旧 0.3.0 页面源与公告状态冲突保留于 [归档](archive/steam-workshop-page-copy-draft.md)。
 
-- 页面：<https://steamcommunity.com/sharedfiles/filedetails/?id=3758115669>。
-- 本文是 Workshop 页面中英文描述的维护源，不是发布记录，不包含 change note。Steam 页面实际是否已经更新，不能从仓库状态推断。
-- 技术事实以当前架构合同、发布产物与已批准的玩家文档为准；页面更新后必须在 Steam 编辑器及实际页面中分别人工预览、核对。
-- BBCode 仅使用保守子集：`[h1]`、`[h2]`、`[h3]`、`[b]`、`[i]`、`[list]`、`[*]`、`[olist]`、`[url]`、`[hr][/hr]`、`[code]`。中英文是两份可独立粘贴的完整描述，不混排。
-- 不在页面展示 `packageId`，不重复 Steam 依赖栏已经列出的依赖模组，不把页面文案当作更新说明。
-- 两份描述均应尽量保持在 Steam 常见的 8000 字符以内；字符数在代码块外维护，内容变更后重新统计。
+本文是中英描述唯一维护源，不是 change note 或发布记录。页面编辑、双预览由维护者执行；agent 仅公开页面只读核验。下载暂用 releases 总入口，不假定 v0.3.3 tag 已存在。
 
-## 术语与文风
+## 编辑约定
 
-- 正式或技术英文使用 `Ratkin`；明确的玩笑处只使用 `adorable little mousie` / `mousies`，禁止 `rat-rats`、`mousefolk`。
-- 中文中“鼠鼠”“鼠辈”仅用于模组名或明确玩笑；普通正式说明使用“鼠族”。
-- 中文“3A”固定指 AI 规划、AI 编程、AI 维护；英文使用严肃标题 `AI-Generated Work Disclosure`，不得使用 `Masterpiece`。
-- 开头的披露后直接进入标题与正文；内置 Example 默认启用事实由正文「内置 Race Example」小节承载（0.3.0 起置顶公告已如期删除），披露与标题之间不得插入其他内容。
-- 重点说明 15 个动作的设计；只自然说明未覆盖动作会回退，不在 Workshop 描述中展开三种声音模式。
-- 页面专注模组本身，不展示：音频统计数字（OGG 总数、每动作数量、SoundDef 数）、开发者排障（七击解锁的开发与诊断页）、版本迁移说明（旧版 audio-selection）、VoicePack 制作步骤（作者内容路由到作者指南，页面只留链接）。
-
-## Example 与兼容事实
-
-- 内置普通 Race Example 覆盖全部 15 个动作，音频为 public-domain；页面不写音频统计数字。
-- Example 无特殊权重；0.2.3 起新装默认启用内置 Race Example（从未调整过音源策略的旧配置自动迁移一次），显式关闭或选择其它包的配置不受影响。
-- 内置 Example 默认启用置顶公告已于 0.3.0 如期删除；默认音源策略 0.3.0 未再调整（本次为维护性更新）。若未来再次调整默认策略，须重新评估置顶公告。
-- 0.2.4 起婴幼儿咯咯笑/哭闹不再触发精神崩溃语音（Biotech BabyFits 是正常精神状态发作，非崩溃）；该行为说明已并入兼容性小节。
-- 基础运行不需要任何官方 DLC。Biotech 仅为精确 Xenotype `defName` 匹配提供可选增强；没有 Biotech 时，Race 与 Vanilla 仍正常工作。
-- 第三方声音必须作为独立 VoicePack 发布和安装，不能装入主模组目录；0.2.0 不会自动迁移旧版 audio-selection（该迁移事实页面不展示，属维护参考）。
+- 中文正式称“鼠族”，英文 Ratkin；品牌 `鼠辈啁啾` / `Squeaky Ratkin` 不改。玩笑才用“鼠鼠”或 `adorable little mousie` / `mousies`。
+- 披露置顶，中文“3A”指 AI 规划/编程/维护，英文标题 `AI-Generated Work Disclosure`；不使用 `Masterpiece`、`rat-rats`、`mousefolk`。
+- 两份 BBCode 独立粘贴，仅用保守标签；不写 packageId、重复依赖栏、音频文件统计、开发者入口、迁移操作或制作步骤。作者内容只链接指南。
+- 区分 **17 个动作键** 与 **15 个内置音频动作**；BabyFits 不误触真崩溃，专用动作需包提供声音。非玩家鼠族可参与常规触发，玩家主动动作仍有控制权/可响应限制。
+- 8000 字符只作编辑目标，不声明为已核实的平台硬上限。改文案后重算字符数；发布前随一次核对确认中英对称、版本/链接、权利措辞及双预览。旧公告是否删除须看实际页面，不能由本文件推断。
 
 ## 中文 BBCode
 
 ```bbcode
 [h2]⚠ 3A 大作声明[/h2]
-本模组是一款由 AI 规划、AI 编程、AI 维护的模组。
-这里的“3A”与开发预算、团队规模和显卡性能无关。实际版本仍由人类维护者执行审查、测试、打包和发布。
+本模组由 AI 规划、AI 编程、AI 维护。这里的“3A”与开发预算、团队规模和显卡性能无关；实际版本由人类维护者审查、测试、打包和发布。
 
 [h1]鼠辈啁啾[/h1]
-
-[b]模组版本：[/b]0.3.0
+[b]模组版本：[/b]0.3.3
 [b]适用版本：[/b]RimWorld 1.6
 
 鼠族当然不是不会说话。
 
-鼠辈啁啾为 NewRatkinPlus 鼠族 加入基于动作触发的可选声音反馈。呼唤、吃饭、移动、工作、战斗或休息时，符合条件的鼠族会在合适的时机发出短促啁啾；模组不会改变其行为、数值或战斗逻辑。
+鼠辈啁啾为 NewRatkinPlus 鼠族加入基于动作触发的可选声音反馈。呼唤、吃饭、移动、工作、战斗或休息时，符合条件的鼠族会发出短促啁啾；模组不会改变其行为、数值或战斗逻辑。
 
-它不只照顾殖民地成员。访客、友方、敌对与地图上其他符合条件的鼠族也走同一套触发与声音选择通路。
+常规动作也适用于访客、友方、敌对及其他符合条件的鼠族；玩家主动选择和命令的声音反馈要求角色可由玩家控制，选择反馈还要求角色清醒且未倒地。
 
 这里还有一只可爱的鼠鼠……或者不可爱，但谁不喜欢鼠鼠呢？
 
-[h2]15 个动作，各自有自己的节奏[/h2]
-
-这 15 个动作不是一份声音随机套在所有场景上，而是分别识别游戏中的不同事件：
-
+[h2]不同动作，各有节奏[/h2]
 [list]
 [*][b]日常与状态：[/b]Call、Eat、Sleep、Wounded。
-[*][b]玩家操作：[/b]Select、Move、Draft、Undraft、Equip。
+[*][b]操作与移动：[/b]Select、Move、Draft、Undraft、Equip。
 [*][b]生活与关系：[/b]Social、Joy、Work。
 [*][b]危险与转折：[/b]Attack、MentalBreak、Death。
+[*][b]Biotech 婴幼儿：[/b]Crying、Giggling；需要 VoicePack 提供相应声音，没有可用音频时静默。
 [/list]
 
-每个动作都有独立的触发概率、冷却和距离设置，因此选择反馈可以清楚直接，移动与工作则可以保持克制，不必让整张地图持续吵闹。距离控制哪些声音值得传到镜头附近；冷却避免同类事件在短时间内挤在一起。
+声音遵守各动作的触发条件、概率、冷却和距离设置。心情在运行时调制音高与音量，让同一套声音有轻微变化。设置分为三个普通页面，修改后立即生效。
 
-当前心情还会在运行时调制音高和音量。同一套声音会随状态产生轻微差别，但不会要求 VoicePack 作者为每种心情制作一整套音频。设置分为 3 个普通页面，修改后立即生效。
+Eat 默认覆盖整个进食任务，包括端食物走向餐桌。你可以开启“仅在真正进食（正在摄入营养）时触发 Eat 叫声”，再按需开启“使用成瘾品”以覆盖零营养摄入物。啤酒、仙馔等带营养成瘾品在前一个选项下已经计入；无法识别咀嚼阶段时会回到完整进食任务的判定。
 
-VoicePack 可以只覆盖其中一部分动作。某个动作没有合适的自定义声音时，会自然回退到仍可播放的层级，而不是因为缺一条音频就静音。
+[h2]声音来源[/h2]
+内置 Race Example 为前 15 个动作提供声音，自 0.2.3 起新装默认启用，可随时关闭；它没有特殊优先级或额外权重。VoicePack 可以只覆盖部分动作，未覆盖部分按设置尝试其他可用音源；所有层均无可用声音时静默。
 
-[h2]原版回退声音[/h2]
-
-主模组按动作引用 RimWorld Core 中不同动物音效组成的混合池。它不是纯 Boomrat，也不是纯 GuineaPig；原版资产只通过游戏的 Def 与资源路径机制引用，不会随本模组重新分发。
+内置回退引用 RimWorld Core 中多种动物的声音。它不是纯 Boomrat，也不是纯 GuineaPig；原版资产只通过 Def 与资源路径引用，不随模组重新分发。
 
 [i]这次只有一点豚鼠，我保留了一点，就一点。[/i]
 
-[h2]内置 Race Example[/h2]
-
-内置 Example 是一个覆盖全部 15 个动作的完整 Race VoicePack。它没有特殊优先级或额外权重；0.2.3 起新装默认启用，可随时在设置中关闭。
-
-这些 Example 音频是公共领域素材，可用来试听，也可作为制作独立 VoicePack 的起点。你可以使用、复制、修改和再分发这些音频；完整的权利状态、来源与法域免责声明见 GitHub 仓库中的权利说明。
-
 [h2]兼容性[/h2]
-
 [list]
-[*]适用于 RimWorld 1.6 与 NewRatkinPlus；所需依赖请查看本页 Steam 依赖栏。
-[*]所有官方 DLC 都是可选内容。只使用 Core 与依赖模组时，Race VoicePack、原版回退、15 个动作、心情调制和设置仍可工作。
-[*]Biotech 启用时，可按精确且区分大小写的 Xenotype defName 匹配声音；这是可选增强，不是基础功能的前提。
-[*]0.2.4 起，婴幼儿的咯咯笑/哭闹（Biotech BabyFits 正常精神状态）不再触发精神崩溃语音。
-[*]不会重新分发 RimWorld 原版音频，也不会把第三方 VoicePack 装入主模组目录。
+[*]适用于 RimWorld 1.6 与 NewRatkinPlus；依赖见本页 Steam 依赖栏。
+[*]官方 DLC 均可选。Core 与所需依赖下，基础动作、Race VoicePack、内置回退、心情和设置仍可用。
+[*]Biotech 可按精确且区分大小写的 Xenotype defName 匹配音源，并提供对应婴幼儿动作；无需 Biotech 使用基础功能。
+[*]婴幼儿正常的哭闹/咯咯笑不会被当成精神崩溃；Crying/Giggling 与 MentalBreak 是独立动作。
+[*]第三方声音包应独立安装，不放入主模组目录。
 [/list]
 
 [h2]下载、指南与反馈[/h2]
-
 [list]
-[*][url=https://github.com/Coahuilite/SqueakyRatkin/releases/tag/v0.3.0]GitHub Release v0.3.0[/url]
+[*][url=https://github.com/Coahuilite/SqueakyRatkin/releases]GitHub Releases[/url]
 [*][url=https://github.com/Coahuilite/SqueakyRatkin/blob/main/.github/skills/squeaky-voicepack-authoring/SKILL.md]VoicePack 作者指南（中文）[/url]
 [*][url=https://github.com/Coahuilite/SqueakyRatkin/issues]GitHub Issues：问题反馈[/url]
 [/list]
 
 [h2]许可与音频权利[/h2]
+模组代码采用 MPL-2.0。Example 音频是代码许可之外的公共领域素材，项目与贡献者不对其主张版权或相关权利；可用于试听或独立 VoicePack 的起点，完整来源、权利状态及法域说明见仓库权利文件。RimWorld 原版资产不重新分发。
 
-模组代码采用 MPL-2.0。内置 Example 的音频是代码许可之外的公共领域素材；项目与贡献者不对这些音频主张版权或相关权利。RimWorld 原版资产仅按 Def 或资源路径引用，不会重新分发。
-
-第三方 VoicePack 作者应为自己的音频、文本与其他内容选择并声明适当许可，只发布自己有权分发的素材。
+第三方 VoicePack 作者应为自己的音频、文本及其他内容声明适当许可，只发布有权分发的素材。
 
 [i]图书馆大堂的奇怪柱子是什么？那是仇恨吱书！[/i]
 ```
-
-维护字符数（中文 BBCode 代码块内，包含标签与换行）：2101。
 
 ## English BBCode
 
 ```bbcode
 [h2]⚠ AI-Generated Work Disclosure[/h2]
-This mod was planned, programmed, and maintained with AI assistance.
-A human maintainer reviews, tests, packages, and publishes each release.
+This mod was planned, programmed, and maintained with AI assistance. A human maintainer reviews, tests, packages, and publishes each release.
 
 [h1]Squeaky Ratkin[/h1]
-
-[b]Mod version:[/b] 0.3.0
+[b]Mod version:[/b] 0.3.3
 [b]Game version:[/b] RimWorld 1.6
 
 It is not that Ratkin cannot speak.
 
-Squeaky Ratkin adds optional, action-based sound feedback to NewRatkinPlus Ratkin. At suitable moments, eligible Ratkin may make a short squeak while calling, eating, moving, working, fighting, or resting. The mod does not alter their behavior, stats, or combat rules.
+Squeaky Ratkin adds optional, action-based sound feedback to NewRatkinPlus Ratkin. Eligible Ratkin may make short squeaks while calling, eating, moving, working, fighting, or resting. The mod does not alter their behavior, stats, or combat rules.
 
-It is not limited to colony members. Visitors, allies, hostile Ratkin, and other eligible Ratkin on the map use the same trigger and sound-selection path.
+Ordinary triggers also apply to eligible visitors, allies, hostile Ratkin, and other Ratkin. Player-initiated selection and command feedback requires a player-controlled pawn; selection feedback additionally requires the pawn to be awake and not downed.
 
 And here is another adorable little mousie... or perhaps not adorable, but who does not like mousies?
 
-[h2]15 actions, each with its own rhythm[/h2]
-
-The design does not apply one random sound to every situation. It recognizes 15 distinct kinds of game events:
-
+[h2]Different actions, different rhythms[/h2]
 [list]
 [*][b]Daily life and condition:[/b] Call, Eat, Sleep, and Wounded.
-[*][b]Player commands:[/b] Select, Move, Draft, Undraft, and Equip.
+[*][b]Commands and movement:[/b] Select, Move, Draft, Undraft, and Equip.
 [*][b]Life and relationships:[/b] Social, Joy, and Work.
 [*][b]Danger and turning points:[/b] Attack, MentalBreak, and Death.
+[*][b]Biotech baby fits:[/b] Crying and Giggling require matching VoicePack audio and remain silent when none is available.
 [/list]
 
-Each action has independent trigger chance, cooldown, and distance settings. Selection feedback can remain clear and immediate, while movement and work can be kept restrained instead of filling the whole map with constant noise. Distance determines which sounds are worth carrying toward the camera; cooldowns keep repeated events from piling up.
+Sounds follow each action's trigger conditions, chance, cooldown, and distance settings. Mood adjusts pitch and volume at runtime, adding subtle variation to the same clips. Settings use three regular pages, and changes take effect immediately.
 
-Current mood also adjusts pitch and volume at runtime. One set of clips can gain subtle variation with a Ratkin's condition without asking VoicePack authors to record a full mood matrix. Settings are arranged across three regular pages, and changes take effect immediately.
+By default, Eat covers the whole ingest job, including carrying food to a table. An optional setting restricts it to gaining nutrition; a dependent option also includes zero-nutrition ingestibles such as drugs. Nutrition-bearing drugs such as beer and ambrosia already count under the first option. If the chewing stage cannot be identified, detection falls back to the whole ingest job.
 
-A VoicePack may cover only some actions. When no suitable custom sound exists for an action, selection falls back naturally to an available tier instead of turning that action silent.
+[h2]Sound sources[/h2]
+The built-in Race Example provides audio for the first 15 actions. It has been enabled by default on fresh installs since 0.2.3, can be disabled at any time, and has no special priority or extra weight. VoicePacks may cover only some actions. Uncovered actions try other available sources according to your settings; if no layer has playable audio, they remain silent.
 
-[h2]Vanilla fallback sounds[/h2]
-
-The main mod references action-specific pools assembled from several RimWorld Core animal sounds. The pool is neither purely Boomrat nor purely Guinea Pig. Vanilla assets are referenced only through the game's Def and resource-path systems and are not redistributed with this mod.
+Built-in fallback references several RimWorld Core animal sounds. The pool is neither purely Boomrat nor purely Guinea Pig. Vanilla assets are referenced through Defs and resource paths and are not redistributed.
 
 [i]There is only a little guinea pig left in the mix this time. I kept a bit. Just a bit.[/i]
 
-[h2]The built-in Race Example[/h2]
-
-The built-in Example is a complete Race VoicePack covering all 15 actions. It has no special priority or extra weight. Since 0.2.3 it is enabled by default on fresh installs and can be disabled in settings at any time.
-
-The Example clips are public-domain material. They can be used for listening or as the starting point for an independent VoicePack. You may use, copy, modify, and redistribute them; see the rights notice in the GitHub repository for the full status, provenance, and jurisdiction disclaimer.
-
 [h2]Compatibility[/h2]
-
 [list]
-[*]Made for RimWorld 1.6 and NewRatkinPlus. See the Steam dependency panel on this page for required mods.
-[*]All official DLC are optional. With Core and the required mods, Race VoicePacks, Vanilla fallback, all 15 actions, mood modulation, and settings continue to work.
-[*]When Biotech is active, sounds may target an exact, case-sensitive Xenotype defName. This is an optional enhancement, not a requirement for the base feature.
-[*]Since 0.2.4, Biotech baby fits (giggling/crying) no longer trigger the mental-break sound.
-[*]The mod does not redistribute RimWorld audio, and third-party VoicePacks must not be installed inside the main mod folder.
+[*]Made for RimWorld 1.6 and NewRatkinPlus. Required dependencies are listed in the Steam dependency panel.
+[*]All official DLC are optional. Core and the required mods support the base actions, Race VoicePacks, built-in fallback, mood modulation, and settings.
+[*]Biotech enables exact, case-sensitive Xenotype defName matching and the corresponding baby-fit actions. It is not required for the base features.
+[*]Normal baby crying and giggling do not count as mental breaks. Crying/Giggling and MentalBreak are separate actions.
+[*]Install third-party VoicePacks independently, never inside the main mod folder.
 [/list]
 
 [h2]Downloads, guide, and feedback[/h2]
-
 [list]
-[*][url=https://github.com/Coahuilite/SqueakyRatkin/releases/tag/v0.3.0]GitHub Release v0.3.0[/url]
+[*][url=https://github.com/Coahuilite/SqueakyRatkin/releases]GitHub Releases[/url]
 [*][url=https://github.com/Coahuilite/SqueakyRatkin/blob/main/.github/skills/squeaky-voicepack-authoring/SKILL.md]VoicePack Author Guide (Chinese)[/url]
 [*][url=https://github.com/Coahuilite/SqueakyRatkin/issues]GitHub Issues[/url]
 [/list]
 
 [h2]License and audio rights[/h2]
+The code is licensed under MPL-2.0. Example clips are public-domain material outside the code license; the project and contributors claim no copyright or related rights in them. They may be used for listening or as a starting point for an independent VoicePack. See the repository's rights notices for provenance, full status, and jurisdiction details. RimWorld assets are not redistributed.
 
-The mod's code is licensed under MPL-2.0. The built-in Example clips are public-domain material outside the code license; the project and its contributors claim no copyright or related rights in those clips. RimWorld assets are referenced only by Def or resource path and are not redistributed.
-
-Third-party VoicePack authors should choose and state an appropriate license for their own audio, text, and other content, and distribute only material they have the right to share.
+Third-party VoicePack authors should state appropriate licenses for their audio, text, and other content and distribute only material they have the right to share.
 
 [i]What is that strange pillar in the library hall? That is The Book of Squeakudges — it has grown as tall as a pillar.[/i]
 ```
 
-维护字符数（English BBCode 代码块内，包含标签与换行）：4741。
+## 文案状态
 
-## 发布前核对
-
-- [ ] 版本事实与实际已发布产物一致；Steam 页面实际更新状态不得从仓库、提交或文案文件推断。
-- [ ] 15 个动作固定；页面不含音频统计数字；Example 默认启用（0.2.3 起）的事实正确。
-- [ ] 新装默认启用内置 Example；显式关闭不受影响；Example 无特殊权重。
-- [ ] No-DLC 基线与精确 Xenotype 匹配的可选 Biotech 边界正确。
-- [ ] 页面 URL 与正文链接有效，且正文没有重复 Steam 依赖栏内容。
-- [ ] 不显示 `packageId`，不包含 change note，两种语言没有混排。
-- [ ] 两份 BBCode 分别在 Steam 编辑器与实际页面人工预览；无错误标签、截断或超长显示问题。
-- [ ] 两份描述字符数均低于 8000，且维护元信息中的统计已经刷新。
-- [ ] 原版资产不再分发、Example 公共领域权利与第三方作者责任表述正确。
-- [ ] 第三方 VoicePack 独立安装边界明确；页面不展开迁移说明、开发者排障与 VoicePack 制作步骤。
-- [ ] 中文正式说明使用“鼠族”；英文正式说明使用 Ratkin，玩笑术语仅为 `adorable little mousie` / `mousies`。
-- [ ] 访客、友方、敌对与其他符合条件的非殖民者鼠族/Ratkin 已明确纳入同一通路。
-- [ ] 3A 披露标题与正文逐字正确；内置 Example 默认启用事实在「内置 Race Example」小节、婴幼儿 fits 行为说明在兼容性小节；0.3.0 起无置顶公告。
-- [ ] 每种语言只有一个指定的末尾俏皮句，未混入另一语言的书名或其他结尾梗。
+两段正文面向同一目标版本 0.3.3，字符数（Unicode code point，LF 换行，不含 fence 及尾换行）：中文 1936、英文 4440。旧置顶公告删除情况未在本轮验证。下一次发布确认后，再记录编辑器预览、公开页面观察及实际渠道版本；本文件不能替代 Claim Pack。

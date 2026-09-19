@@ -83,14 +83,14 @@ flowchart LR
 
 ## Current Change Surface
 
-**权威状态**：[`TODO.md`](TODO.md) 与 [`MEMORY.md`](MEMORY.md)（当前目标、开放行动、阻塞与明确延后）。本图只做结构导航；0.3.x 实施细节以 [`docs/0.3x-refactor-architecture-decision-zh.md`](docs/0.3x-refactor-architecture-decision-zh.md) 与对应目录 codemap 为准。
+**权威状态**：[`TODO.md`](TODO.md) 与 [`MEMORY.md`](MEMORY.md)（当前目标、开放行动、阻塞与明确延后）。本图只做结构导航；现行文档从 [docs/codemap.md](docs/codemap.md) 进入；0.3.x 历史实施细节见 [`docs/archive/0.3x-refactor-architecture-decision-zh.md`](docs/archive/0.3x-refactor-architecture-decision-zh.md) 及对应目录 codemap；现行规则以 docs 当前合同为准。
 
-明确延后：仅 `TicksAbs` 再现时调查归因。Kiiro 实验仍在 `kiiro-experiment` 分支，不 merge；D（Biotech 异种域）、通用化后再议的 merge、实验完整复盘均挂起。任何内容契约改动（音频数量/版本/依赖）必须同步 `scripts/stage-package.ps1` 校验表。
+明确延后：仅 `TicksAbs` 再现时调查归因。`kiiro-experiment` 分支已删除，相关历史实验见 docs/archive；不据旧实验记录声称当前兼容支持。任何内容契约改动（音频数量/版本/依赖）必须同步 `scripts/stage-package.ps1` 校验表。
 
 ## Navigation Rules
 
 1. **先根后子**：从本图按目录定位子图，沿六段结构（Responsibility / Key Files / Design / Data & Control Flow / Integration / Change Guidance）逐级下钻；子图之间以相对链接互引（如 `1.6/` → `Source/SqueakyRatkin/` → `Debug/` `Logging/` `UI/` `Patches/`）。
-2. **权威合同与规划**：现行合同（`docs/project-architecture-contract.md`、`settings-ui-product-contract-zh.md`、`logging-protocol.md`、`.github/skills/squeaky-voicepack-authoring/SKILL.md`（作者指南，兼作 agent skill）、`steam-workshop-page-copy-draft.md`、`release-runbook-zh.md`、`release_review/`）定义当前行为；[`docs/internal-universalization-design-note-zh.md`](docs/internal-universalization-design-note-zh.md) 仅是 0.3.x 内部规划输入，不覆盖合同。根图不重复这些文档内容。
+2. **权威合同与规划**：现行文档见 `docs/codemap.md`；合同（`docs/project-architecture-contract.md`、`settings-ui-product-contract-zh.md`、`logging-protocol.md`、`.github/skills/squeaky-voicepack-authoring/SKILL.md`（作者指南，兼作 agent skill）、`steam-workshop-page-copy-draft.md`、`release-runbook-zh.md`）定义相应行为；发布历史证据在 `docs/archive/release_review/`；[`docs/archive/internal-universalization-design-note-zh.md`](docs/archive/internal-universalization-design-note-zh.md) 仅是 0.3.x 内部规划输入，不覆盖合同。根图不重复这些文档内容。
 3. **契约红线**（跨子图共享，改动前必读对应子图 Change Guidance）：No-DLC/HugsLib 零引用；`SR_` 前缀 defName；`SqueakAction` 枚举 append-only（新增动作三处同步：枚举 + `SqueakActionDefinitions.AudioKey` + `SR_<Action>` SoundDef，再补运行时 hook）；`packageId` 大小写敏感；Template↔built-in 音频实际键集合与 SHA256 镜像一致；csproj `<Version>` 与 git tag 基版本一致；`srdiag fmt=1` 字段顺序与 28 个事件 ID 为兼容面（v1 字节不变）；4 个 v2 扩展事件（`settings.origin`/`audio.route.selected`/`hook.mental_fit.unavailable`/`fallback.profile.store_failed`）走 `fmt=2` 与 `log-v2` once 域，extension-only。
 4. **状态所有权**：`dist/`、`1.6/Assemblies/`、staged `1.6/Sounds/` 为构建态（gitignored，脚本全权管理）；仓库维护态为 `About/`、`1.6/`（除 Assemblies）、`Extras/`、`Source/`。
 5. **本图维护约定**：本图是纯汇总层（不复制子图实现细节）；子图更新后只同步「Directory Map」一行、相关入口与红线即可。`AGENTS.md` 不在本图管辖内（其更新需用户另行确认），本图不注册、不引用它。

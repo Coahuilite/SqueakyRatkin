@@ -1,101 +1,52 @@
-# Release Runbook（版本无关）
+# 发布流程
 
-> 唯一发布流程入口。版本相关事实以当次 `docs/release_review/release-<version>-review-zh.md`（Claim Pack）为准；本文只描述流程与门禁。
-> 本地 `commit` 不需要授权；**远端 push / PR / merge / tag / Release / Workshop 上架**都需要维护者明确授权（见 `AGENTS.md`「External-state boundaries」）。
-> 门禁分工：**能机械判定的都不写成本文的人工清单**——写时断言在 `stage-package.ps1`，读时断言在 `check-pack-readiness.ps1`，隐私面在 `privacy-audit.ps1`。本文只负责顺序、授权点与人工不可替代的步骤。
-> 2026-09-13 精简：三处重复的包内容清单收敛为单一读时门；隐私审查收敛为单一脚本；入口契约与最小仪式见下。评估记录见 `docs/release_review/process-redundancy-review-zh.md`。
+> 唯一流程入口，2026-09-19 重构。当前进度见 [维护状态](maintenance-status-zh.md)，历史渠道证据见 [归档 Claim Packs](archive/README.md#发布证据)。本地 commit 可执行；push/PR/merge/tag/Release/Workshop 与历史重写须有对应的维护者授权。本文不是授权。
 
-## 入口契约（三个命令，一个门只由一个命令负责）
+## 三命令契约
 
-| 场景 | 命令 | 归属 |
-|---|---|---|
-| 日常开发门（harness + 双 flavor 构建） | `pwsh scripts/verify-local.ps1` | 本机 / CI |
-| 发布面（版本轴 / 仓库红线 / 暂存包复核 / DLL 身份 / `[claim]` 快照） | `pwsh scripts/check-pack-readiness.ps1 -RequireReleaseMetadata`（默认组合上面的 verify-local） | 发布会话 / release.yml |
+| 用途 | 命令 | 覆盖 |
+| --- | --- | --- |
+| 日常开发 | `pwsh scripts/verify-local.ps1` | 既有 11 项 harness、fixture、构建、ABI/脚手架检查 |
+| 发布面 | `pwsh scripts/check-pack-readiness.ps1 -RequireReleaseMetadata` | 默认组合 verify-local；版本轴、仓库红线、暂存包、DLL 身份及 `[claim]` 快照 |
+| 每次 push 前 | `pwsh scripts/privacy-audit.ps1 -FullHistory -PrePush` | 跟踪树/提交信息/历史 blob、身份、干净树、main、待推送提交与 tag 集合 |
 
-> 离线/已还原缓存环境：以上命令一律加 `-NoRestore`（csproj 用浮动版本 `1.6.*`，隐式 restore 需要网络）。CI 有网络，故 workflow 里显式 restore 后跑 `-NoRestore`。
-| 隐私面（三向量 + 身份 + 机械自检） | `pwsh scripts/privacy-audit.ps1 -FullHistory -PrePush` | push 前人工 / CI 默认模式 |
+已有还原缓存、离线构建时前两命令加 `-NoRestore`；浮动版本 `1.6.*` 的隐式 restore 可能失败并污染 assets 文件。CI 显式 restore 后使用 `-NoRestore`。不要在 release 检查已组合 verify-local 后再机械重复；CI 已单独验证时沿用既有 `-SkipVerify` 接线。
 
-包内容排除项（`*.pdb` / `*.gitkeep` / `codemap.md` / `PublishedFileId.txt`）、`version.txt` 三行、`About.xml == csproj`、Template↔内置 OGG 镜像由 `stage-package.ps1` 在写入时断言，`check-pack-readiness.ps1` 在发布前复核——**任何渠道都不再手工逐项核验**。
+`stage-package.ps1` 写时断言与 readiness 读时复核共同负责版本一致、包排除、version.txt、DLL 和音频镜像。**不再手工逐项复核包内容，不新增人工检查仪式。** 自动检查能证明什么以脚本为准，不能替代发布裁决或外部渠道观察。
 
-## 最小发布仪式（对齐 UniversalSqueaker 2026-09-06 维护者裁决）
+## 发布顺序
 
-push 前人工只有三件事：
+1. **准备具体候选**。版本主源为 csproj `<Version>`，About `<modVersion>` 跟随；同步双语 CHANGELOG 与必要文案，选定待发布提交。开发条目用 Unreleased；实际发布后才以 UTC+8 时间替换。文案有时间不等于渠道已上线。若需试玩，用 `build-dev.ps1` 产物；dirty 包仅作测试证据。
+2. **最小发布仪式**：发布面命令全绿 → 完整隐私命令全绿 → 维护者裁决版本、渠道、是否发及 Workshop 文案。非发布 push 仍必须通过完整隐私门并有授权。每次新 push 覆盖其完整可达范围，不因旧结果为绿而免检。
+3. **大版本分支 → main**。将已批准的发布内容准备到对应分支（如 `0.3.x`），授权后 push/CI/PR/merge。受保护 main 使用 PR，源仍是大版本分支；dev 只集成。合并后的 main 应承载该候选内容，核实合并差异；**不再要求 dev 与发布树相等**。当前分支是否已同步不能由版本号推定。
+4. **GitHub**。在 main 的批准发布提交上，授权后 tag/push，release CI 验证、构建 GitHub flavor 并发布资产。基版本来自 csproj；正式 `vX.Y.Z`，prerelease 带 SemVer 后缀。已接受的 hotfix 命名为 `vX.Y.Z-hotfixN`，须注意它具有 prerelease 语义。资产身份/散列取 CI 和 `[claim]`；有疑问才以 `pack-github.ps1` 复现对照。tag 重发另需授权及更新实际发布时间。
+5. **Steam（若本次获准）**。`build-steam.ps1` 构建 Steam flavor 并在干净树打包，readiness 复核 `dist/steam/SqueakyRatkin`。维护者复制到本地上传副本，既有 item ID 仅写该副本的 `About/PublishedFileId.txt`；同作者 Update，不使用 SteamCMD，不把后续更新称为 Initial Workshop Upload。正文从 [双语草稿](steam-workshop-page-copy-draft.md) 取用，由维护者在编辑器与实际页面预览。
+6. **独立渠道观察与收尾**。agent 仅以公开 filedetails 玩家视角核验同一 item、描述版本、Updated（记录时区）、visibility、preview、文件大小及 change notes；不进入登录/编辑面。Comments 中有实质疑点时进入 TODO，不增加逐项签字仪式。记录下方 Claim Pack，更新维护状态和必要记忆指针。按需将 main 对账回集成线；`merge -s ours` 只在确认适用的真实分叉恢复中使用。归档分支只在最终版本定稿建立。
 
-1. `pwsh scripts/check-pack-readiness.ps1 -RequireReleaseMetadata` —— 发布面必须全绿（并打印 `[claim]` 快照，Claim Pack 直接引用，不转抄）。
-2. `pwsh scripts/privacy-audit.ps1 -FullHistory -PrePush` —— 三向量 + 身份 + 工作树干净 + 待推送提交 + tag 集合确认。
-3. 发布裁决本身：版本号、渠道、是否发、Workshop 文案。
+## 隐私与证据边界
 
-新检查一律先落脚本再写进本文；**不再新增人工清单**。
+- 工作树、提交信息、历史 blob、身份分别得出结论；CI 默认模式不等于 push 前 FullHistory。作者/提交者使用 GitHub noreply；具体校验规则以脚本为准。
+- `[known-debt]` 不是已消除：历史台账是 5 个文件的既有路径债务，当前方案 A 维持、B 待独立授权。新增台账条目须维护者裁决，不通过改文档或掩盖命中绕门。真实凭据泄漏先撤销/轮换，再处理历史。
+- 默认树扫描只覆盖 git 跟踪文件，其规则也不是任意日志/隐私文本识别器。写作时就避免个人路径、原始日志、凭据、item ID 值；不得把扫描通过扩张为“所有数据都安全”。
+- 页面观察只支持页面级结论，不证明玩家下载二进制；一个渠道不证明另一个渠道。无法观察的字段记 unverified，旧 Claim Pack 不证明新版本已发布。
 
-## 阶段 0 · dev 发布前准备
+## Claim Pack 最小记录
 
-1. **版本**：`Source/SqueakyRatkin/SqueakyRatkin.csproj` `<Version>` 唯一主源，`About/About.xml` `<modVersion>` 跟随。两处一致性与 DLL 身份由 `check-pack-readiness` 断言，不再手查。
-2. **文档同步**（与代码同批 commit）：
-   - CHANGELOG 双语加 `Unreleased — X.Y.Z`：开发者功能解锁细节模糊化、不写 change note、中英同步；
-   - README / MEMORY / 根 codemap 的版本锚点同步（写法上只保留一处唯一维护源，其余用指针，减少每次发布的同步面）；
-   - Workshop 页面文案（如页面内容有变）：中英对称、英文以中文版为准、页面专注模组本身（无音频统计/开发者排障/迁移说明/制作步骤，作者内容只留指南链接）、俏皮句不加解释；**一次变更一次核对**（版本号、下载链接、字符数、清单），规则见 `docs/steam-workshop-page-copy-draft.md`。
-3. **门**：`check-pack-readiness`（含 verify-local）+ `privacy-audit`（默认模式）。
-4. **打包**（需要 dev 试用或 Steam 时）：`build-dev.ps1` / `build-steam.ps1`（Steam 一步入口，含干净树硬门）；包内容不再人工逐项核验，改由 `check-pack-readiness` 复核暂存包并输出文件数/版本。
-
-## 阶段 1 · 大版本分支 → main
-
-5. 原子 commit（本地，无需授权）→ **授权后** push 对应大版本分支（如 `0.3.x`）与 `dev`；CI 通过（CI 已含 verify-local + privacy-audit）。
-6. **发布路径 = 大版本分支 → `main`**（例：`0.3.x` → `main`）。`main` 受保护时开 PR，**源分支仍是大版本分支**；`dev` 只做集成，不作为发布合并源。
-7. merge 后核验：`git diff --stat <大版本分支> main` 为 0 行（tree 相等）；关键行为文件（`LoadFolders.xml`/csproj/`About.xml`）抽查；受保护则 PR squash，非受保护时 ff/merge 均可。
-8. `archive/` 分支**只在最终版本定稿时建立**（例如 1.0.0 归档上一代发布线）；中间版本不建 archive 分支。历史 `merge -s ours` 分叉处理只在出现真实分叉时才用。
-
-## 阶段 2 · GitHub 发布
-
-9. main 树 == dev 树核验（`git diff --stat` 0 行）。隐私面已由 CI + push 前 `-FullHistory` 覆盖，不再单独重复扫描。
-10. **授权后** tag `vX.Y.Z`（严格 SemVer，基版本 = csproj `<Version>`）→ push → release CI（先跑 verify-local + `check-pack-readiness -RequireReleaseMetadata`，再构建 GitHub flavor 并打包）→ 资产核验：以 CI 输出的文件数/哈希为准，需要本机对照时用 `pack-github.ps1` 复现。
-11. changelog 时间替换：`Unreleased` → 最终发布时间（UTC+8；**tag 重发后必须再更新**）。
-
-## 阶段 3 · Steam 发布（人工 + 页面核验）
-
-12. `build-steam.ps1`（Steam flavor 构建 + pack-steam 干净树硬门）→ `check-pack-readiness` 复核 `dist/steam/SqueakyRatkin`。
-13. 维护者：复制 stage 到本地上传副本 → 把既有 item ID **只写入副本** `About/PublishedFileId.txt` → 以同一作者 Update（后续版本绝不用 `Initial Workshop Upload`）。
-14. 维护者：粘贴中英文案 → Steam 编辑器 + 实际页面双预览。
-15. **页面核对（只读 filedetails 玩家视角）**：同一 item URL/ID、描述版本、Updated、visibility、preview、文件大小、change notes 数；顺带扫 Comments 区未处理反馈（疑点记入 TODO）。**绝不尝试登录态或编辑界面**（Steam 编辑 = 维护者人工操作）。
-
-## 阶段 4 · 收尾
-
-16. Release Claim Pack 写入 `docs/release_review/release-<version>-review-zh.md`（模板见下；字段优先取自 `check-pack-readiness` 的 `[claim]` 快照与 CI 输出）。
-17. dev 对账：merge main 回 dev，验证无意外树变化。
-18. MEMORY / TODO 更新。
-
-## 隐私审查门禁（push 前，含临时暂存）
-
-- 命令：`pwsh scripts/privacy-audit.ps1 -FullHistory`；CI 每次 push/PR 跑默认模式（工作树 + 提交信息 + 身份）。
-- **三个向量独立扫，结论不得互推**：工作树 / 提交信息 / 历史 blob——工作树干净不蕴含历史干净（SR 实测：工作树 0 命中，历史 5 个文件命中）。
-- 身份面：author / committer 必须全部是 GitHub noreply 地址（含 GitHub 自身的 bot committer）；出现真实邮箱即失败。
-- 已知历史债务：`privacy-audit.ps1` 内 `$knownHistoryDebt` 台账（当前 5 条：`.slim/codemap.json` 与 4 份 HEAD 已净化文档的旧版本）。命中按 `[known-debt]` 列出、不判失败；**新增一条 = 一次维护者裁决**，历史/tag 重写另行授权。
-- 扫描模式：凭据（`sk-…`/API key/token）、私钥、本地绝对路径、诊断日志摘录、`PublishedFileId.txt` 值。
-- 文档按**无隐私写法**编写：写作时不写入个人本地状态、展开路径、日志摘录、凭据或 ID 值，而非写后清理。
-
-## Release Claim Pack 固定模板
+版本事实完成后存入 `docs/archive/release_review/release-<version>-review-zh.md`，当前状态只保留链接。prerelease 可沿用 `release-0.3.2-pre1-review-zh.md` 先例；保留原证据，不为了统一版式回改旧评审。
 
 ```text
-## GitHub Release Claim Pack
-| 项 | 值 |
-|---|---|
-| 版本 | X.Y.Z |
-| 标签 | vX.Y.Z（严格 SemVer，基版本 = csproj <Version>） |
-| 源码提交 | <main squash 完整 SHA> |
-| 发布时间 | <UTC 时间>（UTC+8 <时间>） |
-| 构建 flavor | GitHub（CI tag 触发） |
-| DLL 身份 | FileVersion <V>；Informational v<V>+<sha12> |
-| CI | Release workflow run <id> success |
-| 资产 | <zip 名>（<字节数> B） |
-| DLL SHA256 | <hash> |
-| 包内容 | 文件数；0 PDB；0 PublishedFileId.txt；0 codemap.md；关键文件内容核验；OGG 镜像校验；包内 version.txt（版本/flavor/commit） |
-| 隐私审计 | 完整树扫描 0 未接受命中；dev↔main 树一致 |
+# Release <version> 观察记录
+观察日期/时区；本次批准的渠道；证据范围。
+
+| 项 | 证据 |
+| --- | --- |
+| 版本、tag、源码提交 | 精确值及 main 来源 |
+| 构建 | flavor、DLL FileVersion/InformationalVersion、version.txt 身份 |
+| CI/资产 | run、结果、资产名/字节数/SHA256；引用 [claim] 和 CI 输出 |
+| 本地验证 | 实际运行命令、时间、结果；known-debt 单列 |
+| GitHub | 完整 / 待补，观察依据 |
+| Workshop | unverified / 页面级已核验 / 完整，观察依据 |
+| 限制与未决 | 未做的二进制验证、阻断及待处理项 |
 ```
 
-## Steam staging / 发布观察
-- staging 包：文件数、排除项、DLL FileVersion、PublishedFileId=0、包内 version.txt（版本/flavor/commit 与预期一致）。
-- 页面观察：同一 item URL/ID、描述版本、Updated、visibility、preview、文件大小、change notes。
-- 二进制下载级验证边界如实记录（页面级核验 ≠ 玩家下载内容已验证）。
-
-## 渠道状态
-- GitHub：完整 / 待补。
-- Workshop：unverified / 页面级已核验 / 完整。
+表格是证据归档格式，不是新增发布门；不粘贴个人日志、本机绝对路径或 item ID 值。完整流程依据与本次修正见 [终审 R1/R9](archive/consolidation/final/handoff-package-final.md)。
