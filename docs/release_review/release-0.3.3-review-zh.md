@@ -1,6 +1,6 @@
 # Release 0.3.3 观察记录
 
-观察日期/时区：2026-09-19（UTC+8）。本次批准渠道：**GitHub 正式 Release（首发撤回后同版本重发）**；Steam 未上传（由维护者人工执行）。证据范围：本地三命令门禁 + GitHub CI/资产（下载级核验）+ Steam 暂存包；Workshop 页面本次未观察（线上仍是 0.3.0 口径）。
+观察日期/时区：2026-09-19（UTC+8）。本次批准渠道：**GitHub 正式 Release（首发撤回后同版本重发）+ Steam Workshop 更新**；Workshop 由维护者人工执行，agent 只读核验公开页面。证据范围：本地三命令门禁 + GitHub CI/资产（下载级核验）+ Steam 暂存包 + 公开 Workshop 页面（页面级，非二进制）。
 
 ## 撤回与重发
 
@@ -14,7 +14,7 @@
 | CI/资产 | PR CI `35436829771` success；main push CI `35436831751` success；Release CI `35436845918` success；资产 `SqueakyRatkin-v0.3.3.zip` = 1,590,744 B，SHA256 `fced520ac755bd4438f00434e8d5430279ab6f022a5b5382bacfdf326decb123`（下载后实测，与 API digest 一致；zip 134 entries = 116 文件 + 目录项） |
 | 本地验证 | `verify-local.ps1 -NoRestore` 11/11（修正提交 `56b40e1` 与最终 `main` 各跑一次）；`check-pack-readiness.ps1 -RequireReleaseMetadata` all checks passed；`privacy-audit.ps1 -FullHistory -PrePush` CLEAN（244 revisions，未接受命中 0，5 条 `[known-debt]` 接受） |
 | GitHub | **完整**：重发 Release `v0.3.3` 已发布（非 prerelease、非 draft）+ 单资产 |
-| Workshop | **unverified**：本次未上传；暂存包已就绪（`commit=cd90a9e`）；解除阻断时按 runbook 阶段 3 由维护者人工上传并做页面只读核验 |
+| Workshop | **页面级已核验（2026-09-19）**：维护者人工上传同一 item；agent 只读抓取公开页面观察到——标题 `Squeaky Ratkin`；描述为**英文块**且与文案源一致（页首 AI 披露、`Mod version: 0.3.3`、`Game version: RimWorld 1.6`、`MPL-2.0` 许可段）；Change Notes 为仓库 CHANGELOG 的 0.3.3 英文段（约 1,993 字符，含 Eat 两级开关与日志条目）；`Updated Sep 19`。**内容差异**：页面**没有**中文描述块，Change Notes **没有** R6 修复条目、也没有中文段；退役公告未出现（符合"不随 0.3.3 上传"的裁定）。未做：二进制下载级核验、从 Workshop 订阅后的游戏内实机 |
 | 流程变更 | 分支模型落地：`dev` 分支删除（本地 + 远端）；本版本在 `0.3.x` 开发并 merge 到 `main`；后续每个 minor 各自分支 |
 
 ## R6 修正与守卫
@@ -41,4 +41,4 @@
 
 内容摘要：0.3.1/0.3.2 工作并入本版（race 声明路由、年龄变体、fallback/彩蛋、玩家触发身份门控、XML ABI 固化、日志重排），新增 Eat 两级粒度开关（默认行为不变），并含 R6 Remix 修正；文档收敛为 10 份现行文档并把发布证据移入 `docs/release_review/`，记忆压缩进 `OBLIVIONIS.md`。
 
-限制与未决：R4/R5 日志 `pawn=<label>` 与旧隐私禁令冲突未裁决；R3 作者 ABI 起点未精确到 tag；历史 `[known-debt]` 5 文件未重写；Steam 上传/页面核验待维护者。R6 已闭（内核 + 语料 + 实机听感均有证据）。
+限制与未决：R4/R5 日志 `pawn=<label>` 与旧隐私禁令冲突未裁决；R3 作者 ABI 起点未精确到 tag；历史 `[known-debt]` 5 文件未重写。R6 已闭（内核 + 语料 + 实机听感均有证据）；Steam 已上传（页面级），页面未含中文描述块与 R6 条目，是否补录由维护者决定；Workshop 二进制与订阅安装后的实机未核验。

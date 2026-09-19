@@ -96,4 +96,5 @@
 - **修正与守卫**：`SelectRemixThree` 改为只在非 None 层等权折叠（与四层同规则；分布等价 0.2.4，非 RNG 流一致）。守卫 = shape A/B 断言 + `corpus-0.3.1.txt` 重建 + 新增 `corpus-0.3.0-r6.txt` 字节回放 + 历史 `corpus-0.3.0.txt` 540 行差异断言。独立只读复核五项全 CONFIRMED。
 - **实机验收（流程特例）**：以 GitHub release 资产替代发布前 dev 包前置测试（维护者裁定，仅本次）；日志身份 `build=github` / `v0.3.3+cd90a9e55d44` 自证对象为发布资产；SR 相关 error/no_sound 全 0、26 次派发、同一动作同时出现包层与内置层；维护者听感确认无问题。
 - **1.0 形态裁定**：对 US 硬依赖（FL 传递）；Def 归属按 US 约定；设置不自动导入、只提醒玩家自留；Steam 3A 声明下方加无具体时间的退役公告，但 US 未上工坊前不随 0.3.3 上传。
+- **Steam 上传（2026-09-19 完成）**：维护者人工更新同一 Workshop item；agent 只读核验公开页面——`Mod version: 0.3.3`、英文描述块与文案源一致、Change Notes 为仓库 CHANGELOG 0.3.3 英文段（约 1,993 字符）、退役公告未出现（符合裁定）。页面**未含中文描述块与 R6 条目**；Workshop 二进制与订阅后实机未核验（页面级证据）。线上 0.3.0（含 R6 缺陷）已替换。
 - **状态**：completed；完整证据见 `docs/release_review/release-0.3.3-review-zh.md`，现行开放项见 `TODO.md` 与维护状态。
