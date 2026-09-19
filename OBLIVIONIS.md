@@ -86,3 +86,14 @@
 - **发布历史台账**：0.1.0–0.2.4、0.3.0、0.3.2-pre1 的 tag/CI/资产核验记录见各自 Claim Pack；0.2.3 Workshop 未上传、0.2.2 页面观察缺口、0.2.4 三项流程自评等旧口径不再指导当前工作。
 - **`.slim` 隐私债务**：历史提交/tag 仍可达 `.slim/codemap.json`（含本机路径），HEAD 已净化；维护 A（不重写 + 台账），重写需单独授权。
 - **状态**：completed / superseded；现行权威见 `MEMORY.md`、`TODO.md` 与 `docs/` 合同。
+
+---
+
+## 2026-09-19：0.3.3 撤回重发、R6 修正与实机验收（归档）
+
+- **R6 缺陷**：0.3.0 起的零 Verse 内核把三层 Remix 折叠写成"按原始位序取 index"，缺层时命中空位（该次事件静默）且后继层（内置音源）永不可达；0.2.4 的等价实现是"仅非 None 层进入候选表"，属 0.3.0 重写引入的回归。默认 Fallback 不受影响，但出厂播种的 `SR_OfficialExample_Race` 声明空 fallbacks，任何开启 Remix 的默认装配都命中。内核复现：shape A `none=105/200`、内置 `0/200`；shape B `none=115/200`、内置 `0/200`。
+- **撤回与重发**：首发 tag `v0.3.3`（→ `c7fb868`，资产 1,590,750 B / SHA256 `b7eb7dac…`，downloadCount 1）发布当日撤回（Release + tag 删除，Latest 一度回退 v0.3.0）；同日同版本重发 tag `v0.3.3` → `cd90a9e`，资产 1,590,744 B / `fced520a…`（下载级核验 = API digest），Release 页加更正说明。
+- **修正与守卫**：`SelectRemixThree` 改为只在非 None 层等权折叠（与四层同规则；分布等价 0.2.4，非 RNG 流一致）。守卫 = shape A/B 断言 + `corpus-0.3.1.txt` 重建 + 新增 `corpus-0.3.0-r6.txt` 字节回放 + 历史 `corpus-0.3.0.txt` 540 行差异断言。独立只读复核五项全 CONFIRMED。
+- **实机验收（流程特例）**：以 GitHub release 资产替代发布前 dev 包前置测试（维护者裁定，仅本次）；日志身份 `build=github` / `v0.3.3+cd90a9e55d44` 自证对象为发布资产；SR 相关 error/no_sound 全 0、26 次派发、同一动作同时出现包层与内置层；维护者听感确认无问题。
+- **1.0 形态裁定**：对 US 硬依赖（FL 传递）；Def 归属按 US 约定；设置不自动导入、只提醒玩家自留；Steam 3A 声明下方加无具体时间的退役公告，但 US 未上工坊前不随 0.3.3 上传。
+- **状态**：completed；完整证据见 `docs/release_review/release-0.3.3-review-zh.md`，现行开放项见 `TODO.md` 与维护状态。

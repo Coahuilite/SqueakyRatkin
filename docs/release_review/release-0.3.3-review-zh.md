@@ -23,8 +23,22 @@
 - 断言（`tools/KernelCharacterization` 新增 shape A/B，各 200 种子）：shape A 修正前 `none=105/200`、内置 `0/200`；修正后 `none=0`、`race=105 / builtin=95`。shape B 修正前 `none=115/200`、内置 `0/200`；修正后 `none=0`、`xeno=85 / builtin=115`。
 - 语料：`corpus-0.3.1.txt` 按修正语义重建（10404 条数据行，harness 计行口径 10406 含注释行）；新增 `corpus-0.3.0-r6.txt`（3780 条数据行，harness 口径 3783）作为 0.3.0 矩阵修正后基线；历史 `corpus-0.3.0.txt` 保留为修正前证据，harness 断言两者差异**为且仅为** 540 条 Remix 行（非 Remix 差异 0、前缀漂移 0）。
 - 独立复核（2026-09-19，只读 + 隔离副本）：① 逐形状穷举（3 层 8 态 + 4 层 16 态 × Off/Fallback/Remix × 2000 抽样）下，修正只改变两个破损形状，其余输出逐行一致；② 「存在非空层却返回 None」的违例：修正前 2000、修正后 0；③ 用修正前内核重建时历史语料 3780/3780 数据行吻合，证明 `corpus-0.3.0.txt` 确为修正前矩阵；④ 用修正后内核 `--update-corpus` 可逐字节复现已提交语料。五项声明无反驳项。
-- 未做：游戏内 Remix 听感验证。本记录只证明内核行为与渠道状态，不证明实机听感。
+
+## 实机验收（2026-09-19，流程特例）
+
+维护者裁定：本次**以 GitHub release 资产做实机验收，替代发布前的 dev 包前置测试**（0.3.3 为特例；dev 包未测）。维护者在模组设置中开启全量诊断日志（`SqueakyDevLoggingMode.Enabled`）后由 agent 只读核验本机 `Player.log`。
+
+| 面 | 观察 |
+| --- | --- |
+| 身份自证 | 日志 `build=github` / `build_id=v0.3.3+cd90a9e55d44` = 资产内 DLL ProductVersion ⇒ 被测试对象即本次发布资产（非本地 `dist` 副本、非 Steam 暂存包；后者为 `build=steam`） |
+| 启动与设置 | `settings.origin LoadedFromFile`；模组列表仅一份 `coahuilite.squeakyratkin`（无重复 packageId）；HAR 在场，无 `voicepack.pack.rejected` |
+| 健康面 | SR 相关 `Log.Error` / Exception、`audio.dispatch.failed`、`trigger.attempt.failed`、`voicepack.resolver.rebuild_failed`、`voicepack.catalog.refresh_failed`、`audio.dispatch.no_sound` 全部 0；3 条 `Could not load library …MonoBleedingEdge/data-*.dll` 为 Unity/Mono 常规噪声，与 SR 无关 |
+| 派发与限流 | 成功派发 26 次（summary `dispatched=1` + `dispatched=25`）；`suppressed_detail` 累计值表明 5 秒/60 秒节流在工作 |
+| 路由（17 条抽样） | 同一动作同时出现包层与内置层：Call `race_pack` 3 / `vanilla` 4；Move `race_pack` 3 / `vanilla` 6；Eat `vanilla` 1。播放可用性判定与镜头距离无关（只要声音可解析 + MapOnly + pawn 在当前地图），故此组合不是 Fallback 回退可解释的，符合修正后"只在非空层折叠"的行为 |
+| 结论 | R6 实机验收完成（含维护者听感确认无问题） |
+
+边界：日志协议不记录当前语音源模式（模式由维护者当场确认为 Remix）；本次未覆盖 Eat 两级开关、Biotech 婴幼儿动作、低频动作（MentalBreak/Death 等）与 dev flavor 专属日志面。日志内容与个人路径不入库，本节只保留聚合观察。
 
 内容摘要：0.3.1/0.3.2 工作并入本版（race 声明路由、年龄变体、fallback/彩蛋、玩家触发身份门控、XML ABI 固化、日志重排），新增 Eat 两级粒度开关（默认行为不变），并含 R6 Remix 修正；文档收敛为 10 份现行文档并把发布证据移入 `docs/release_review/`，记忆压缩进 `OBLIVIONIS.md`。
 
-限制与未决：R4/R5 日志 `pawn=<label>` 与旧隐私禁令冲突未裁决；R3 作者 ABI 起点未精确到 tag；历史 `[known-debt]` 5 文件未重写；Steam 上传/页面核验待维护者；R6 实机听感未验。
+限制与未决：R4/R5 日志 `pawn=<label>` 与旧隐私禁令冲突未裁决；R3 作者 ABI 起点未精确到 tag；历史 `[known-debt]` 5 文件未重写；Steam 上传/页面核验待维护者。R6 已闭（内核 + 语料 + 实机听感均有证据）。
