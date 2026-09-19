@@ -43,8 +43,8 @@
 ## 收敛审查材料
 
 - [终审报告](consolidation/final/handoff-package-final.md)：R1–R10 独立判断、回查、完整 CNF/OQ/GAP 原陈述及编号。
-- [v2](consolidation/final/handoff-package-v2.md)：原第二轮结果，原样保留；不是已核实的当前状态。
-- [覆盖记录](consolidation/coverage-check.md)、`consolidation/packages/`、`consolidation/final/v2-parts/`：上游原包、compact、提取片段及当时账本，包括非交付 r2 样张。原有 `packages/` gitignore 仍生效；文件存在不代表已进入 Git。
 - [原文件指纹](consolidation/final/source-manifest.json)：整理前 56 个文件的原路径、字节数与 SHA-256（包含两份未移动的 CHANGELOG，不含本轮新终审/索引）。用于证明归档没有改写原材料，不是新增运行脚本或发布门。
 
-本目录保留是用户本轮明确要求；旧 `TASK-docs-consolidation-zh.md` 的“任务结束删除 archive”不适用。原档中未完成的疑点仍可追溯，但只有 [维护状态](../maintenance-status-zh.md) 与现行 TODO 承担当前行动入口。
+中间工作材料（上游原包 master、v2 草稿与 compact、提取片段、覆盖记录与账本）已于 2026-09-19 清理；需要追溯时从提交 `8481cbe` 取回。`consolidation/packages/` 属 gitignore 的本地材料，不进入 Git。
+
+本目录保留是用户本轮明确要求；原档中未完成的疑点仍可追溯，但只有 [维护状态](../maintenance-status-zh.md) 与现行 TODO 承担当前行动入口。
