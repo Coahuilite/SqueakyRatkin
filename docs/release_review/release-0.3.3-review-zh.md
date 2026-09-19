@@ -19,9 +19,10 @@
 
 ## R6 修正与守卫
 
-- 修正：`SqueakPoolRegistry.SelectRemixThree` 只在非 None 层上等权折叠（三层与四层同规则，恢复 0.2.4 语义）。
+- 修正：`SqueakPoolRegistry.SelectRemixThree` 只在非 None 层上等权折叠（三层与四层同规则，恢复 0.2.4 语义）。等价性口径：候选集、固定序 `[xeno, race, builtin]`、等权与单层零抽取短路与 0.2.4 一致；**分布等价而非 RNG 流一致**——0.2.4 走 `Rand.Range(int,int)`（`Rand.Int` 流），内核走 `floor(Rand.Value*N)`，是 0.3.0 起的既有性质，本次未触碰；修正前后每次 `Select` 的抽取次数逐形状相同（count≥2 各 1 次、count≤1 各 0 次）。
 - 断言（`tools/KernelCharacterization` 新增 shape A/B，各 200 种子）：shape A 修正前 `none=105/200`、内置 `0/200`；修正后 `none=0`、`race=105 / builtin=95`。shape B 修正前 `none=115/200`、内置 `0/200`；修正后 `none=0`、`xeno=85 / builtin=115`。
-- 语料：`corpus-0.3.1.txt` 按修正语义重建（10406 例）；新增 `corpus-0.3.0-r6.txt`（3783 例）作为 0.3.0 矩阵修正后基线；历史 `corpus-0.3.0.txt` 保留为修正前证据，harness 断言两者差异**为且仅为** 540 条 Remix 行（非 Remix 差异 0、前缀漂移 0）。
+- 语料：`corpus-0.3.1.txt` 按修正语义重建（10404 条数据行，harness 计行口径 10406 含注释行）；新增 `corpus-0.3.0-r6.txt`（3780 条数据行，harness 口径 3783）作为 0.3.0 矩阵修正后基线；历史 `corpus-0.3.0.txt` 保留为修正前证据，harness 断言两者差异**为且仅为** 540 条 Remix 行（非 Remix 差异 0、前缀漂移 0）。
+- 独立复核（2026-09-19，只读 + 隔离副本）：① 逐形状穷举（3 层 8 态 + 4 层 16 态 × Off/Fallback/Remix × 2000 抽样）下，修正只改变两个破损形状，其余输出逐行一致；② 「存在非空层却返回 None」的违例：修正前 2000、修正后 0；③ 用修正前内核重建时历史语料 3780/3780 数据行吻合，证明 `corpus-0.3.0.txt` 确为修正前矩阵；④ 用修正后内核 `--update-corpus` 可逐字节复现已提交语料。五项声明无反驳项。
 - 未做：游戏内 Remix 听感验证。本记录只证明内核行为与渠道状态，不证明实机听感。
 
 内容摘要：0.3.1/0.3.2 工作并入本版（race 声明路由、年龄变体、fallback/彩蛋、玩家触发身份门控、XML ABI 固化、日志重排），新增 Eat 两级粒度开关（默认行为不变），并含 R6 Remix 修正；文档收敛为 10 份现行文档并把发布证据移入 `docs/release_review/`，记忆压缩进 `OBLIVIONIS.md`。

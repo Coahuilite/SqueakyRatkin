@@ -82,7 +82,7 @@ XML 决定周期动作的 `EachTime` / `RandomOneShot` / `External`、间隔、�
 | Fallback | Xenotype → Race → pack fallback → built-in → 静默，逐动作判断；pack fallback 查询精确 `ctx.Domain`，不跨域借用 |
 | Remix | 在当前可播放层之间等权选择，层内按包权重；无声明 pack fallback 时保留旧三层抽样通路（三层与四层同规则：只有非 None 层进入候选表） |
 
-**R6（0.3.3 已修正）**：旧三层 Remix 曾按原始位序取 index，缺层时命中空位（该次事件静默）且后继层不可达——`(None, Race, BuiltIn)` 与 `(Xeno, None, BuiltIn)` 两个形状各约一半事件无声、内置层永不入选。0.3.3 起三层折叠与四层一致：仅在非 None 层上等权抽取。回归守卫 = `tools/KernelCharacterization` 的 shape A/B 断言 + `fixtures/corpus/corpus-0.3.0-r6.txt` 字节回放；修正前语义作为历史证据保留在 `corpus-0.3.0.txt`，harness 断言两者差异为且仅为既定条数（540）的 Remix 行。证据见 [维护状态](maintenance-status-zh.md) 与 [0.3.3 发布记录](release_review/release-0.3.3-review-zh.md)。
+**R6（0.3.3 已修正）**：旧三层 Remix 曾按原始位序取 index，缺层时命中空位（该次事件静默）且后继层不可达——`(None, Race, BuiltIn)` 与 `(Xeno, None, BuiltIn)` 两个形状各约一半事件无声、内置层永不入选。0.3.3 起三层折叠与四层一致：仅在非 None 层上等权抽取（与 0.2.4 的候选集/固定序/等权/单层零抽取短路一致；抽取源自 0.3.0 起为 `floor(Rand.Value*N)`，故为分布等价而非 RNG 流一致）。回归守卫 = `tools/KernelCharacterization` 的 shape A/B 断言 + `fixtures/corpus/corpus-0.3.0-r6.txt` 字节回放；修正前语义作为历史证据保留在 `corpus-0.3.0.txt`，harness 断言两者差异为且仅为既定条数（540）的 Remix 行。证据见 [维护状态](maintenance-status-zh.md) 与 [0.3.3 发布记录](release_review/release-0.3.3-review-zh.md)。
 
 `BuiltInFallbackCatalog` 是维护者拥有的 C# 单源表：精确 race → string action key → `SR_*`。Ratkin 种子仅 `Call` 至 `MentalBreak` 15 键；缺包且无内置 profile 则静默。自 0.2.3，出厂默认 Fallback + 内置 Race Example；仅对从未设置模式的配置幂等播种，不覆盖明确模式和已有选择。
 
