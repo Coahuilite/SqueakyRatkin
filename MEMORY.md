@@ -2,7 +2,7 @@
 
 ## 当前状态
 - 产品版本 **0.3.3**：GitHub 首发因 R6 当日撤回、同版本重发（tag `v0.3.3` → `cd90a9e`），实机验收通过（release 包 + 维护者听感；特例跳过 dev 包前置测试）。证据 `docs/release_review/release-0.3.3-review-zh.md`。
-- 渠道：Steam/Workshop **未上传**——线上仍是 0.3.0（含 R6 缺陷）；暂存包 `dist/steam/SqueakyRatkin` 就绪（`0.3.3`/`steam`/`cd90a9e`），粘贴源 `docs/steam-workshop-page-copy-draft.md`。
+- 渠道：**GitHub Release 与 Steam Workshop 均已上线 0.3.3**（Steam 由维护者 2026-09-19 上传，页面只读核验 `Mod version: 0.3.3`；页面未含中文描述块与 R6 条目，是否补录待定）；线上旧版（含 R6 缺陷的 0.3.0）已被替换。
 - 分支模型：`dev` 已删除；每个 minor 在自己分支开发（本次 `0.3.x`）→ PR 入 `main`（受保护）。发布锚 = tag `v0.3.3` → `cd90a9e`（不追记移动的 main HEAD）。
 - 身份与开放动作：`AGENTS.md`；`TODO.md`；现状/证据边界/裁决入口 `docs/maintenance-status-zh.md`。
 

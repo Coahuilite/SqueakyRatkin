@@ -9,10 +9,10 @@
 | 面 | 已知 | 不能据此推出 |
 | --- | --- | --- |
 | 本地版本 | csproj/About = 0.3.3；CHANGELOG 时间 = 2026-09-19 17:26 UTC+8 | 本地版本号本身不代表渠道状态 |
-| 发布记录 | **0.3.3 = GitHub 正式 Release（首发当日因 R6 撤回，同版本重发）**，证据 [Claim Pack](release_review/release-0.3.3-review-zh.md)；0.3.0 = GitHub 完整 + Workshop 页面级；0.3.2-pre1 = GitHub prerelease | 旧 CI/页面不证明当前版本；Workshop 本次未观察 |
-| 0.3.3 | 重发 tag `v0.3.3` → `cd90a9e`（PR #32）；资产下载级核验（1,590,744 B，SHA256 `fced520a…` = API digest）；**实机验收已过**（release 包 + 听感，特例跳过 dev 包）；Steam 未上传，暂存包就绪（`commit=cd90a9e`） | 商店页面仍是 0.3.0 口径（线上版本含 R6 缺陷）；首发资产（1,590,750 B、`b7eb7dac…`、downloadCount 1）已随 tag 删除，只在本记录留证，无法回收 |
+| 发布记录 | **0.3.3 = GitHub 正式 Release（首发当日因 R6 撤回，同版本重发）+ Workshop 页面级**，证据 [Claim Pack](release_review/release-0.3.3-review-zh.md)；0.3.0 = GitHub 完整 + Workshop 页面级；0.3.2-pre1 = GitHub prerelease | 旧 CI/页面不证明当前版本；页面级不等于二进制/实机已验 |
+| 0.3.3 | 重发 tag `v0.3.3` → `cd90a9e`（PR #32）；资产下载级核验（1,590,744 B，SHA256 `fced520a…` = API digest）；**实机验收已过**（release 包 + 听感，特例跳过 dev 包）；Steam 已由维护者上传同一 item，公开页面显示 `Mod version: 0.3.3`（英文描述块） | 页面 **无中文描述块**、Change Notes 用仓库 CHANGELOG 英文段（**无 R6 条目**）、退役公告按裁定未出现；Workshop 二进制与订阅后实机未核验；首发资产（1,590,750 B、`b7eb7dac…`、downloadCount 1）已随 tag 删除，只在本记录留证 |
 | 发布分支 | 规则 = 每个 minor 在自己的分支开发（本次 `0.3.x`）、发布时 merge 到 `main`；**`dev` 已删除（本地 + 远端）**；main 已含发布提交 `cd90a9e`（= tag `v0.3.3`）及其后的纯文档提交，`0.3.x` 与之 tree 一致（不追记持续移动的 main HEAD，以 tag 为锚） | 分支已同步不代表下一版已准备 |
-| Steam | 最后记录仍为阻断；新草稿面向 0.3.3，未上传 | 页面现状、旧公告已删或二进制已验证 |
+| Steam | **0.3.3 已上传（2026-09-19，维护者执行，agent 页面只读核验）**；文案源 `docs/steam-workshop-page-copy-draft.md`（English 块已上页；中文块未上页）；退役公告仍按裁定留待 US 上架后单独更新 | 页面只读核验不能证明包内容；旧置顶公告是否已删未观察 |
 
 0.3.1 无独立正式发布记录；0.3.2 正式版按并入 0.3.3 的工作口径推进，具体渠道裁决仍由发布会话确认。两个 CHANGELOG 按本轮要求原样保留，其中“旧前新后”规则与正文倒序、时间行与发布证据的差异仍存在，不据其自行改写发布史。
 
