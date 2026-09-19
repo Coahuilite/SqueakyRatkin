@@ -36,7 +36,7 @@ Short release summary.
 - ...
 ```
 
-## [2026-09-17 12:59 UTC+8] Version 0.3.3
+## [2026-09-19 17:26 UTC+8] Version 0.3.3
 
 Race-declared, age-aware VoicePacks; player-triggered voices are limited to controllable, responsive pawns; the author XML contract is frozen and ships with a scaffold + self-contained guide; eating and drug squeaks gain two-level granularity controls.
 
