@@ -10,9 +10,9 @@
 | --- | --- |
 | 版本、tag、源码提交 | `0.3.3`；annotated tag `v0.3.3`（重发后指向 `cd90a9e`）；main `cd90a9e`（PR #32 squash，tree 与 `0.3.x` `988e850` 相同） |
 | 撤回对象（已删除） | 首发 tag 指向 `c7fb868`；资产 `SqueakyRatkin-v0.3.3.zip` = 1,590,750 B，SHA256 `b7eb7dac8ddc72a91e814f40d69904d7890ad2c1ade266218c3e4f6e2007a9f9`，downloadCount 1 |
-| 构建 | 三渠道各 116 文件；DLL FileVersion `0.3.3.0`；Steam 暂存 `dist/steam/SqueakyRatkin` version.txt = `SqueakyRatkin 0.3.3` / `build=steam` / `commit=cd90a9e`；GitHub 资产内 version.txt = `build=github` / `commit=cd90a9e` |
+| 构建 | 三渠道各 116 文件；DLL FileVersion `0.3.3.0`；Steam 暂存 `dist/steam/SqueakyRatkin` version.txt = `SqueakyRatkin 0.3.3` / `build=steam` / `commit=cd90a9e`，同包 DLL ProductVersion = `0.3.3+cd90a9e55d44a14260bde0af77d066d8d1366c30`（在 tag 提交上强制重建，避免增量构建残留旧 SourceRevisionId）；GitHub 资产内 version.txt = `build=github` / `commit=cd90a9e` |
 | CI/资产 | PR CI `35436829771` success；main push CI `35436831751` success；Release CI `35436845918` success；资产 `SqueakyRatkin-v0.3.3.zip` = 1,590,744 B，SHA256 `fced520ac755bd4438f00434e8d5430279ab6f022a5b5382bacfdf326decb123`（下载后实测，与 API digest 一致；zip 134 entries = 116 文件 + 目录项） |
-| 本地验证 | `verify-local.ps1 -NoRestore` 11/11（作用于 `56b40e1`）；`check-pack-readiness.ps1 -RequireReleaseMetadata` all checks passed；`privacy-audit.ps1 -FullHistory -PrePush` CLEAN（244 revisions，未接受命中 0，5 条 `[known-debt]` 接受） |
+| 本地验证 | `verify-local.ps1 -NoRestore` 11/11（修正提交 `56b40e1` 与最终 `main` 各跑一次）；`check-pack-readiness.ps1 -RequireReleaseMetadata` all checks passed；`privacy-audit.ps1 -FullHistory -PrePush` CLEAN（244 revisions，未接受命中 0，5 条 `[known-debt]` 接受） |
 | GitHub | **完整**：重发 Release `v0.3.3` 已发布（非 prerelease、非 draft）+ 单资产 |
 | Workshop | **unverified**：本次未上传；暂存包已就绪（`commit=cd90a9e`）；解除阻断时按 runbook 阶段 3 由维护者人工上传并做页面只读核验 |
 | 流程变更 | 分支模型落地：`dev` 分支删除（本地 + 远端）；本版本在 `0.3.x` 开发并 merge 到 `main`；后续每个 minor 各自分支 |
