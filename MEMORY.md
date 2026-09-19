@@ -2,8 +2,8 @@
 
 ## 身份与当前状态
 - RimWorld 1.6 模组 **鼠辈啁啾 / Squeaky Ratkin**；`packageId` `coahuilite.squeakyratkin`；namespace `SqueakyRatkin`；Defs 前缀 `SR_`。
-- 产品版本 **0.3.3**（csproj `<Version>` 与 About `<modVersion>` 已一致）；0.3.2 仅 GitHub prerelease `v0.3.2-pre1`，其工作并入 0.3.3；最新正式发布 **0.3.0**（2026-08-21）；**Steam 仍阻断**。
-- 分支模型（2026-09-19 维护者裁定）：**不再有 `dev` 分支**；每个 minor 在自己的分支开发（本次 `0.3.x`），需要发布时在该分支提交并 merge 到 `main`；`archive/` 分支只在最终版本建立。
+- 产品版本 **0.3.3**：**GitHub 正式 Release 已发布（2026-09-19，`v0.3.3` + 资产核验，Claim Pack `docs/release_review/release-0.3.3-review-zh.md`）**；Steam **未上传**（暂存包 `dist/steam/SqueakyRatkin` 就绪）；上一个 Workshop 上线版本是 0.3.0。
+- 分支模型（2026-09-19 维护者裁定，已落地）：**`dev` 已删除（本地 + 远端）**；每个 minor 在自己的分支开发（本次 `0.3.x`），发布时在该分支提交并 merge 到 `main`（受保护，走 PR）；`archive/` 分支只在最终版本建立。main 当前 `c7fb868`（tree == `0.3.x`）。
 - 当前开放动作、阻塞与待裁决见 `TODO.md`；现状、证据边界与裁决入口见 `docs/maintenance-status-zh.md`。
 
 ## 权威入口
