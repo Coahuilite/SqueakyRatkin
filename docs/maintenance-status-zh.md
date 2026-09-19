@@ -1,6 +1,6 @@
 # SR 维护状态与待裁决
 
-> 2026-09-19 本地审查（文档收敛、独立化与 archive/codemap 清理之后）。这里提供维护入口：现状、证据边界、待修复与待裁决；具体行动跟踪见 [TODO](../TODO.md)。本轮仅整理文档，未修运行时、未发布。
+> 2026-09-19 更新（文档收敛、独立化、archive/codemap 清理与 0.3.3 GitHub 发布之后）。这里提供维护入口：现状、证据边界、待修复与待裁决；具体行动跟踪见 [TODO](../TODO.md)。
 
 现行文档（10 份，全部自足，不依赖历史材料）：本维护状态、[架构合同](project-architecture-contract.md)、[设置合同](settings-ui-product-contract-zh.md)、[日志协议](logging-protocol.md)、[发布流程](release-runbook-zh.md)、[Steam 页面草稿](steam-workshop-page-copy-draft.md)、[隐私重写方案](privacy-history-rewrite-plan-zh.md)、双语 CHANGELOG。发布证据与终审报告在 [`release_review/`](release_review/)（含 7 份 Claim Pack、2 份流程复盘与终审报告）；原 `docs/archive/` 与全部 `codemap.md` 已删除，靠 git 历史追溯（收敛提交 `8481cbe`）。
 
@@ -8,10 +8,10 @@
 
 | 面 | 已知 | 不能据此推出 |
 | --- | --- | --- |
-| 本地版本 | csproj/About 为 0.3.3；CHANGELOG 已换 2026-09-17 时间；dev 对本地 origin/dev 缓存领先 6 提交 | 0.3.3 已上线或已获发布许可 |
-| 发布记录 | 0.3.0 = GitHub 完整 + Workshop 页面级；0.3.2-pre1 = GitHub prerelease | 旧 CI/页面证明当前版本；本次未查远端 |
-| 0.3.3 | 已有本地实现与旧验证记录，待维护者实机及发布推进；未找到该版 Claim Pack | 当前所有行为已通过实机 |
-| 发布分支 | 规则 = 每个 minor 在自己的分支开发（本次 `0.3.x`）、发布时 merge 到 `main`；**`dev` 分支已取消**（本地与远端待删）；本地 `0.3.x` 需先承载 0.3.3 内容 | 0.3.x 已承载候选；发布前须先同步版本分支 |
+| 本地版本 | csproj/About = 0.3.3；CHANGELOG 时间 = 2026-09-19 17:26 UTC+8 | 本地版本号本身不代表渠道状态 |
+| 发布记录 | **0.3.3 = GitHub 正式 Release 已发布（2026-09-19）**，证据 [Claim Pack](release_review/release-0.3.3-review-zh.md)；0.3.0 = GitHub 完整 + Workshop 页面级；0.3.2-pre1 = GitHub prerelease | 旧 CI/页面不证明当前版本；Workshop 本次未观察 |
+| 0.3.3 | Release `v0.3.3`（非 prerelease）+ 资产已核验（SHA256 与 API digest 一致）；Steam 未上传，暂存包就绪 | 商店页面仍是 0.3.0 口径；未做二进制下载级验证 |
+| 发布分支 | 规则 = 每个 minor 在自己的分支开发（本次 `0.3.x`）、发布时 merge 到 `main`；**`dev` 已删除（本地 + 远端）**；main 当前 `c7fb868`（tree == `0.3.x`） | 分支已同步不代表下一版已准备 |
 | Steam | 最后记录仍为阻断；新草稿面向 0.3.3，未上传 | 页面现状、旧公告已删或二进制已验证 |
 
 0.3.1 无独立正式发布记录；0.3.2 正式版按并入 0.3.3 的工作口径推进，具体渠道裁决仍由发布会话确认。两个 CHANGELOG 按本轮要求原样保留，其中“旧前新后”规则与正文倒序、时间行与发布证据的差异仍存在，不据其自行改写发布史。

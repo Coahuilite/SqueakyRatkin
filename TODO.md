@@ -2,10 +2,10 @@
 
 > 只列开放动作、阻塞与明确延后；已完成历史见 `OBLIVIONIS.md` 与 `docs/release_review/`。当前状态与证据边界以 `docs/maintenance-status-zh.md` 为准。
 
-## 发布（0.3.3）
-- [ ] 0.3.3 远端发布（需授权）：前置实机测试已通过（dev 包 `dist/dev/SqueakyRatkin-dev-v0.3.3-92be4d6.zip`，Player.log 零 SR 错误）。序列 = 在 `0.3.x` 提交 → push `0.3.x` → merge 到 `main` → tag `v0.3.3` → release CI 与资产核验 → Claim Pack `docs/release_review/release-0.3.3-review-zh.md`。
-- [ ] 分支模型落地：删除本地与远端 `dev`；后续每个 minor 从 `main` 开分支（如 `0.4`、`1.0`）；`archive/` 分支只在最终版本建立。
-- [ ] Steam：仍阻断；解除时同步 `docs/steam-workshop-page-copy-draft.md`（版本号/下载链接/字符数）并走人工上传 + 页面只读核验。
+## 发布
+- 0.3.3 已于 2026-09-19 发布到 GitHub（`v0.3.3` 正式 Release，资产核验通过）；记录见 Claim Pack `docs/release_review/release-0.3.3-review-zh.md`。分支模型已落地（`dev` 已删，本次走 `0.3.x` → `main`）。
+- [ ] Steam：**未上传**；暂存包 `dist/steam/SqueakyRatkin` 已就绪（116 文件，build=steam/commit=c7fb868）。解除阻断时同步 `docs/steam-workshop-page-copy-draft.md`（版本号/下载链接/字符数）→ 维护者人工上传 → 页面只读核验 → 更新 Claim Pack 渠道格。
+- [ ] 下一版开工时从 `main` 新建版本分支（`0.4` 或按路线直推 `1.0`）；`archive/` 分支只在最终版本建立。
 
 ## 待修复 / 待裁决
 - [ ] R6（终审发现）：Remix 在「无 Xenotype 层 + Race + BuiltIn」组合可能选空层；公开 Select 入口已复现，源码无兜底。需修复 + 处理冻结语料取舍 + 实际游戏验证。
