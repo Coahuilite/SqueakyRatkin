@@ -54,7 +54,7 @@ function Invoke-Check {
     Write-Host 'OK'
 }
 
-Invoke-Check 'KernelCharacterization (purity gate, extended asserts, dual corpus byte replay: 0.3.0 frozen + 0.3.1 17-action/egg)' `
+Invoke-Check 'KernelCharacterization (purity gate, extended asserts, corpora: 0.3.0 R6-corrected replay + historical correction delta + 0.3.1 17-action/egg)' `
     'dotnet run --project tools/KernelCharacterization -c Release' `
     { dotnet run --project (Join-Path $root 'tools\KernelCharacterization') -c Release }
 

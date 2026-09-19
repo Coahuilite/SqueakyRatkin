@@ -19,8 +19,14 @@ namespace SqueakyRatkin.KernelCharacterization;
 internal static class Program
 {
     private const string LegacyCorpusFileName = "corpus-0.3.0.txt";
+    private const string LegacyCorrectedCorpusFileName = "corpus-0.3.0-r6.txt";
     private const string CorpusFileName = "corpus-0.3.1.txt";
     private const string UpdateCorpusArgument = "--update-corpus";
+
+    /// <summary>0.3.3 R6 修正（Remix 仅折叠非 None tier）在 0.3.0 冻结矩阵上造成的确定性行差。
+    /// 历史文件 corpus-0.3.0.txt 保持不变，作为修正前语义的证据；其差异必须是本常量条 Remix 行，
+    /// 任何非 Remix 差异或条数漂移（= 场景构造或其它语义被改动）都判失败。</summary>
+    private const int ExpectedLegacyRemixCorrectionRows = 540;
     private static readonly long[] Seeds = { 1, 2, 3 };
     private static readonly UTF8Encoding Utf8WithoutBom = new(false);
 
@@ -50,7 +56,8 @@ internal static class Program
 
         string corpusDir = Path.Combine(FindRepositoryRoot(), "fixtures", "corpus");
         string corpusPath = Path.Combine(corpusDir, CorpusFileName);
-        string legacyPath = Path.Combine(corpusDir, LegacyCorpusFileName);
+        string legacyHistoryPath = Path.Combine(corpusDir, LegacyCorpusFileName);
+        string legacyReplayPath = Path.Combine(corpusDir, LegacyCorrectedCorpusFileName);
 
         Console.WriteLine("Golden corpus generation (17 actions + egg dimension)...");
         string corpus;
@@ -91,8 +98,9 @@ internal static class Program
             failures++;
         }
 
-        // 0.3.0 冻结语料：只读回放。任何 delta 必须修场景构造/镜像（不得 --update-corpus 覆盖）。
-        Console.WriteLine("Legacy 0.3.0 corpus replay (frozen, read-only)...");
+        // 0.3.0 矩阵：历史文件 corpus-0.3.0.txt（修正前语义）保持只读；回放目标 = corpus-0.3.0-r6.txt
+        // （0.3.3 R6 修正后重建，字节级冻结）。历史文件与修正文件的差异必须是且仅是 ExpectedLegacyRemixCorrectionRows 条 Remix 行。
+        Console.WriteLine("Legacy 0.3.0 corpus replay (R6-corrected, frozen)...");
         string legacyCorpus;
         try
         {
@@ -104,21 +112,29 @@ internal static class Program
             return 1;
         }
         byte[] legacyGenerated = Utf8WithoutBom.GetBytes(legacyCorpus);
-        if (!File.Exists(legacyPath))
+        if (updateCorpus)
         {
-            Console.Error.WriteLine("  FAIL: committed legacy corpus missing: " + legacyPath);
+            Directory.CreateDirectory(corpusDir);
+            File.WriteAllBytes(legacyReplayPath, legacyGenerated);
+            Console.WriteLine("  legacy corrected corpus updated: " + legacyReplayPath + " (" + CountLines(legacyCorpus) + " cases)");
+        }
+        else if (!File.Exists(legacyReplayPath))
+        {
+            Console.Error.WriteLine("  FAIL: committed legacy corrected corpus missing: " + legacyReplayPath);
             return 1;
         }
-        byte[] legacyBaseline = File.ReadAllBytes(legacyPath);
+        byte[] legacyBaseline = File.ReadAllBytes(legacyReplayPath);
         if (BytesEqual(legacyGenerated, legacyBaseline))
         {
-            Console.WriteLine("  ok: legacy 0.3.0 corpus replay zero delta (byte-identical, " + CountLines(legacyCorpus) + " cases)");
+            Console.WriteLine("  ok: legacy 0.3.0 corrected corpus replay zero delta (byte-identical, " + CountLines(legacyCorpus) + " cases)");
         }
         else
         {
-            Console.Error.WriteLine("  FAIL: legacy corpus delta detected (generated " + legacyGenerated.Length + " bytes, baseline " + legacyBaseline.Length + " bytes) — frozen file must not be regenerated; restore legacy scenario constructions.");
+            Console.Error.WriteLine("  FAIL: legacy corrected corpus delta detected (generated " + legacyGenerated.Length + " bytes, baseline " + legacyBaseline.Length + " bytes) — 场景构造/镜像改动或语义回归；只有显式裁决过的 R6 修正可以改变此文件。");
             failures++;
         }
+
+        if (!updateCorpus) CheckLegacyCorrection(legacyGenerated, legacyHistoryPath, ref failures);
 
         Console.WriteLine("Replay determinism check...");
         byte[] replay = Utf8WithoutBom.GetBytes(GenerateCorpus(legacy: false));
@@ -136,6 +152,71 @@ internal static class Program
         return failures == 0 ? 0 : 1;
     }
 
+    /// <summary>历史 0.3.0 语料 vs R6 修正后同一矩阵：只允许 Remix 行的结果差异，且条数固定。
+    /// 前缀（scenario|mode|domain|action|seed|gate）必须逐字段相同——保证差异来自结果映射而非用例身份漂移。</summary>
+    private static void CheckLegacyCorrection(byte[] generated, string legacyHistoryPath, ref int failures)
+    {
+        if (!File.Exists(legacyHistoryPath))
+        {
+            Console.Error.WriteLine("  FAIL: legacy historical corpus missing: " + legacyHistoryPath);
+            failures++;
+            return;
+        }
+        string[] history = DataLines(Utf8WithoutBom.GetString(File.ReadAllBytes(legacyHistoryPath)));
+        string[] current = DataLines(Utf8WithoutBom.GetString(generated));
+        if (history.Length != current.Length)
+        {
+            Console.Error.WriteLine("  FAIL: legacy correction comparison line count mismatch (history " + history.Length + " vs current " + current.Length + ")");
+            failures++;
+            return;
+        }
+
+        const int LegacyResultFieldIndex = 6; // scenario|mode|domain|action|seed|gate|soundKey|...
+        int differing = 0;
+        int nonRemix = 0;
+        int prefixDrift = 0;
+        string firstExample = "";
+        for (int i = 0; i < history.Length; i++)
+        {
+            if (history[i] == current[i]) continue;
+            string[] h = history[i].Split('|');
+            string[] c = current[i].Split('|');
+            if (h.Length < LegacyResultFieldIndex || c.Length < LegacyResultFieldIndex)
+            {
+                prefixDrift++;
+                continue;
+            }
+            for (int f = 0; f < LegacyResultFieldIndex; f++)
+            {
+                if (!string.Equals(h[f], c[f], StringComparison.Ordinal)) { prefixDrift++; break; }
+            }
+            if (!string.Equals(h[1], "Remix", StringComparison.Ordinal)) nonRemix++;
+            differing++;
+            if (firstExample.Length == 0) firstExample = h[0] + " " + h[3] + " seed=" + h[4] + "/" + h[5] + ": " + h[6] + "|" + h[7] + " -> " + c[6] + "|" + c[7];
+        }
+
+        bool ok = differing == ExpectedLegacyRemixCorrectionRows && nonRemix == 0 && prefixDrift == 0;
+        string message = "legacy correction delta: rows=" + differing + " (expected " + ExpectedLegacyRemixCorrectionRows + "), non-remix=" + nonRemix + ", prefix-drift=" + prefixDrift;
+        if (ok) Console.WriteLine("  ok: " + message + "; first: " + firstExample);
+        else
+        {
+            Console.Error.WriteLine("  FAIL: " + message + "; first: " + firstExample);
+            failures++;
+        }
+    }
+
+    /// <summary>语料数据行（跳过 '#' 头注释；修正文件比历史文件多一行说明）。</summary>
+    private static string[] DataLines(string text)
+    {
+        List<string> lines = new();
+        foreach (string line in text.Split('\n'))
+        {
+            if (line.Length == 0 || line[0] == '#') continue;
+            lines.Add(line);
+        }
+        return lines.ToArray();
+    }
+
     private static bool BytesEqual(byte[] left, byte[] right)
     {
         if (left.Length != right.Length) return false;
@@ -151,8 +232,9 @@ internal static class Program
         StringBuilder sb = new();
         if (legacy)
         {
-            sb.Append("# 0.3.0 golden corpus - kernel Select (SqueakPoolRegistry). Lines: scenario|mode|domain|action|seed|gate|soundKey|tier|poolStableKey; '-' = none.\n");
+            sb.Append("# 0.3.0 golden corpus (R6-corrected) - kernel Select (SqueakPoolRegistry). Lines: scenario|mode|domain|action|seed|gate|soundKey|tier|poolStableKey; '-' = none.\n");
             sb.Append("# Rebuilt by tools/KernelCharacterization; scenarios frozen in Scenarios.cs (S1-S5 constructed, F03-F07 fixture-driven from fixtures/input). Any delta on replay = regression.\n");
+            sb.Append("# 0.3.3 R6 correction: Remix folds only non-None tiers; corpus-0.3.0.txt keeps the pre-correction rows as historical evidence.\n");
         }
         else
         {

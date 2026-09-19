@@ -322,6 +322,36 @@ public static class UnitTests
         SqueakPoolRegistry s1 = Scenarios.BuildRegistry("S1-empty");
         ChainResult s1r = s1.Select(Ctx(Scenarios.RaceDomain, SqueakyRatkin.SqueakAction.Call), SelectionMode.Remix, SimGate.All, new LcgRandom(1));
         Check(s1r.Tier == ChainTier.BuiltInFallback && s1r.SoundKey == "SR_Call", "Remix S1 single tier", ref failures);
+
+        // R6 回归守卫（0.3.3 修正）：Remix 只在「非 None」tier 上等权折叠，缺层不得落回空位。
+        // 形状 A（xeno tier 为空、Race + 内置都在）：修复前 index 直接映射原始位序 → index 0 命中 tier0=None（静默），
+        // 内置 tier 永不可达；修复后 index 在 [race, builtin] 上折叠。
+        SqueakPoolRegistry shapeA = Scenarios.BuildRegistry("S2-builtin-seed");
+        int shapeANone = 0, shapeARace = 0, shapeAVanilla = 0;
+        for (int seed = 1; seed <= 200; seed++)
+        {
+            ChainResult r = shapeA.Select(Ctx(Scenarios.RaceDomain, SqueakyRatkin.SqueakAction.Call), SelectionMode.Remix, SimGate.All, new LcgRandom(seed));
+            if (r.IsNone) shapeANone++;
+            else if (r.Tier == ChainTier.RacePack) shapeARace++;
+            else if (r.Tier == ChainTier.BuiltInFallback) shapeAVanilla++;
+        }
+        Check(shapeANone == 0, "Remix shape A (no xenotype tier) never returns none: none=" + shapeANone + "/200", ref failures);
+        Check(shapeARace > 0 && shapeAVanilla > 0, "Remix shape A folds over available tiers only: race=" + shapeARace + " builtin=" + shapeAVanilla, ref failures);
+
+        // 形状 B（race tier 为空、xeno + 内置都在）：修复前 index 1 命中 tier1=None（静默），内置 tier 永不可达。
+        SqueakPoolRegistry shapeB = new(
+            new[] { ScenariosEntry("other.mod:SR_XenoOnly", Scenarios.XenoDomain, sounds: 1) },
+            Scenarios.BuildBuiltIn(), DomainFilter.Everything);
+        int shapeBNone = 0, shapeBXeno = 0, shapeBVanilla = 0;
+        for (int seed = 1; seed <= 200; seed++)
+        {
+            ChainResult r = shapeB.Select(Ctx(Scenarios.XenoDomain, SqueakyRatkin.SqueakAction.Call), SelectionMode.Remix, SimGate.All, new LcgRandom(seed));
+            if (r.IsNone) shapeBNone++;
+            else if (r.Tier == ChainTier.XenotypePack) shapeBXeno++;
+            else if (r.Tier == ChainTier.BuiltInFallback) shapeBVanilla++;
+        }
+        Check(shapeBNone == 0, "Remix shape B (no race tier) never returns none: none=" + shapeBNone + "/200", ref failures);
+        Check(shapeBXeno > 0 && shapeBVanilla > 0, "Remix shape B folds over available tiers only: xeno=" + shapeBXeno + " builtin=" + shapeBVanilla, ref failures);
     }
 
     private static void DistributionBounds(ref int failures)
