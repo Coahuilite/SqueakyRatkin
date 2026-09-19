@@ -19,7 +19,7 @@
 - 作者 XML ABI 公开稳定：字段只增不改、17 动作键 append-only、fail-closed；内部 kernel/schema 仍是 0.x 窗口。
 - Eat 默认 job 级派发（招牌手感）不得默认收窄；两级开关语义、营养/toil 判定与回落规则见架构合同。
 - 发布三命令契约：`verify-local.ps1`（11 项）→ `check-pack-readiness.ps1 -RequireReleaseMetadata` → `privacy-audit.ps1 -FullHistory -PrePush`；不新增人工仪式。
-- US 兼容顺序硬门：`U1 跨程序集检测 → US 型 Ratkin 包或 legacy 桥 → SR 1.0 内容化`；SR 保持 `SqueakyRatkin.CompProperties_Squeaker`/`CompSqueaker` 全名稳定；packageId 跟内容走。
+- US 兼容（2026-09-19 维护者裁定）：共存期 SR 与 US **各自装配、各自发声（双 comp / 双响）是正常行为**，玩家另装 SR legacy 独立版时同样正常；**不再要求 US 侧检测让位，也不存在 U1 顺序硬门**。仍需裁决的是切换面：类型名所有权（两 DLL 定义 `SqueakyRatkin.SqueakVoicePackDef` 的 first-wins 风险）、packageId 归属、legacy 渠道、US 前置硬/软、设置迁移、公告窗口。清单见 `docs/maintenance-status-zh.md`「迁移与退役」。
 - 隐私：历史 known-debt 维持 A（不重写 + 台账纪律）；重写方案 `docs/privacy-history-rewrite-plan-zh.md`，执行需单独授权。
 
 ## 指针
