@@ -1,6 +1,8 @@
 # SR 维护状态与待裁决
 
-> 2026-09-19 本地审查（文档收敛与独立化之后）。这里提供维护入口：现状、证据边界、待修复与待裁决；具体行动跟踪见 [TODO](../TODO.md)。本轮仅整理文档，未修运行时、未发布。
+> 2026-09-19 本地审查（文档收敛、独立化与 archive/codemap 清理之后）。这里提供维护入口：现状、证据边界、待修复与待裁决；具体行动跟踪见 [TODO](../TODO.md)。本轮仅整理文档，未修运行时、未发布。
+
+现行文档（10 份，全部自足，不依赖历史材料）：本维护状态、[架构合同](project-architecture-contract.md)、[设置合同](settings-ui-product-contract-zh.md)、[日志协议](logging-protocol.md)、[发布流程](release-runbook-zh.md)、[Steam 页面草稿](steam-workshop-page-copy-draft.md)、[隐私重写方案](privacy-history-rewrite-plan-zh.md)、双语 CHANGELOG。发布证据与终审报告在 [`release_review/`](release_review/)（含 7 份 Claim Pack、2 份流程复盘与终审报告）；原 `docs/archive/` 与全部 `codemap.md` 已删除，靠 git 历史追溯（收敛提交 `8481cbe`）。
 
 ## 状态与证据
 
