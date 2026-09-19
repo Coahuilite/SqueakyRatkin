@@ -146,6 +146,7 @@ Third-party VoicePack authors should state appropriate licenses for their audio,
 - 作者 XML 合同公开冻结：字段只增不改、17 个动作键 append-only、非法包 fail-closed；随附脚手架与自包含作者指南。
 - Biotech 婴幼儿的 Crying/Giggling 需要语音包提供音频，未提供时静默；正常的哭闹/咯咯笑不再被当作精神崩溃。
 - 诊断日志每个动作窗口合并为一行路由记录，含音源层级、彩蛋标记、派系与玩家控制标记。
+- 修复语音源 Remix（混合）在缺少某一层音源时可能整次无声、且内置音源永不入选的缺陷；现在只在可用层之间等权抽取。
 ```
 
 ```text
@@ -156,8 +157,9 @@ Third-party VoicePack authors should state appropriate licenses for their audio,
 - The author XML contract is publicly frozen: fields are add-only, the 17 action keys are append-only, and invalid packs fail closed. A scaffold and a self-contained author guide ship alongside.
 - Biotech baby Crying/Giggling need matching VoicePack audio and stay silent otherwise; normal crying and giggling are no longer treated as a mental break.
 - Diagnostics now write one consolidated route line per action window with sound tier, egg flag, faction, and player-control flag.
+- Fixed Voice source Remix when a tier is missing: some events stayed silent and the built-in tier could never be drawn. Remix now draws evenly among available tiers only.
 ```
 
 ## 文案状态
 
-字符数（Unicode code point，LF 换行，不含 fence 与尾换行）：中文正文 1936、英文正文 4440；中文 Change Notes 410、英文 Change Notes 1165。两段正文与 Change Notes 均面向 0.3.3，正文自 2026-09-19 版本起未再改动。发布前用一次核对确认中英对称、版本、下载入口、权利措辞与双预览；页面编辑与 change notes 粘贴均由维护者执行，agent 只做公开页面只读核验。旧置顶公告是否删除须看实际页面，不能由本文件推断。本文件不替代 Claim Pack。
+字符数（Unicode code point，LF 换行，不含 fence 与尾换行）：中文正文 1936、英文正文 4440；中文 Change Notes 471、英文 Change Notes 1337。两段正文与 Change Notes 均面向 0.3.3，正文自 2026-09-19 版本起未再改动；Change Notes 增加 R6 Remix 修复条目（0.3.3 撤回重发）。发布前用一次核对确认中英对称、版本、下载入口、权利措辞与双预览；页面编辑与 change notes 粘贴均由维护者执行，agent 只做公开页面只读核验。旧置顶公告是否删除须看实际页面，不能由本文件推断。本文件不替代 Claim Pack。
