@@ -21,6 +21,8 @@ public partial class SqueakyRatkinSettings : ModSettings
     public bool scaleCooldownWithTimeSpeed = true;
     public bool scaleFrequencyWithTalking = true;
     public bool scalePeriodicWithAudiblePopulation = true;
+    public bool eatOnlyDuringChewing;
+    public bool eatIncludeDrugs;
     public bool localizeDebugActions;
     public bool developerToolsEnabled;
     public SqueakDevLoggingMode devLoggingMode = SqueakDevLoggingMode.Auto;
