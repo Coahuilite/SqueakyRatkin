@@ -19,7 +19,7 @@
 - 作者 XML ABI 公开稳定：字段只增不改、17 动作键 append-only、fail-closed；内部 kernel/schema 仍是 0.x 窗口。
 - Eat 默认 job 级派发（招牌手感）不得默认收窄；两级开关语义、营养/toil 判定与回落规则见架构合同。
 - 发布三命令契约：`verify-local.ps1`（11 项）→ `check-pack-readiness.ps1 -RequireReleaseMetadata` → `privacy-audit.ps1 -FullHistory -PrePush`；不新增人工仪式。
-- US 兼容（2026-09-19 维护者裁定）：共存期 SR 与 US **各自装配、各自发声（双 comp / 双响）是正常行为**，玩家另装 SR legacy 独立版时同样正常；**不再要求 US 侧检测让位，也不存在 U1 顺序硬门**。仍需裁决的是切换面：类型名所有权（两 DLL 定义 `SqueakyRatkin.SqueakVoicePackDef` 的 first-wins 风险）、packageId 归属、legacy 渠道、US 前置硬/软、设置迁移、公告窗口。清单见 `docs/maintenance-status-zh.md`「迁移与退役」。
+- US 兼容（2026-09-19 维护者裁定）：共存期 SR 与 US **各自装配、各自发声（双 comp / 双响）是正常行为**，玩家另装 SR legacy 独立版时同样正常；**不再要求 US 侧检测让位，也不存在 U1 顺序硬门**。**SR 1.0 形态（同日裁定）**：对 US **硬依赖**，US 自然带 FL（SR 不单独声明）；Def 归属按 US 约定执行（附属不自立类型名）；设置**不自动导入**，只提醒玩家自行保留/记录后在 US 重选；Steam 主页 3A 声明下方加**无具体时间**的退役公告，但 US 未上工坊，故该公告**不随 0.3.3 上传**，等 US 上线后单独更新主页。仍开放：packageId 归属、legacy 渠道、过渡版、切换实机验收。清单见 `docs/maintenance-status-zh.md`「迁移与退役」。
 - 隐私：历史 known-debt 维持 A（不重写 + 台账纪律）；重写方案 `docs/privacy-history-rewrite-plan-zh.md`，执行需单独授权。
 
 ## 指针

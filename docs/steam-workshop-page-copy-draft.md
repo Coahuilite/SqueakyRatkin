@@ -74,6 +74,32 @@ Eat 默认覆盖整个进食任务，包括端食物走向餐桌。你可以开�
 [i]图书馆大堂的奇怪柱子是什么？那是仇恨吱书！[/i]
 ```
 
+## 即将退役公告（草稿，**暂不启用**）
+
+维护者 2026-09-19 裁定：本公告插在页面最上方 `[h2]⚠ 3A 大作声明[/h2]` 区块之后、`[h1]鼠辈啁啾[/h1]` 之前；**不写具体时间**。因 US（Universal Squeaker）尚未上架工坊，**不随 0.3.3 上传**——等 US 上线后单独更新主页公告时再粘贴。
+
+```bbcode
+[h2]即将退役公告[/h2]
+鼠辈啁啾作为独立模组即将退役：之后它会转为 Universal Squeaker 的附属音源包，本体不再携带程序集。届时需要先安装 Universal Squeaker（其自身前置随它一并安装）。
+
+[list]
+[*]不设具体时间，取决于接续模组的上线与稳定情况；确定后另行公告。
+[*]请自行保留或记录你在本模组中的音源选择与调音设置：新形态不会自动导入，需要重新选择。
+[*]卸载安全不变：本模组不向存档写入永久状态，移除后存档照常载入，只是不再有声。
+[/list]
+```
+
+```bbcode
+[h2]Retirement Notice[/h2]
+Squeaky Ratkin will be retired as a standalone mod: it becomes a voice pack for Universal Squeaker, and will no longer ship an assembly. Universal Squeaker (which brings its own prerequisites) will then be required.
+
+[list]
+[*]No date is set. It depends on when the successor mod is published and stable; a separate announcement will follow.
+[*]Please keep or note down your voice source selection and tuning settings: the new form does not import them, so you will pick again there.
+[*]Uninstall safety is unchanged: this mod writes no permanent state into saves, so removing it leaves saves loading normally, only without squeaks.
+[/list]
+```
+
 ## English BBCode
 
 ```bbcode
@@ -162,4 +188,4 @@ Third-party VoicePack authors should state appropriate licenses for their audio,
 
 ## 文案状态
 
-字符数（Unicode code point，LF 换行，不含 fence 与尾换行）：中文正文 1936、英文正文 4440；中文 Change Notes 471、英文 Change Notes 1337。两段正文与 Change Notes 均面向 0.3.3，正文自 2026-09-19 版本起未再改动；Change Notes 增加 R6 Remix 修复条目（0.3.3 撤回重发）。发布前用一次核对确认中英对称、版本、下载入口、权利措辞与双预览；页面编辑与 change notes 粘贴均由维护者执行，agent 只做公开页面只读核验。旧置顶公告是否删除须看实际页面，不能由本文件推断。本文件不替代 Claim Pack。
+字符数（Unicode code point，LF 换行，不含 fence 与尾换行）：中文正文 1936、英文正文 4440；中文 Change Notes 471、英文 Change Notes 1337；退役公告中文 253、英文 667（**未启用**，启用时插在正文 3A 区块之后，正文随之变为中文 2189 / 英文 5107，另加一个空行作分隔）。0.3.3 本次粘贴载荷 = 正文 + Change Notes，**不含**退役公告；公告等 US 上架工坊后单独更新主页。发布前用一次核对确认中英对称、版本、下载入口、权利措辞与双预览；页面编辑与 change notes 粘贴均由维护者执行，agent 只做公开页面只读核验。旧置顶公告是否删除须看实际页面，不能由本文件推断。本文件不替代 Claim Pack。
