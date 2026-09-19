@@ -1,6 +1,6 @@
 # SR 维护状态与待裁决
 
-> 2026-09-19 更新（文档收敛、独立化、archive/codemap 清理与 0.3.3 GitHub 发布之后）。这里提供维护入口：现状、证据边界、待修复与待裁决；具体行动跟踪见 [TODO](../TODO.md)。
+> 2026-09-19 更新（文档收敛、独立化、archive/codemap 清理之后；0.3.3 因 R6 Remix 缺陷**撤回后本日重新发布**）。这里提供维护入口：现状、证据边界、待修复与待裁决；具体行动跟踪见 [TODO](../TODO.md)。
 
 现行文档（10 份，全部自足，不依赖历史材料）：本维护状态、[架构合同](project-architecture-contract.md)、[设置合同](settings-ui-product-contract-zh.md)、[日志协议](logging-protocol.md)、[发布流程](release-runbook-zh.md)、[Steam 页面草稿](steam-workshop-page-copy-draft.md)、[隐私重写方案](privacy-history-rewrite-plan-zh.md)、双语 CHANGELOG。发布证据与终审报告在 [`release_review/`](release_review/)（含 7 份 Claim Pack、2 份流程复盘与终审报告）；原 `docs/archive/` 与全部 `codemap.md` 已删除，靠 git 历史追溯（收敛提交 `8481cbe`）。
 
@@ -20,7 +20,7 @@
 
 | 项 | 结论与下一步 |
 | --- | --- |
-| **R6 Remix 实现偏差** | 当前三层路径在无 Xenotype 层、有 Race + BuiltIn 时可能选空层。已用公开 Select 入口编译执行复现；适配/播放源码没有兜底。另行修复并处理冻结 corpus 的取舍，补实际游戏验证。本次未修 |
+| **R6 Remix 折叠（0.3.3 已修正）** | 缺陷成立且玩家可见：三层路径按原始位序取 index，缺层时命中空位 → 该次事件**静默**且内置层永不可达；默认 Fallback 用户不受影响，**开启 Remix 的默认装配**（出厂播种的 `SR_OfficialExample_Race` 声明空 fallbacks）命中 shape A。修正 = 仅非 None 层等权折叠（回到 0.2.4 语义）。守卫 = shape A/B 断言（修正前 none=105/200、内置 0；修正后 none=0、105 race / 95 内置）+ `corpus-0.3.0-r6.txt` 字节回放 + 历史语料 540 行差异断言。首发 0.3.3 因此撤回并重发 |
 | **R4/R5 日志** | 文档已补 v1 `pawn pawn_id` 并纠正 28/4 事件分组；实际 label 输出与旧隐私禁令冲突仍开。普通字段仅编码、非通用脱敏。处理字段须先确定兼容政策 |
 | **R3 作者 ABI** | add-only/17 键 append-only/fail-closed 承诺继续有效；“首个携带 0.3.1 ABI 的发行版本”尚未精确到 tag。pre1 是有证据候选，不擅自排除 prerelease |
 | 实机与发布 | Eat 三态、身份门余项、低频回归沿用现有 TODO；取得结果后决定修复或按 [runbook](release-runbook-zh.md) 发布。旧“V1–V3 都待定”不再成立：V1 追认、V3 接受、V2 仅出方案 |

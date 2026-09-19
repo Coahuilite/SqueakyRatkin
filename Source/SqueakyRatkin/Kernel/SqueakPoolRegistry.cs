@@ -110,6 +110,9 @@ public sealed class SqueakPoolRegistry
 
     public DomainPool? PoolFor(AudioDomain domain) => poolsByDomain.TryGetValue(domain, out DomainPool? pool) ? pool : null;
 
+    /// <summary>三层 Remix 折叠：只在非 None tier 上等权抽取（与 <see cref="SelectRemixFour"/> 同规则）。
+    /// 0.3.3 R6 修正：0.3.0 起此路径按原始位序取 index，缺层时会命中空位（静默）且后继 tier 不可达；
+    /// 0.2.4 语义是「仅非 None tier 进入候选表」（corpus-0.3.0 已按修正后语义重放，见维护状态 R6 记录）。</summary>
     private static ChainResult SelectRemixThree(ChainResult x, ChainResult r, ChainResult vanilla, IRollSource rolls)
     {
         ChainResult tier0 = x, tier1 = r, tier2 = vanilla;
@@ -118,14 +121,15 @@ public sealed class SqueakPoolRegistry
         if (!tier1.IsNone) count++;
         if (!tier2.IsNone) count++;
         if (count == 0) return ChainResult.None;
-        if (count == 1) return !tier0.IsNone ? tier0 : (!tier1.IsNone ? tier1 : tier2);
-        int index = RollIndex(count, rolls);
-        return index switch
+        if (count == 1)
         {
-            0 => tier0,
-            1 => tier1,
-            _ => tier2,
-        };
+            if (!tier0.IsNone) return tier0;
+            return !tier1.IsNone ? tier1 : tier2;
+        }
+        int index = RollIndex(count, rolls);
+        if (!tier0.IsNone && index-- == 0) return tier0;
+        if (!tier1.IsNone && index-- == 0) return tier1;
+        return tier2;
     }
 
 
