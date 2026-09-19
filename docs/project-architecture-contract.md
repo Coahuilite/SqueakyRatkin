@@ -1,65 +1,96 @@
-# Squeaky Ratkin Project Architecture Contract
+# 鼠辈啁啾架构与兼容合同
 
-> This is the current project-level architecture contract. It defines implementation authority and compatibility boundaries; historical planning and review records are not substitutes.
+> 2026-09-19 重构。本文规定应保持的行为，自足描述现状；不代表所有行为均已实机验证。当前证据边界、待修复项与待裁决见 [维护状态](maintenance-status-zh.md)。
 
-## 1. Authority and conflict order
+## 身份、权威与边界
 
-The effective contract is, from highest to lowest: explicit accepted product decisions; this document and the current settings product contract; source/Defs that implement those decisions; and supporting author/reference documentation. `AGENTS.md` remains the repository's operational hard-constraint index. Historical documents are evidence only. When implementation and a current contract disagree, do not silently normalize either: identify the mismatch and resolve it in the authoritative layer.
+品牌为 **鼠辈啁啾 / Squeaky Ratkin**，packageId 为 `coahuilite.squeakyratkin`，C# namespace 为 `SqueakyRatkin`，Defs 使用 `SR_`。产品支持 NewRatkinPlus Ratkin，由 XML 装配的 `CompSqueaker` 标识；路由机制按 VoicePack 的精确 `raceDefName` 处理域，不按名称、图标或 HAR 包身份特判种族。
 
-The supported product is NewRatkinPlus Ratkin only, identified by the XML-attached `CompSqueaker`; it is not a generic HAR-race framework. All Defs use `SR_`; C# type names rely on namespace isolation.
+明确接受的产品裁决优先于合同；合同规定实现目标，源码记录实际实现。两者冲突须显式登记，不能把现有 bug 写成承诺。[AGENTS.md](../AGENTS.md) 管操作、隐私和授权；UI 与日志分别以 [设置合同](settings-ui-product-contract-zh.md)、[日志协议](logging-protocol.md) 为准；历史规划不覆盖现行规则。
 
-## 2. Baseline, eligibility, and optional Xenotypes
+- 无官方 DLC 的基线：RimWorld Core + Harmony + HAR/NewRatkinPlus + SR。全局设置、动作、心情、Race 音源及内置回退必须可用。
+- Biotech 未启用时不得访问 Xenotype DefDatabase 或 pawn genes。启用时只按精确且区分大小写的 `XenotypeDef.defName` 绑定；不可用的异种层 fail-closed，Race/内置回退继续工作。不做 gene 级设置、第三方 Xenotype 冲突仲裁或任意 HAR 种族的产品支持承诺。
+- HAR 仅经反射增强发现；缺失或失败应降级，不得崩溃。显示/发现信息不是资格门。
+- 卸载不得影响存档：不向游戏存档写永久状态；运行时 Def 装配可随卸载消失，设置与 profile 留在 Config。共存期保持 `SqueakyRatkin.CompProperties_Squeaker` / `SqueakyRatkin.CompSqueaker` 全名稳定；跨仓接管须先完成 [迁移条件](maintenance-status-zh.md#迁移与退役)。
 
-The mandatory baseline is RimWorld Core + Harmony + HAR/NewRatkinPlus + Squeaky Ratkin with every official DLC disabled. Optional DLC is an end-to-end delta, not a quiet catalog failure: settings, applicable Ratkin actions, global XML/settings behavior, mood modulation, and Vanilla fallback must remain usable. Biotech-inactive paths must not enter Xenotype DefDatabase or pawn-gene paths.
+## 动作、触发与发声
 
-Harmony entry points dispatch by `CompSqueaker` presence; they must not add a second race-name or `IsRatkin` gate. Missing Biotech, catalog, preset, selection, pack, pawn Xenotype, or sound pool resolves to GlobalOnly/fallback and never removes ordinary event eligibility.
+内置动作按以下序号 **append-only**：
 
-The sole Xenotype identity is the exact, case-sensitive `XenotypeDef.defName`. A pawn's current `defName` is the runtime authority. Localized labels, icons, HAR discovery, whitelists/`CanUseXenotype`, source-package metadata, and Core/Ludeon classification are display, search, diagnostic, or candidate hints only. A Core/Ludeon Xenotype discovered only through HAR does not create a settings candidate by itself; an explicit preset, persisted Xenotype selection, or declared Xenotype VoicePack still keeps that exact target visible. Duplicate same-name resolution fails closed for that Xenotype layer; Race/Vanilla behavior continues. No gene-level settings, arbitrary HAR races, or third-party Xenotype-conflict mediation are in scope.
+```text
+0 Call, 1 Eat, 2 Sleep, 3 Wounded, 4 Select, 5 Move, 6 Social,
+7 Joy, 8 Death, 9 Draft, 10 Undraft, 11 Attack, 12 Work,
+13 Equip, 14 MentalBreak, 15 Crying, 16 Giggling
+```
 
-## 3. Fixed action and trigger contract
+这是 17 个 one-shot 动作键；内置音频/fallback 只覆盖前 15 个。`Crying` / `Giggling` 无可用包音频时静默。新增动作须联动源码、Defs、本地化、触发、验证及文档；SR 当前不提供插件动作注册机制。
 
-There are exactly 17 built-in one-shot actions, in append-only ordinal order: `Call`, `Eat`, `Sleep`, `Wounded`, `Select`, `Move`, `Social`, `Joy`, `Death`, `Draft`, `Undraft`, `Attack`, `Work`, `Equip`, `MentalBreak`, `Crying`, and `Giggling` (`Crying` = 15, `Giggling` = 16; 0–14 remain unchanged). The fixed definitions provide stable display/audio keys and gate policy; XML supplies the action plan. Adding an action is a coordinated source, Def, localization, trigger, and documentation change—not a plugin registration. `Crying` and `Giggling` are the narrow BabyFits mental-state actions; neither has a built-in SoundDef or built-in fallback entry, so each is silent unless a VoicePack declares audio for it.
+XML 决定周期动作的 `EachTime` / `RandomOneShot` / `External`、间隔、概率、时钟及是否绕过全局冷却；外部动作由事件驱动。固定动作策略在 resolver、RNG、计时和播放之前执行；关闭动作意味着生产路径绝对静默，显式 preview 独立。全局策略与运行时 delta 均执行作用域限制。
 
-Periodic actions are sampled by `CompSqueaker`; XML decides `EachTime`, `RandomOneShot`, or `External`, interval, probability, cooldown clock, and global-cooldown bypass. External actions are event driven. `Draft` and `Undraft` originate only from player gizmo changes. `Attack` is bounded to successful Core `Verb.TryCastShot` implementations declared in Core `Verse`/`RimWorld` types, excluding Ability-named verbs, DLC assemblies, and attack systems that do not use that method. `Work` can narrow to a player-forced job. `Equip` accepts only a player-issued Core Equip job, never AI, load, or system equipment changes. `Move` and `Sleep` remain occasional one-shots; sustained playback is unsupported. `Crying`/`Giggling` are notified only by the successful `MentalStateHandler.TryStartMentalState` BabyFits postfix after its `MentalFitDef` reverse-map check; they do not widen the real-mental-break hook.
+| 触发 | 必须保持的边界 |
+| --- | --- |
+| 玩家选择/主动命令 | `PlayerSelection` / `ActiveCommand` 要求 `Pawn.IsPlayerControlled`；选择还要求 `!Downed && Awake()`。过滤 `Selector.Select(playSound:false)`，失败静默且不消耗冷却 |
+| Draft / Undraft / Equip | 前两者只由玩家 gizmo 改变产生；Equip 只接受玩家下达的 Core Equip job，不接受 AI、加载或系统换装 |
+| Attack | 只覆盖成功的 Core `Verb.TryCastShot` 实现；排除 Ability 命名 verb、DLC 程序集及不使用该方法的攻击系统 |
+| Work / Move / Sleep | Work 可限制为玩家强制 job；Move/Sleep 是偶发 one-shot，不支持持续播放 |
+| MentalBreak / BabyFits | 真崩溃 hook 不扩大；Crying/Giggling 仅来自成功的 `TryStartMentalState` postfix 经 `MentalFitDef` 反向映射确认的 BabyFits |
 
-The settings-owned fixed action policy runs before resolver, RNG, timing, vocal, or playback work. Disabled is absolute production silence; explicit preview is intentionally separate. Action scope is enforced both by the global policy and resolved runtime delta.
+声带效率门作用于全部动作（含 Death）；启用的 `Talking` 能力概率门仅对 Death 豁免。enable/probability/timing 先于声带判定；声带拒绝与成功尝试消耗同样的动作/适用共享冷却，避免逐 tick 重试。
 
-## 4. Vocal, timing, mood, and distance
+### Eat 三级粒度
 
-A sanitized vocal-organ efficiency gate mutes every action, including `Death`. When enabled, the clamped `Talking` capacity is an ordinary-action chance gate; `Death` alone is exempt from the Talking gate. Enablement, probability, and timing are evaluated first. A vocal rejection consumes the same per-action and applicable shared attempt cooldown as a successful playback, preventing retry-every-tick behavior.
+默认保持整个 `JobDefOf.Ingest`，包括取食、端食物赶路及收尾，Eat 优先于 Move；不得默认收窄。两个设置默认均为 `false`：
 
-Mood is applied at dispatch through `SoundInfo.pitchFactor` and `volumeFactor`; there is one sound definition per action/audio set, never a mood × action SoundDef matrix. Camera handling uses `CurrentViewRect.ExpandedBy(10)` for view culling and `SoundInfo.InMap(TargetInfo(Pawn))` with `distRange` attenuation. The underlying SoundDef range is `15–70` cells, while the player settings default to the Balanced preset at `15–50`; beyond the active range is silent. **Do not reintroduce a zoom eligibility gate** (including `CurrentZoom <= Close`): it would incorrectly block distance attenuation. High-speed control scales cooldowns, not individual sound volume.
+| 父 `eatOnlyDuringChewing` | 子 `eatIncludeDrugs` | 有效模式与判据 |
+| --- | --- | --- |
+| 关 | 强制为关 | `WholeJob`：整个 Ingest job |
+| 开 | 关 | `GainingNutrition`：`IEatingDriver.GainingNutritionNow` |
+| 开 | 开 | `ChewingToil`：未确认 toil 名 **或** 正在 `ChewIngestible` **或** 正在摄入营养 |
 
-## 5. XML and settings merge
+`ChewIngestible` 来自 `JobDriver.CurToilString`，名称在进程中未确认时回落整个 job，不能静默。带营养成瘾品（啤酒 `0.08`、仙馔 `0.2`）在中档已算 Eat；烟卷/薄片等零营养摄入物靠第三档覆盖。UI 父关立即清零并禁用子项，PostLoadInit 也归一。规则由纯函数 `SqueakEatOccurrence` 提供，Verse 采样留适配层；不改变路由、冷却或 ABI，不新增日志事件。
 
-`1.6/Patches/Ratkin_AddSqueakComp.xml` is the behavior authority: `actions` and `moodMods` are data-driven, and distance presets live in `CompProperties_Squeaker.distancePresets`. Runtime code adapts these fields generically; documentation categories must not become action-name hardcoding where a field can express the behavior.
+## 配置与内核
 
-Configuration merges field-by-field: (1) XML `CompProperties` defaults, (2) global `ModSettings` overrides, then (3) per-Xenotype deltas. Missing preset or field inherits the lower layer. Selecting a distance preset copies its actual range; manual range edits become Custom.
+`1.6/Patches/Ratkin_AddSqueakComp.xml` 的 actions/moodMods 与 `CompProperties_Squeaker.distancePresets` 是行为数据源；不要以动作名硬编码替代可表达的字段。
 
-When Biotech is active, maintain one preset per exact `XenotypeDef.defName`; empty or missing preset fields inherit global defaults. The settings presentation uses localized name and Xenotype icon, with `defName` available as technical information. Labels, icons, localization, and discovery remain display/candidate aids, never preset or audio eligibility gates.
+配置逐字段合并：XML 默认 → 全局 ModSettings → 精确 Xenotype delta；缺字段继承。选距离 preset 时复制其真实范围，手改为 Custom。行为/心情配置与音频选择相互独立；音频 schema 的迁移有意受限，不据此许诺无关设置自动迁移。
 
-The audio-selection schema is a deliberate boundary: legacy audio selections/remix values are not automatically migrated. Do not infer or promise migration for unrelated settings without evidence. Behavior and mood configuration are independent from audio-pack selection.
+心情在派发时调制 `SoundInfo.pitchFactor` / `volumeFactor`；不生成 mood × action SoundDef 矩阵。相机按 `CurrentViewRect.ExpandedBy(10)` 裁剪，用 `SoundInfo.InMap(TargetInfo(Pawn))` 和 distRange 衰减；SoundDef 基础范围 `15–70`，Balanced 设置默认 `15–50`，范围外静默。禁止恢复 zoom 资格门（含 `CurrentZoom <= Close`）；高速控制缩放冷却，不单独缩放音量。
 
-## 6. VoicePack model and persistence
+路由是选择的唯一事实源；执行层只能经输入与 `ISoundGate` 等注入面影响候选。决策逻辑出生即纯，游戏事实采样留适配层；`Kernel/` 零 Verse 引用，由 harness 链接编译，不为未来消费者预拆程序集。设置迁移先在临时副本完成，成功才替换；失败保留旧 schema/数据并阻止破坏性保存。
 
-`SqueakVoicePackDef` is one selection, weight, and validation unit. Every PackDef must declare the exact, case-sensitive `raceDefName` it serves; a missing value is rejected. A Race pack has no target and works without Biotech. A Xenotype pack has exactly one `targetDefName` string. `weight` is the positive finite pack-level draw weight (default `1`). Optional `fallbacks` entries map one built-in action to an `SR_*` SoundDef for that pack's fallback tier. Each action entry may carry `ageTag` (`Baby`, `Toddler`, `Child`, or `Adult`; absent means all ages) and `IsEgg` (an additive easter-egg tag). Exact-age variants take priority over all-age variants; the resolver directly maps RimWorld's already-resolved `CurLifeStage.developmentalStage` as Newborn/Baby → Baby, Child → Child, and all other or missing stages → Adult. `Toddler` remains an ABI bucket but has no native RimWorld 1.6 stage. `IsEgg` entries join the candidate pool only when `allowEasterEggSounds` is enabled; that setting defaults to `false` and rebuilding the resolver applies it discretely. A package may publish several PackDefs, but each remains independent. Stable PackKey identity is package ID plus PackDef defName; Race and Xenotype choices are persisted in separate domains.
+## VoicePack XML 与选择链
 
-**Author-facing VoicePack XML ABI (2026-08-22)**: from the first released version that carries the 0.3.1 ABI, the `SqueakVoicePackDef` XML surface — `raceDefName`, `scope`, `targetDefName`, `weight`, `fallbacks`, `actions` entries (`action`, `ageTag`, `IsEgg`, `sounds`), and the referenced one-shot `SR_*` SoundDef contract — is public-stable for audio-pack authors. Fields are add-only, built-in action keys are append-only, and validation fails closed; `IsEgg` is included in this public ABI. Internal surfaces (kernel, domain model, fallback profile schema, and the future action gates) remain under the 0.x revision window.
+每个 `SqueakVoicePackDef` 是独立选择、权重及验证单元。包可包含多个 PackDef，但不得合并身份。
 
-Modes are: **Off** = built-in fallback only; **Fallback** = Xenotype pack → Race pack → pack fallback → built-in fallback, then silence, per action; **Remix** = equal tier selection across currently playable Xenotype, Race, declared pack-fallback, and built-in-fallback tiers. An action with no declared pack fallback retains the frozen three-tier Remix draw shape (Xenotype/Race/built-in). Packs contribute sounds only; they never override action behavior, timing, capability, distance, or mood. The built-in fallback profile is maintainer-owned C# data (`BuiltInFallbackCatalog`): exact race → string action key → original `SR_*` SoundDef key. Ratkin's profile deliberately has 15 keys (`Call` through `MentalBreak`); `Crying` and `Giggling` are absent, and a race with neither a usable pack path nor a built-in profile is silent. Since 0.2.3 the shipped default is Fallback with the built-in Race Example enabled; it is applied once to configurations that never set a mode (Scribe omits the default-valued `voicePackMode` node) and never overwrites an explicit mode or existing selections.
+| 字段/身份 | 合同 |
+| --- | --- |
+| `raceDefName` | 必填、精确大小写；缺失拒绝 |
+| `scope` / `targetDefName` | Race 无 target、无 Biotech 也可用；Xenotype 只有一个精确 target 字符串 |
+| `weight` | 正有限 pack 权重，默认 `1` |
+| `fallbacks` | 可选，内置动作键 → 该包 fallback tier 的 `SR_*` SoundDef |
+| `actions` | `action`、可选 `ageTag` / `IsEgg`、`sounds`；仅贡献声音，不改行为/时机/能力/距离/心情 |
+| 年龄 | `Baby` / `Toddler` / `Child` / `Adult`；缺省 all-age，exact-age 优先。直接映射 `CurLifeStage.developmentalStage`，不重算年龄阈值；Newborn/Baby→Baby，Child→Child，其余/缺失→Adult；1.6 无原生 Toddler |
+| `IsEgg` | 加性池成员；`allowEasterEggSounds` 默认 false，打开才加入同权候选，resolver 重建应用 |
+| PackKey | package ID + PackDef defName；Race/Xenotype 选择分域持久化 |
 
-Fallback-profile persistence is a separate formal Config artifact: `SqueakFallbackProfileStore` owns `SqueakyRatkin_Profile_<race>.xml`, writes through temp+atomic replacement, and never calls `WriteSettings()` or joins the ModSettings debounce queue. Missing, corrupt, or older copies rebuild from the C# source; a current copy with a field-presence delta is merged with that source.
+**作者 XML 是 public-stable：字段 add-only、内置动作键 append-only、验证 fail-closed，包含 IsEgg 与引用的 one-shot `SR_*` SoundDef 合同。** 原起点是“首个携带 0.3.1 ABI 的发行版本”；具体 tag 的解释未闭合，不能据此收回当前承诺。内部 kernel/domain/profile schema/未来动作门仍有 0.x 修订空间。作者操作正本为 [VoicePack SKILL](../.github/skills/squeaky-voicepack-authoring/SKILL.md)，本文不另造制作指南。
 
-Saved selections whose PackKey disappears are retained as **orphan** choices and excluded from resolution. Xenotype bindings unavailable because Biotech, catalog, or target is absent are **dormant**, not orphaned. Both resume automatically if the same identity returns; players may explicitly forget them. Forgetting an unavailable Xenotype target is a confirmed destructive action that removes both its exact behavior preset and its Xenotype VoicePack selection; catalog refresh never performs that deletion implicitly. Pack targets, persisted bindings, and non-official discovery-only hints form the UI candidate union, not an eligibility whitelist.
+| 模式 | 期望语义 |
+| --- | --- |
+| Off | 仅内置 fallback；不是总静音开关 |
+| Fallback | Xenotype → Race → pack fallback → built-in → 静默，逐动作判断；pack fallback 查询精确 `ctx.Domain`，不跨域借用 |
+| Remix | 在当前可播放层之间等权选择，层内按包权重；无声明 pack fallback 时保留旧三层抽样通路 |
 
-## 7. Example audio and implementation paths
+**已知实现偏差 R6**：旧三层 Remix 在 `(None, Race, BuiltIn)` 组合会误选空层，公开内核入口已复现。本合同描述应有语义，不证明当前实现满足；证据与状态见 [维护状态](maintenance-status-zh.md) 与 [TODO](../TODO.md)，修复与冻结语料取舍另行处理。
 
-The built-in `SR_OfficialExample_Race` and external `SR_ExampleTemplate_Race` are independent Race VoicePacks with distinct Defs, PackKeys, catalog entries, and roots. Neither is privileged by resolver weighting. The Template's Biotech tree is TXT-only guidance, not loadable Xenotype content.
+`BuiltInFallbackCatalog` 是维护者拥有的 C# 单源表：精确 race → string action key → `SR_*`。Ratkin 种子仅 `Call` 至 `MentalBreak` 15 键；缺包且无内置 profile 则静默。自 0.2.3，出厂默认 Fallback + 内置 Race Example；仅对从未设置模式的配置幂等播种，不覆盖明确模式和已有选择。
 
-The Template directory is the only manually maintained Example source: `Extras/SqueakyRatkinExampleVoices/1.6/Race/Sounds/coahuilite.squeakyratkin.examplevoices/SR_ExampleTemplate_Race/`. As a current reference baseline it contains 15 action directories and 41 OGG files: Attack 3, Call 4, Death 2, Draft 3, Eat 2, Equip 2, Joy 3, MentalBreak 1, Move 3, Select 3, Sleep 3, Social 3, Undraft 3, Work 3, and Wounded 3. These are the 15 actions with shipped Example audio, not the runtime ABI: the fixed contract has 17 action names, while `Crying`/`Giggling` deliberately have no built-in audio and default to silence. Audio-pack totals and per-action counts may vary as Example audio evolves. The source main-mod tree intentionally has no built-in OGG mirror. `scripts/stage-package.ps1` copies this source into the staged built-in root and verifies that the built-in mirrors the Template's actual action/key sets and SHA-256 identity, without asserting fixed totals or per-action counts. Unexpected changes outside that source, a broken Template→built-in mirror relationship or its distribution, altered pack/path roots, extra audio formats, or divergent staged hashes are invariants to report—not silently repair.
+## 持久化与分发
 
-Formal Example sources allow OGG only. OGG Vorbis is also the recommended final-distribution format for third-party VoicePacks. WAV is supported by RimWorld/the current loading chain and may be useful for intermediate review, but is not the project's recommended release format; runtime validator or game compatibility must not be represented as a publication recommendation. This policy does not reject third-party WAV solely for being WAV. MP3 is not a recommended guide format.
-
-Authoring resource roots are always `<lowercase packageId>/<PackDef.defName>/<Action>/`. SoundDef `clipFolderPath`, the physical `Sounds/` tree, and installation guidance must agree. RimWorld audio keys are not isolated by package ownership, so the project validates its own distributed roots and duplicate extensions but does not globally arbitrate third-party patches or collisions.
-
-Implementation authority paths: `Source/SqueakyRatkin/CompSqueaker.cs` for the generic component/runtime pipeline; `Source/SqueakyRatkin/Patches/` for bounded event hooks; `1.6/Patches/Ratkin_AddSqueakComp.xml` for action/mood defaults; `Source/SqueakyRatkin/SqueakyRatkinSettings.cs` and adjacent settings UI code for persisted settings; `Source/SqueakyRatkin/SqueakVoicePackModels.cs` and resolver code for pack resolution; `scripts/stage-package.ps1` for staging invariants; and `docs/logging-protocol.md` for the closed logging compatibility surface.
+- `SqueakFallbackProfileStore` 单独持有 `SqueakyRatkin_Profile_<race>.xml`，临时文件 + 原子替换，不调用 `WriteSettings()` 或加入设置 debounce。缺失/损坏/旧版本重建；可用副本的 field-presence delta 与 C# 源合并。
+- 消失 PackKey 保留为 orphan，暂不解析；因 DLC/catalog/target 不可用的 Xenotype 绑定为 dormant。身份恢复后自动恢复，刷新不删除；玩家确认“忘记此目标”才同时删除该目标行为 preset 与异种音源选择。
+- 候选由包声明目标、已存绑定与合格发现信息组成；候选/显示不是音频白名单，HAR-only 提示不直接生成设置目标行。
+- 内置 `SR_OfficialExample_Race` 与外部 `SR_ExampleTemplate_Race` 的 Def、PackKey、目录均独立，无特权权重；Template 的 Biotech 树是 TXT 指引而非可加载包。
+- 唯一手工音频源在 `Extras/SqueakyRatkinExampleVoices/1.6/Race/Sounds/coahuilite.squeakyratkin.examplevoices/SR_ExampleTemplate_Race/`；基线 15 动作目录/41 OGG 可随内容演进。主模组源树不维护 OGG 镜像；stage 脚本镜像实际集合与 SHA-256，不锁总数。镜像/根路径/格式/散列异常须报告，不能擅自“修复”。
+- 作者资源根为 `<lowercase packageId>/<PackDef.defName>/<Action>/`，SoundDef 路径与物理 Sounds 树一致。正式 Example 仅 OGG，第三方推荐 OGG Vorbis；WAV 可加载但不据此推荐发布，也不因 WAV 单独拒绝第三方包；不推荐 MP3。项目不仲裁第三方全局音频键碰撞。

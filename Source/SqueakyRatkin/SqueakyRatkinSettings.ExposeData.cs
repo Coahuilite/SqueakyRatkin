@@ -58,6 +58,11 @@ public partial class SqueakyRatkinSettings
         Scribe_Values.Look(ref scaleCooldownWithTimeSpeed, "scaleCooldownWithTimeSpeed", true);
         Scribe_Values.Look(ref scaleFrequencyWithTalking, "scaleFrequencyWithTalking", GetDefaultScaleFrequencyWithTalking());
         Scribe_Values.Look(ref scalePeriodicWithAudiblePopulation, "scalePeriodicWithAudiblePopulation", true);
+        // false = 整个 Ingest job 都算 Eat（出厂手感）；true = 仅「正在摄入营养」时算。
+        // 默认值必须保持 false（= SqueakEatOccurrence.ChewingOnlyDefault），由 harness 单测 + fixtures 零 delta 门锁定。
+        Scribe_Values.Look(ref eatOnlyDuringChewing, "eatOnlyDuringChewing", false);
+        // 子开关（成瘾品）：仅在上层开关开启时有意义；默认 false 同样省略节点。
+        Scribe_Values.Look(ref eatIncludeDrugs, "eatIncludeDrugs", false);
         Scribe_Values.Look(ref localizeDebugActions, "localizeDebugActions", false);
         Scribe_Values.Look(ref developerToolsEnabled, "developerToolsEnabled", false);
         Scribe_Values.Look(ref devLoggingMode, "devLoggingMode", SqueakDevLoggingMode.Auto);
@@ -99,6 +104,8 @@ public partial class SqueakyRatkinSettings
         if (!scaleFrequencyWithTalkingWasLoaded) scaleFrequencyWithTalking = GetDefaultScaleFrequencyWithTalking();
         if (!distanceRangeWasLoaded) distanceRange = GetDistancePresetRange(SqueakDistancePreset.Balanced);
         distanceRange = ClampDistanceRange(distanceRange);
+        // 子开关不变式：父项关闭时子项必须为 false（手改配置/未来版本残留都在这里归一，不 bump schema）。
+        if (!eatOnlyDuringChewing) eatIncludeDrugs = false;
 
         if (experimentalRaceAllowlist == null) experimentalRaceAllowlist = new List<string>();
         if (globalActionEnabled == null) globalActionEnabled = new List<GlobalActionEnabledRecord>();

@@ -2,7 +2,7 @@
 
 **English** | [中文](./README.zh-CN.md)
 
-Squeaky Ratkin adds optional one-shot squeaks to NewRatkinPlus Ratkin pawns. The current repository implements the accepted 0.2.0 feature set plus the 0.2.1 bug-fix release, and the product version is **0.2.1**; this README is not a release announcement.
+Squeaky Ratkin adds optional one-shot squeaks to NewRatkinPlus Ratkin pawns. This README describes the current feature set and is not a release announcement; the single manually maintained version is `<Version>` in `Source/SqueakyRatkin/SqueakyRatkin.csproj` (see Development, packaging, and versioning).
 
 ## Requirements and No-DLC baseline
 
@@ -27,7 +27,7 @@ Settings are immediate with a coalesced save and close flush. There are three re
 
 ## Development, packaging, and versioning
 
-The only manually maintained product version is `<Version>` in `Source/SqueakyRatkin/SqueakyRatkin.csproj` (currently 0.2.1). Builds do not install into RimWorld.
+The only manually maintained product version is `<Version>` in `Source/SqueakyRatkin/SqueakyRatkin.csproj`; `About/About.xml <modVersion>` follows it. Builds do not install into RimWorld.
 
 ```powershell
 dotnet build Source/SqueakyRatkin/SqueakyRatkin.csproj -c Release -p:SqueakyBuildFlavor=Dev
@@ -40,7 +40,7 @@ This stages `dist/dev/SqueakyRatkin/` for manual local testing. Packaging script
 pwsh scripts/verify-local.ps1
 ```
 
-It runs the three characterization harnesses (kernel purity gate + 43 asserts + 3782-case corpus replay, settings fixtures byte-stable, log protocol v1 in both flavors), the fixtures zero-delta gate, and Dev + Steam flavor builds with warnings-as-errors; add `-PackDev` or `-PackSteam` to also stage the package (Steam requires a clean working tree). Bare build:
+It runs 11 checks in one pass: the kernel purity gate with extended asserts and dual corpus byte replay (frozen 0.3.0 plus the 17-action/egg corpus), the settings fixture 9-scenario byte gate, the ConfigCopy store-lifecycle harness, the log protocol in both flavors, the `fixtures/` zero-delta gate, Dev + Steam + Dev flavor builds with warnings-as-errors, the VoicePack XML ABI consistency lock, and the VoicePack scaffold self-test; add `-PackDev` or `-PackSteam` to also stage the package (Steam requires a clean working tree). The release-facing check and the pre-push privacy gate are two more commands, described in [`docs/release-runbook-zh.md`](./docs/release-runbook-zh.md). Bare build:
 
 ```text
 dotnet build Source/SqueakyRatkin/SqueakyRatkin.csproj

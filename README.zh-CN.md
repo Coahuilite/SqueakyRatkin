@@ -2,7 +2,7 @@
 
 [English](./README.md) | **中文**
 
-鼠辈啁啾为 NewRatkinPlus 鼠族 pawn 加入可选的一次性啁啾声。仓库已实现获接受的 0.2.0 功能范围并追加 0.2.1 bug 修复版本，产品版本现为 **0.2.1**；本文不是发布声明。
+鼠辈啁啾为 NewRatkinPlus 鼠族 pawn 加入可选的一次性啁啾声。本文描述当前功能范围，不是发布声明；唯一人工维护的产品版本是 `Source/SqueakyRatkin/SqueakyRatkin.csproj` 的 `<Version>`（见「开发、打包与版本」）。
 
 ## 依赖与 No-DLC 基线
 
@@ -27,14 +27,20 @@ Example 音频是 MPL-2.0 代码许可证之外的公共领域素材。项目与
 
 ## 开发、打包与版本
 
-唯一人工维护的产品版本是 `Source/SqueakyRatkin/SqueakyRatkin.csproj` 的 `<Version>`（当前 0.2.1）。构建不会安装到 RimWorld。
+唯一人工维护的产品版本是 `Source/SqueakyRatkin/SqueakyRatkin.csproj` 的 `<Version>`；`About/About.xml <modVersion>` 跟随它。构建不会安装到 RimWorld。
 
 ```powershell
 dotnet build Source/SqueakyRatkin/SqueakyRatkin.csproj -c Release -p:SqueakyBuildFlavor=Dev
 pwsh scripts/pack-dev.ps1
 ```
 
-它会生成 `dist/dev/SqueakyRatkin/`，供开发者手动安装测试。打包脚本只 stage 已有构建，不会编译：Dev 用于本地测试，Steam 用于创意工坊 staging，GitHub 发布包由 tag/release CI 流程生成。维护者发布规则见 [`AGENTS.md`](./AGENTS.md)。标准构建验证：
+它会生成 `dist/dev/SqueakyRatkin/`，供开发者手动安装测试。打包脚本只 stage 已有构建，不会编译：Dev 用于本地测试，Steam 用于创意工坊 staging，GitHub 发布包由 tag/release CI 流程生成。维护者发布规则见 [`AGENTS.md`](./AGENTS.md)。标准验证是一条命令：
+
+```powershell
+pwsh scripts/verify-local.ps1
+```
+
+它一次跑 11 项：内核纯度门 + 扩展断言 + 双份语料字节回放（0.3.0 冻结 + 17 动作/彩蛋语料）、设置 fixture 9 场景字节门、ConfigCopy store 生命周期 harness、双 flavor 日志协议、`fixtures/` 零 delta 门、Dev + Steam + Dev 三 flavor 构建（warnings-as-errors）、VoicePack XML ABI 一致性锁、VoicePack 脚手架自检；加 `-PackDev`/`-PackSteam` 追加打包（Steam 要求干净树）。发布面复核与 push 前隐私门是另两条命令，见 [`docs/release-runbook-zh.md`](./docs/release-runbook-zh.md)。裸构建：
 
 ```text
 dotnet build Source/SqueakyRatkin/SqueakyRatkin.csproj

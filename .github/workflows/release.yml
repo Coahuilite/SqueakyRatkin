@@ -20,7 +20,9 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          # Self-measured: every gate's local evidence was produced on SDK 10.0.204 (no global.json),
+          # so the runner reproduces that machine. Mixing majors over one obj/ fails NETSDK1047.
+          dotnet-version: '10.0.x'
 
       - name: Verify release tag
         shell: pwsh
@@ -61,6 +63,22 @@ jobs:
           if ($LASTEXITCODE -ne 0) {
             throw "Release tag commit $tagCommit is not in origin/main history. Tag main's squash commit before releasing."
           }
+
+      - name: Restore
+        shell: pwsh
+        run: |
+          Get-ChildItem -Path Source,tools -Recurse -Filter *.csproj |
+            ForEach-Object { dotnet restore $_.FullName --nologo }
+
+      # Tag-time gates, in the same axe the maintainer's local release check uses: a red gate or a
+      # mislabelled version dies before any release asset exists.
+      - name: Verify (11 gates)
+        shell: pwsh
+        run: ./scripts/verify-local.ps1 -NoRestore
+
+      - name: Pack-readiness (version axis, red lines, DLL identity)
+        shell: pwsh
+        run: ./scripts/check-pack-readiness.ps1 -SkipVerify -RequireReleaseMetadata
 
       - name: Build GitHub release flavor
         shell: pwsh

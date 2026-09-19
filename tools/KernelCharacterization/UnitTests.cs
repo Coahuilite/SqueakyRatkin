@@ -34,6 +34,7 @@ public static class UnitTests
         PackWeight(ref failures);
         TimingModelRules(ref failures);
         TriggerInvocationRules(ref failures);
+        EatOccurrenceRules(ref failures);
         PerRacePoolIsolation(ref failures);
     }
 
@@ -654,6 +655,41 @@ public static class UnitTests
         SqueakTriggerInvocation equip = new(SqueakTriggerOrigin.Equip, SqueakInvocationSource.ActiveCommand);
         Check(equip.IsPlayerInitiated && !equip.RequiresResponsivePawn,
             "invocation equip active command is player initiated without responsiveness requirement", ref failures);
+    }
+
+    /// <summary>Eat 触发粒度纯规则（2026-08-23 两级选项）：父关 = 完整 job 级（出厂手感，端食物赶路也算）；
+    /// 父开子关 = 营养级；父开子开 = 咀嚼/点燃 toil 级，且 toil 名在本进程未确认时回落完整 job 级（fail-open）。
+    /// 两个默认值与 vanilla toil 名常量也在此锁定，防误改。</summary>
+    private static void EatOccurrenceRules(ref int failures)
+    {
+        Check(!SqueakEatOccurrence.ChewingOnlyDefault && !SqueakEatOccurrence.IncludeDrugsDefault,
+            "eat occurrence ships both toggles off by default", ref failures);
+        Check(SqueakEatOccurrence.ChewingToilDebugName == "ChewIngestible",
+            "eat occurrence locks the vanilla ChewIngestible toil debugName", ref failures);
+
+        Check(SqueakEatOccurrence.ResolveMode(false, false) == SqueakEatOccurrenceMode.WholeJob
+            && SqueakEatOccurrence.ResolveMode(false, true) == SqueakEatOccurrenceMode.WholeJob,
+            "eat occurrence mode: parent off forces whole job even when the child is set", ref failures);
+        Check(SqueakEatOccurrence.ResolveMode(true, false) == SqueakEatOccurrenceMode.GainingNutrition,
+            "eat occurrence mode: parent on without child is gaining-nutrition", ref failures);
+        Check(SqueakEatOccurrence.ResolveMode(true, true) == SqueakEatOccurrenceMode.ChewingToil,
+            "eat occurrence mode: parent plus child is chewing-toil", ref failures);
+
+        Check(SqueakEatOccurrence.AllowsOccurrence(SqueakEatOccurrenceMode.WholeJob, false, false, false)
+            && SqueakEatOccurrence.AllowsOccurrence(SqueakEatOccurrenceMode.WholeJob, false, false, true),
+            "eat occurrence whole-job allows regardless of toil confirmation", ref failures);
+
+        Check(!SqueakEatOccurrence.AllowsOccurrence(SqueakEatOccurrenceMode.GainingNutrition, false, true, true)
+            && SqueakEatOccurrence.AllowsOccurrence(SqueakEatOccurrenceMode.GainingNutrition, true, false, true),
+            "eat occurrence gaining-nutrition mirrors only the nutrition sample", ref failures);
+
+        Check(SqueakEatOccurrence.AllowsOccurrence(SqueakEatOccurrenceMode.ChewingToil, false, false, false),
+            "eat occurrence chewing-toil falls back to whole job until the toil name is confirmed", ref failures);
+        Check(SqueakEatOccurrence.AllowsOccurrence(SqueakEatOccurrenceMode.ChewingToil, false, true, true)
+            && SqueakEatOccurrence.AllowsOccurrence(SqueakEatOccurrenceMode.ChewingToil, true, false, true),
+            "eat occurrence chewing-toil allows chewing (and nutrition union) once confirmed", ref failures);
+        Check(!SqueakEatOccurrence.AllowsOccurrence(SqueakEatOccurrenceMode.ChewingToil, false, false, true),
+            "eat occurrence chewing-toil rejects the walk/pickup phases once confirmed", ref failures);
     }
 
     /// <summary>0.3.1 波 4a per-race 池隔离 harness（决策 §5：两 race 池互不串扰）：

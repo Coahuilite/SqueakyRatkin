@@ -147,6 +147,13 @@ public class CompSqueaker : ThingComp
     public static bool ScaleCooldownWithTimeSpeed = true;
     public static bool ScaleFrequencyWithTalking = true;
     public static bool ScalePeriodicWithAudiblePopulation = true;
+    // Eat 触发粒度：父开关（默认 false = 整个 Ingest job 都算 Eat，出厂手感）与子开关
+    // （默认 false = 不含成瘾品；父关时子项恒 false）。模式解析与判定见 SqueakEatOccurrence。
+    public static bool EatOnlyDuringChewing;
+    public static bool EatIncludeDrugs;
+    // 运行时专用（不 Scribe）：本次进程内是否已确认 vanilla 咀嚼/点燃 toil 名存在。
+    // 未确认时子开关按完整 job 级兜底（fail-open，绝不静默丢失发声）。
+    private static bool chewToilNameConfirmed;
     public static float GlobalCooldownMultiplier = 1f;
     public static bool DiagnosticsEnabled;
 
@@ -875,7 +882,31 @@ public class CompSqueaker : ThingComp
         }
     }
 
-    private bool IsEating() => Pawn.CurJob?.def == JobDefOf.Ingest;
+    // Eat 默认按整个 Ingest job 采样（取食 → 端食物走到餐桌 → 吞咽 → 收尾，全部算 Eat）。
+    // 父开关收窄到「正在摄入营养」；父开 + 子开则按咀嚼/点燃 toil 判定（成瘾品也算），
+    // 该 toil 名在本进程内未获确认时回落完整 job 级。父关时不采样任何东西。
+    private bool IsEating()
+    {
+        if (Pawn.CurJob?.def != JobDefOf.Ingest) return false;
+        return SqueakEatOccurrence.ResolveMode(EatOnlyDuringChewing, EatIncludeDrugs) switch
+        {
+            SqueakEatOccurrenceMode.WholeJob => true,
+            SqueakEatOccurrenceMode.GainingNutrition => IsGainingNutritionNow(),
+            _ => SqueakEatOccurrence.AllowsOccurrence(SqueakEatOccurrenceMode.ChewingToil,
+                IsGainingNutritionNow(), SampleChewingToil(), chewToilNameConfirmed),
+        };
+    }
+
+    /// <summary>方案 B 采样：vanilla JobDriver_Ingest 的当前 toil 是否为咀嚼/点燃 toil；命中即确认该 toil 名存在。</summary>
+    private bool SampleChewingToil()
+    {
+        if (Pawn.jobs?.curDriver is not JobDriver_Ingest driver) return false;
+        if (!string.Equals(driver.CurToilString, SqueakEatOccurrence.ChewingToilDebugName, StringComparison.Ordinal)) return false;
+        chewToilNameConfirmed = true;
+        return true;
+    }
+
+    private bool IsGainingNutritionNow() => Pawn.jobs?.curDriver is IEatingDriver eating && eating.GainingNutritionNow;
     private bool IsSleeping() => Pawn.GetPosture() == PawnPosture.LayingInBed && Pawn.needs?.rest != null;
     private bool IsMoving() => Pawn.pather != null && Pawn.pather.Moving;
     private bool IsJoyJob() => Pawn.CurJob?.def?.joyKind != null;
