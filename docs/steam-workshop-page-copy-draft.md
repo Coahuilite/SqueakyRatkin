@@ -1,8 +1,8 @@
 # Workshop 页面文案维护源
 
-> **目标：0.3.3，待发布草稿；本次未上传，线上状态未核验。** 发布时须让版本、下载入口与批准产物一致。当前阻塞及 Remix 问题见 [维护状态](maintenance-status-zh.md)，流程见 [runbook](release-runbook-zh.md)。
+> **目标：0.3.3。GitHub 正式 Release `v0.3.3` 已发布（2026-09-19）；Steam 待维护者上传**，线上页面仍是 0.3.0 口径（未核验）。发布时须让版本、下载入口与批准产物一致。当前状态与已知问题见 [维护状态](maintenance-status-zh.md)，流程见 [runbook](release-runbook-zh.md)。
 
-本文是中英描述唯一维护源，不是 change note 或发布记录。页面编辑、双预览由维护者执行；agent 仅公开页面只读核验。下载暂用 releases 总入口，不假定 v0.3.3 tag 已存在。
+本文是中英描述唯一维护源，不是 change note 或发布记录。页面编辑、双预览由维护者执行；agent 仅公开页面只读核验。下载使用 releases 总入口，因此不依赖具体 tag 文案。
 
 ## 编辑约定
 
@@ -136,6 +136,28 @@ Third-party VoicePack authors should state appropriate licenses for their audio,
 [i]What is that strange pillar in the library hall? That is The Book of Squeakudges — it has grown as tall as a pillar.[/i]
 ```
 
+## Steam 更新说明（Change Notes，中英各一段，粘贴用）
+
+```text
+[b]0.3.3[/b]
+- 新增 Eat 两级粒度开关：默认仍是整段进食任务（含端食物走向餐桌）；可改为只在正在摄入营养时触发，「使用成瘾品」子项覆盖烟卷、薄片等零营养摄入物。啤酒、仙馔等本身带营养的成瘾品在第一个开关下已经计入；无法识别咀嚼阶段时回落到完整进食任务。
+- 语音包改为声明所服务的精确种族，并支持按年龄（Baby/Child/Adult）的变体与逐动作包回退。
+- 玩家主动发声（选中、命令）仅对玩家可控、清醒、未倒地的角色触发。
+- 作者 XML 合同公开冻结：字段只增不改、17 个动作键 append-only、非法包 fail-closed；随附脚手架与自包含作者指南。
+- Biotech 婴幼儿的 Crying/Giggling 需要语音包提供音频，未提供时静默；正常的哭闹/咯咯笑不再被当作精神崩溃。
+- 诊断日志每个动作窗口合并为一行路由记录，含音源层级、彩蛋标记、派系与玩家控制标记。
+```
+
+```text
+[b]0.3.3[/b]
+- New two-level Eat granularity: the whole ingest job still counts by default (including carrying food to a table). Optionally restrict it to gaining nutrition, with a dependent option that also covers zero-nutrition ingestibles such as drugs. Nutrition-bearing drugs such as beer and ambrosia already count under the first option; if the chewing stage cannot be identified, detection falls back to the whole ingest job.
+- VoicePacks now declare the exact race they serve, and support per-age variants (Baby/Child/Adult) plus per-action pack fallbacks.
+- Player-initiated selection and command feedback now requires a player-controlled pawn that is awake and not downed.
+- The author XML contract is publicly frozen: fields are add-only, the 17 action keys are append-only, and invalid packs fail closed. A scaffold and a self-contained author guide ship alongside.
+- Biotech baby Crying/Giggling need matching VoicePack audio and stay silent otherwise; normal crying and giggling are no longer treated as a mental break.
+- Diagnostics now write one consolidated route line per action window with sound tier, egg flag, faction, and player-control flag.
+```
+
 ## 文案状态
 
-两段正文面向同一目标版本 0.3.3，字符数（Unicode code point，LF 换行，不含 fence 及尾换行）：中文 1936、英文 4440。旧置顶公告删除情况未在本轮验证。下一次发布确认后，再记录编辑器预览、公开页面观察及实际渠道版本；本文件不能替代 Claim Pack。
+字符数（Unicode code point，LF 换行，不含 fence 与尾换行）：中文正文 1936、英文正文 4440；中文 Change Notes 410、英文 Change Notes 1165。两段正文与 Change Notes 均面向 0.3.3，正文自 2026-09-19 版本起未再改动。发布前用一次核对确认中英对称、版本、下载入口、权利措辞与双预览；页面编辑与 change notes 粘贴均由维护者执行，agent 只做公开页面只读核验。旧置顶公告是否删除须看实际页面，不能由本文件推断。本文件不替代 Claim Pack。
