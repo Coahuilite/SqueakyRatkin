@@ -10,7 +10,7 @@
 | --- | --- | --- |
 | 本地版本 | csproj/About = 0.3.3；CHANGELOG 时间 = 2026-09-19 17:26 UTC+8 | 本地版本号本身不代表渠道状态 |
 | 发布记录 | **0.3.3 = GitHub 正式 Release（首发当日因 R6 撤回，同版本重发）**，证据 [Claim Pack](release_review/release-0.3.3-review-zh.md)；0.3.0 = GitHub 完整 + Workshop 页面级；0.3.2-pre1 = GitHub prerelease | 旧 CI/页面不证明当前版本；Workshop 本次未观察 |
-| 0.3.3 | 重发 tag `v0.3.3` → `cd90a9e`（PR #32）；资产下载级核验（1,590,744 B，SHA256 `fced520a…` = API digest）；Steam 未上传，暂存包就绪（`commit=cd90a9e`） | 商店页面仍是 0.3.0 口径；首发资产（1,590,750 B、`b7eb7dac…`、downloadCount 1）已随 tag 删除，只在本记录留证，无法回收 |
+| 0.3.3 | 重发 tag `v0.3.3` → `cd90a9e`（PR #32）；资产下载级核验（1,590,744 B，SHA256 `fced520a…` = API digest）；**实机验收已过**（release 包 + 听感，特例跳过 dev 包）；Steam 未上传，暂存包就绪（`commit=cd90a9e`） | 商店页面仍是 0.3.0 口径（线上版本含 R6 缺陷）；首发资产（1,590,750 B、`b7eb7dac…`、downloadCount 1）已随 tag 删除，只在本记录留证，无法回收 |
 | 发布分支 | 规则 = 每个 minor 在自己的分支开发（本次 `0.3.x`）、发布时 merge 到 `main`；**`dev` 已删除（本地 + 远端）**；main 已含发布提交 `cd90a9e`（= tag `v0.3.3`）及其后的纯文档提交，`0.3.x` 与之 tree 一致（不追记持续移动的 main HEAD，以 tag 为锚） | 分支已同步不代表下一版已准备 |
 | Steam | 最后记录仍为阻断；新草稿面向 0.3.3，未上传 | 页面现状、旧公告已删或二进制已验证 |
 
@@ -20,7 +20,8 @@
 
 | 项 | 结论与下一步 |
 | --- | --- |
-| **R6 Remix 折叠（0.3.3 已修正）** | 缺陷成立且玩家可见：三层路径按原始位序取 index，缺层时命中空位 → 该次事件**静默**且内置层永不可达；默认 Fallback 用户不受影响，**开启 Remix 的默认装配**（出厂播种的 `SR_OfficialExample_Race` 声明空 fallbacks）命中 shape A。修正 = 仅非 None 层等权折叠（回到 0.2.4 语义）。守卫 = shape A/B 断言（修正前 none=105/200、内置 0；修正后 none=0、105 race / 95 内置）+ `corpus-0.3.0-r6.txt` 字节回放 + 历史语料 540 行差异断言。首发 0.3.3 因此撤回并重发 |
+| **R6 Remix 折叠（0.3.3 已闭）** | 缺陷成立且玩家可见：三层路径按原始位序取 index，缺层时命中空位 → 该次事件**静默**且内置层永不可达；默认 Fallback 用户不受影响，**开启 Remix 的默认装配**（出厂播种的 `SR_OfficialExample_Race` 声明空 fallbacks）命中 shape A。修正 = 仅非 None 层等权折叠（回到 0.2.4 语义，分布等价而非 RNG 流一致）。守卫 = shape A/B 断言（105/115 → 0 静默、内置层可达）+ `corpus-0.3.0-r6.txt` 字节回放 + 历史语料 540 行差异断言 + 独立只读复核。首发 0.3.3 因此撤回并重发；实机验收（release 包 + 维护者听感，特例跳过 dev 包）通过 |
+| **实机验收流程特例** | 0.3.3 以 GitHub release 资产替代发布前 dev 包前置测试（维护者裁定，仅本次）。后续版本恢复 dev 包优先；该特例与其证据边界记在 [0.3.3 记录](release_review/release-0.3.3-review-zh.md) |
 | **R4/R5 日志** | 文档已补 v1 `pawn pawn_id` 并纠正 28/4 事件分组；实际 label 输出与旧隐私禁令冲突仍开。普通字段仅编码、非通用脱敏。处理字段须先确定兼容政策 |
 | **R3 作者 ABI** | add-only/17 键 append-only/fail-closed 承诺继续有效；“首个携带 0.3.1 ABI 的发行版本”尚未精确到 tag。pre1 是有证据候选，不擅自排除 prerelease |
 | 实机与发布 | Eat 三态、身份门余项、低频回归沿用现有 TODO；取得结果后决定修复或按 [runbook](release-runbook-zh.md) 发布。旧“V1–V3 都待定”不再成立：V1 追认、V3 接受、V2 仅出方案 |
