@@ -1,6 +1,6 @@
 # 设置 UI 产品合同
 
-> 2026-09-19 重构。本文规定设置体验与验收边界；运行时见 [架构合同](project-architecture-contract.md)，原始规格见 [归档](archive/settings-ui-product-contract-zh.md)。
+> 2026-09-19 重构。本文规定设置体验与验收边界，自足描述现状；运行时见 [架构合同](project-architecture-contract.md)。
 
 ## 页面与能力
 

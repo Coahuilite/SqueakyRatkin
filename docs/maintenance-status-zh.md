@@ -1,13 +1,13 @@
 # SR 维护状态与待裁决
 
-> 2026-09-19 本地审查，HEAD `547e2f2`。这里提供维护入口；完整判断、分歧和原编号见 [终审报告](archive/consolidation/final/handoff-package-final.md)，具体行动跟踪见 [TODO](../TODO.md)。本轮仅整理文档，未修运行时、未发布。
+> 2026-09-19 本地审查，HEAD `5e8d524`（文档收敛后）。这里提供维护入口：现状、证据边界、待修复与待裁决；具体行动跟踪见 [TODO](../TODO.md)。本轮仅整理文档，未修运行时、未发布。
 
 ## 状态与证据
 
 | 面 | 已知 | 不能据此推出 |
 | --- | --- | --- |
 | 本地版本 | csproj/About 为 0.3.3；CHANGELOG 已换 2026-09-17 时间；dev 对本地 origin/dev 缓存领先 6 提交 | 0.3.3 已上线或已获发布许可 |
-| 发布记录 | [0.3.0](archive/release_review/release-0.3.0-review-zh.md) 记录 GitHub 完整、Workshop 页面级；[0.3.2-pre1](archive/release_review/release-0.3.2-pre1-review-zh.md) 为 GitHub prerelease | 旧 CI/页面证明当前版本；本次未查远端 |
+| 发布记录 | 0.3.0 = GitHub 完整 + Workshop 页面级；0.3.2-pre1 = GitHub prerelease | 旧 CI/页面证明当前版本；本次未查远端 |
 | 0.3.3 | 已有本地实现与旧验证记录，待维护者实机及发布推进；未找到该版 Claim Pack | 当前所有行为已通过实机 |
 | 发布分支 | 规则已改为大版本分支 → main；本地 0.3.x 仍在 `b19d68a`，0.3.3 工作在 dev | 大版本分支已承载候选；后续须先准备发布源 |
 | Steam | 最后记录仍为阻断；新草稿面向 0.3.3，未上传 | 页面现状、旧公告已删或二进制已验证 |
@@ -26,7 +26,7 @@
 
 ## 迁移与退役
 
-08-23 的 [兼容审查](archive/us-sr-compatibility-check-zh.md) / [迁移方案](archive/us-sr-migration-plan-zh.md) 是旧 US 快照的报告；“暂不建仓”已被后续审查对象所取代，但本次没有读取 US 当前仓库。“双开安全”仅适用于当时无 US 型 Ratkin 包、无桥的条件；双 comp/双响是条件风险，不能写成已发生事故或已修复。
+08-23 的兼容审查与迁移方案是旧 US 快照的报告；“暂不建仓”已被后续审查对象所取代，但本次没有读取 US 当前仓库。“双开安全”仅适用于当时无 US 型 Ratkin 包、无桥的条件；双 comp/双响是条件风险，不能写成已发生事故或已修复。
 
 仍需保持的先后关系：**U1 跨程序集检测/让位 → US 型 Ratkin 包或 legacy 桥启用 → SR 内容化退役 DLL**。SR 维持装配/comp 全名与卸载安全；US 让位机制、服务域、桥的类型名所有权和双开矩阵必须有回执。两 DLL 同时定义 `SqueakyRatkin.SqueakVoicePackDef` 的风险不能靠“已批准桥”自动消除。原 0.4/1.0 时间表是规划，不是达成证据。
 
@@ -42,7 +42,7 @@
 
 ## 历史隐私债务
 
-09-13 裁决维持 A（不重写 + known-debt 纪律），B 仅备方案；[原专项方案](archive/release_review/privacy-history-rewrite-plan-zh.md) 保留。债务报告覆盖 5 个文件；10/9 tag、227/230 revision、约 54 处 hash 引用均为历史口径，执行前须重新盘点，不能照旧数字 force-push。
+09-13 裁决维持 A（不重写 + known-debt 纪律），B 仅备方案；[专项方案](privacy-history-rewrite-plan-zh.md)（现行活跃文档）保留。债务报告覆盖 5 个文件；10/9 tag、227/230 revision、约 54 处 hash 引用均为历史口径，执行前须重新盘点，不能照旧数字 force-push。
 
 B 仍需确认执行授权、mirror/refs 备份、工具、替换边界、tag/commit-map、协调窗口与跨仓通知；不可回收的 fork/缓存及旧 SHA 可访问风险未消失。当前默认扫描只覆盖跟踪树及配置的模式，known-debt 以模式/路径匹配；扫描绿不代表全部信息无隐私风险。本轮不执行历史重写、不扩大例外台账。
 

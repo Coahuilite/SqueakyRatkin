@@ -1,6 +1,6 @@
 # 鼠辈啁啾架构与兼容合同
 
-> 2026-09-19 重构。本文规定应保持的行为；不代表所有行为均已实机验证。原合同及决策史见 [归档索引](archive/README.md)，本次发现的实现偏差见 [维护状态](maintenance-status-zh.md)。
+> 2026-09-19 重构。本文规定应保持的行为，自足描述现状；不代表所有行为均已实机验证。当前证据边界、待修复项与待裁决见 [维护状态](maintenance-status-zh.md)。
 
 ## 身份、权威与边界
 
@@ -82,7 +82,7 @@ XML 决定周期动作的 `EachTime` / `RandomOneShot` / `External`、间隔、�
 | Fallback | Xenotype → Race → pack fallback → built-in → 静默，逐动作判断；pack fallback 查询精确 `ctx.Domain`，不跨域借用 |
 | Remix | 在当前可播放层之间等权选择，层内按包权重；无声明 pack fallback 时保留旧三层抽样通路 |
 
-**已知实现偏差 R6**：旧三层 Remix 在 `(None, Race, BuiltIn)` 组合会误选空层，公开内核入口已复现。本合同描述应有语义，不证明当前实现满足；详见 [终审](archive/consolidation/final/handoff-package-final.md#r6--remix-三层路径存在实际反例不能写成已满足合同)。修复与冻结语料取舍另行处理。
+**已知实现偏差 R6**：旧三层 Remix 在 `(None, Race, BuiltIn)` 组合会误选空层，公开内核入口已复现。本合同描述应有语义，不证明当前实现满足；证据与状态见 [维护状态](maintenance-status-zh.md) 与 [TODO](../TODO.md)，修复与冻结语料取舍另行处理。
 
 `BuiltInFallbackCatalog` 是维护者拥有的 C# 单源表：精确 race → string action key → `SR_*`。Ratkin 种子仅 `Call` 至 `MentalBreak` 15 键；缺包且无内置 profile 则静默。自 0.2.3，出厂默认 Fallback + 内置 Race Example；仅对从未设置模式的配置幂等播种，不覆盖明确模式和已有选择。
 

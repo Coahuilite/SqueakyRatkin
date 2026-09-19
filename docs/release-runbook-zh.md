@@ -1,6 +1,6 @@
 # 发布流程
 
-> 唯一流程入口，2026-09-19 重构。当前进度见 [维护状态](maintenance-status-zh.md)，历史渠道证据见 [归档 Claim Packs](archive/README.md#发布证据)。本地 commit 可执行；push/PR/merge/tag/Release/Workshop 与历史重写须有对应的维护者授权。本文不是授权。
+> 唯一流程入口，2026-09-19 重构，自足可执行。当前进度见 [维护状态](maintenance-status-zh.md)。本地 commit 可执行；push/PR/merge/tag/Release/Workshop 与历史重写须有对应的维护者授权。本文不是授权。
 
 ## 三命令契约
 
@@ -32,7 +32,7 @@
 
 ## Claim Pack 最小记录
 
-版本事实完成后存入 `docs/archive/release_review/release-<version>-review-zh.md`，当前状态只保留链接。prerelease 可沿用 `release-0.3.2-pre1-review-zh.md` 先例；保留原证据，不为了统一版式回改旧评审。
+版本事实完成后存入 `docs/release_review/release-<version>-review-zh.md`，当前状态只保留链接。prerelease 用 SemVer 后缀命名（如 `release-0.3.2-pre1-review-zh.md`）；保留原证据，不为了统一版式回改旧评审。
 
 ```text
 # Release <version> 观察记录
@@ -49,4 +49,4 @@
 | 限制与未决 | 未做的二进制验证、阻断及待处理项 |
 ```
 
-表格是证据归档格式，不是新增发布门；不粘贴个人日志、本机绝对路径或 item ID 值。完整流程依据与本次修正见 [终审 R1/R9](archive/consolidation/final/handoff-package-final.md)。
+表格是证据归档格式，不是新增发布门；不粘贴个人日志、本机绝对路径或 item ID 值。

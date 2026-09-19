@@ -1,6 +1,6 @@
 # srdiag 日志协议
 
-> 2026-09-19 按现行源码重构：这是兼容/解析合同和已知偏差记录，不是游戏实测证据。实现为 [SqueakLogProtocol.cs](../Source/SqueakyRatkin/Logging/SqueakLogProtocol.cs)，字节期望在 [日志 harness](../tools/SqueakLogCharacterization/Program.cs)。旧表与原判断保留于 [归档](archive/logging-protocol.md)，纠正依据见 [终审 R4/R5](archive/consolidation/final/handoff-package-final.md)。
+> 2026-09-19 按现行源码重构，自足描述现状：这是兼容/解析合同和已知偏差记录，不是游戏实测证据。实现为 [SqueakLogProtocol.cs](../Source/SqueakyRatkin/Logging/SqueakLogProtocol.cs)，字节期望在 [日志 harness](../tools/SqueakLogCharacterization/Program.cs)。
 
 ## 门面、开关与会话
 

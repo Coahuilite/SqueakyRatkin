@@ -1,6 +1,6 @@
 # Workshop 页面文案维护源
 
-> **目标：0.3.3，待发布草稿；本次未上传，线上状态未核验。** 发布时须让版本、下载入口与批准产物一致。当前阻塞及 Remix 问题见 [维护状态](maintenance-status-zh.md)，流程见 [runbook](release-runbook-zh.md)。旧 0.3.0 页面源与公告状态冲突保留于 [归档](archive/steam-workshop-page-copy-draft.md)。
+> **目标：0.3.3，待发布草稿；本次未上传，线上状态未核验。** 发布时须让版本、下载入口与批准产物一致。当前阻塞及 Remix 问题见 [维护状态](maintenance-status-zh.md)，流程见 [runbook](release-runbook-zh.md)。
 
 本文是中英描述唯一维护源，不是 change note 或发布记录。页面编辑、双预览由维护者执行；agent 仅公开页面只读核验。下载暂用 releases 总入口，不假定 v0.3.3 tag 已存在。
 
