@@ -68,3 +68,21 @@
 - **旧方案**：主模从嵌套 Extras 按需读取 WAV/OGG，并自行维护异步 AudioClip 生命周期与 fallback。
 - **放弃原因**：需要第二套音频后端并穿透 Catalog/resolver/preview/diagnostics，复杂度与兼容风险高于原生 Def + staging 镜像；且会破坏内置官方 Example 与独立 Template 的清晰边界。
 - **状态**：superseded；除非未来明确改变产品目标，不重新评估。
+
+---
+
+## 2026-09-19：0.2.x–0.3.x 实施与流程记忆压缩（归档）
+
+- **0.2.1–0.2.4**：悬浮诊断重构（单字符标记 + 可拖动面板）、七击计数修复、`LoadFolders` 去硬门控；`SqueakLog` facade/protocol 拆分 + srdiag v1 28 事件 characterization；`About <modVersion>` 落地；0.2.3 默认音源策略改 Fallback + 内置 Example 种子（schema 2→3）；0.2.4 精神崩溃 hook 收窄到 `MentalBreakWorker.TryStart`、日志 append `pawn`/`pawn_id`。
+- **0.3.0（2026-08-21 发布）**：零 Verse `Kernel/` 编译集（域键/池/链/fallback/调制）+ `tools/KernelCharacterization`（纯度门、43 断言、3782 例语料）+ resolver 接入；发布门槛 A–H 八面全绿；双轨发布与热修方案 a（`vX.Y.Z-hotfixN`）定案；打包纪律 = stage 断言 About==csproj、包内 `version.txt`。
+- **0.3.1（工作并入 0.3.2 发布）**：race-aware（`raceDefName` 必填、域闸、事务性 Scribe 4/2）、年龄（ageTag exact→all-age、直映 `CurLifeStage.developmentalStage`、1.6 无 Toddler）、fallback 末端（`BuiltInFallbackCatalog` 15 键 + `SqueakFallbackProfileStore` Config 副本单写者）、彩蛋 `IsEgg`（默认关、加性池成员）、Crying/Giggling append 15/16 + `TryStartMentalState` 窄 hook；漏斗纯文件提取（`SqueakActionPlan`/`SqueakTimingModel`）+ 双语料回放零 delta。
+- **0.3.2（GitHub prerelease `v0.3.2-pre1`）**：玩家触发身份门控（`IsPlayerControlled`、`PlayerSelection` 另需 `!Downed && Awake()`、`playSound:false` 过滤）、XML ABI 固化（作者面冻结、`IsEgg` 入 ABI）、发配日志重排（只发一条 v2 `audio.route.selected`，含 `pawn_faction`/`pawn_ctrl`）、作者指南统一为 SKILL 正本 + 脚手架。
+- **Eat 两级开关（2026-08-23）**：Steam 评论正反馈驱动的实现；默认 job 级派发，父「仅真正进食」= `GainingNutritionNow`，子「使用成瘾品」= `ChewIngestible` toil（未确认时回落完整 job）；纯规则 `SqueakEatOccurrence` + 单测。规格与 vanilla 基线见当时的交接文档（已随 archive 删除）。
+- **流程简化 V1–V3（2026-09-13）**：V1 本地 commit 免授权；V2 隐私历史重写只出方案待授权；V3 CI 加门 + SDK 10.0.x；三命令契约（verify-local / check-pack-readiness / privacy-audit）与最小发布仪式取代人工清单。
+- **文档收敛与清理（2026-09-19）**：外部 agent 终审并重建 10 份现行 docs（合同 3 + runbook + 维护状态 + Steam 草稿 + 隐私方案 + 双语 CHANGELOG + 索引），旧文档与收敛管道先入 archive 后被整体删除；14 份 `codemap.md` 全部删除；证据（7 份 Claim Pack + 2 份流程复盘 + 终审报告）保留在 `docs/release_review/`。删除内容可从提交 `8481cbe` 取回。
+- **分支模型（2026-09-19 裁定）**：`dev` 分支取消，每个 minor 在自己的分支开发（如 `0.3.x`），发布时提交并 merge 到 `main`；`archive/` 分支只在最终版本建立。
+- **RimWorld 1.6 年龄体系事实基线**：`lifeStageAges` → `CurLifeStage` → `LifeStageDef.developmentalStage`（Baby/Child/Adult，无 Toddler）；Human 五段 0-3/3-9/9-13/13-18/18+；voxPitch 1.6/1.2/1.0。SR 一律直映，不自算年龄阈值。
+- **Kiiro 实验线**：`kiiro-experiment` 分支（薄装配 adapter + `SQUEAKY_EXPERIMENTAL` 门 + MeowingKiiro-EXP 试验包）已于 2026-09-13 之后删除（本地 + 远端），不发布、不 merge。
+- **发布历史台账**：0.1.0–0.2.4、0.3.0、0.3.2-pre1 的 tag/CI/资产核验记录见各自 Claim Pack；0.2.3 Workshop 未上传、0.2.2 页面观察缺口、0.2.4 三项流程自评等旧口径不再指导当前工作。
+- **`.slim` 隐私债务**：历史提交/tag 仍可达 `.slim/codemap.json`（含本机路径），HEAD 已净化；维护 A（不重写 + 台账），重写需单独授权。
+- **状态**：completed / superseded；现行权威见 `MEMORY.md`、`TODO.md` 与 `docs/` 合同。

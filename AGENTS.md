@@ -17,6 +17,13 @@
 - Dependency access is reflective, never compiled: HAR is touched only via reflection as a discovery enhancement; missing dependencies must degrade silently, never crash.
 - **Uninstall safety is a hard rule: removing the mod must never affect a saved game.** No permanent data is written into saves (defs are injected at runtime via XPath; settings and profile overrides live in the Config folder). After uninstall the save loads and plays normally — squeaks simply stop; leftover Config files are harmless and removable.
 
+## Authoritative entry points
+
+- Current status, evidence boundaries and open rulings: `docs/maintenance-status-zh.md`. There is no repository codemap; read the source for structure.
+- Binding behavior: `docs/project-architecture-contract.md`, `docs/settings-ui-product-contract-zh.md`, `docs/logging-protocol.md`. Process: `docs/release-runbook-zh.md`. Release evidence: `docs/release_review/`.
+- VoicePack authoring (single source, also the agent skill): `.github/skills/squeaky-voicepack-authoring/SKILL.md`.
+- Source of truth order when statements conflict: maintainer ruling > contracts/runbook > `MEMORY.md` > `TODO.md` > `OBLIVIONIS.md` (cold evidence).
+
 ## Memory protocol
 
 At every non-trivial session:
@@ -46,5 +53,5 @@ Maintain these boundaries:
 
 - **Local commits are permitted** without a separate authorization step: they are reversible, never leave the machine, and are how a release is assembled. The release pipeline in `docs/release-runbook-zh.md` is local up to the first push.
 - **Remote-facing operations require explicit maintainer authorization**: `git remote` changes, push (including temporary staging branches), PR, merge, tag, GitHub Release, and any Workshop/Steam publication or edit.
-- **Pre-push ceremony is deliberately minimal (maintainer ruling 2026-09-13, mirroring UniversalSqueaker's 2026-09-06 ruling)**: the only human-run gate before a push is `pwsh scripts/privacy-audit.ps1 -FullHistory -PrePush` (privacy three-vector scan + identity + mechanical self-check: clean tree, `main` present, ahead-commit list, tag set confirmation), plus the release-facing `pwsh scripts/check-pack-readiness.ps1 -RequireReleaseMetadata` when the push is a release.
-- Everything else is already automated by `scripts/verify-local.ps1`, `scripts/check-pack-readiness.ps1`, `scripts/privacy-audit.ps1`, and the workflows: **do not re-add manual ritual** (hand-checked version equality, package-content item-by-item lists, repeated privacy scans). A new check is added as a script first, and only then referenced from the runbook.
+- **Pre-push ceremony is deliberately minimal**: local commits are free; a push needs the runbook's scripted gates to pass (privacy audit; release readiness when the push is a release) plus maintainer authorization. The exact commands and their scope live in `docs/release-runbook-zh.md` — this file only fixes the principle.
+- Everything else is automated by `scripts/verify-local.ps1`, `scripts/check-pack-readiness.ps1`, `scripts/privacy-audit.ps1`, and the workflows: **do not re-add manual ritual** (hand-checked version equality, package-content item-by-item lists, repeated privacy scans). A new check is added as a script first, and only then referenced from the runbook. Mutable current status belongs in `docs/maintenance-status-zh.md`, not in this file.
