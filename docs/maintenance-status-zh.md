@@ -11,6 +11,7 @@
 | 上次已记录发布 | **0.3.3**；GitHub 与 Workshop 的历史证据见 [0.3.3 记录](release_review/release-0.3.3-review-zh.md) | 2026-09-19 的页面观察不证明现在的线上状态，也不证明 0.3.4 已上传 |
 | Workshop 草稿 | [0.3.4 中英页面正文](steam-workshop-page-copy-draft.md)，待维护者审阅 | 生成草稿不包含页面编辑、登录或上传授权 |
 | 更新说明 | 仅维护于 [英文 CHANGELOG](CHANGELOG.md) 与 [中文 CHANGELOG](CHANGELOG.zh-CN.md) | 不在页面草稿重复；发布时从对应版本条目取用 |
+| 本地准备 | 正式提交、三渠道构建/打包、readiness、完整历史隐私门已通过，见 [0.3.4 准备记录](release_review/release-0.3.4-review-zh.md) | 76 项历史债务仍存在；不代表新版本已上线或远端 CI 已运行 |
 | 分支规则 | 从 `main` 建每个 minor 的版本分支，经 PR 入受保护 `main`；不使用 `dev` | 不在文档追记移动的 HEAD、ahead 数或推定分支同步 |
 
 0.3.3 撤回重发、R6 修正、资产核验及一次性的实机流程特例只在原发布记录中保留。0.3.1 没有独立正式发布记录；0.3.2 仅有 `v0.3.2-pre1`，相关功能随 0.3.3 正式发布。历史 CHANGELOG 正文与发布记录不重写。
