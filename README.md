@@ -6,10 +6,12 @@ Squeaky Ratkin adds optional one-shot squeaks to NewRatkinPlus Ratkin pawns. Thi
 
 ## Requirements and No-DLC baseline
 
-- RimWorld 1.6, Harmony, HAR, and NewRatkinPlus (`Solaris.RatkinRaceMod`).
+- RimWorld 1.6 or 1.7, Harmony, HAR, and NewRatkinPlus (`Solaris.RatkinRaceMod`).
 - Core + those dependencies is the required baseline; all official DLC, including Biotech, are optional. Without Biotech, global settings, applicable actions, mood modulation, Race packs, and Vanilla fallback still work.
 
 Install a published Steam/Release package into `RimWorld/Mods/` and enable its dependencies. See [`docs/project-architecture-contract.md`](./docs/project-architecture-contract.md) for runtime boundaries.
+
+Both game versions load the shared `1.6/` content and assembly. The 1.7 runtime evidence and remaining validation limits are recorded in [`docs/maintenance-status-zh.md`](./docs/maintenance-status-zh.md); a support declaration does not mean every mod-stack combination has been tested.
 
 ## Audio and VoicePacks
 
@@ -40,7 +42,7 @@ This stages `dist/dev/SqueakyRatkin/` for manual local testing. Packaging script
 pwsh scripts/verify-local.ps1
 ```
 
-It runs 11 checks in one pass: the kernel purity gate with extended asserts and dual corpus byte replay (frozen 0.3.0 plus the 17-action/egg corpus), the settings fixture 9-scenario byte gate, the ConfigCopy store-lifecycle harness, the log protocol in both flavors, the `fixtures/` zero-delta gate, Dev + Steam + Dev flavor builds with warnings-as-errors, the VoicePack XML ABI consistency lock, and the VoicePack scaffold self-test; add `-PackDev` or `-PackSteam` to also stage the package (Steam requires a clean working tree). The release-facing check and the pre-push privacy gate are two more commands, described in [`docs/release-runbook-zh.md`](./docs/release-runbook-zh.md). Bare build:
+It runs 12 checks in one pass: the kernel purity gate with extended asserts and dual corpus byte replay (frozen 0.3.0 plus the 17-action/egg corpus), the settings fixture 9-scenario byte gate, the ConfigCopy store-lifecycle harness, the log protocol in both flavors, the `fixtures/` zero-delta gate, Dev + Steam + Dev flavor builds with warnings-as-errors, the VoicePack XML ABI consistency lock, the VoicePack scaffold self-test, and synthetic regression cases for the combined release-gate script; add `-PackDev` or `-PackSteam` to also stage the package (Steam requires a clean working tree). The release-facing check and the pre-push privacy gate are two more commands, described in [`docs/release-runbook-zh.md`](./docs/release-runbook-zh.md). Bare build:
 
 ```text
 dotnet build Source/SqueakyRatkin/SqueakyRatkin.csproj

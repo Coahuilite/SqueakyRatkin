@@ -6,7 +6,9 @@
 
 品牌为 **鼠辈啁啾 / Squeaky Ratkin**，packageId 为 `coahuilite.squeakyratkin`，C# namespace 为 `SqueakyRatkin`，Defs 使用 `SR_`。产品支持 NewRatkinPlus Ratkin，由 XML 装配的 `CompSqueaker` 标识；路由机制按 VoicePack 的精确 `raceDefName` 处理域，不按名称、图标或 HAR 包身份特判种族。
 
-明确接受的产品裁决优先于合同；合同规定实现目标，源码记录实际实现。两者冲突须显式登记，不能把现有 bug 写成承诺。[AGENTS.md](../AGENTS.md) 管操作、隐私和授权；UI 与日志分别以 [设置合同](settings-ui-product-contract-zh.md)、[日志协议](logging-protocol.md) 为准；历史规划不覆盖现行规则。
+游戏支持版本为 RimWorld 1.6 / 1.7。两个版本在 `LoadFolders.xml` 中显式映射到共同的根目录与 `1.6/` 内容，不复制程序集或音频；当前程序集继续使用 `net472` 与 `Krafs.Rimworld.Ref 1.6.*` 构建。目录名和编译基线不是支持版本清单，1.7 的实测证据与限制以 [维护状态](maintenance-status-zh.md) 为准。
+
+明确接受的产品裁决优先于合同；合同规定实现目标，源码记录实际实现。两者冲突须显式登记，不能把现有 bug 写成承诺。[AGENTS.md](../AGENTS.md) 管长期原则、隐私与读取入口；UI 与日志分别以 [设置合同](settings-ui-product-contract-zh.md)、[日志协议](logging-protocol.md) 为准；历史规划不覆盖现行规则。
 
 - 无官方 DLC 的基线：RimWorld Core + Harmony + HAR/NewRatkinPlus + SR。全局设置、动作、心情、Race 音源及内置回退必须可用。
 - Biotech 未启用时不得访问 Xenotype DefDatabase 或 pawn genes。启用时只按精确且区分大小写的 `XenotypeDef.defName` 绑定；不可用的异种层 fail-closed，Race/内置回退继续工作。不做 gene 级设置、第三方 Xenotype 冲突仲裁或任意 HAR 种族的产品支持承诺。

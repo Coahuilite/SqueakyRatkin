@@ -2,3 +2,4 @@
 # Other fixtures (input/expected XML) intentionally follow the host checkout (Windows CRLF) because
 # SettingsFixtureGenerator emits Environment.NewLine and compares bytes on Windows.
 fixtures/corpus/*.txt text eol=lf
+scripts/githooks/* text eol=lf

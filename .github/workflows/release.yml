@@ -72,13 +72,9 @@ jobs:
 
       # Tag-time gates, in the same axe the maintainer's local release check uses: a red gate or a
       # mislabelled version dies before any release asset exists.
-      - name: Verify (11 gates)
+      - name: Verify (12 gates)
         shell: pwsh
         run: ./scripts/verify-local.ps1 -NoRestore
-
-      - name: Pack-readiness (version axis, red lines, DLL identity)
-        shell: pwsh
-        run: ./scripts/check-pack-readiness.ps1 -SkipVerify -RequireReleaseMetadata
 
       - name: Build GitHub release flavor
         shell: pwsh
@@ -94,6 +90,14 @@ jobs:
         env:
           RELEASE_TAG: ${{ github.ref_name }}
         run: ./scripts/pack-github.ps1 -Version $env:RELEASE_TAG
+
+      - name: Pack-readiness (GitHub candidate)
+        shell: pwsh
+        run: ./scripts/check-pack-readiness.ps1 -SkipVerify -RequireReleaseMetadata -StageFlavor github
+
+      - name: Privacy audit (complete reachable history)
+        shell: pwsh
+        run: ./scripts/privacy-audit.ps1 -FullHistory
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2

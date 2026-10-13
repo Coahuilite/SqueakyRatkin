@@ -2,10 +2,26 @@
 
 冷归档：不要在会话开始时读取；仅在历史冲突、重新启用旧议题或明确请求时读取。
 
+以下记录均说明当时的决定与证据。现行行为与流程由合同和 runbook 规定，当前状态集中在 `docs/maintenance-status-zh.md`；不从历史条目推定当前分支或渠道状态。
+
+## 2026-10-14：AGENTS 与 TODO 职责收敛（归档）
+
+- **原因**：维护者要求 AGENTS 不变优先、变化事实进 MEMORY、TODO 只列未完成动作。
+- 版本、编译布局、分支和本轮发布阶段从 AGENTS 移入 MEMORY/权威文档；移除 `Execution and external state`，通用授权边界由上级会话规则处理。
+- TODO 中未安排实施的迁移、退役与历史重写移为维护状态入口；“反馈后再修”等条件句删除，不代表相关场景已验收或长期路线取消。
+- **状态**：superseded；已完成动作从 TODO 删除，不积累勾选发布史。
+
+## 2026-10-13：0.3.3 活跃记忆与旧下一周期任务收敛（归档）
+
+- **原因**：开始 0.3.4 文档及兼容性声明维护，旧发布细节和下一周期计划不再指导当前任务。
+- 0.3.3 的撤回重发、渠道观察与实机流程特例从活跃 MEMORY/维护状态中压缩为发布记录指针；原证据保留在 `docs/release_review/release-0.3.3-review-zh.md`。
+- 旧“0.3.3 页面中文/R6 补录待定”动作由 0.3.4 新页面草稿审阅取代；旧“直接新建 0.4 / 1.0 分支”安排延后，不代表取消长期路线。US 内容化的已决项和未决项仍由维护状态承载。
+- **状态**：superseded；MEMORY 保留耐久约束和入口，TODO 只跟踪当前下一步。已删除的 `SqueakyRatkin.slnx` 不恢复。
+
 ---
 
 ## 2026-07-28：治理层收敛前的文档草案（归档）
-- 旧 planning、engineering review、repository status、text review 与 settings responsive draft 已改为 `DEPRECATED_` 前缀。
+- 当时旧 planning、engineering review、repository status、text review 与 settings responsive draft 改为 `DEPRECATED_` 前缀；后续清理已删除这些旧文件，不要求它们继续存在。
 - 它们由项目架构合同、设置 UI 产品合同、日志协议与 VoicePack 作者指南取代；只保留为冷证据，不重复其全文，也不能作为现行权威。
 - **状态**：superseded historical documentation。
 
@@ -49,7 +65,7 @@
 
 ## 2026-07：dev orphan 历史修复
 - dev 曾因 orphan 重建与 main 无共同祖先，后以合并建立共同祖先。
-- **教训**：重构分支应从 main 建立；当前仍遵循 `dev` → protected-main PR/squash → tag main → CI release。
+- **教训**：重构分支应从 main 建立。当时采用的 `dev` → protected-main PR/squash 流程已被 2026-09-19 的 minor 版本分支规则取代，现行流程见 runbook。
 
 ## 2026-07-27：ExamplePack 外部独立分发/拆仓方案 → 主包内置休眠模板
 - **旧方案**：把 `SqueakyRatkinExampleVoices` 提取为外部独立项目/仓库并另行分发。
@@ -91,10 +107,6 @@
 
 ## 2026-09-19：0.3.3 撤回重发、R6 修正与实机验收（归档）
 
-- **R6 缺陷**：0.3.0 起的零 Verse 内核把三层 Remix 折叠写成"按原始位序取 index"，缺层时命中空位（该次事件静默）且后继层（内置音源）永不可达；0.2.4 的等价实现是"仅非 None 层进入候选表"，属 0.3.0 重写引入的回归。默认 Fallback 不受影响，但出厂播种的 `SR_OfficialExample_Race` 声明空 fallbacks，任何开启 Remix 的默认装配都命中。内核复现：shape A `none=105/200`、内置 `0/200`；shape B `none=115/200`、内置 `0/200`。
-- **撤回与重发**：首发 tag `v0.3.3`（→ `c7fb868`，资产 1,590,750 B / SHA256 `b7eb7dac…`，downloadCount 1）发布当日撤回（Release + tag 删除，Latest 一度回退 v0.3.0）；同日同版本重发 tag `v0.3.3` → `cd90a9e`，资产 1,590,744 B / `fced520a…`（下载级核验 = API digest），Release 页加更正说明。
-- **修正与守卫**：`SelectRemixThree` 改为只在非 None 层等权折叠（与四层同规则；分布等价 0.2.4，非 RNG 流一致）。守卫 = shape A/B 断言 + `corpus-0.3.1.txt` 重建 + 新增 `corpus-0.3.0-r6.txt` 字节回放 + 历史 `corpus-0.3.0.txt` 540 行差异断言。独立只读复核五项全 CONFIRMED。
-- **实机验收（流程特例）**：以 GitHub release 资产替代发布前 dev 包前置测试（维护者裁定，仅本次）；日志身份 `build=github` / `v0.3.3+cd90a9e55d44` 自证对象为发布资产；SR 相关 error/no_sound 全 0、26 次派发、同一动作同时出现包层与内置层；维护者听感确认无问题。
-- **1.0 形态裁定**：对 US 硬依赖（FL 传递）；Def 归属按 US 约定；设置不自动导入、只提醒玩家自留；Steam 3A 声明下方加无具体时间的退役公告，但 US 未上工坊前不随 0.3.3 上传。
-- **Steam 上传（2026-09-19 完成）**：维护者人工更新同一 Workshop item；agent 只读核验公开页面——`Mod version: 0.3.3`、英文描述块与文案源一致、Change Notes 为仓库 CHANGELOG 0.3.3 英文段（约 1,993 字符）、退役公告未出现（符合裁定）。页面**未含中文描述块与 R6 条目**；Workshop 二进制与订阅后实机未核验（页面级证据）。线上 0.3.0（含 R6 缺陷）已替换。
-- **状态**：completed；完整证据见 `docs/release_review/release-0.3.3-review-zh.md`，现行开放项见 `TODO.md` 与维护状态。
+- **原因**：R6 三层 Remix 在缺层时可能静默且无法选中内置层，首发因此撤回；同日修正为仅在可用层等权选择并重发。
+- **结果**：0.3.3 的发布资产实机验收和 Workshop 页面观察已完成；验收使用发布资产的流程特例仅适用于该次。资产、tag、测试守卫和渠道限制均保留在原发布记录，不在冷归档重复完整矩阵。
+- **状态**：completed；证据见 `docs/release_review/release-0.3.3-review-zh.md`。1.0 迁移裁定与当前开放项见维护状态，不能从当时的页面观察推定现在的外部状态。

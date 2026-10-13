@@ -1,40 +1,13 @@
 # Changelog
 
-## Changelog Template
+Keep Unreleased first and preserve the existing published entries, newest first. Replace the Unreleased heading with the actual UTC+8 release time when publishing and keep both languages synchronized. Later Workshop updates are not an Initial Workshop Upload.
 
-Use this file as the canonical English changelog for Squeaky Ratkin.
+## Unreleased — 0.3.4
 
-Rules:
-- Keep released entries in chronological order, oldest first and newest last; place an Unreleased entry at the top.
-- Use local release time in the heading: `[YYYY-MM-DD HH:MM UTC+8] Version X.Y.Z`.
-- An unreleased top entry may use `Unreleased — X.Y.Z`; replace it with the actual UTC+8 release time when publishing.
-- Use `Initial Workshop Upload` only for the first Steam Workshop upload; subsequent updates use ordinary version entries.
-- Keep items short and visible. Prefer one change per bullet.
-- Separate feature additions, changes, fixes, packaging notes, and release notes when useful.
-- Bug fixes should be concise unless the fix changes player-facing behavior.
-- Mention both GitHub and Steam only when the entry affects both release surfaces.
-- Do not put unaccepted plans here. An accepted, not-yet-released version may use the explicit Unreleased entry above.
-- Keep the Simplified Chinese version synchronized in `docs/CHANGELOG.zh-CN.md`.
+- Version bumped to 0.3.4.
+- Added support for RimWorld 1.7.
 
-Recommended entry shape:
-
-```text
-## [YYYY-MM-DD HH:MM UTC+8] Version X.Y.Z
-
-Short release summary.
-
-### Added
-- ...
-
-### Changed
-- ...
-
-### Fixed
-- ...
-
-### Packaging
-- ...
-```
+Tynan's modpocalypse couldn't stop the Ratkin from squeaking!
 
 ## [2026-09-19 17:26 UTC+8] Version 0.3.3
 

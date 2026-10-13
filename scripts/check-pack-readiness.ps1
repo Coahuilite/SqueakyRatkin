@@ -2,7 +2,8 @@ param(
     [string]$ProjectRoot = (Split-Path -Parent $PSScriptRoot),
     [switch]$SkipVerify,
     [switch]$RequireReleaseMetadata,
-    [switch]$NoRestore
+    [switch]$NoRestore,
+    [ValidateSet('dev', 'steam', 'github')][string]$StageFlavor
 )
 
 Set-StrictMode -Version Latest
@@ -12,12 +13,13 @@ $ErrorActionPreference = "Stop"
 #   - 日常开发门：scripts/verify-local.ps1（harness + 双 flavor 构建；本脚本默认会调用它）
 #   - 发布面（本脚本）：版本轴、仓库红线、包内排除项、version.txt、DLL 身份，并把 Claim Pack 需要的字段
 #     直接打印成 [claim] 行，发布时不再手工逐项核验与转抄
-#   - 隐私面：scripts/privacy-audit.ps1（push 前唯一人工步骤）
+#   - 隐私面：scripts/privacy-audit.ps1（完整历史门；hook/CI 自动运行，发布另加 -PrePush）
 # 包内容红线的写入方仍是 stage-package.ps1（写时断言），本脚本是发布前的读时复核——两者不是重复仪式：
 # 写时保证"不会产出坏包"，读时保证"手上这个包确实是刚产出的那一个"。
 #
 # -SkipVerify              跳过 verify-local（CI 已单独跑过时用，避免重复构建）
 # -RequireReleaseMetadata  发布口径：版本必须是无后缀基础版本、描述不得是占位符
+# -StageFlavor            必须存在且匹配当前版本的候选渠道；发布时指定，忽略其他缓存包
 # -NoRestore               转发给 verify-local：离线/已还原缓存环境（本机无网络时是必需项，否则 dotnet
 #                          build 会尝试 restore 并以 NU1301 失败——这不是门本身的问题）
 #
@@ -69,6 +71,7 @@ Assert-Check 'LICENSE present at repo root and MPL-2.0' (
 )
 
 if ($RequireReleaseMetadata) {
+    Assert-Check 'release check selects a staged flavor' (-not [string]::IsNullOrWhiteSpace($StageFlavor))
     $descNode = $aboutXml.SelectSingleNode('/ModMetaData/description')
     $desc = if ($null -ne $descNode) { $descNode.InnerText.Trim() } else { '' }
     Assert-Check 'release description is not a placeholder' ($desc -notmatch 'Placeholder|TODO') "($desc)"
@@ -115,8 +118,12 @@ $stageCandidates = @(
 )
 $stagedSnapshots = New-Object 'System.Collections.Generic.List[string]'
 foreach ($candidate in $stageCandidates) {
+    if ($StageFlavor -and $candidate.Flavor -ne $StageFlavor) { continue }
     $stagePath = $candidate.Path
-    if (-not (Test-Path -LiteralPath $stagePath -PathType Container)) { continue }
+    if (-not (Test-Path -LiteralPath $stagePath -PathType Container)) {
+        if ($StageFlavor) { Assert-Check "[$StageFlavor] selected staged package exists" $false }
+        continue
+    }
     $flavor = $candidate.Flavor
 
     $stageAbout = Join-Path $stagePath 'About\About.xml'
@@ -148,8 +155,21 @@ foreach ($candidate in $stageCandidates) {
     }
 
     $stageFileCount = @(Get-ChildItem -LiteralPath $stagePath -Recurse -File).Count
-    if ($stageModVersion -ne $version) {
-        Write-Note "[$flavor] staged package is version $stageModVersion (csproj is $version): stale artifact, do not upload it"
+    Assert-Check "[$flavor] staged version matches current product" ($stageModVersion -eq $version) "($stageModVersion vs $version)"
+    $stageDll = Join-Path $stagePath '1.6\Assemblies\SqueakyRatkin.dll'
+    Assert-Check "[$flavor] staged DLL exists" (Test-Path -LiteralPath $stageDll -PathType Leaf)
+    if (Test-Path -LiteralPath $stageDll -PathType Leaf) {
+        Assert-Check "[$flavor] staged DLL FileVersion matches staged About.xml" ((Get-Item -LiteralPath $stageDll).VersionInfo.FileVersion -eq ($stageModVersion + '.0'))
+    }
+    if (($RequireReleaseMetadata -or $StageFlavor) -and (Test-Path -LiteralPath $versionTxt -PathType Leaf)) {
+        $commitLine = if ($lines.Count -ge 3) { $lines[2].Trim() } else { '' }
+        $stageCommit = $commitLine -replace '^commit=', ''
+        $head = @(& git -C $root rev-parse HEAD 2>$null)
+        Assert-Check "[$flavor] package comes from clean current commit" (
+            $stageCommit -match '^[0-9a-f]{7,40}$' -and $head.Count -eq 1 -and ([string]$head[0]).StartsWith($stageCommit)
+        )
+        $currentStatus = @(& git -C $root status --porcelain --untracked-files=normal 2>$null)
+        Assert-Check "[$flavor] release working tree is clean" ($LASTEXITCODE -eq 0 -and $currentStatus.Count -eq 0)
     }
     # 一律输出仓库相对路径：这些行会被粘进 Claim Pack，绝不能携带本机展开路径。
     $relativeStagePath = $stagePath.Substring($root.Length).TrimStart('\', '/').Replace('\', '/')
@@ -196,4 +216,5 @@ Write-Host ('[claim] dll.FileVersion=' + $(if ($dllPresent) { (Get-Item -Literal
 Write-Host ('[claim] dll.ProductVersion=' + $infoValue)
 foreach ($snapshot in $stagedSnapshots) { Write-Host ('[claim] staged ' + $snapshot) }
 Write-Host ''
-Write-Host '[pack-readiness] all checks passed.'
+if ($RequireReleaseMetadata -and $StageFlavor) { Write-Host '[pack-readiness] all release checks passed.' }
+else { Write-Host '[pack-readiness] inspection passed; publishing requires -RequireReleaseMetadata and -StageFlavor.' }
