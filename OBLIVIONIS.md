@@ -4,6 +4,12 @@
 
 以下记录均说明当时的决定与证据。现行行为与流程由合同和 runbook 规定，当前状态集中在 `docs/maintenance-status-zh.md`；不从历史条目推定当前分支或渠道状态。
 
+## 2026-10-14：Steam 更新方式改为游戏内 Update（归档）
+
+- **原因**：0.3.4 的 SteamCMD 上传虽成功，但未更新工坊版本标签；不再将 SteamCMD 作为当前推荐发布方式，也不据版本 tag 自动认定问题已解决。
+- **裁定**：后续更新优先用维护者游戏内 Update；0.3.4-tagfix1 采用此流程，Change Notes 由维护者手工录入。SteamCMD 保留为已安装工具，不用于本次发布。0.3.4 的真实上传记录仍见对应 release review。
+- **状态**：superseded；现行步骤见 `docs/release-runbook-zh.md`。
+
 ## 2026-10-14：旧隐私方案与流程复盘文档清理（归档）
 
 - **裁定**：维护者确认删除 `docs/privacy-history-rewrite-plan-zh.md`、`docs/release_review/process-review-zh.md`、`docs/release_review/process-redundancy-review-zh.md` 与 `docs/release_review/consolidation-review-final-zh.md`。隐私历史继续方案 A（不重写 + known-debt 台账），不再维护方案 B 草案。
