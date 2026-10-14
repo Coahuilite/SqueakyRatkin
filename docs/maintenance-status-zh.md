@@ -1,19 +1,20 @@
 # SR 维护状态与待裁决
 
-> 2026-10-13 整理。当前状态与证据边界集中于本文；行动见 [TODO](../TODO.md)，长期约束见 [架构合同](project-architecture-contract.md)、[设置合同](settings-ui-product-contract-zh.md) 和 [日志协议](logging-protocol.md)。发布步骤见 [runbook](release-runbook-zh.md)。
+> 2026-10-14 更新。当前状态与证据边界集中于本文；行动见 [TODO](../TODO.md)，长期约束见 [架构合同](project-architecture-contract.md)、[设置合同](settings-ui-product-contract-zh.md) 和 [日志协议](logging-protocol.md)。发布步骤见 [runbook](release-runbook-zh.md)。
 
 ## 当前版本与渠道
 
 | 面 | 当前口径 | 证据边界 |
 | --- | --- | --- |
-| 当前版本 | **0.3.4**：2026-10-14 已在 GitHub 正式发布；运行时行为不变 | GitHub 发布证据见 [0.3.4 记录](release_review/release-0.3.4-review-zh.md)；不等于 Steam 已更新 |
+| 当前版本 | **0.3.4**：2026-10-14 已在 GitHub 与 Steam 发布；运行时行为不变 | 两个渠道的发布观察均见 [0.3.4 记录](release_review/release-0.3.4-review-zh.md)；Steam 玩家侧二进制未下载核验 |
 | 游戏支持 | RimWorld **1.6 / 1.7**，显式共用根目录和 `1.6/` 内容；继续以 net472 / 1.6 引用编译 | 共享目录不代表逐功能、逐 DLC 或逐模组组合均已验收 |
 | GitHub Release | **v0.3.4** 已发布；Release notes 由 GitHub 根据 PR 自动生成 | Release CI 与公开资产下载核验均成功，详情见 [0.3.4 记录](release_review/release-0.3.4-review-zh.md) |
-| Steam 候选 | **0.3.4** tag 固定包已通过 readiness，待维护者本人上传 | 尚未上传或观察新页面；不在文档收尾后重建该包 |
-| 上次 Steam/Workshop 发布 | **0.3.3**；历史渠道证据见 [0.3.3 记录](release_review/release-0.3.3-review-zh.md) | 2026-09-19 的页面观察不证明当前线上状态 |
-| Workshop 正文 | [0.3.4 中英页面正文](steam-workshop-page-copy-draft.md)，由维护者上传时使用 | 草稿本身不证明新版本页面已更新 |
+| Steam 更新 | **0.3.4** 已上传；公开 API 返回 `result=1`、`visibility=0`、`banned=0`，更新时间 2026-10-14 18:40:50（UTC+8），文件 1,910,256 bytes | 上传与公开元数据、Change Notes 已核验；玩家侧二进制下载未做 |
+| 前一版本 | **0.3.3**；历史渠道证据见 [0.3.3 记录](release_review/release-0.3.3-review-zh.md) | 2026-09-19 的页面观察仅适用于当时版本 |
+| Workshop 正文 | 英文正文与草稿 LF/trim 后 4,505 字符逐字符一致；简中页面开头、版本/支持信息和结尾已公开核验 | 中文未做逐字符比对；本次预览存在但未视觉比对，详情见 0.3.4 记录 |
+| Workshop 标签 | 维护者自行处理 `1.7` 标签 | 按维护者要求，不安排 agent 复核；见 [TODO](../TODO.md) |
 | 更新说明 | 仅维护于 [英文 CHANGELOG](CHANGELOG.md) 与 [中文 CHANGELOG](CHANGELOG.zh-CN.md) | 不在页面草稿重复；发布时从对应版本条目取用 |
-| 本地准备 | 正式提交、三渠道构建/打包、readiness、完整历史隐私门已通过，准备阶段证据见 [0.3.4 记录](release_review/release-0.3.4-review-zh.md) | 76 项历史债务仍存在；准备证据与远端发布证据分开记录 |
+| 本地准备 | 正式提交、三渠道构建/打包、readiness、完整历史隐私门已通过，准备阶段证据见 [0.3.4 记录](release_review/release-0.3.4-review-zh.md) | 76 项历史债务仍存在；准备证据与远端渠道证据分开记录 |
 | 分支规则 | 从 `main` 建每个 minor 的版本分支，经 PR 入受保护 `main`；不使用 `dev` | 不在文档追记移动的 HEAD、ahead 数或推定分支同步 |
 
 0.3.3 撤回重发、R6 修正、资产核验及一次性的实机流程特例只在原发布记录中保留。0.3.1 没有独立正式发布记录；0.3.2 仅有 `v0.3.2-pre1`，相关功能随 0.3.3 正式发布。历史 CHANGELOG 正文与发布记录不重写。
@@ -28,6 +29,10 @@
 
 **覆盖限制**：其余动作、Eat 三态、Remix、保存/读取、卸载和完整 DLC/模组组合未在 1.7 下逐项验收；1.6 的既有卸载安全证据不自动扩张为 1.7 全覆盖。未来如改动运行时行为，再按变化安排针对性验收。
 
+## RimWorld 1.6 下的 0.3.4 验收
+
+维护者于 2026-10-14 使用 Steam 0.3.4 在 RimWorld **1.6.4871** 测试，未发现问题。最新只读 `Player.log` 无 SR 失败；另有两条原版 `PrefsData` XML 未知窗口位置字段错误，来源未确认。游戏已切回 1.6。本次 1.7 证据仍仅为 1.7.4977 上运行 0.3.3；没有 0.3.4 的新 1.7 实测。
+
 ## 保留的未决项
 
 | 项 | 当前边界 |
@@ -36,7 +41,7 @@
 | 作者 ABI R3 | 字段 add-only、17 键 append-only、fail-closed 承诺有效；“首个携带 0.3.1 ABI 的发行版本”对应的精确 tag 仍未裁定 |
 | 可观测性 | 日志 tier 折叠是否细分、Eat 的替代 Dev 面板仍未裁定；当前没有新增日志事件 |
 | 低频实机回归 | 原有 Eat 三态、身份门余项和低频场景仍需按实际改动安排验收；不把历史待办改写为已测 |
-| Workshop 旧页面 | 0.3.3 当时未含中文块与 R6 更新条目；新版本草稿统一维护正文。旧置顶公告与当前页面需在实际发布时另行观察 |
+| Workshop 旧置顶公告 | 当前是否仍存在尚未观察 | 0.3.4 中英正文与 Change Notes 已核验；仅旧公告状态待观察 |
 
 ## 迁移与退役
 

@@ -1,8 +1,8 @@
 # Workshop 页面文案维护源
 
-> **0.3.4 待审阅草稿，尚未发布。** 目标游戏版本为 RimWorld 1.6 / 1.7，运行时行为沿用 0.3.3。本文件只维护中英页面正文；历史发布证据见 [0.3.3 记录](release_review/release-0.3.3-review-zh.md)，当前状态见 [维护状态](maintenance-status-zh.md)。
+> **0.3.4 页面状态：英文与简中正文均已上线并公开核验。** 英文正文与本稿逐字符一致；简中已核验代表段落，未做全文逐字符比对。目标游戏版本为 RimWorld 1.6 / 1.7，运行时行为沿用 0.3.3。本文件只维护中英页面正文；发布证据见 [0.3.4 记录](release_review/release-0.3.4-review-zh.md)，历史发布记录见 [0.3.3 记录](release_review/release-0.3.3-review-zh.md)。
 
-两个正文 BBCode 区块可分别粘贴；更新说明分别维护于 [英文 CHANGELOG](CHANGELOG.md) 与 [中文 CHANGELOG](CHANGELOG.zh-CN.md)。页面预览与发布由维护者审阅决定，本文件不证明页面已更新。
+两个正文 BBCode 区块可分别粘贴；更新说明分别维护于 [英文 CHANGELOG](CHANGELOG.md) 与 [中文 CHANGELOG](CHANGELOG.zh-CN.md)，不在本文件重复。`1.7` 工坊标签由维护者自行处理，不安排 agent 复核；页面预览虽存在，本轮未做视觉比对。
 
 ## 编辑约定
 
@@ -138,6 +138,6 @@ Third-party VoicePack authors should state appropriate licenses for their audio,
 
 ## 文案状态
 
-中英页面正文待维护者审阅；退役公告未包含在当前草稿中。实际发布时预览正文并另行观察旧置顶公告状态。
+英文与简中正文均已上线并公开核验；英文与本稿逐字符一致，简中仅核验代表段落。`1.7` 工坊标签由维护者自行处理，不安排 agent 复核。页面预览存在但未作视觉比对，未下载 Steam 玩家侧二进制。退役公告未包含在本稿中；旧置顶公告状态按公开页面实际观察。
 
 字符数（Unicode code point、LF 换行，不含 fence 与尾换行）：中文正文 1938；英文正文 4505。

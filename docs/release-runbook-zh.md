@@ -1,6 +1,6 @@
 # 发布流程
 
-> 唯一流程入口，2026-10-13 整理。当前进度见 [维护状态](maintenance-status-zh.md)。本地 commit 可执行；push/PR/merge/tag/Release/Workshop 与历史重写须有对应的维护者授权。本文不是授权。
+> 唯一流程入口，2026-10-14 更新。当前进度见 [维护状态](maintenance-status-zh.md)。本地 commit 可执行；push/PR/merge/tag/Release/Workshop 与历史重写须有对应的维护者授权。本文不是授权。
 
 ## 三命令契约
 
@@ -22,7 +22,9 @@
 2. **最小发布仪式**：发布面命令全绿 → 完整隐私命令全绿 → 维护者裁决版本、渠道、是否发及 Workshop 文案。非发布 push 仍必须通过完整隐私门并有授权。每次新 push 覆盖其完整可达范围，不因旧结果为绿而免检。
 3. **版本分支 → main**。每个 minor 从 `main` 建立自己的开发分支，例如 `0.3.x`；不使用已删除的 `dev` 分支。需要发布时在版本分支提交，授权后 push → CI → PR/merge 到受保护的 `main`。发布证据记录实际源码提交与 tag，不以版本号推定分支同步，也不重复脚本已覆盖的逐文件核对。
 4. **GitHub**。在 main 的批准发布提交上，授权后 tag/push，release CI 验证、构建 GitHub flavor 并发布资产；GitHub Release notes 自动从 PR 信息生成，CHANGELOG 不接入该生成流程。基版本来自 csproj；正式 `vX.Y.Z`，prerelease 带 SemVer 后缀。已接受的 hotfix 命名为 `vX.Y.Z-hotfixN`，须注意它具有 prerelease 语义。资产身份/散列取 CI 和 `[claim]`；有疑问才以 `pack-github.ps1` 复现对照。tag 重发另需授权及更新实际发布时间。
-5. **Steam（若本次获准）**。`build-steam.ps1` 构建 Steam flavor 并在干净树打包，readiness 复核 `dist/steam/SqueakyRatkin`。维护者复制到上传副本，既有 item ID 仅写该副本的 `About/PublishedFileId.txt`；沿用同作者的游戏内 Update 流程，不把后续更新称为 Initial Workshop Upload。SteamCMD 的安装与启动自检是独立工具准备，不构成登录、上传或更改发布方式的授权；若改用它发布，先确认上传方案并取得该外部操作的明确授权。正文从 [页面草稿](steam-workshop-page-copy-draft.md) 取用；Change Notes 从 [英文 CHANGELOG](CHANGELOG.md) / [中文 CHANGELOG](CHANGELOG.zh-CN.md) 的对应版本条目取用，由维护者预览审阅。
+5. **Steam（若本次获准）**。`build-steam.ps1` 构建 Steam flavor 并在干净树打包，readiness 复核 `dist/steam/SqueakyRatkin`。上传既有条目可用同作者的游戏内 Update，或经明确授权的 SteamCMD；不把后续更新称为 Initial Workshop Upload。游戏内上传时，维护者复制到上传副本，既有 item ID 仅写该副本的 `About/PublishedFileId.txt`。SteamCMD 上传时，VDF 与登录辅助文件放在仓库、发布包之外；VDF 必须指定正确的 `appid` 与既有非零 `publishedfileid`，`contentfolder` 指向已验收的 Steam 候选。登录与 Steam Guard 由维护者在工具窗口直接完成，密码、验证码不进入聊天、脚本或仓库。工具安装与启动自检本身不构成登录或发布授权。
+
+   SteamCMD 仅更新 VDF 列出的字段；文件上传不会自动同步页面正文或游戏版本标签。正文从 [页面草稿](steam-workshop-page-copy-draft.md) 取用，仍须维护者审阅；Change Notes 从 [英文 CHANGELOG](CHANGELOG.md) / [中文 CHANGELOG](CHANGELOG.zh-CN.md) 的对应版本条目取用。核对实际上传日志与页面，不能只凭工具进程退出码宣布成功。参数依据为 [Steamworks 的 SteamCmd Integration](https://partner.steamgames.com/doc/features/workshop/implementation#SteamCmd_Integration)。
 6. **独立渠道观察与收尾**。agent 仅以公开 filedetails 玩家视角核验同一 item、描述版本、Updated（记录时区）、visibility、preview、文件大小及 change notes；不进入登录/编辑面。Comments 中有实质疑点时进入 TODO，不增加逐项签字仪式。记录下方 Claim Pack，更新维护状态和必要记忆指针。`archive/` 分支只在最终版本定稿建立。
 
 ## 隐私与证据边界
