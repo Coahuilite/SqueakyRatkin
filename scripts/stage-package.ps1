@@ -42,6 +42,18 @@ function Assert-ExampleAudioMirrors([string]$TemplateRoot, [string]$BuiltInRoot)
 
 $root = Resolve-NormalizedPath $ProjectRoot
 $stageDir = Resolve-NormalizedPath $StageDir
+$distRoot = [IO.Path]::GetFullPath((Join-Path $root 'dist')).TrimEnd('\', '/')
+if (-not $stageDir.StartsWith($distRoot + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) {
+    throw 'StageDir must be a child of the project dist directory.'
+}
+$stageAncestor = $stageDir
+while ($stageAncestor.Length -ge $distRoot.Length) {
+    if ((Test-Path -LiteralPath $stageAncestor) -and
+        ((Get-Item -LiteralPath $stageAncestor -Force).Attributes -band [IO.FileAttributes]::ReparsePoint)) {
+        throw 'Staging through a junction or symbolic link is not permitted.'
+    }
+    $stageAncestor = Split-Path -Parent $stageAncestor
+}
 $aboutSource = Join-Path $root 'About'
 $loadFoldersSource = Join-Path $root 'LoadFolders.xml'
 $versionedSource = Join-Path $root '1.6'
@@ -50,6 +62,10 @@ $templateAudio = Join-Path $extrasSource '1.6\Race\Sounds\coahuilite.squeakyratk
 $builtInSourceAudio = Join-Path $versionedSource 'Sounds\coahuilite.squeakyratkin\SR_OfficialExample_Race'
 $assemblyPath = Join-Path $versionedSource 'Assemblies\SqueakyRatkin.dll'
 
+if ($BuildFlavor -in @('steam', 'github')) {
+    $formalStatus = @(& git -C $root status --porcelain --untracked-files=normal 2>$null)
+    if ($LASTEXITCODE -ne 0 -or $formalStatus.Count -gt 0) { throw 'Formal packaging requires a clean Git working tree.' }
+}
 
 # Version discipline (all channels): the staged About.xml must carry the same product version as
 # the package label derived from the csproj. Fail before staging so no half-built package exists.

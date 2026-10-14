@@ -14,7 +14,7 @@ The Example clips are public-domain material: the project and its contributors c
 
 ## Code / 代码
 
-1. Fork and clone the repository; branch from `dev`.
+1. Fork and clone the repository; branch from `main`. Maintainer development uses one branch per minor version, such as `0.3.x`.
 2. Keep the No-DLC Core baseline, fixed 17-action ABI (with silent-by-default `Crying`/`Giggling`), XML-driven behavior, and VoicePack boundaries intact.
 3. Use `SR_` for every Def; C# classes use namespace isolation. Localize player-facing strings in English and Simplified Chinese.
 4. Verify the build:
@@ -23,7 +23,7 @@ The Example clips are public-domain material: the project and its contributors c
    dotnet build Source/SqueakyRatkin/SqueakyRatkin.csproj
    ```
 
-5. Submit a PR to `dev` with the change and rationale. Do not bundle vanilla assets; reference them only by Def/path.
+5. Submit a PR to `main` with the change, rationale, and relevant verification. Do not bundle vanilla assets; reference them only by Def/path.
 
 ## Local test package / 本地测试包
 
@@ -36,4 +36,4 @@ pwsh scripts/pack-dev.ps1
 
 Manually install/copy `dist/dev/SqueakyRatkin/` to test. The maintained scripts are `stage-package.ps1`, `pack-dev.ps1`, `pack-steam.ps1`, and `pack-github.ps1`; pack scripts do not compile. `<Version>` in the csproj is the single manually maintained product version.
 
-Code contributions are MPL-2.0. Historical files marked `DEPRECATED` are archaeology, not implementation guidance.
+Code contributions are MPL-2.0. Historical release reviews and `OBLIVIONIS.md` record past evidence; use the current contracts and maintenance status for implementation guidance.

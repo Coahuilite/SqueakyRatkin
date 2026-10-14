@@ -1,0 +1,541 @@
+{
+  "decision": "Preserve history. Existing 32 exact tuples retained; 44 reviewed non-identifying path examples and synthetic test tuples accepted by maintainer ruling on 2026-10-14. Current-tree text has no exceptions.",
+  "source": "SR existing five-path decision; full-history blob/path inventory",
+  "count": 76,
+  "exceptions": [
+    {
+      "blob": "02702fa7f761c67645de383fb469f2029259962b",
+      "path": "TODO.md",
+      "pattern": "personal-path",
+      "category": "legacy-accepted-path-debt",
+      "reason": "Exact migration of the previously accepted SR five-path history decision."
+    },
+    {
+      "blob": "0907a6868cf6d54f65949e65cd3499968d8aeb5d",
+      "path": "TODO.md",
+      "pattern": "personal-path",
+      "category": "legacy-accepted-path-debt",
+      "reason": "Exact migration of the previously accepted SR five-path history decision."
+    },
+    {
+      "blob": "0ae3eeb7184a8a20def1de9fa8ee4c2b2782f38b",
+      "path": "AGENTS.md",
+      "pattern": "personal-path",
+      "category": "legacy-accepted-path-debt",
+      "reason": "Exact migration of the previously accepted SR five-path history decision."
+    },
+    {
+      "blob": "0e582a25a0ad8e28d5203492daef932dfa23956a",
+      "path": "AGENTS.md",
+      "pattern": "personal-path",
+      "category": "legacy-accepted-path-debt",
+      "reason": "Exact migration of the previously accepted SR five-path history decision."
+    },
+    {
+      "blob": "1e50db8ad6393d0820913d9bfe2ad90c7174b695",
+      "path": "AGENTS.md",
+      "pattern": "personal-path",
+      "category": "legacy-accepted-path-debt",
+      "reason": "Exact migration of the previously accepted SR five-path history decision."
+    },
+    {
+      "blob": "26f0dc73ad234811a5d040e444bf0433dd74d071",
+      "path": "MEMORY.md",
+      "pattern": "personal-path",
+      "category": "legacy-accepted-path-debt",
+      "reason": "Exact migration of the previously accepted SR five-path history decision."
+    },
+    {
+      "blob": "2892440ae510bf3eb8809f475556360eabdb027f",
+      "path": "MEMORY.md",
+      "pattern": "personal-path",
+      "category": "legacy-accepted-path-debt",
+      "reason": "Exact migration of the previously accepted SR five-path history decision."
+    },
+    {
+      "blob": "36f266dfa3fb979b18d3b5c965238b105598cee1",
+      "path": "MEMORY.md",
+      "pattern": "personal-path",
+      "category": "legacy-accepted-path-debt",
+      "reason": "Exact migration of the previously accepted SR five-path history decision."
+    },
+    {
+      "blob": "45b4ae37431aa8e626c17ed227a596e0e025c946",
+      "path": "CONTRIBUTING.md",
+      "pattern": "personal-path",
+      "category": "legacy-accepted-path-debt",
+      "reason": "Exact migration of the previously accepted SR five-path history decision."
+    },
+    {
+      "blob": "4d8ba78344d600f3a15087c11baeab4381843b5d",
+      "path": ".slim/codemap.json",
+      "pattern": "personal-path",
+      "category": "legacy-accepted-path-debt",
+      "reason": "Exact migration of the previously accepted SR five-path history decision."
+    },
+    {
+      "blob": "67cc12d6049819ea0f9a4aa2f8c0d5de43492014",
+      "path": "AGENTS.md",
+      "pattern": "personal-path",
+      "category": "legacy-accepted-path-debt",
+      "reason": "Exact migration of the previously accepted SR five-path history decision."
+    },
+    {
+      "blob": "70c520a303c14c6ab007bc18ed14821657ac5684",
+      "path": "AGENTS.md",
+      "pattern": "personal-path",
+      "category": "legacy-accepted-path-debt",
+      "reason": "Exact migration of the previously accepted SR five-path history decision."
+    },
+    {
+      "blob": "71b0db5072b9529546ee56bada2a27d00d734a71",
+      "path": ".slim/codemap.json",
+      "pattern": "personal-path",
+      "category": "legacy-accepted-path-debt",
+      "reason": "Exact migration of the previously accepted SR five-path history decision."
+    },
+    {
+      "blob": "7493ff68860435aee0b0d2617a60373cc1dc8c2b",
+      "path": "MEMORY.md",
+      "pattern": "personal-path",
+      "category": "legacy-accepted-path-debt",
+      "reason": "Exact migration of the previously accepted SR five-path history decision."
+    },
+    {
+      "blob": "80cca73ecddc4bc81fc0542381d055952478347f",
+      "path": "MEMORY.md",
+      "pattern": "personal-path",
+      "category": "legacy-accepted-path-debt",
+      "reason": "Exact migration of the previously accepted SR five-path history decision."
+    },
+    {
+      "blob": "970a2334963290aad331d02d77d05b230ff0bcf2",
+      "path": "CONTRIBUTING.md",
+      "pattern": "personal-path",
+      "category": "legacy-accepted-path-debt",
+      "reason": "Exact migration of the previously accepted SR five-path history decision."
+    },
+    {
+      "blob": "9adc352f548b33293590dce0d340e7b484c2e891",
+      "path": "AGENTS.md",
+      "pattern": "personal-path",
+      "category": "legacy-accepted-path-debt",
+      "reason": "Exact migration of the previously accepted SR five-path history decision."
+    },
+    {
+      "blob": "9e74884168b1f4fff3d3d80926147ac815020c2a",
+      "path": "AGENTS.md",
+      "pattern": "personal-path",
+      "category": "legacy-accepted-path-debt",
+      "reason": "Exact migration of the previously accepted SR five-path history decision."
+    },
+    {
+      "blob": "b1f61149ca47f3ed8f20f9aef89b8db4af451c41",
+      "path": "MEMORY.md",
+      "pattern": "personal-path",
+      "category": "legacy-accepted-path-debt",
+      "reason": "Exact migration of the previously accepted SR five-path history decision."
+    },
+    {
+      "blob": "b87920be4565dfaf53c4fb7f71289a8b370ce178",
+      "path": "TODO.md",
+      "pattern": "personal-path",
+      "category": "legacy-accepted-path-debt",
+      "reason": "Exact migration of the previously accepted SR five-path history decision."
+    },
+    {
+      "blob": "b9d9c610f74d9507ba03947179da4c9a98822703",
+      "path": "MEMORY.md",
+      "pattern": "personal-path",
+      "category": "legacy-accepted-path-debt",
+      "reason": "Exact migration of the previously accepted SR five-path history decision."
+    },
+    {
+      "blob": "baa645a5f6fd0858f6f4a16d34c4bcc4db2fc867",
+      "path": ".slim/codemap.json",
+      "pattern": "personal-path",
+      "category": "legacy-accepted-path-debt",
+      "reason": "Exact migration of the previously accepted SR five-path history decision."
+    },
+    {
+      "blob": "bd5ac0cd2f4ec4203715805f8f63eda3d798dedd",
+      "path": "CONTRIBUTING.md",
+      "pattern": "personal-path",
+      "category": "legacy-accepted-path-debt",
+      "reason": "Exact migration of the previously accepted SR five-path history decision."
+    },
+    {
+      "blob": "be2a2508ac81c1a44461368d5944a17fdbced21b",
+      "path": "TODO.md",
+      "pattern": "personal-path",
+      "category": "legacy-accepted-path-debt",
+      "reason": "Exact migration of the previously accepted SR five-path history decision."
+    },
+    {
+      "blob": "c7a5a43a3491ef0b75d77e1bb74aeef1a67e5372",
+      "path": "MEMORY.md",
+      "pattern": "personal-path",
+      "category": "legacy-accepted-path-debt",
+      "reason": "Exact migration of the previously accepted SR five-path history decision."
+    },
+    {
+      "blob": "cfbeb3e25b39430586f4eb6b3ba07f954c419520",
+      "path": "AGENTS.md",
+      "pattern": "personal-path",
+      "category": "legacy-accepted-path-debt",
+      "reason": "Exact migration of the previously accepted SR five-path history decision."
+    },
+    {
+      "blob": "d2cd195fd8f932bce48b7af69b94fc58ff652257",
+      "path": "AGENTS.md",
+      "pattern": "personal-path",
+      "category": "legacy-accepted-path-debt",
+      "reason": "Exact migration of the previously accepted SR five-path history decision."
+    },
+    {
+      "blob": "d788e07765aa843dff9552f291cd66d20659bbe5",
+      "path": "CONTRIBUTING.md",
+      "pattern": "personal-path",
+      "category": "legacy-accepted-path-debt",
+      "reason": "Exact migration of the previously accepted SR five-path history decision."
+    },
+    {
+      "blob": "e257d32ae89cfece225bdcc48cc776eebac9b640",
+      "path": "MEMORY.md",
+      "pattern": "personal-path",
+      "category": "legacy-accepted-path-debt",
+      "reason": "Exact migration of the previously accepted SR five-path history decision."
+    },
+    {
+      "blob": "ebba10ba4bba6de3f381ff132d9dce0a32da1759",
+      "path": "MEMORY.md",
+      "pattern": "personal-path",
+      "category": "legacy-accepted-path-debt",
+      "reason": "Exact migration of the previously accepted SR five-path history decision."
+    },
+    {
+      "blob": "ed840b4820a5dfe16f6eb17df00af279f3891133",
+      "path": "MEMORY.md",
+      "pattern": "personal-path",
+      "category": "legacy-accepted-path-debt",
+      "reason": "Exact migration of the previously accepted SR five-path history decision."
+    },
+    {
+      "blob": "f1413b192e276002b33489e3ba4a47b0f03a9280",
+      "path": "TODO.md",
+      "pattern": "personal-path",
+      "category": "legacy-accepted-path-debt",
+      "reason": "Exact migration of the previously accepted SR five-path history decision."
+    },
+    {
+      "blob": "0c8134d444bf13c6ba0d173644d2ed9653f001bd",
+      "path": "MEMORY.md",
+      "pattern": "personal-path",
+      "category": "reviewed-generic-path-example",
+      "reason": "Candidate only; not accepted by the scanner."
+    },
+    {
+      "blob": "0e58e570e26300609da5eb5ce963874f3861cfee",
+      "path": "docs/archive/consolidation/coverage-check.md",
+      "pattern": "personal-path",
+      "category": "reviewed-generic-path-example",
+      "reason": "Candidate only; not accepted by the scanner."
+    },
+    {
+      "blob": "1166af5cf9ad813e88d0211502463e1cf14a6931",
+      "path": "MEMORY.md",
+      "pattern": "personal-path",
+      "category": "reviewed-generic-path-example",
+      "reason": "Candidate only; not accepted by the scanner."
+    },
+    {
+      "blob": "1738bde2239805752525512dc377510e6427253a",
+      "path": "MEMORY.md",
+      "pattern": "personal-path",
+      "category": "reviewed-generic-path-example",
+      "reason": "Candidate only; not accepted by the scanner."
+    },
+    {
+      "blob": "17740c005516c39aac42e64e4ab25c534fd857e1",
+      "path": "AGENTS.md",
+      "pattern": "personal-path",
+      "category": "reviewed-generic-path-example",
+      "reason": "Candidate only; not accepted by the scanner."
+    },
+    {
+      "blob": "1f479d9827a4a75609075354dc4316feb13c5e48",
+      "path": "AGENTS.md",
+      "pattern": "personal-path",
+      "category": "reviewed-generic-path-example",
+      "reason": "Candidate only; not accepted by the scanner."
+    },
+    {
+      "blob": "2b224bc7bf2ad2e3db60020cbc73d1c99b8f55b7",
+      "path": "docs/text-review-2026-07-05.md",
+      "pattern": "personal-path",
+      "category": "reviewed-generic-path-example",
+      "reason": "Candidate only; not accepted by the scanner."
+    },
+    {
+      "blob": "2ca804f09bf58078ad8a16764cf940f44b18f9e4",
+      "path": "docs/DEPRECATED_text-review-2026-07-05.md",
+      "pattern": "personal-path",
+      "category": "reviewed-generic-path-example",
+      "reason": "Candidate only; not accepted by the scanner."
+    },
+    {
+      "blob": "35a9661566210f7176f59c173362a3faefe497b3",
+      "path": "MEMORY.md",
+      "pattern": "personal-path",
+      "category": "reviewed-generic-path-example",
+      "reason": "Candidate only; not accepted by the scanner."
+    },
+    {
+      "blob": "380fe68a9edb160b7876652ab73e8a26d8205f92",
+      "path": "AGENTS.md",
+      "pattern": "personal-path",
+      "category": "reviewed-generic-path-example",
+      "reason": "Candidate only; not accepted by the scanner."
+    },
+    {
+      "blob": "3a4708d8bceb315572ae51b96137d536087f2b3f",
+      "path": "AGENTS.md",
+      "pattern": "personal-path",
+      "category": "reviewed-generic-path-example",
+      "reason": "Candidate only; not accepted by the scanner."
+    },
+    {
+      "blob": "4bce276ebb1ffb2059587048b9f039b859bef123",
+      "path": "MEMORY.md",
+      "pattern": "personal-path",
+      "category": "reviewed-generic-path-example",
+      "reason": "Candidate only; not accepted by the scanner."
+    },
+    {
+      "blob": "564f68d08ab25ea9106d6a147152b1f8436bae10",
+      "path": "tools/SqueakLogCharacterization/Program.cs",
+      "pattern": "personal-path",
+      "category": "synthetic-redaction-test",
+      "reason": "Candidate only; not accepted by the scanner."
+    },
+    {
+      "blob": "576b710807871de1db8073de2690a86edc70a6ba",
+      "path": "AGENTS.md",
+      "pattern": "personal-path",
+      "category": "reviewed-generic-path-example",
+      "reason": "Candidate only; not accepted by the scanner."
+    },
+    {
+      "blob": "59cd9c300a729dfd4d15c8a59d74398034ac533e",
+      "path": "AGENTS.md",
+      "pattern": "personal-path",
+      "category": "reviewed-generic-path-example",
+      "reason": "Candidate only; not accepted by the scanner."
+    },
+    {
+      "blob": "62174cb6634a7c015d002821f1b439b9c8ddb5bb",
+      "path": "AGENTS.md",
+      "pattern": "personal-path",
+      "category": "reviewed-generic-path-example",
+      "reason": "Candidate only; not accepted by the scanner."
+    },
+    {
+      "blob": "6422941dc919a163af9361545289e54275a0f7cf",
+      "path": "AGENTS.md",
+      "pattern": "personal-path",
+      "category": "reviewed-generic-path-example",
+      "reason": "Candidate only; not accepted by the scanner."
+    },
+    {
+      "blob": "6c055a87e913ac7cf2f0a9e5be0aa2aec12d313d",
+      "path": "AGENTS.md",
+      "pattern": "personal-path",
+      "category": "reviewed-generic-path-example",
+      "reason": "Candidate only; not accepted by the scanner."
+    },
+    {
+      "blob": "6faac8af970bb4e0db8399f2da0daf39322f48db",
+      "path": "AGENTS.md",
+      "pattern": "personal-path",
+      "category": "reviewed-generic-path-example",
+      "reason": "Candidate only; not accepted by the scanner."
+    },
+    {
+      "blob": "702c446b7d6660458cf14e4b4f4c6f1acb638465",
+      "path": "MEMORY.md",
+      "pattern": "personal-path",
+      "category": "reviewed-generic-path-example",
+      "reason": "Candidate only; not accepted by the scanner."
+    },
+    {
+      "blob": "7362bebb1d52f6ba1f30ec8ff5b1ff09eb372b8d",
+      "path": "AGENTS.md",
+      "pattern": "personal-path",
+      "category": "reviewed-generic-path-example",
+      "reason": "Candidate only; not accepted by the scanner."
+    },
+    {
+      "blob": "7399e3f69ff65dd824bce029d35a40a5fbfe5ee2",
+      "path": "tools/SqueakLogCharacterization/Program.cs",
+      "pattern": "personal-path",
+      "category": "synthetic-redaction-test",
+      "reason": "Candidate only; not accepted by the scanner."
+    },
+    {
+      "blob": "78e5c5f2705c459a18a3b2efd580c3bcae318e01",
+      "path": "tools/SqueakLogCharacterization/Program.cs",
+      "pattern": "personal-path",
+      "category": "synthetic-redaction-test",
+      "reason": "Candidate only; not accepted by the scanner."
+    },
+    {
+      "blob": "8a8bdc0fe47c5ab96126d8832bf8e0eaf3a56551",
+      "path": "tools/SqueakLogCharacterization/Program.cs",
+      "pattern": "personal-path",
+      "category": "synthetic-redaction-test",
+      "reason": "Candidate only; not accepted by the scanner."
+    },
+    {
+      "blob": "946ede672868b1aebffb3a201211a329992ea040",
+      "path": "scripts/validate-junction.ps1",
+      "pattern": "personal-path",
+      "category": "reviewed-generic-path-example",
+      "reason": "Candidate only; not accepted by the scanner."
+    },
+    {
+      "blob": "958764d547884bbf8037bfefb5e705efaa197792",
+      "path": "MEMORY.md",
+      "pattern": "personal-path",
+      "category": "reviewed-generic-path-example",
+      "reason": "Candidate only; not accepted by the scanner."
+    },
+    {
+      "blob": "9fa27ab807c76c82f46d27a0081e3a7a79bc4c24",
+      "path": "tools/SqueakLogCharacterization/Program.cs",
+      "pattern": "personal-path",
+      "category": "synthetic-redaction-test",
+      "reason": "Candidate only; not accepted by the scanner."
+    },
+    {
+      "blob": "a3334329bf942b0eba4aa956ffb8d387d2b011cb",
+      "path": "MEMORY.md",
+      "pattern": "personal-path",
+      "category": "reviewed-generic-path-example",
+      "reason": "Candidate only; not accepted by the scanner."
+    },
+    {
+      "blob": "ad0b257e28738a21900e3e49ee030d7146b9b1b2",
+      "path": "MEMORY.md",
+      "pattern": "personal-path",
+      "category": "reviewed-generic-path-example",
+      "reason": "Candidate only; not accepted by the scanner."
+    },
+    {
+      "blob": "b06d69f25716d543749892f56a185f4a72afe596",
+      "path": "tools/SqueakLogCharacterization/Program.cs",
+      "pattern": "personal-path",
+      "category": "synthetic-redaction-test",
+      "reason": "Candidate only; not accepted by the scanner."
+    },
+    {
+      "blob": "b5505adb00ecdbf475d045ea1f1de4adbdebef86",
+      "path": "OBLIVIONIS.md",
+      "pattern": "personal-path",
+      "category": "reviewed-generic-path-example",
+      "reason": "Candidate only; not accepted by the scanner."
+    },
+    {
+      "blob": "b73d9c7c0a0f39ec81a4c17dc3e9f68907889aab",
+      "path": "tools/SqueakLogCharacterization/Program.cs",
+      "pattern": "personal-path",
+      "category": "synthetic-redaction-test",
+      "reason": "Candidate only; not accepted by the scanner."
+    },
+    {
+      "blob": "c4079869df2754369e6dc10748d777fad8ad5e2a",
+      "path": "MEMORY.md",
+      "pattern": "personal-path",
+      "category": "reviewed-generic-path-example",
+      "reason": "Candidate only; not accepted by the scanner."
+    },
+    {
+      "blob": "d339b950342a5d6986c8a27301f573df0f9fcbb6",
+      "path": "OBLIVIONIS.md",
+      "pattern": "personal-path",
+      "category": "reviewed-generic-path-example",
+      "reason": "Candidate only; not accepted by the scanner."
+    },
+    {
+      "blob": "d75477b1bfe7b48c2a44ca33af280f19da9f4b79",
+      "path": "OBLIVIONIS.md",
+      "pattern": "personal-path",
+      "category": "reviewed-generic-path-example",
+      "reason": "Candidate only; not accepted by the scanner."
+    },
+    {
+      "blob": "d77c8d35c19ecb673aa270908b707bda57b7b5bf",
+      "path": "AGENTS.md",
+      "pattern": "personal-path",
+      "category": "reviewed-generic-path-example",
+      "reason": "Candidate only; not accepted by the scanner."
+    },
+    {
+      "blob": "e3978d5625036d43b8546143705360e1d15c08f4",
+      "path": "AGENTS.md",
+      "pattern": "personal-path",
+      "category": "reviewed-generic-path-example",
+      "reason": "Candidate only; not accepted by the scanner."
+    },
+    {
+      "blob": "e3ea0e3ff9ea08e240a3ddc47a7962ba3e2b0a67",
+      "path": "docs/text-review-2026-07-05.md",
+      "pattern": "personal-path",
+      "category": "reviewed-generic-path-example",
+      "reason": "Candidate only; not accepted by the scanner."
+    },
+    {
+      "blob": "e4c9e6cf007f713f3966a6c9dc1b017a7873ccc2",
+      "path": "MEMORY.md",
+      "pattern": "personal-path",
+      "category": "reviewed-generic-path-example",
+      "reason": "Candidate only; not accepted by the scanner."
+    },
+    {
+      "blob": "eae9169dedf1bcf5f298564be61ff9f64354a524",
+      "path": "scripts/pack-example-voices-dev.ps1",
+      "pattern": "personal-path",
+      "category": "reviewed-generic-path-example",
+      "reason": "Candidate only; not accepted by the scanner."
+    },
+    {
+      "blob": "eb81104075e959248bca2d065f120528cf92f080",
+      "path": "docs/text-review-2026-07-05.md",
+      "pattern": "personal-path",
+      "category": "reviewed-generic-path-example",
+      "reason": "Candidate only; not accepted by the scanner."
+    },
+    {
+      "blob": "eba4e42b100a4f936f164302ff3fcbb7597e19b5",
+      "path": "MEMORY.md",
+      "pattern": "personal-path",
+      "category": "reviewed-generic-path-example",
+      "reason": "Candidate only; not accepted by the scanner."
+    },
+    {
+      "blob": "f0266d7fb06bb2474b114cd2c94e6c548e6eab95",
+      "path": "MEMORY.md",
+      "pattern": "personal-path",
+      "category": "reviewed-generic-path-example",
+      "reason": "Candidate only; not accepted by the scanner."
+    },
+    {
+      "blob": "fecb34284eaa2eed8320f70dc01209f04c90f723",
+      "path": "MEMORY.md",
+      "pattern": "personal-path",
+      "category": "reviewed-generic-path-example",
+      "reason": "Candidate only; not accepted by the scanner."
+    }
+  ],
+  "pendingCount": 0,
+  "pendingExceptions": []
+}

@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ModMetaData>
   <packageId>coahuilite.squeakyratkin</packageId>
-  <modVersion>0.3.3</modVersion>
+  <modVersion>0.3.4</modVersion>
   <name>Squeaky Ratkin</name>
   <author>Coahuilite</author>
   <supportedVersions>
     <li>1.6</li>
+    <li>1.7</li>
   </supportedVersions>
   <description>Squeaky Ratkin is a lightweight sound effect mod that injects a little stir into the Ratkin experience. It brings a whimsical medley of chirps and squeaks to these once-silent little critters, ensuring every action comes with... a little sound things. No longer shall the colonies and the world beyond echo solely with the lamentations of blood and fire - the whispered squeaks of the ratkin will remind you that though they may be small, they are never content to remain silent.
 

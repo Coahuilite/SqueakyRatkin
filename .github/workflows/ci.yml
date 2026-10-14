@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main, master, dev]
+    branches: [main, '*.*.x']
   pull_request:
-    branches: [main, master, dev]
+    branches: [main]
 
 permissions:
   contents: read
@@ -23,6 +23,8 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -38,19 +40,20 @@ jobs:
           # verify-local runs its build gates with --no-restore, so a clean checkout needs an obj/
           # for every project. Glob rather than a hand list, so a new tools/ project is never forgotten.
           Get-ChildItem -Path Source,tools -Recurse -Filter *.csproj |
-            ForEach-Object { dotnet restore $_.FullName --nologo }
+            ForEach-Object {
+              dotnet restore $_.FullName --nologo
+              if ($LASTEXITCODE -ne 0) { throw "dotnet restore failed for project $($_.FullName) (exit $LASTEXITCODE)." }
+            }
 
       # Aligns with the UniversalSqueaker flow: the gates a maintainer would run by hand are the
       # gates CI runs, so a push cannot be green locally and untested on the runner.
-      - name: Verify (11 gates)
+      - name: Verify (12 gates)
         shell: pwsh
         run: ./scripts/verify-local.ps1 -NoRestore
 
-      # Privacy gate 的默认模式（工作树 + 提交信息 + 身份）跑在每次 CI 上，personal path 或凭据就不可能
-      # 跟着 commit 上 main；-FullHistory 仍是 push 前的人工步骤（runner 的 clone 是浅的，扫不到全历史）。
-      - name: Privacy audit (working tree + commit messages + identity)
+      - name: Privacy audit (complete reachable history)
         shell: pwsh
-        run: ./scripts/privacy-audit.ps1
+        run: ./scripts/privacy-audit.ps1 -FullHistory
 
       - name: Build (Dev flavor)
         run: dotnet build Source/SqueakyRatkin/SqueakyRatkin.csproj -c Release -p:SqueakyBuildFlavor=Dev

@@ -20,6 +20,7 @@ $ErrorActionPreference = "Stop"
 #   10   VoicePack XML ABI 一致性锁（第 10 项，0.3.2）：示例 XML × validator × 作者指南三向对照，
 #        含 C# 17 动作键顺序；彩蛋测试包为 dist/SqueakyRatkinEggTestVoices 可选工件（存在才并入）。
 #   11   VoicePack 脚手架自检（第 11 项，0.3.2）：new-voicepack.ps1 在临时目录生成最小包并解析 XML。
+#   12   合成发布门回归（verify-release-gates.ps1）：隔离临时仓库验证隐私审计规则；在子 pwsh 进程执行。
 # -NoRestore  ：构建项追加 --no-restore（离线/已还原缓存环境；默认仍走常规 restore）。
 # -PackDev   ：校验全绿后追加 dev 包（pack-dev，允许脏树并自动 -dirty 标签）。
 # -PackSteam ：校验全绿后追加 Steam 包（build-steam = Steam flavor 构建 + pack-steam 干净树硬门；
@@ -97,6 +98,10 @@ Invoke-Check 'VoicePack XML ABI consistency lock (samples x validator x author g
 Invoke-Check 'VoicePack scaffold self-test (new-voicepack.ps1 generates valid minimal pack)' `
     'pwsh -NoProfile -File scripts/verify-voicepack-scaffold.ps1' `
     { & (Join-Path $PSScriptRoot 'verify-voicepack-scaffold.ps1') -ProjectRoot $root }
+
+Invoke-Check 'Synthetic release-gate regression (privacy-audit fixtures)' `
+    'pwsh -NoProfile -NonInteractive -File scripts/verify-release-gates.ps1' `
+    { pwsh -NoProfile -NonInteractive -File (Join-Path $PSScriptRoot 'verify-release-gates.ps1') }
 
 Write-Host '[verify] all checks passed.'
 

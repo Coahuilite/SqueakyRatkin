@@ -6,10 +6,12 @@
 
 ## 依赖与 No-DLC 基线
 
-- RimWorld 1.6、Harmony、HAR、NewRatkinPlus（`Solaris.RatkinRaceMod`）。
+- RimWorld 1.6 或 1.7、Harmony、HAR、NewRatkinPlus（`Solaris.RatkinRaceMod`）。
 - Core 加上述依赖是强制基线；所有官方 DLC（含 Biotech）均为可选。无 Biotech 时，全局设置、适用动作、心情调制、Race 包与原版回退仍可用。
 
 将已发布的 Steam/Release 包安装到 `RimWorld/Mods/` 并启用依赖。运行时边界见 [`docs/project-architecture-contract.md`](./docs/project-architecture-contract.md)。
+
+两个游戏版本共用 `1.6/` 内容与程序集。1.7 的运行证据和未验证范围见 [`docs/maintenance-status-zh.md`](./docs/maintenance-status-zh.md)；支持声明不代表所有模组组合均已测试。
 
 ## 音频与 VoicePack
 
@@ -40,7 +42,7 @@ pwsh scripts/pack-dev.ps1
 pwsh scripts/verify-local.ps1
 ```
 
-它一次跑 11 项：内核纯度门 + 扩展断言 + 双份语料字节回放（0.3.0 冻结 + 17 动作/彩蛋语料）、设置 fixture 9 场景字节门、ConfigCopy store 生命周期 harness、双 flavor 日志协议、`fixtures/` 零 delta 门、Dev + Steam + Dev 三 flavor 构建（warnings-as-errors）、VoicePack XML ABI 一致性锁、VoicePack 脚手架自检；加 `-PackDev`/`-PackSteam` 追加打包（Steam 要求干净树）。发布面复核与 push 前隐私门是另两条命令，见 [`docs/release-runbook-zh.md`](./docs/release-runbook-zh.md)。裸构建：
+它一次跑 12 项：内核纯度门 + 扩展断言 + 双份语料字节回放（0.3.0 冻结 + 17 动作/彩蛋语料）、设置 fixture 9 场景字节门、ConfigCopy store 生命周期 harness、双 flavor 日志协议、`fixtures/` 零 delta 门、Dev + Steam + Dev 三 flavor 构建（warnings-as-errors）、VoicePack XML ABI 一致性锁、VoicePack 脚手架自检，以及针对合成发布门脚本的回归用例；加 `-PackDev`/`-PackSteam` 追加打包（Steam 要求干净树）。发布面复核与 push 前隐私门是另两条命令，见 [`docs/release-runbook-zh.md`](./docs/release-runbook-zh.md)。裸构建：
 
 ```text
 dotnet build Source/SqueakyRatkin/SqueakyRatkin.csproj

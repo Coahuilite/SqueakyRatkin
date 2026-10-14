@@ -3,7 +3,7 @@
   <packageId>coahuilite.squeakyratkin.examplevoices</packageId>
   <name>Squeaky Ratkin Example Voices Template</name>
   <author>Coahuilite</author>
-  <supportedVersions><li>1.6</li></supportedVersions>
+  <supportedVersions><li>1.6</li><li>1.7</li></supportedVersions>
   <description>Template voice pack for Squeaky Ratkin. It is a complete Race-only example with independently named PackDef, SoundDefs, PackKey, Catalog entry, and audio paths.</description>
   <modDependencies><li><packageId>coahuilite.squeakyratkin</packageId><displayName>Squeaky Ratkin</displayName></li><li><packageId>Solaris.RatkinRaceMod</packageId><displayName>NewRatkinPlus</displayName></li></modDependencies>
   <loadAfter><li>coahuilite.squeakyratkin</li><li>Solaris.RatkinRaceMod</li></loadAfter>

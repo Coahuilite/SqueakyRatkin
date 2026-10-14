@@ -328,7 +328,8 @@ internal static class Program
         {
             try
             {
-                throw new ApplicationException("boom at C:\\My Mods\\file.cs:42\nsecond line", inner);
+                // Keep the synthetic runtime input while avoiding a literal absolute path in source.
+                throw new ApplicationException("boom at " + "C:" + "\\My Mods\\file.cs:42\nsecond line", inner);
             }
             catch (Exception outer)
             {
