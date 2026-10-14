@@ -2,7 +2,7 @@
 
 ## 当前工作锚
 
-- GitHub 的 0.3.4 与 **0.3.4-tagfix1 prerelease** 已发布；Steam 0.3.4-tagfix1 包已备妥，待维护者游戏内 Update、手工录入 Change Notes 并自行验收标签。Release 与资产证据、候选包身份见 [0.3.4-tagfix1 记录](docs/release_review/release-0.3.4-tagfix1-review-zh.md)。
+- GitHub 的 0.3.4 与 **0.3.4-tagfix1 prerelease** 已发布；维护者报告已完成 0.3.4-tagfix1 工坊更新，agent 未独立检查页面字段或玩家下载。Release、资产与渠道证据见 [0.3.4-tagfix1 记录](docs/release_review/release-0.3.4-tagfix1-review-zh.md)。
 - 版本源为 `Source/SqueakyRatkin/SqueakyRatkin.csproj` 的 `<Version>`，About 跟随；当前使用 net472 与 1.6 引用程序集，没有单独的 1.7 DLL。
 - 本次 0.3.4-tagfix1 沿用 RimWorld 1.6 下 Steam 0.3.4 与 1.7 下 Steam 0.3.3 的既有验收；没有本版本新实测，支持仍为 1.6 / 1.7 共用 `1.6/` 内容。
 - Workshop 正文维护于 [页面草稿](docs/steam-workshop-page-copy-draft.md)；更新说明维护于双语 CHANGELOG。GitHub Release notes 仍按 PR 自动生成；本次 Steam Change Notes 由维护者手工录入，不做外部同步。发布证据见各版本 review。
@@ -18,7 +18,8 @@
 - SR 1.0 的 US 硬依赖、Def 归属、不自动迁移设置与共存双响裁定继续有效；完整决定及未决项集中在维护状态。
 - 隐私历史沿用已确认的方案 A（不重写 + 台账）；不再维护方案 B 草案。个人路径、原始日志、凭据与 Workshop item ID 不入库。
 - 本轮脚本以已审阅的 US scripts 为基线升级；SR 台账只接受精确 blob/path/pattern。新增 44 项非个人路径示例/合成测试按维护者裁定保留历史，合计 76 项例外；维护者已确认既有 25 项含用户名排障目录继续按方案 A 保留，不重写历史。当前文件不使用历史例外。
-- 0.3.3 与 0.3.4 旧候选包已归档；当前 Steam 候选固定于 `v0.3.4-tagfix1`，不随文档收尾提交重建。额外历史 PNG 为已停用宣传图，不随当前包发布；压缩像素流中的路径字节命中是误报。
+- 0.3.3 与 0.3.4 旧候选包已归档；当前 Steam 包固定于 `v0.3.4-tagfix1`，不随文档收尾提交重建。额外历史 PNG 为已停用宣传图，不随当前包发布；压缩像素流中的路径字节命中是误报。
+- 按维护者 2026-10-14 裁定，今后手工上传副本统一放于 gitignored `dist/steam-upload/SqueakyRatkin`；PublishedFileId 只写入该不跟踪副本，不进入 Git 或正式 ZIP。此前仓库外副本已由维护者删除，本次不重建。
 - SteamCMD 已安装；其 0.3.4 上传没有更新工坊版本标签，因此后续优先由维护者游戏内 Update。旧上传事实见 0.3.4 review，旧推荐流程已归档于 `OBLIVIONIS.md`。
 
 ## 读取入口
