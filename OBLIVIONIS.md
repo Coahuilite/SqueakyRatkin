@@ -4,6 +4,12 @@
 
 以下记录均说明当时的决定与证据。现行行为与流程由合同和 runbook 规定，当前状态集中在 `docs/maintenance-status-zh.md`；不从历史条目推定当前分支或渠道状态。
 
+## 2026-10-14：旧隐私方案与流程复盘文档清理（归档）
+
+- **裁定**：维护者确认删除 `docs/privacy-history-rewrite-plan-zh.md`、`docs/release_review/process-review-zh.md`、`docs/release_review/process-redundancy-review-zh.md` 与 `docs/release_review/consolidation-review-final-zh.md`。隐私历史继续方案 A（不重写 + known-debt 台账），不再维护方案 B 草案。
+- **保留**：现行合同、runbook 与版本发布记录继续作为当前文档；被删除的旧流程复盘和终审可按需从 Git 历史查阅。仅删除工作树文档，不重写 Git 历史。
+- **状态**：completed；当前方案 A 与发布流程分别见 `MEMORY.md`、`docs/maintenance-status-zh.md` 和 `docs/release-runbook-zh.md`。
+
 ## 2026-10-14：AGENTS 与 TODO 职责收敛（归档）
 
 - **原因**：维护者要求 AGENTS 不变优先、变化事实进 MEMORY、TODO 只列未完成动作。

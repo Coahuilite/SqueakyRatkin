@@ -102,23 +102,10 @@ jobs:
         shell: pwsh
         run: ./scripts/privacy-audit.ps1 -FullHistory
 
-      - name: Prepare bilingual release notes
-        id: prepare-release-notes
-        shell: pwsh
-        env:
-          RELEASE_TAG: ${{ github.ref_name }}
-        run: |
-          $ErrorActionPreference = 'Stop'
-          $outputPath = Join-Path $env:RUNNER_TEMP ("squeaky-ratkin-release-notes-$([guid]::NewGuid().ToString('N')).md")
-          & ./scripts/write-release-notes.ps1 -Version $env:RELEASE_TAG -OutputPath $outputPath
-          Add-Content -LiteralPath $env:GITHUB_ENV -Encoding utf8 -Value "RELEASE_NOTES_PATH=$outputPath"
-          Add-Content -LiteralPath $env:GITHUB_OUTPUT -Encoding utf8 -Value "release_notes_path=$outputPath"
-
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: dist/github/SqueakyRatkin-${{ github.ref_name }}.zip
-          body_path: ${{ steps.prepare-release-notes.outputs.release_notes_path }}
-          generate_release_notes: false
+          generate_release_notes: true   # GitHub keeps its automatic PR-based release notes.
           draft: false
           prerelease: ${{ contains(github.ref_name, '-') }}   # v0.1.0-rc1 等 pre-release tag 自动标记;v0.1.0 正式不含 -
