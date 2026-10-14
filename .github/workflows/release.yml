@@ -68,7 +68,10 @@ jobs:
         shell: pwsh
         run: |
           Get-ChildItem -Path Source,tools -Recurse -Filter *.csproj |
-            ForEach-Object { dotnet restore $_.FullName --nologo }
+            ForEach-Object {
+              dotnet restore $_.FullName --nologo
+              if ($LASTEXITCODE -ne 0) { throw "dotnet restore failed for project $($_.FullName) (exit $LASTEXITCODE)." }
+            }
 
       # Tag-time gates, in the same axe the maintainer's local release check uses: a red gate or a
       # mislabelled version dies before any release asset exists.
@@ -99,10 +102,23 @@ jobs:
         shell: pwsh
         run: ./scripts/privacy-audit.ps1 -FullHistory
 
+      - name: Prepare bilingual release notes
+        id: prepare-release-notes
+        shell: pwsh
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $outputPath = Join-Path $env:RUNNER_TEMP ("squeaky-ratkin-release-notes-$([guid]::NewGuid().ToString('N')).md")
+          & ./scripts/write-release-notes.ps1 -Version $env:RELEASE_TAG -OutputPath $outputPath
+          Add-Content -LiteralPath $env:GITHUB_ENV -Encoding utf8 -Value "RELEASE_NOTES_PATH=$outputPath"
+          Add-Content -LiteralPath $env:GITHUB_OUTPUT -Encoding utf8 -Value "release_notes_path=$outputPath"
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: dist/github/SqueakyRatkin-${{ github.ref_name }}.zip
-          generate_release_notes: true   # 自动从 commits 生成 Release notes
+          body_path: ${{ steps.prepare-release-notes.outputs.release_notes_path }}
+          generate_release_notes: false
           draft: false
           prerelease: ${{ contains(github.ref_name, '-') }}   # v0.1.0-rc1 等 pre-release tag 自动标记;v0.1.0 正式不含 -

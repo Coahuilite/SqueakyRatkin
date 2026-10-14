@@ -40,7 +40,10 @@ jobs:
           # verify-local runs its build gates with --no-restore, so a clean checkout needs an obj/
           # for every project. Glob rather than a hand list, so a new tools/ project is never forgotten.
           Get-ChildItem -Path Source,tools -Recurse -Filter *.csproj |
-            ForEach-Object { dotnet restore $_.FullName --nologo }
+            ForEach-Object {
+              dotnet restore $_.FullName --nologo
+              if ($LASTEXITCODE -ne 0) { throw "dotnet restore failed for project $($_.FullName) (exit $LASTEXITCODE)." }
+            }
 
       # Aligns with the UniversalSqueaker flow: the gates a maintainer would run by hand are the
       # gates CI runs, so a push cannot be green locally and untested on the runner.
