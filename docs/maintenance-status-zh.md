@@ -6,13 +6,14 @@
 
 | 面 | 当前口径 | 证据边界 |
 | --- | --- | --- |
-| 待发布版本 | **0.3.4**：维护者授权的文档、版本与游戏支持声明更新；不改变运行时行为 | csproj 为产品版本主源，About 跟随；版本提升不等于发布 |
+| 当前版本 | **0.3.4**：2026-10-14 已在 GitHub 正式发布；运行时行为不变 | GitHub 发布证据见 [0.3.4 记录](release_review/release-0.3.4-review-zh.md)；不等于 Steam 已更新 |
 | 游戏支持 | RimWorld **1.6 / 1.7**，显式共用根目录和 `1.6/` 内容；继续以 net472 / 1.6 引用编译 | 共享目录不代表逐功能、逐 DLC 或逐模组组合均已验收 |
-| 上次已记录发布 | **0.3.3**；GitHub 与 Workshop 的历史证据见 [0.3.3 记录](release_review/release-0.3.3-review-zh.md) | 2026-09-19 的页面观察不证明现在的线上状态，也不证明 0.3.4 已上传 |
-| Workshop 草稿 | [0.3.4 中英页面正文](steam-workshop-page-copy-draft.md)，待维护者审阅 | 生成草稿不包含页面编辑、登录或上传授权 |
+| GitHub Release | **v0.3.4** 已发布；Release notes 由 GitHub 根据 PR 自动生成 | Release CI 与公开资产下载核验均成功，详情见 [0.3.4 记录](release_review/release-0.3.4-review-zh.md) |
+| Steam 候选 | **0.3.4** tag 固定包已通过 readiness，待维护者本人上传 | 尚未上传或观察新页面；不在文档收尾后重建该包 |
+| 上次 Steam/Workshop 发布 | **0.3.3**；历史渠道证据见 [0.3.3 记录](release_review/release-0.3.3-review-zh.md) | 2026-09-19 的页面观察不证明当前线上状态 |
+| Workshop 正文 | [0.3.4 中英页面正文](steam-workshop-page-copy-draft.md)，由维护者上传时使用 | 草稿本身不证明新版本页面已更新 |
 | 更新说明 | 仅维护于 [英文 CHANGELOG](CHANGELOG.md) 与 [中文 CHANGELOG](CHANGELOG.zh-CN.md) | 不在页面草稿重复；发布时从对应版本条目取用 |
-| 本地准备 | 正式提交、三渠道构建/打包、readiness、完整历史隐私门已通过，见 [0.3.4 准备记录](release_review/release-0.3.4-review-zh.md) | 76 项历史债务仍存在；不代表新版本已上线或远端 CI 已运行 |
-| 发布授权与进度 | GitHub 推送、PR/merge、tag 与 0.3.4 Release 已获授权，正在执行；Steam 仅由我们准备包，上传由维护者本人完成 | 授权不代表步骤已完成；截至本记录尚无 0.3.4 远端发布或 Steam 页面更新证据 |
+| 本地准备 | 正式提交、三渠道构建/打包、readiness、完整历史隐私门已通过，准备阶段证据见 [0.3.4 记录](release_review/release-0.3.4-review-zh.md) | 76 项历史债务仍存在；准备证据与远端发布证据分开记录 |
 | 分支规则 | 从 `main` 建每个 minor 的版本分支，经 PR 入受保护 `main`；不使用 `dev` | 不在文档追记移动的 HEAD、ahead 数或推定分支同步 |
 
 0.3.3 撤回重发、R6 修正、资产核验及一次性的实机流程特例只在原发布记录中保留。0.3.1 没有独立正式发布记录；0.3.2 仅有 `v0.3.2-pre1`，相关功能随 0.3.3 正式发布。历史 CHANGELOG 正文与发布记录不重写。
