@@ -21,17 +21,19 @@
 1. **准备具体候选**。版本主源为 csproj `<Version>`，About `<modVersion>` 跟随；同步双语 CHANGELOG 与必要文案，校验并正式提交，再按渠道构建、打包。旧 `dist` 输出只是缓存，不能代替当前候选；发布检查必须指定 `-StageFlavor`。开发条目用 Unreleased；实际发布后才以 UTC+8 时间替换。文案有时间不等于渠道已上线。若需试玩，用 `build-dev.ps1` 产物；dirty 包仅作测试证据。
 2. **最小发布仪式**：发布面命令全绿 → 完整隐私命令全绿 → 维护者裁决版本、渠道、是否发及 Workshop 文案。非发布 push 仍必须通过完整隐私门并有授权。每次新 push 覆盖其完整可达范围，不因旧结果为绿而免检。
 3. **版本分支 → main**。每个 minor 从 `main` 建立自己的开发分支，例如 `0.3.x`；不使用已删除的 `dev` 分支。需要发布时在版本分支提交，授权后 push → CI → PR/merge 到受保护的 `main`。发布证据记录实际源码提交与 tag，不以版本号推定分支同步，也不重复脚本已覆盖的逐文件核对。
-4. **GitHub**。在 main 的批准发布提交上，授权后 tag/push，release CI 验证、构建 GitHub flavor 并发布资产；GitHub Release notes 自动从 PR 信息生成，CHANGELOG 不接入该生成流程。基版本来自 csproj；正式 `vX.Y.Z`，prerelease 带 SemVer 后缀。已接受的 hotfix 命名为 `vX.Y.Z-hotfixN`，须注意它具有 prerelease 语义。资产身份/散列取 CI 和 `[claim]`；有疑问才以 `pack-github.ps1` 复现对照。tag 重发另需授权及更新实际发布时间。
-5. **Steam（若本次获准）**。`build-steam.ps1` 构建 Steam flavor 并在干净树打包，readiness 复核 `dist/steam/SqueakyRatkin`。上传既有条目可用同作者的游戏内 Update，或经明确授权的 SteamCMD；不把后续更新称为 Initial Workshop Upload。游戏内上传时，维护者复制到上传副本，既有 item ID 仅写该副本的 `About/PublishedFileId.txt`。SteamCMD 上传时，VDF 与登录辅助文件放在仓库、发布包之外；VDF 必须指定正确的 `appid` 与既有非零 `publishedfileid`，`contentfolder` 指向已验收的 Steam 候选。登录与 Steam Guard 由维护者在工具窗口直接完成，密码、验证码不进入聊天、脚本或仓库。工具安装与启动自检本身不构成登录或发布授权。
+4. **GitHub**。在 main 的批准发布提交上，授权后 tag/push，release CI 验证、构建 GitHub flavor 并发布资产；GitHub Release notes 自动从 PR 信息生成，CHANGELOG 不接入该生成流程。基版本来自 csproj；正式 `vX.Y.Z`，prerelease 带 SemVer 后缀。已接受的 hotfix 命名为 `vX.Y.Z-hotfixN`；其他维护后缀须经维护者明确授权，并按 prerelease 处理。资产身份/散列取 CI 和 `[claim]`；有疑问才以 `pack-github.ps1` 复现对照。tag 重发另需授权及更新实际发布时间。
+5. **Steam（若本次获准）**。`build-steam.ps1` 构建 Steam flavor 并在干净树打包，readiness 复核 `dist/steam/SqueakyRatkin`。后续更新优先由维护者用游戏内 Update 更新既有条目；SteamCMD 仅在另行明确授权后备用，VDF 与登录辅助文件须放在仓库、发布包之外。游戏内上传时，维护者复制到上传副本，既有 item ID 仅写该副本的 `About/PublishedFileId.txt`。登录与 Steam Guard 由维护者在工具窗口直接完成，密码、验证码不进入聊天、脚本或仓库。工具安装与启动自检本身不构成登录或发布授权。
 
-   SteamCMD 仅更新 VDF 列出的字段；文件上传不会自动同步页面正文或游戏版本标签。正文从 [页面草稿](steam-workshop-page-copy-draft.md) 取用，仍须维护者审阅；Change Notes 从 [英文 CHANGELOG](CHANGELOG.md) / [中文 CHANGELOG](CHANGELOG.zh-CN.md) 的对应版本条目取用。核对实际上传日志与页面，不能只凭工具进程退出码宣布成功。参数依据为 [Steamworks 的 SteamCmd Integration](https://partner.steamgames.com/doc/features/workshop/implementation#SteamCmd_Integration)。
+   Steam 页面正文由维护者审阅；Change Notes 由维护者从 [英文 CHANGELOG](CHANGELOG.md) / [中文 CHANGELOG](CHANGELOG.zh-CN.md) 对应版本条目手工录入，不自动外部同步。核对实际发布结果，不能只凭工具或游戏进程退出码宣布成功。
 
-   **版本标签**由 RimWorld 游戏上传器从 `About.xml` 的 `supportedVersions` 生成，通过 `SteamUGC.SetItemTags` 提交，不能假定网页编辑页提供手动入口。需要同步时，用对应候选的上传副本在游戏内 Update 既有条目；该操作同时更新标题、预览和内容，既有条目的页面正文不会由游戏上传器重写。标签仅影响工坊筛选，不替代包内版本支持声明。实现依据为 RimWorld `Workshop.SetWorkshopItemDataFrom`，机制说明见 [Steam Workshop Item Tags](https://partner.steamgames.com/doc/features/workshop/tags?l=english)。
+   **版本标签**由 RimWorld 游戏上传器从 `About.xml` 的 `supportedVersions` 生成，通过 `SteamUGC.SetItemTags` 提交，不能假定网页编辑页提供手动入口；SteamCMD 文件更新也不会自动同步版本标签。游戏内 Update 同时更新标题、预览和内容，既有条目的页面正文不会由游戏上传器重写。标签仅影响工坊筛选，不替代包内版本支持声明。实现依据为 RimWorld `Workshop.SetWorkshopItemDataFrom`，机制说明见 [Steam Workshop Item Tags](https://partner.steamgames.com/doc/features/workshop/tags?l=english)。
 6. **独立渠道观察与收尾**。agent 仅以公开 filedetails 玩家视角核验同一 item、描述版本、Updated（记录时区）、visibility、preview、文件大小及 change notes；不进入登录/编辑面。Comments 中有实质疑点时进入 TODO，不增加逐项签字仪式。记录下方 Claim Pack，更新维护状态和必要记忆指针。`archive/` 分支只在最终版本定稿建立。
 
 ## 隐私与证据边界
 
 - RimWorld 1.6 / 1.7 共用 `1.6/` 内容，支持声明与加载映射须随包保留。通常按实际候选包验收；维护者可明确接受版本号维护沿用旧运行证据。0.3.4 已获此裁定，记录接受依据而不改写旧证据的版本号，也不声称新增游戏运行。
+
+- 版本号常规使用 `X.Y.Z`；维护发布使用经维护者明确授权的 `X.Y.Z-<suffix>` SemVer prerelease 后缀（例如 `0.3.4-tagfix1`，符合 SemVer 2.0），保留 `0.3.4` 基版本。Steam 候选的 `version.txt` 标识发布后缀，About 与 DLL FileVersion 保持基版本。
 
 - 工作树、提交/tag 信息、历史文本、历史二进制元数据、身份分别得出结论。PNG 读取全部文本/EXIF 块并解压文本，OGG/WAV 读取元数据而非压缩音频；图片视觉内容仍由人工检查。作者/提交者使用 GitHub noreply；具体校验规则以脚本为准。
 - `[known-debt]` 不是已消除：历史例外位于 `scripts/privacy-history-exceptions.json`，只匹配精确 blob/path/pattern，当前文件不豁免。当前方案 A 维持、B 待独立授权。新增台账条目须维护者裁决，不通过改文档或掩盖命中绕门。真实凭据泄漏先撤销/轮换，再处理历史。

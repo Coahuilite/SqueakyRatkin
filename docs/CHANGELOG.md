@@ -2,6 +2,10 @@
 
 Keep Unreleased first and preserve the existing published entries, newest first. Replace the Unreleased heading with the actual UTC+8 release time when publishing and keep both languages synchronized. Later Workshop updates are not an Initial Workshop Upload.
 
+## Unreleased — 0.3.4-tagfix1
+
+- Released solely to update Steam Workshop tags. No gameplay changes.
+
 ## [2026-10-14 18:04 UTC+8] Version 0.3.4
 
 - Version bumped to 0.3.4.

@@ -7,12 +7,13 @@
 | 面 | 当前口径 | 证据边界 |
 | --- | --- | --- |
 | 当前版本 | **0.3.4**：2026-10-14 已在 GitHub 与 Steam 发布；运行时行为不变 | 两个渠道的发布观察均见 [0.3.4 记录](release_review/release-0.3.4-review-zh.md)；Steam 玩家侧二进制未下载核验 |
+| 待发布维护版本 | **0.3.4-tagfix1**：仅更新 Steam 工坊版本标签，无功能改动；支持 1.6 / 1.7 不变 | 沿用 1.6 下 0.3.4 与 1.7 下 0.3.3 的既有游戏验收；未进行本版本新游戏测试。准备与待验证项见 [本次记录](release_review/release-0.3.4-tagfix1-review-zh.md) |
 | 游戏支持 | RimWorld **1.6 / 1.7**，显式共用根目录和 `1.6/` 内容；继续以 net472 / 1.6 引用编译 | 共享目录不代表逐功能、逐 DLC 或逐模组组合均已验收 |
 | GitHub Release | **v0.3.4** 已发布；Release notes 由 GitHub 根据 PR 自动生成 | Release CI 与公开资产下载核验均成功，详情见 [0.3.4 记录](release_review/release-0.3.4-review-zh.md) |
-| Steam 更新 | **0.3.4** 已上传；公开 API 返回 `result=1`、`visibility=0`、`banned=0`，更新时间 2026-10-14 18:40:50（UTC+8），文件 1,910,256 bytes | 上传与公开元数据、Change Notes 已核验；玩家侧二进制下载未做 |
+| Steam 更新 | **0.3.4** 已上传；公开 API 返回 `result=1`、`visibility=0`、`banned=0`，更新时间 2026-10-14 18:40:50（UTC+8），文件 1,910,256 bytes | 上传与公开元数据、Change Notes 已核验；玩家侧二进制下载未做。此次上传未更新工坊版本标签，0.3.4-tagfix1 改由维护者游戏内 Update 发布，结果待核验 |
 | 前一版本 | **0.3.3**；历史渠道证据见 [0.3.3 记录](release_review/release-0.3.3-review-zh.md) | 2026-09-19 的页面观察仅适用于当时版本 |
-| Workshop 正文 | 英文正文与草稿 LF/trim 后 4,505 字符逐字符一致；简中页面开头、版本/支持信息和结尾已公开核验 | 中文未做逐字符比对；本次预览存在但未视觉比对，详情见 0.3.4 记录 |
-| Workshop 标签 | 维护者自行处理 `1.7` 标签 | 按维护者要求，不安排 agent 复核；见 [TODO](../TODO.md) |
+| Workshop 正文 | **0.3.4 历史稿**英文正文与当时草稿 LF/trim 后 4,505 字符逐字符一致；简中代表段落已公开核验 | 这些核验只适用于 0.3.4 线上正文；当前 0.3.4-tagfix1 草稿尚未发布，详见对应 review |
+| Workshop 标签 | 0.3.4-tagfix1 的手工游戏内 Update 待维护者执行并自行验收 | 上传前不推定标签已更新；由维护者确认，不安排 agent 复核 |
 | 更新说明 | 仅维护于 [英文 CHANGELOG](CHANGELOG.md) 与 [中文 CHANGELOG](CHANGELOG.zh-CN.md) | 不在页面草稿重复；发布时从对应版本条目取用 |
 | 本地准备 | 正式提交、三渠道构建/打包、readiness、完整历史隐私门已通过，准备阶段证据见 [0.3.4 记录](release_review/release-0.3.4-review-zh.md) | 76 项历史债务仍存在；准备证据与远端渠道证据分开记录 |
 | 分支规则 | 从 `main` 建每个 minor 的版本分支，经 PR 入受保护 `main`；不使用 `dev` | 不在文档追记移动的 HEAD、ahead 数或推定分支同步 |

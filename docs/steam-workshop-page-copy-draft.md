@@ -1,8 +1,8 @@
 # Workshop 页面文案维护源
 
-> **0.3.4 页面状态：英文与简中正文均已上线并公开核验。** 英文正文与本稿逐字符一致；简中已核验代表段落，未做全文逐字符比对。目标游戏版本为 RimWorld 1.6 / 1.7，运行时行为沿用 0.3.3。本文件只维护中英页面正文；发布证据见 [0.3.4 记录](release_review/release-0.3.4-review-zh.md)，历史发布记录见 [0.3.3 记录](release_review/release-0.3.3-review-zh.md)。
+> **0.3.4-tagfix1 待维护者手工发布；当前公开页面仍是此前的 0.3.4。** 本稿只把两块正文的模组版本改为 0.3.4-tagfix1，其余 BBCode 正文沿用已核验的 0.3.4 文案。目标游戏版本为 RimWorld 1.6 / 1.7，运行时行为不变；发布进度见 [0.3.4-tagfix1 记录](release_review/release-0.3.4-tagfix1-review-zh.md)，此前公开页面证据见 [0.3.4 记录](release_review/release-0.3.4-review-zh.md)。
 
-两个正文 BBCode 区块可分别粘贴；更新说明分别维护于 [英文 CHANGELOG](CHANGELOG.md) 与 [中文 CHANGELOG](CHANGELOG.zh-CN.md)，不在本文件重复。`1.7` 工坊标签由维护者自行处理，不安排 agent 复核；页面预览虽存在，本轮未做视觉比对。
+两个正文 BBCode 区块可分别粘贴；更新说明维护于 [英文 CHANGELOG](CHANGELOG.md) 与 [中文 CHANGELOG](CHANGELOG.zh-CN.md)，本次 Change Notes 由维护者在游戏内手工录入，不在本文件重复或外部同步。
 
 ## 编辑约定
 
@@ -19,7 +19,7 @@
 本模组由 AI 规划、AI 编程、AI 维护，并由人类维护者审查、测试、打包和发布。
 
 [h1]鼠辈啁啾[/h1]
-[b]模组版本：[/b]0.3.4
+[b]模组版本：[/b]0.3.4-tagfix1
 [b]适用版本：[/b]RimWorld 1.6 / 1.7
 
 鼠族当然不是不会说话。
@@ -81,7 +81,7 @@ Eat 默认覆盖整个进食任务，包括端食物走向餐桌。你可以开�
 This mod was planned, programmed, and maintained by AI, and is reviewed, tested, packaged, and published by a human maintainer.
 
 [h1]Squeaky Ratkin[/h1]
-[b]Mod version:[/b] 0.3.4
+[b]Mod version:[/b] 0.3.4-tagfix1
 [b]Game version:[/b] RimWorld 1.6 / 1.7
 
 It is not that Ratkin cannot speak.
@@ -138,6 +138,6 @@ Third-party VoicePack authors should state appropriate licenses for their audio,
 
 ## 文案状态
 
-英文与简中正文均已上线并公开核验；英文与本稿逐字符一致，简中仅核验代表段落。`1.7` 工坊标签由维护者自行处理，不安排 agent 复核。页面预览存在但未作视觉比对，未下载 Steam 玩家侧二进制。退役公告未包含在本稿中；旧置顶公告状态按公开页面实际观察。
+本稿为 0.3.4-tagfix1 待维护者通过游戏内 Update 手工发布的正文；当前公开页面仍是此前的 0.3.4。除两处模组版本号外，其余 BBCode 正文未改。此前英文正文与 0.3.4 公开描述的逐字符核验仅适用于旧版本；简中也只核验过 0.3.4 页面代表段落。退役公告未包含在本稿中。
 
-字符数（Unicode code point、LF 换行，不含 fence 与尾换行）：中文正文 1938；英文正文 4505。
+字符数（Unicode code point、LF 换行，不含 fence 与尾换行）：中文正文 1946；英文正文 4513。
