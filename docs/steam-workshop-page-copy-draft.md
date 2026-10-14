@@ -1,6 +1,6 @@
 # Workshop 页面文案维护源
 
-> **0.3.4-tagfix1 待维护者手工发布；当前公开页面仍是此前的 0.3.4。** 本稿只把两块正文的模组版本改为 0.3.4-tagfix1，其余 BBCode 正文沿用已核验的 0.3.4 文案。目标游戏版本为 RimWorld 1.6 / 1.7，运行时行为不变；发布进度见 [0.3.4-tagfix1 记录](release_review/release-0.3.4-tagfix1-review-zh.md)，此前公开页面证据见 [0.3.4 记录](release_review/release-0.3.4-review-zh.md)。
+> **维护者报告已完成 0.3.4-tagfix1 工坊更新。** 本稿的两块正文版本字段为 0.3.4-tagfix1；当前稿与线上正文是否一致尚未复核。目标游戏版本为 RimWorld 1.6 / 1.7，运行时行为不变；渠道证据见 [0.3.4-tagfix1 记录](release_review/release-0.3.4-tagfix1-review-zh.md)，旧版页面证据见 [0.3.4 记录](release_review/release-0.3.4-review-zh.md)。
 
 两个正文 BBCode 区块可分别粘贴；更新说明维护于 [英文 CHANGELOG](CHANGELOG.md) 与 [中文 CHANGELOG](CHANGELOG.zh-CN.md)，本次 Change Notes 由维护者在游戏内手工录入，不在本文件重复或外部同步。
 
@@ -138,6 +138,6 @@ Third-party VoicePack authors should state appropriate licenses for their audio,
 
 ## 文案状态
 
-本稿为 0.3.4-tagfix1 待维护者通过游戏内 Update 手工发布的正文；当前公开页面仍是此前的 0.3.4。除两处模组版本号外，其余 BBCode 正文未改。此前英文正文与 0.3.4 公开描述的逐字符核验仅适用于旧版本；简中也只核验过 0.3.4 页面代表段落。退役公告未包含在本稿中。
+维护者报告已完成 0.3.4-tagfix1 工坊更新。本稿仅记录当前维护文案，不代表已确认线上正文与本稿一致；游戏内 Update 不会自动替换既有页面正文。本稿相较 0.3.4 仅改两处模组版本号，其余 BBCode 正文未改；线上核验事实仅适用于 0.3.4 历史页面。退役公告未包含在本稿中。
 
 字符数（Unicode code point、LF 换行，不含 fence 与尾换行）：中文正文 1946；英文正文 4513。

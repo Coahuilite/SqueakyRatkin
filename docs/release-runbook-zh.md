@@ -22,7 +22,7 @@
 2. **最小发布仪式**：发布面命令全绿 → 完整隐私命令全绿 → 维护者裁决版本、渠道、是否发及 Workshop 文案。非发布 push 仍必须通过完整隐私门并有授权。每次新 push 覆盖其完整可达范围，不因旧结果为绿而免检。
 3. **版本分支 → main**。每个 minor 从 `main` 建立自己的开发分支，例如 `0.3.x`；不使用已删除的 `dev` 分支。需要发布时在版本分支提交，授权后 push → CI → PR/merge 到受保护的 `main`。发布证据记录实际源码提交与 tag，不以版本号推定分支同步，也不重复脚本已覆盖的逐文件核对。
 4. **GitHub**。在 main 的批准发布提交上，授权后 tag/push，release CI 验证、构建 GitHub flavor 并发布资产；GitHub Release notes 自动从 PR 信息生成，CHANGELOG 不接入该生成流程。基版本来自 csproj；正式 `vX.Y.Z`，prerelease 带 SemVer 后缀。已接受的 hotfix 命名为 `vX.Y.Z-hotfixN`；其他维护后缀须经维护者明确授权，并按 prerelease 处理。资产身份/散列取 CI 和 `[claim]`；有疑问才以 `pack-github.ps1` 复现对照。tag 重发另需授权及更新实际发布时间。
-5. **Steam（若本次获准）**。`build-steam.ps1` 构建 Steam flavor 并在干净树打包，readiness 复核 `dist/steam/SqueakyRatkin`。后续更新优先由维护者用游戏内 Update 更新既有条目；SteamCMD 仅在另行明确授权后备用，VDF 与登录辅助文件须放在仓库、发布包之外。游戏内上传时，维护者复制到上传副本，既有 item ID 仅写该副本的 `About/PublishedFileId.txt`。登录与 Steam Guard 由维护者在工具窗口直接完成，密码、验证码不进入聊天、脚本或仓库。工具安装与启动自检本身不构成登录或发布授权。
+5. **Steam（若本次获准）**。`build-steam.ps1` 构建 Steam flavor 并在干净树打包，readiness 复核 `dist/steam/SqueakyRatkin`。后续更新优先由维护者用游戏内 Update 更新既有条目；SteamCMD 仅在另行明确授权后备用，VDF 与登录辅助文件须放在仓库、发布包之外。游戏内上传时，可将候选复制至 gitignored `dist/steam-upload/SqueakyRatkin`，既有 item ID 仅写该不跟踪上传副本的 `About/PublishedFileId.txt`；该目录不得进入正式 ZIP 或 Git。登录与 Steam Guard 由维护者在工具窗口直接完成，密码、验证码不进入聊天、脚本或仓库。工具安装与启动自检本身不构成登录或发布授权。
 
    Steam 页面正文由维护者审阅；Change Notes 由维护者从 [英文 CHANGELOG](CHANGELOG.md) / [中文 CHANGELOG](CHANGELOG.zh-CN.md) 对应版本条目手工录入，不自动外部同步。核对实际发布结果，不能只凭工具或游戏进程退出码宣布成功。
 
