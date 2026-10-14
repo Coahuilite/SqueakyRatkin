@@ -25,6 +25,8 @@
 5. **Steam（若本次获准）**。`build-steam.ps1` 构建 Steam flavor 并在干净树打包，readiness 复核 `dist/steam/SqueakyRatkin`。上传既有条目可用同作者的游戏内 Update，或经明确授权的 SteamCMD；不把后续更新称为 Initial Workshop Upload。游戏内上传时，维护者复制到上传副本，既有 item ID 仅写该副本的 `About/PublishedFileId.txt`。SteamCMD 上传时，VDF 与登录辅助文件放在仓库、发布包之外；VDF 必须指定正确的 `appid` 与既有非零 `publishedfileid`，`contentfolder` 指向已验收的 Steam 候选。登录与 Steam Guard 由维护者在工具窗口直接完成，密码、验证码不进入聊天、脚本或仓库。工具安装与启动自检本身不构成登录或发布授权。
 
    SteamCMD 仅更新 VDF 列出的字段；文件上传不会自动同步页面正文或游戏版本标签。正文从 [页面草稿](steam-workshop-page-copy-draft.md) 取用，仍须维护者审阅；Change Notes 从 [英文 CHANGELOG](CHANGELOG.md) / [中文 CHANGELOG](CHANGELOG.zh-CN.md) 的对应版本条目取用。核对实际上传日志与页面，不能只凭工具进程退出码宣布成功。参数依据为 [Steamworks 的 SteamCmd Integration](https://partner.steamgames.com/doc/features/workshop/implementation#SteamCmd_Integration)。
+
+   **版本标签**由 RimWorld 游戏上传器从 `About.xml` 的 `supportedVersions` 生成，通过 `SteamUGC.SetItemTags` 提交，不能假定网页编辑页提供手动入口。需要同步时，用对应候选的上传副本在游戏内 Update 既有条目；该操作同时更新标题、预览和内容，既有条目的页面正文不会由游戏上传器重写。标签仅影响工坊筛选，不替代包内版本支持声明。实现依据为 RimWorld `Workshop.SetWorkshopItemDataFrom`，机制说明见 [Steam Workshop Item Tags](https://partner.steamgames.com/doc/features/workshop/tags?l=english)。
 6. **独立渠道观察与收尾**。agent 仅以公开 filedetails 玩家视角核验同一 item、描述版本、Updated（记录时区）、visibility、preview、文件大小及 change notes；不进入登录/编辑面。Comments 中有实质疑点时进入 TODO，不增加逐项签字仪式。记录下方 Claim Pack，更新维护状态和必要记忆指针。`archive/` 分支只在最终版本定稿建立。
 
 ## 隐私与证据边界
